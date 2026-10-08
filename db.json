@@ -41,162 +41,2758 @@
       "isHost": true,
       "platformRole": "user",
       "createdAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "email": "jitbhavsar40@gmail.com",
+      "password": "123456789",
+      "phone": "9313094070",
+      "firstName": "Jeet",
+      "lastName": "Bhavsar",
+      "isEmailVerified": false,
+      "isPhoneVerified": false,
+      "isHost": false,
+      "platformRole": "user",
+      "createdAt": "2026-10-07T11:34:59.551Z",
+      "id": "zt4g24M83t8"
     }
   ],
   "events": [
     {
-      "id": "evt-001",
-      "title": "Ahmedabad Music Festival 2025",
-      "description": "A grand celebration of music featuring top artists from across India.",
+      "id": "evt-100",
+      "title": "Mumbai Festivals Showcase 1",
+      "description": "A fantastic Festivals event happening live in Mumbai. Join us for an unforgettable experience!",
       "category": "Festivals",
-      "subcategory": "Music",
+      "subcategory": "General",
       "format": "In-Person",
       "status": "published",
       "isFeatured": true,
       "isPopular": true,
-      "thumbnailUrl": "https://picsum.photos/seed/evt001/600/400",
-      "date": "2025-12-15",
-      "time": "17:00",
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Mumbai1/600/400",
+      "date": "2026-11-01",
+      "time": "18:00",
       "location": {
-        "venue": "GMDC Grounds",
-        "city": "Ahmedabad",
-        "state": "Gujarat",
-        "country": "India"
-      },
-      "capacity": 5000,
-      "ticketTypes": [
-        { "id": "tt-001", "name": "General", "price": 499, "capacity": 3000, "available": 2800 },
-        { "id": "tt-002", "name": "VIP", "price": 1499, "capacity": 500, "available": 480 },
-        { "id": "tt-003", "name": "Premium", "price": 2999, "capacity": 100, "available": 95 }
-      ],
-      "maxTicketsPerBooking": 4,
-      "hostId": "user-003",
-      "createdAt": "2025-06-01T00:00:00.000Z"
-    },
-    {
-      "id": "evt-002",
-      "title": "TechConf India 2025",
-      "description": "India's leading technology conference for developers, designers and innovators.",
-      "category": "Conferences",
-      "subcategory": "Technology",
-      "format": "In-Person",
-      "status": "published",
-      "isFeatured": true,
-      "isPopular": false,
-      "thumbnailUrl": "https://picsum.photos/seed/evt002/600/400",
-      "date": "2025-11-20",
-      "time": "09:00",
-      "location": {
-        "venue": "Bombay Exhibition Centre",
+        "venue": "Mumbai Grand Center",
         "city": "Mumbai",
-        "state": "Maharashtra",
-        "country": "India"
-      },
-      "capacity": 2000,
-      "ticketTypes": [
-        { "id": "tt-004", "name": "Standard", "price": 999, "capacity": 1500, "available": 1200 },
-        { "id": "tt-005", "name": "Pro", "price": 2499, "capacity": 300, "available": 250 }
-      ],
-      "maxTicketsPerBooking": 2,
-      "hostId": "user-003",
-      "createdAt": "2025-05-15T00:00:00.000Z"
-    },
-    {
-      "id": "evt-003",
-      "title": "Stand-Up Night with Zakir Khan",
-      "description": "An evening of laughter with the beloved comedian Zakir Khan.",
-      "category": "Shows & Entertainment",
-      "subcategory": "Comedy",
-      "format": "In-Person",
-      "status": "published",
-      "isFeatured": false,
-      "isPopular": true,
-      "thumbnailUrl": "https://picsum.photos/seed/evt003/600/400",
-      "date": "2025-10-30",
-      "time": "20:00",
-      "location": {
-        "venue": "Tagore Hall",
-        "city": "Ahmedabad",
-        "state": "Gujarat",
-        "country": "India"
-      },
-      "capacity": 800,
-      "ticketTypes": [
-        { "id": "tt-006", "name": "General", "price": 699, "capacity": 600, "available": 320 },
-        { "id": "tt-007", "name": "Front Row", "price": 1299, "capacity": 100, "available": 30 }
-      ],
-      "maxTicketsPerBooking": 4,
-      "hostId": "user-003",
-      "createdAt": "2025-04-10T00:00:00.000Z"
-    },
-    {
-      "id": "evt-004",
-      "title": "Yoga & Wellness Workshop",
-      "description": "A free full-day wellness workshop open to all. Includes yoga, meditation and nutrition talks.",
-      "category": "Activities",
-      "subcategory": "Wellness",
-      "format": "In-Person",
-      "status": "published",
-      "isFeatured": false,
-      "isPopular": false,
-      "thumbnailUrl": "https://picsum.photos/seed/evt004/600/400",
-      "date": "2025-11-05",
-      "time": "07:00",
-      "location": {
-        "venue": "Riverfront Park",
-        "city": "Ahmedabad",
-        "state": "Gujarat",
-        "country": "India"
-      },
-      "capacity": 300,
-      "ticketTypes": [
-        { "id": "tt-008", "name": "Free Entry", "price": 0, "capacity": 300, "available": 180 }
-      ],
-      "maxTicketsPerBooking": 2,
-      "hostId": "user-003",
-      "createdAt": "2025-07-01T00:00:00.000Z"
-    },
-    {
-      "id": "evt-005",
-      "title": "IPL After Party — Ahmedabad",
-      "description": "Official after-party following the IPL final at Narendra Modi Stadium.",
-      "category": "Sports",
-      "subcategory": "Cricket",
-      "format": "In-Person",
-      "status": "published",
-      "isFeatured": true,
-      "isPopular": true,
-      "thumbnailUrl": "https://picsum.photos/seed/evt005/600/400",
-      "date": "2025-12-01",
-      "time": "21:00",
-      "location": {
-        "venue": "Narendra Modi Stadium",
-        "city": "Ahmedabad",
-        "state": "Gujarat",
+        "state": "State",
         "country": "India"
       },
       "capacity": 1000,
       "ticketTypes": [
-        { "id": "tt-009", "name": "General", "price": 1999, "capacity": 800, "available": 600 },
-        { "id": "tt-010", "name": "VIP Table", "price": 5999, "capacity": 50, "available": 20 }
+        {
+          "id": "tt-101-1",
+          "name": "General",
+          "price": 500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-101-2",
+          "name": "VIP",
+          "price": 1500,
+          "capacity": 200,
+          "available": 100
+        }
       ],
-      "maxTicketsPerBooking": 6,
+      "maxTicketsPerBooking": 4,
       "hostId": "user-003",
-      "createdAt": "2025-09-01T00:00:00.000Z"
+      "createdAt": "2026-10-08T05:39:10.038Z"
+    },
+    {
+      "id": "evt-101",
+      "title": "Mumbai Sports Showcase 2",
+      "description": "A fantastic Sports event happening live in Mumbai. Join us for an unforgettable experience!",
+      "category": "Sports",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Mumbai2/600/400",
+      "date": "2026-11-02",
+      "time": "18:00",
+      "location": {
+        "venue": "Mumbai Grand Center",
+        "city": "Mumbai",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-102-1",
+          "name": "General",
+          "price": 1000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-102-2",
+          "name": "VIP",
+          "price": 3000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.039Z"
+    },
+    {
+      "id": "evt-102",
+      "title": "Mumbai Shows & Entertainment Showcase 3",
+      "description": "A fantastic Shows & Entertainment event happening live in Mumbai. Join us for an unforgettable experience!",
+      "category": "Shows & Entertainment",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Mumbai3/600/400",
+      "date": "2026-11-03",
+      "time": "18:00",
+      "location": {
+        "venue": "Mumbai Grand Center",
+        "city": "Mumbai",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-103-1",
+          "name": "General",
+          "price": 1500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-103-2",
+          "name": "VIP",
+          "price": 4500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.039Z"
+    },
+    {
+      "id": "evt-103",
+      "title": "Mumbai Activities Showcase 4",
+      "description": "A fantastic Activities event happening live in Mumbai. Join us for an unforgettable experience!",
+      "category": "Activities",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Mumbai4/600/400",
+      "date": "2026-11-04",
+      "time": "18:00",
+      "location": {
+        "venue": "Mumbai Grand Center",
+        "city": "Mumbai",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-104-1",
+          "name": "General",
+          "price": 2000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-104-2",
+          "name": "VIP",
+          "price": 6000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.039Z"
+    },
+    {
+      "id": "evt-104",
+      "title": "Mumbai Conferences Showcase 5",
+      "description": "A fantastic Conferences event happening live in Mumbai. Join us for an unforgettable experience!",
+      "category": "Conferences",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Mumbai5/600/400",
+      "date": "2026-11-05",
+      "time": "18:00",
+      "location": {
+        "venue": "Mumbai Grand Center",
+        "city": "Mumbai",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-105-1",
+          "name": "General",
+          "price": 2500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-105-2",
+          "name": "VIP",
+          "price": 7500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-105",
+      "title": "Mumbai Workshops Showcase 6",
+      "description": "A fantastic Workshops event happening live in Mumbai. Join us for an unforgettable experience!",
+      "category": "Workshops",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Mumbai6/600/400",
+      "date": "2026-11-06",
+      "time": "18:00",
+      "location": {
+        "venue": "Mumbai Grand Center",
+        "city": "Mumbai",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-106-1",
+          "name": "General",
+          "price": 3000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-106-2",
+          "name": "VIP",
+          "price": 9000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-106",
+      "title": "Ahmedabad Festivals Showcase 1",
+      "description": "A fantastic Festivals event happening live in Ahmedabad. Join us for an unforgettable experience!",
+      "category": "Festivals",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Ahmedabad1/600/400",
+      "date": "2026-11-01",
+      "time": "18:00",
+      "location": {
+        "venue": "Ahmedabad Grand Center",
+        "city": "Ahmedabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-107-1",
+          "name": "General",
+          "price": 500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-107-2",
+          "name": "VIP",
+          "price": 1500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-107",
+      "title": "Ahmedabad Sports Showcase 2",
+      "description": "A fantastic Sports event happening live in Ahmedabad. Join us for an unforgettable experience!",
+      "category": "Sports",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Ahmedabad2/600/400",
+      "date": "2026-11-02",
+      "time": "18:00",
+      "location": {
+        "venue": "Ahmedabad Grand Center",
+        "city": "Ahmedabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-108-1",
+          "name": "General",
+          "price": 1000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-108-2",
+          "name": "VIP",
+          "price": 3000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-108",
+      "title": "Ahmedabad Shows & Entertainment Showcase 3",
+      "description": "A fantastic Shows & Entertainment event happening live in Ahmedabad. Join us for an unforgettable experience!",
+      "category": "Shows & Entertainment",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Ahmedabad3/600/400",
+      "date": "2026-11-03",
+      "time": "18:00",
+      "location": {
+        "venue": "Ahmedabad Grand Center",
+        "city": "Ahmedabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-109-1",
+          "name": "General",
+          "price": 1500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-109-2",
+          "name": "VIP",
+          "price": 4500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-109",
+      "title": "Ahmedabad Activities Showcase 4",
+      "description": "A fantastic Activities event happening live in Ahmedabad. Join us for an unforgettable experience!",
+      "category": "Activities",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Ahmedabad4/600/400",
+      "date": "2026-11-04",
+      "time": "18:00",
+      "location": {
+        "venue": "Ahmedabad Grand Center",
+        "city": "Ahmedabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-110-1",
+          "name": "General",
+          "price": 2000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-110-2",
+          "name": "VIP",
+          "price": 6000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-110",
+      "title": "Ahmedabad Conferences Showcase 5",
+      "description": "A fantastic Conferences event happening live in Ahmedabad. Join us for an unforgettable experience!",
+      "category": "Conferences",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Ahmedabad5/600/400",
+      "date": "2026-11-05",
+      "time": "18:00",
+      "location": {
+        "venue": "Ahmedabad Grand Center",
+        "city": "Ahmedabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-111-1",
+          "name": "General",
+          "price": 2500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-111-2",
+          "name": "VIP",
+          "price": 7500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-111",
+      "title": "Ahmedabad Workshops Showcase 6",
+      "description": "A fantastic Workshops event happening live in Ahmedabad. Join us for an unforgettable experience!",
+      "category": "Workshops",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Ahmedabad6/600/400",
+      "date": "2026-11-06",
+      "time": "18:00",
+      "location": {
+        "venue": "Ahmedabad Grand Center",
+        "city": "Ahmedabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-112-1",
+          "name": "General",
+          "price": 3000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-112-2",
+          "name": "VIP",
+          "price": 9000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-112",
+      "title": "Delhi-NCR Festivals Showcase 1",
+      "description": "A fantastic Festivals event happening live in Delhi-NCR. Join us for an unforgettable experience!",
+      "category": "Festivals",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Delhi-NCR1/600/400",
+      "date": "2026-11-01",
+      "time": "18:00",
+      "location": {
+        "venue": "Delhi-NCR Grand Center",
+        "city": "Delhi-NCR",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-113-1",
+          "name": "General",
+          "price": 500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-113-2",
+          "name": "VIP",
+          "price": 1500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-113",
+      "title": "Delhi-NCR Sports Showcase 2",
+      "description": "A fantastic Sports event happening live in Delhi-NCR. Join us for an unforgettable experience!",
+      "category": "Sports",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Delhi-NCR2/600/400",
+      "date": "2026-11-02",
+      "time": "18:00",
+      "location": {
+        "venue": "Delhi-NCR Grand Center",
+        "city": "Delhi-NCR",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-114-1",
+          "name": "General",
+          "price": 1000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-114-2",
+          "name": "VIP",
+          "price": 3000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-114",
+      "title": "Delhi-NCR Shows & Entertainment Showcase 3",
+      "description": "A fantastic Shows & Entertainment event happening live in Delhi-NCR. Join us for an unforgettable experience!",
+      "category": "Shows & Entertainment",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Delhi-NCR3/600/400",
+      "date": "2026-11-03",
+      "time": "18:00",
+      "location": {
+        "venue": "Delhi-NCR Grand Center",
+        "city": "Delhi-NCR",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-115-1",
+          "name": "General",
+          "price": 1500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-115-2",
+          "name": "VIP",
+          "price": 4500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-115",
+      "title": "Delhi-NCR Activities Showcase 4",
+      "description": "A fantastic Activities event happening live in Delhi-NCR. Join us for an unforgettable experience!",
+      "category": "Activities",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Delhi-NCR4/600/400",
+      "date": "2026-11-04",
+      "time": "18:00",
+      "location": {
+        "venue": "Delhi-NCR Grand Center",
+        "city": "Delhi-NCR",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-116-1",
+          "name": "General",
+          "price": 2000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-116-2",
+          "name": "VIP",
+          "price": 6000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-116",
+      "title": "Delhi-NCR Conferences Showcase 5",
+      "description": "A fantastic Conferences event happening live in Delhi-NCR. Join us for an unforgettable experience!",
+      "category": "Conferences",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Delhi-NCR5/600/400",
+      "date": "2026-11-05",
+      "time": "18:00",
+      "location": {
+        "venue": "Delhi-NCR Grand Center",
+        "city": "Delhi-NCR",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-117-1",
+          "name": "General",
+          "price": 2500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-117-2",
+          "name": "VIP",
+          "price": 7500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-117",
+      "title": "Delhi-NCR Workshops Showcase 6",
+      "description": "A fantastic Workshops event happening live in Delhi-NCR. Join us for an unforgettable experience!",
+      "category": "Workshops",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Delhi-NCR6/600/400",
+      "date": "2026-11-06",
+      "time": "18:00",
+      "location": {
+        "venue": "Delhi-NCR Grand Center",
+        "city": "Delhi-NCR",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-118-1",
+          "name": "General",
+          "price": 3000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-118-2",
+          "name": "VIP",
+          "price": 9000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-118",
+      "title": "Bengaluru Festivals Showcase 1",
+      "description": "A fantastic Festivals event happening live in Bengaluru. Join us for an unforgettable experience!",
+      "category": "Festivals",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Bengaluru1/600/400",
+      "date": "2026-11-01",
+      "time": "18:00",
+      "location": {
+        "venue": "Bengaluru Grand Center",
+        "city": "Bengaluru",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-119-1",
+          "name": "General",
+          "price": 500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-119-2",
+          "name": "VIP",
+          "price": 1500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-119",
+      "title": "Bengaluru Sports Showcase 2",
+      "description": "A fantastic Sports event happening live in Bengaluru. Join us for an unforgettable experience!",
+      "category": "Sports",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Bengaluru2/600/400",
+      "date": "2026-11-02",
+      "time": "18:00",
+      "location": {
+        "venue": "Bengaluru Grand Center",
+        "city": "Bengaluru",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-120-1",
+          "name": "General",
+          "price": 1000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-120-2",
+          "name": "VIP",
+          "price": 3000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-120",
+      "title": "Bengaluru Shows & Entertainment Showcase 3",
+      "description": "A fantastic Shows & Entertainment event happening live in Bengaluru. Join us for an unforgettable experience!",
+      "category": "Shows & Entertainment",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Bengaluru3/600/400",
+      "date": "2026-11-03",
+      "time": "18:00",
+      "location": {
+        "venue": "Bengaluru Grand Center",
+        "city": "Bengaluru",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-121-1",
+          "name": "General",
+          "price": 1500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-121-2",
+          "name": "VIP",
+          "price": 4500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-121",
+      "title": "Bengaluru Activities Showcase 4",
+      "description": "A fantastic Activities event happening live in Bengaluru. Join us for an unforgettable experience!",
+      "category": "Activities",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Bengaluru4/600/400",
+      "date": "2026-11-04",
+      "time": "18:00",
+      "location": {
+        "venue": "Bengaluru Grand Center",
+        "city": "Bengaluru",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-122-1",
+          "name": "General",
+          "price": 2000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-122-2",
+          "name": "VIP",
+          "price": 6000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-122",
+      "title": "Bengaluru Conferences Showcase 5",
+      "description": "A fantastic Conferences event happening live in Bengaluru. Join us for an unforgettable experience!",
+      "category": "Conferences",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Bengaluru5/600/400",
+      "date": "2026-11-05",
+      "time": "18:00",
+      "location": {
+        "venue": "Bengaluru Grand Center",
+        "city": "Bengaluru",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-123-1",
+          "name": "General",
+          "price": 2500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-123-2",
+          "name": "VIP",
+          "price": 7500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-123",
+      "title": "Bengaluru Workshops Showcase 6",
+      "description": "A fantastic Workshops event happening live in Bengaluru. Join us for an unforgettable experience!",
+      "category": "Workshops",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Bengaluru6/600/400",
+      "date": "2026-11-06",
+      "time": "18:00",
+      "location": {
+        "venue": "Bengaluru Grand Center",
+        "city": "Bengaluru",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-124-1",
+          "name": "General",
+          "price": 3000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-124-2",
+          "name": "VIP",
+          "price": 9000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-124",
+      "title": "Pune Festivals Showcase 1",
+      "description": "A fantastic Festivals event happening live in Pune. Join us for an unforgettable experience!",
+      "category": "Festivals",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Pune1/600/400",
+      "date": "2026-11-01",
+      "time": "18:00",
+      "location": {
+        "venue": "Pune Grand Center",
+        "city": "Pune",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-125-1",
+          "name": "General",
+          "price": 500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-125-2",
+          "name": "VIP",
+          "price": 1500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-125",
+      "title": "Pune Sports Showcase 2",
+      "description": "A fantastic Sports event happening live in Pune. Join us for an unforgettable experience!",
+      "category": "Sports",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Pune2/600/400",
+      "date": "2026-11-02",
+      "time": "18:00",
+      "location": {
+        "venue": "Pune Grand Center",
+        "city": "Pune",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-126-1",
+          "name": "General",
+          "price": 1000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-126-2",
+          "name": "VIP",
+          "price": 3000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-126",
+      "title": "Pune Shows & Entertainment Showcase 3",
+      "description": "A fantastic Shows & Entertainment event happening live in Pune. Join us for an unforgettable experience!",
+      "category": "Shows & Entertainment",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Pune3/600/400",
+      "date": "2026-11-03",
+      "time": "18:00",
+      "location": {
+        "venue": "Pune Grand Center",
+        "city": "Pune",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-127-1",
+          "name": "General",
+          "price": 1500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-127-2",
+          "name": "VIP",
+          "price": 4500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-127",
+      "title": "Pune Activities Showcase 4",
+      "description": "A fantastic Activities event happening live in Pune. Join us for an unforgettable experience!",
+      "category": "Activities",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Pune4/600/400",
+      "date": "2026-11-04",
+      "time": "18:00",
+      "location": {
+        "venue": "Pune Grand Center",
+        "city": "Pune",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-128-1",
+          "name": "General",
+          "price": 2000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-128-2",
+          "name": "VIP",
+          "price": 6000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-128",
+      "title": "Pune Conferences Showcase 5",
+      "description": "A fantastic Conferences event happening live in Pune. Join us for an unforgettable experience!",
+      "category": "Conferences",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Pune5/600/400",
+      "date": "2026-11-05",
+      "time": "18:00",
+      "location": {
+        "venue": "Pune Grand Center",
+        "city": "Pune",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-129-1",
+          "name": "General",
+          "price": 2500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-129-2",
+          "name": "VIP",
+          "price": 7500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-129",
+      "title": "Pune Workshops Showcase 6",
+      "description": "A fantastic Workshops event happening live in Pune. Join us for an unforgettable experience!",
+      "category": "Workshops",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Pune6/600/400",
+      "date": "2026-11-06",
+      "time": "18:00",
+      "location": {
+        "venue": "Pune Grand Center",
+        "city": "Pune",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-130-1",
+          "name": "General",
+          "price": 3000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-130-2",
+          "name": "VIP",
+          "price": 9000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-130",
+      "title": "Hyderabad Festivals Showcase 1",
+      "description": "A fantastic Festivals event happening live in Hyderabad. Join us for an unforgettable experience!",
+      "category": "Festivals",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Hyderabad1/600/400",
+      "date": "2026-11-01",
+      "time": "18:00",
+      "location": {
+        "venue": "Hyderabad Grand Center",
+        "city": "Hyderabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-131-1",
+          "name": "General",
+          "price": 500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-131-2",
+          "name": "VIP",
+          "price": 1500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-131",
+      "title": "Hyderabad Sports Showcase 2",
+      "description": "A fantastic Sports event happening live in Hyderabad. Join us for an unforgettable experience!",
+      "category": "Sports",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Hyderabad2/600/400",
+      "date": "2026-11-02",
+      "time": "18:00",
+      "location": {
+        "venue": "Hyderabad Grand Center",
+        "city": "Hyderabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-132-1",
+          "name": "General",
+          "price": 1000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-132-2",
+          "name": "VIP",
+          "price": 3000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-132",
+      "title": "Hyderabad Shows & Entertainment Showcase 3",
+      "description": "A fantastic Shows & Entertainment event happening live in Hyderabad. Join us for an unforgettable experience!",
+      "category": "Shows & Entertainment",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Hyderabad3/600/400",
+      "date": "2026-11-03",
+      "time": "18:00",
+      "location": {
+        "venue": "Hyderabad Grand Center",
+        "city": "Hyderabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-133-1",
+          "name": "General",
+          "price": 1500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-133-2",
+          "name": "VIP",
+          "price": 4500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-133",
+      "title": "Hyderabad Activities Showcase 4",
+      "description": "A fantastic Activities event happening live in Hyderabad. Join us for an unforgettable experience!",
+      "category": "Activities",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Hyderabad4/600/400",
+      "date": "2026-11-04",
+      "time": "18:00",
+      "location": {
+        "venue": "Hyderabad Grand Center",
+        "city": "Hyderabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-134-1",
+          "name": "General",
+          "price": 2000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-134-2",
+          "name": "VIP",
+          "price": 6000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-134",
+      "title": "Hyderabad Conferences Showcase 5",
+      "description": "A fantastic Conferences event happening live in Hyderabad. Join us for an unforgettable experience!",
+      "category": "Conferences",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Hyderabad5/600/400",
+      "date": "2026-11-05",
+      "time": "18:00",
+      "location": {
+        "venue": "Hyderabad Grand Center",
+        "city": "Hyderabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-135-1",
+          "name": "General",
+          "price": 2500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-135-2",
+          "name": "VIP",
+          "price": 7500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-135",
+      "title": "Hyderabad Workshops Showcase 6",
+      "description": "A fantastic Workshops event happening live in Hyderabad. Join us for an unforgettable experience!",
+      "category": "Workshops",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Hyderabad6/600/400",
+      "date": "2026-11-06",
+      "time": "18:00",
+      "location": {
+        "venue": "Hyderabad Grand Center",
+        "city": "Hyderabad",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-136-1",
+          "name": "General",
+          "price": 3000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-136-2",
+          "name": "VIP",
+          "price": 9000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-136",
+      "title": "Chennai Festivals Showcase 1",
+      "description": "A fantastic Festivals event happening live in Chennai. Join us for an unforgettable experience!",
+      "category": "Festivals",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Chennai1/600/400",
+      "date": "2026-11-01",
+      "time": "18:00",
+      "location": {
+        "venue": "Chennai Grand Center",
+        "city": "Chennai",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-137-1",
+          "name": "General",
+          "price": 500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-137-2",
+          "name": "VIP",
+          "price": 1500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-137",
+      "title": "Chennai Sports Showcase 2",
+      "description": "A fantastic Sports event happening live in Chennai. Join us for an unforgettable experience!",
+      "category": "Sports",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Chennai2/600/400",
+      "date": "2026-11-02",
+      "time": "18:00",
+      "location": {
+        "venue": "Chennai Grand Center",
+        "city": "Chennai",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-138-1",
+          "name": "General",
+          "price": 1000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-138-2",
+          "name": "VIP",
+          "price": 3000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-138",
+      "title": "Chennai Shows & Entertainment Showcase 3",
+      "description": "A fantastic Shows & Entertainment event happening live in Chennai. Join us for an unforgettable experience!",
+      "category": "Shows & Entertainment",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Chennai3/600/400",
+      "date": "2026-11-03",
+      "time": "18:00",
+      "location": {
+        "venue": "Chennai Grand Center",
+        "city": "Chennai",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-139-1",
+          "name": "General",
+          "price": 1500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-139-2",
+          "name": "VIP",
+          "price": 4500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-139",
+      "title": "Chennai Activities Showcase 4",
+      "description": "A fantastic Activities event happening live in Chennai. Join us for an unforgettable experience!",
+      "category": "Activities",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Chennai4/600/400",
+      "date": "2026-11-04",
+      "time": "18:00",
+      "location": {
+        "venue": "Chennai Grand Center",
+        "city": "Chennai",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-140-1",
+          "name": "General",
+          "price": 2000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-140-2",
+          "name": "VIP",
+          "price": 6000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-140",
+      "title": "Chennai Conferences Showcase 5",
+      "description": "A fantastic Conferences event happening live in Chennai. Join us for an unforgettable experience!",
+      "category": "Conferences",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Chennai5/600/400",
+      "date": "2026-11-05",
+      "time": "18:00",
+      "location": {
+        "venue": "Chennai Grand Center",
+        "city": "Chennai",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-141-1",
+          "name": "General",
+          "price": 2500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-141-2",
+          "name": "VIP",
+          "price": 7500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-141",
+      "title": "Chennai Workshops Showcase 6",
+      "description": "A fantastic Workshops event happening live in Chennai. Join us for an unforgettable experience!",
+      "category": "Workshops",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Chennai6/600/400",
+      "date": "2026-11-06",
+      "time": "18:00",
+      "location": {
+        "venue": "Chennai Grand Center",
+        "city": "Chennai",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-142-1",
+          "name": "General",
+          "price": 3000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-142-2",
+          "name": "VIP",
+          "price": 9000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-142",
+      "title": "Kolkata Festivals Showcase 1",
+      "description": "A fantastic Festivals event happening live in Kolkata. Join us for an unforgettable experience!",
+      "category": "Festivals",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Kolkata1/600/400",
+      "date": "2026-11-01",
+      "time": "18:00",
+      "location": {
+        "venue": "Kolkata Grand Center",
+        "city": "Kolkata",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-143-1",
+          "name": "General",
+          "price": 500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-143-2",
+          "name": "VIP",
+          "price": 1500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-143",
+      "title": "Kolkata Sports Showcase 2",
+      "description": "A fantastic Sports event happening live in Kolkata. Join us for an unforgettable experience!",
+      "category": "Sports",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Kolkata2/600/400",
+      "date": "2026-11-02",
+      "time": "18:00",
+      "location": {
+        "venue": "Kolkata Grand Center",
+        "city": "Kolkata",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-144-1",
+          "name": "General",
+          "price": 1000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-144-2",
+          "name": "VIP",
+          "price": 3000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-144",
+      "title": "Kolkata Shows & Entertainment Showcase 3",
+      "description": "A fantastic Shows & Entertainment event happening live in Kolkata. Join us for an unforgettable experience!",
+      "category": "Shows & Entertainment",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Kolkata3/600/400",
+      "date": "2026-11-03",
+      "time": "18:00",
+      "location": {
+        "venue": "Kolkata Grand Center",
+        "city": "Kolkata",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-145-1",
+          "name": "General",
+          "price": 1500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-145-2",
+          "name": "VIP",
+          "price": 4500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-145",
+      "title": "Kolkata Activities Showcase 4",
+      "description": "A fantastic Activities event happening live in Kolkata. Join us for an unforgettable experience!",
+      "category": "Activities",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Kolkata4/600/400",
+      "date": "2026-11-04",
+      "time": "18:00",
+      "location": {
+        "venue": "Kolkata Grand Center",
+        "city": "Kolkata",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-146-1",
+          "name": "General",
+          "price": 2000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-146-2",
+          "name": "VIP",
+          "price": 6000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-146",
+      "title": "Kolkata Conferences Showcase 5",
+      "description": "A fantastic Conferences event happening live in Kolkata. Join us for an unforgettable experience!",
+      "category": "Conferences",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Kolkata5/600/400",
+      "date": "2026-11-05",
+      "time": "18:00",
+      "location": {
+        "venue": "Kolkata Grand Center",
+        "city": "Kolkata",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-147-1",
+          "name": "General",
+          "price": 2500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-147-2",
+          "name": "VIP",
+          "price": 7500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-147",
+      "title": "Kolkata Workshops Showcase 6",
+      "description": "A fantastic Workshops event happening live in Kolkata. Join us for an unforgettable experience!",
+      "category": "Workshops",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Kolkata6/600/400",
+      "date": "2026-11-06",
+      "time": "18:00",
+      "location": {
+        "venue": "Kolkata Grand Center",
+        "city": "Kolkata",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-148-1",
+          "name": "General",
+          "price": 3000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-148-2",
+          "name": "VIP",
+          "price": 9000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-148",
+      "title": "Chandigarh Festivals Showcase 1",
+      "description": "A fantastic Festivals event happening live in Chandigarh. Join us for an unforgettable experience!",
+      "category": "Festivals",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Chandigarh1/600/400",
+      "date": "2026-11-01",
+      "time": "18:00",
+      "location": {
+        "venue": "Chandigarh Grand Center",
+        "city": "Chandigarh",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-149-1",
+          "name": "General",
+          "price": 500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-149-2",
+          "name": "VIP",
+          "price": 1500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-149",
+      "title": "Chandigarh Sports Showcase 2",
+      "description": "A fantastic Sports event happening live in Chandigarh. Join us for an unforgettable experience!",
+      "category": "Sports",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Chandigarh2/600/400",
+      "date": "2026-11-02",
+      "time": "18:00",
+      "location": {
+        "venue": "Chandigarh Grand Center",
+        "city": "Chandigarh",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-150-1",
+          "name": "General",
+          "price": 1000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-150-2",
+          "name": "VIP",
+          "price": 3000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-150",
+      "title": "Chandigarh Shows & Entertainment Showcase 3",
+      "description": "A fantastic Shows & Entertainment event happening live in Chandigarh. Join us for an unforgettable experience!",
+      "category": "Shows & Entertainment",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Chandigarh3/600/400",
+      "date": "2026-11-03",
+      "time": "18:00",
+      "location": {
+        "venue": "Chandigarh Grand Center",
+        "city": "Chandigarh",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-151-1",
+          "name": "General",
+          "price": 1500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-151-2",
+          "name": "VIP",
+          "price": 4500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-151",
+      "title": "Chandigarh Activities Showcase 4",
+      "description": "A fantastic Activities event happening live in Chandigarh. Join us for an unforgettable experience!",
+      "category": "Activities",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Chandigarh4/600/400",
+      "date": "2026-11-04",
+      "time": "18:00",
+      "location": {
+        "venue": "Chandigarh Grand Center",
+        "city": "Chandigarh",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-152-1",
+          "name": "General",
+          "price": 2000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-152-2",
+          "name": "VIP",
+          "price": 6000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-152",
+      "title": "Chandigarh Conferences Showcase 5",
+      "description": "A fantastic Conferences event happening live in Chandigarh. Join us for an unforgettable experience!",
+      "category": "Conferences",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Chandigarh5/600/400",
+      "date": "2026-11-05",
+      "time": "18:00",
+      "location": {
+        "venue": "Chandigarh Grand Center",
+        "city": "Chandigarh",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-153-1",
+          "name": "General",
+          "price": 2500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-153-2",
+          "name": "VIP",
+          "price": 7500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-153",
+      "title": "Chandigarh Workshops Showcase 6",
+      "description": "A fantastic Workshops event happening live in Chandigarh. Join us for an unforgettable experience!",
+      "category": "Workshops",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Chandigarh6/600/400",
+      "date": "2026-11-06",
+      "time": "18:00",
+      "location": {
+        "venue": "Chandigarh Grand Center",
+        "city": "Chandigarh",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-154-1",
+          "name": "General",
+          "price": 3000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-154-2",
+          "name": "VIP",
+          "price": 9000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-154",
+      "title": "Jaipur Festivals Showcase 1",
+      "description": "A fantastic Festivals event happening live in Jaipur. Join us for an unforgettable experience!",
+      "category": "Festivals",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Jaipur1/600/400",
+      "date": "2026-11-01",
+      "time": "18:00",
+      "location": {
+        "venue": "Jaipur Grand Center",
+        "city": "Jaipur",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-155-1",
+          "name": "General",
+          "price": 500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-155-2",
+          "name": "VIP",
+          "price": 1500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-155",
+      "title": "Jaipur Sports Showcase 2",
+      "description": "A fantastic Sports event happening live in Jaipur. Join us for an unforgettable experience!",
+      "category": "Sports",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": true,
+      "testingNote": "Currently making it trending/promoted for testing purpose",
+      "thumbnailUrl": "https://picsum.photos/seed/Jaipur2/600/400",
+      "date": "2026-11-02",
+      "time": "18:00",
+      "location": {
+        "venue": "Jaipur Grand Center",
+        "city": "Jaipur",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-156-1",
+          "name": "General",
+          "price": 1000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-156-2",
+          "name": "VIP",
+          "price": 3000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-156",
+      "title": "Jaipur Shows & Entertainment Showcase 3",
+      "description": "A fantastic Shows & Entertainment event happening live in Jaipur. Join us for an unforgettable experience!",
+      "category": "Shows & Entertainment",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": true,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Jaipur3/600/400",
+      "date": "2026-11-03",
+      "time": "18:00",
+      "location": {
+        "venue": "Jaipur Grand Center",
+        "city": "Jaipur",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-157-1",
+          "name": "General",
+          "price": 1500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-157-2",
+          "name": "VIP",
+          "price": 4500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-157",
+      "title": "Jaipur Activities Showcase 4",
+      "description": "A fantastic Activities event happening live in Jaipur. Join us for an unforgettable experience!",
+      "category": "Activities",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Jaipur4/600/400",
+      "date": "2026-11-04",
+      "time": "18:00",
+      "location": {
+        "venue": "Jaipur Grand Center",
+        "city": "Jaipur",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-158-1",
+          "name": "General",
+          "price": 2000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-158-2",
+          "name": "VIP",
+          "price": 6000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-158",
+      "title": "Jaipur Conferences Showcase 5",
+      "description": "A fantastic Conferences event happening live in Jaipur. Join us for an unforgettable experience!",
+      "category": "Conferences",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Jaipur5/600/400",
+      "date": "2026-11-05",
+      "time": "18:00",
+      "location": {
+        "venue": "Jaipur Grand Center",
+        "city": "Jaipur",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-159-1",
+          "name": "General",
+          "price": 2500,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-159-2",
+          "name": "VIP",
+          "price": 7500,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
+    },
+    {
+      "id": "evt-159",
+      "title": "Jaipur Workshops Showcase 6",
+      "description": "A fantastic Workshops event happening live in Jaipur. Join us for an unforgettable experience!",
+      "category": "Workshops",
+      "subcategory": "General",
+      "format": "In-Person",
+      "status": "published",
+      "isFeatured": false,
+      "isPopular": false,
+      "thumbnailUrl": "https://picsum.photos/seed/Jaipur6/600/400",
+      "date": "2026-11-06",
+      "time": "18:00",
+      "location": {
+        "venue": "Jaipur Grand Center",
+        "city": "Jaipur",
+        "state": "State",
+        "country": "India"
+      },
+      "capacity": 1000,
+      "ticketTypes": [
+        {
+          "id": "tt-160-1",
+          "name": "General",
+          "price": 3000,
+          "capacity": 800,
+          "available": 500
+        },
+        {
+          "id": "tt-160-2",
+          "name": "VIP",
+          "price": 9000,
+          "capacity": 200,
+          "available": 100
+        }
+      ],
+      "maxTicketsPerBooking": 4,
+      "hostId": "user-003",
+      "createdAt": "2026-10-08T05:39:10.040Z"
     }
   ],
   "categories": [
-    { "id": "cat-01", "name": "Movies & Cinema", "icon": "🎬", "slug": "movies" },
-    { "id": "cat-02", "name": "Festivals", "icon": "🎉", "slug": "festivals" },
-    { "id": "cat-03", "name": "Sports", "icon": "🏆", "slug": "sports" },
-    { "id": "cat-04", "name": "Shows & Entertainment", "icon": "🎭", "slug": "shows" },
-    { "id": "cat-05", "name": "Activities", "icon": "🧘", "slug": "activities" },
-    { "id": "cat-06", "name": "Conferences", "icon": "💼", "slug": "conferences" },
-    { "id": "cat-07", "name": "Workshops", "icon": "🛠️", "slug": "workshops" },
-    { "id": "cat-08", "name": "Technology", "icon": "💻", "slug": "technology" },
-    { "id": "cat-09", "name": "Arts & Culture", "icon": "🎨", "slug": "arts" },
-    { "id": "cat-10", "name": "Food & Lifestyle", "icon": "🍽️", "slug": "food" }
+    {
+      "id": "cat-01",
+      "name": "Movies & Cinema",
+      "icon": "🎬",
+      "slug": "movies"
+    },
+    {
+      "id": "cat-02",
+      "name": "Festivals",
+      "icon": "🎉",
+      "slug": "festivals"
+    },
+    {
+      "id": "cat-03",
+      "name": "Sports",
+      "icon": "🏆",
+      "slug": "sports"
+    },
+    {
+      "id": "cat-04",
+      "name": "Shows & Entertainment",
+      "icon": "🎭",
+      "slug": "shows"
+    },
+    {
+      "id": "cat-05",
+      "name": "Activities",
+      "icon": "🧘",
+      "slug": "activities"
+    },
+    {
+      "id": "cat-06",
+      "name": "Conferences",
+      "icon": "💼",
+      "slug": "conferences"
+    },
+    {
+      "id": "cat-07",
+      "name": "Workshops",
+      "icon": "🛠️",
+      "slug": "workshops"
+    },
+    {
+      "id": "cat-08",
+      "name": "Technology",
+      "icon": "💻",
+      "slug": "technology"
+    },
+    {
+      "id": "cat-09",
+      "name": "Arts & Culture",
+      "icon": "🎨",
+      "slug": "arts"
+    },
+    {
+      "id": "cat-10",
+      "name": "Food & Lifestyle",
+      "icon": "🍽️",
+      "slug": "food"
+    }
   ],
-  "bookings": [],
-  "notifications": []
+  "bookings": [
+    {
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "eventDate": "2026-11-01",
+      "eventLocation": "Mumbai Grand Center",
+      "userId": "user-001",
+      "tickets": [
+        {
+          "ticketTypeId": "tt-101-1",
+          "name": "General",
+          "price": 500,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 500,
+      "discount": 100,
+      "tax": 72,
+      "totalAmount": 472,
+      "status": "confirmed",
+      "createdAt": "2026-10-08T09:22:53.569Z",
+      "id": "SRrJdwJUo2Q"
+    },
+    {
+      "bookingReference": "EH-MUZCAYG5-NCKF",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "eventDate": "2026-11-01",
+      "eventTime": "18:00",
+      "eventLocation": "Mumbai Grand Center",
+      "eventAddress": "Mumbai, State, India",
+      "eventThumbnail": "https://picsum.photos/seed/Mumbai1/600/400",
+      "attendee": {
+        "id": "user-001",
+        "name": "Jeet Shah",
+        "email": "jeet@eventhub.com",
+        "phone": "+91 98765 43210"
+      },
+      "userId": "user-001",
+      "tickets": [
+        {
+          "ticketTypeId": "tt-101-1",
+          "name": "General",
+          "price": 500,
+          "quantity": 2
+        },
+        {
+          "ticketTypeId": "tt-101-2",
+          "name": "VIP",
+          "price": 1500,
+          "quantity": 2
+        }
+      ],
+      "subtotal": 4000,
+      "discount": 0,
+      "tax": 720,
+      "totalAmount": 4720,
+      "status": "confirmed",
+      "payment": {
+        "method": "upi",
+        "label": "UPI",
+        "upiId": "jitbhavsar40@gmail.com",
+        "status": "paid",
+        "transactionReference": "TXN-MUZCAYG5"
+      },
+      "createdAt": "2026-10-08T09:34:22.949Z",
+      "id": "3NnL7lXh4Ro"
+    },
+    {
+      "bookingReference": "EH-MUZD75VP-5PE3",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "eventDate": "2026-11-01",
+      "eventTime": "18:00",
+      "eventLocation": "Mumbai Grand Center",
+      "eventAddress": "Mumbai, State, India",
+      "eventThumbnail": "https://picsum.photos/seed/Mumbai1/600/400",
+      "attendee": {
+        "id": "user-001",
+        "name": "Jeet Shah",
+        "email": "jeet@eventhub.com",
+        "phone": "+91 98765 43210"
+      },
+      "userId": "user-001",
+      "tickets": [
+        {
+          "ticketTypeId": "tt-101-1",
+          "name": "General",
+          "price": 500,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 500,
+      "discount": 0,
+      "tax": 90,
+      "totalAmount": 590,
+      "status": "confirmed",
+      "payment": {
+        "method": "qr",
+        "label": "UPI QR",
+        "status": "paid",
+        "transactionReference": "TXN-MUZD75VS"
+      },
+      "createdAt": "2026-10-08T09:59:25.576Z",
+      "id": "hnq3IHa0djo"
+    },
+    {
+      "bookingReference": "EH-MUZEMSGG-VDOD",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "eventDate": "2026-11-01",
+      "eventTime": "18:00",
+      "eventLocation": "Mumbai Grand Center",
+      "eventAddress": "Mumbai, State, India",
+      "eventThumbnail": "https://picsum.photos/seed/Mumbai1/600/400",
+      "attendee": {
+        "id": "user-001",
+        "name": "Jeet Shah",
+        "email": "jeet@eventhub.com",
+        "phone": "+91 98765 43210"
+      },
+      "userId": "user-001",
+      "tickets": [
+        {
+          "ticketTypeId": "tt-101-1",
+          "name": "General",
+          "price": 500,
+          "quantity": 1
+        },
+        {
+          "ticketTypeId": "tt-101-2",
+          "name": "VIP",
+          "price": 1500,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 2000,
+      "discount": 0,
+      "offerCode": null,
+      "tax": 360,
+      "totalAmount": 2360,
+      "status": "confirmed",
+      "payment": {
+        "method": "qr",
+        "label": "UPI QR",
+        "status": "paid",
+        "transactionReference": "TXN-MUZEMSGG"
+      },
+      "createdAt": "2026-10-08T10:39:34.288Z",
+      "id": "BAtnG6LfL1U"
+    }
+  ],
+  "notifications": [],
+  "coupons": [
+    {
+      "id": "cpn-1",
+      "code": "FESTIVAL20",
+      "discountPercentage": 20,
+      "maxDiscount": 500,
+      "isActive": true
+    },
+    {
+      "id": "cpn-2",
+      "code": "WELCOME50",
+      "discountAmount": 250,
+      "isActive": true
+    }
+  ],
+  "offers": [
+    {
+      "id": "offer-welcome",
+      "code": "WELCOME50",
+      "title": "Welcome to EventHub",
+      "description": "Take ₹250 off your first ticket booking.",
+      "discountAmount": 250,
+      "minOrderAmount": 750,
+      "expiresAt": "2027-03-31T23:59:59.000Z",
+      "isActive": true,
+      "badge": "New members"
+    },
+    {
+      "id": "offer-festival",
+      "code": "FESTIVAL20",
+      "title": "Festival season special",
+      "description": "Save 20% on your booking, up to ₹500.",
+      "discountPercentage": 20,
+      "maxDiscount": 500,
+      "minOrderAmount": 1000,
+      "expiresAt": "2027-01-31T23:59:59.000Z",
+      "isActive": true,
+      "badge": "Limited time"
+    },
+    {
+      "id": "offer-weekend",
+      "code": "WEEKEND15",
+      "title": "Weekend plans sorted",
+      "description": "Enjoy 15% off events booked for the weekend.",
+      "discountPercentage": 15,
+      "maxDiscount": 350,
+      "minOrderAmount": 500,
+      "expiresAt": "2026-12-31T23:59:59.000Z",
+      "isActive": true,
+      "badge": "Popular"
+    }
+  ],
+  "giftCards": [
+    {
+      "id": "gift-500",
+      "title": "A little something",
+      "description": "Perfect for a coffee, comedy night, or a creative workshop.",
+      "amount": 500,
+      "imageUrl": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80",
+      "theme": "Celebration",
+      "terms": "Redeemable against eligible EventHub ticket purchases. Valid for 12 months.",
+      "isActive": true
+    },
+    {
+      "id": "gift-1000",
+      "title": "Make their weekend",
+      "description": "Give them a choice of concerts, sports, festivals and more.",
+      "amount": 1000,
+      "imageUrl": "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=900&q=80",
+      "theme": "Music",
+      "terms": "Redeemable against eligible EventHub ticket purchases. Valid for 12 months.",
+      "isActive": true
+    },
+    {
+      "id": "gift-2500",
+      "title": "The big experience",
+      "description": "A generous gift for the person always planning the next outing.",
+      "amount": 2500,
+      "imageUrl": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80",
+      "theme": "Festival",
+      "terms": "Redeemable against eligible EventHub ticket purchases. Valid for 12 months.",
+      "isActive": true
+    }
+  ],
+  "giftCardPurchases": [
+    {
+      "id": "gift-purchase-001",
+      "giftCardId": "gift-1000",
+      "userId": "user-001",
+      "recipientName": "Jeet Shah",
+      "recipientEmail": "jeet@eventhub.com",
+      "title": "Make their weekend",
+      "amount": 1000,
+      "balance": 1000,
+      "imageUrl": "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=900&q=80",
+      "giftCode": "EHGC-WEEKEND1",
+      "status": "active",
+      "purchasedAt": "2026-10-08T10:15:00.000Z",
+      "expiresAt": "2027-10-08T10:15:00.000Z"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

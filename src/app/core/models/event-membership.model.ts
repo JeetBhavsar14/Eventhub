@@ -28,3 +28,10 @@ export interface EventMembership {
   joinedAt?: string;
   expiresAt?: string;
 }
+export interface EventFilter {
+  category: string;
+  type?: string;
+  date: string;
+  customDate?: string;
+  price: string;
+}

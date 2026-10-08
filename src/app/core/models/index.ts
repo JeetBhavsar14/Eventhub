@@ -4,3 +4,5 @@ export * from './api-error.model';
 export * from './permission.model';
 export * from './policy.model';
 export * from './event-membership.model';
+export * from './booking.model';
+export * from './offer.model';

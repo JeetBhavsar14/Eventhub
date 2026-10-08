@@ -1,0 +1,133 @@
+<!-- Main Wrapper -->
+<div class="home-container">
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <!-- OTT Style Full-width Banner Carousel -->
+    <div class="hero-carousel-container" *ngIf="promotionalEvents().length > 0">
+      
+      <!-- We use CSS snap scroll for the carousel -->
+      <div class="carousel-slide" *ngFor="let event of promotionalEvents(); let i = index" 
+           [class.active]="i === currentSlideIndex()"
+           [routerLink]="['/events', event.id]"
+           style="cursor: pointer;">
+        
+        <!-- Large Cover Image -->
+        <div class="slide-bg">
+          <img [src]="event.thumbnailUrl" [alt]="event.title">
+        </div>
+        
+        <!-- Gradient Overlay for readability -->
+        <div class="slide-overlay">
+          <div class="slide-content">
+            <div class="content-inner">
+              <h1 class="slide-title">{{ event.title }}</h1>
+              
+              <div class="slide-meta">
+                <span class="meta-item">
+                  <span class="icon" [innerHTML]="calendarSvg"></span> 
+                  {{ event.date | date:'MMMM dd, yyyy' }}
+                </span>
+                <span class="meta-item">
+                  <span class="icon" [innerHTML]="mapPinSvg"></span> 
+                  {{ event.location.venue }}
+                </span>
+                <span class="meta-item category-badge">
+                  <span class="icon" [innerHTML]="getCategorySvg(event.category)"></span> 
+                  {{ event.category }}
+                </span>
+              </div>
+
+              <p class="slide-desc">{{ event.description }}</p>
+              
+              <div class="slide-actions">
+                <app-button variant="primary" size="lg" [routerLink]="['/events', event.id]">Book Tickets Now</app-button>
+                <app-button variant="secondary" size="lg" [routerLink]="['/events', event.id]">More Info</app-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Carousel Navigation Dots -->
+      <div class="carousel-dots" *ngIf="promotionalEvents().length > 1">
+        <button class="dot" *ngFor="let ev of promotionalEvents(); let i = index"
+                [class.active]="i === currentSlideIndex()"
+                (click)="setSlide(i)"
+                aria-label="Go to slide">
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Empty State for Hero -->
+    <div class="hero-empty-container" *ngIf="promotionalEvents().length === 0">
+      <div class="empty-content">
+        <h1>Discover {{ currentFilter.category === 'All' ? 'Events' : currentFilter.category + ' Events' }} in {{ locationService.selectedCity() }}</h1>
+        <p>Explore top events and conferences happening near you.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Discover Layout (Sidebar + Main Content) -->
+  <section class="discover-layout-section" id="discover-events-section">
+    <div class="discover-container">
+      
+      <!-- Left Sidebar (Filters) -->
+      <aside class="filters-sidebar">
+        <h3>Filters</h3>
+        <app-event-filter [currentFilter]="currentFilter" (filterChange)="handleFilterChange($event)"></app-event-filter>
+      </aside>
+
+      <!-- Right Main Content -->
+      <main class="events-main">
+        <div class="section-header">
+          <h2>{{ currentFilter.category === 'All' ? 'Events' : currentFilter.category + ' Events' }} In {{ locationService.selectedCity() }}</h2>
+        </div>
+
+        <div class="loading-state" *ngIf="isLoading()">
+          <div class="spinner"></div>
+          <p>Finding the best experiences...</p>
+        </div>
+
+        <div class="empty-state" *ngIf="!isLoading() && featuredEvents().length === 0">
+          <h3>No events found</h3>
+          <p>Try adjusting your filters.</p>
+          <app-button variant="secondary" (click)="handleFilterChange({category: 'All', date: 'Any Date', price: 'Any Price'})">Clear Filters</app-button>
+        </div>
+
+        <div class="events-grid" *ngIf="!isLoading()">
+          <!-- Event Card -->
+          <div class="event-card" *ngFor="let event of featuredEvents()" [routerLink]="['/events', event.id]">
+            <div class="event-image">
+              <img [src]="event.thumbnailUrl" [alt]="event.title">
+              <span class="category-tag">
+                <span class="icon" [innerHTML]="getCategorySvg(event.category)"></span>
+                {{ event.category }}
+              </span>
+              <span class="featured-trending-badge" *ngIf="event.isPopular">
+                <span class="icon" [innerHTML]="trendingSvg"></span> Trending
+              </span>
+            </div>
+            <div class="event-details">
+              <div class="event-date">
+                <span class="month">{{ event.date | date:'MMM' }}</span>
+                <span class="day">{{ event.date | date:'dd' }}</span>
+              </div>
+              <div class="event-info">
+                <h3>{{ event.title }}</h3>
+                <p class="location">
+                  <span class="icon" [innerHTML]="mapPinSvg"></span>
+                  {{ event.location.venue }}, {{ event.location.city }}
+                </p>
+                <p class="price">From ₹{{ event.ticketTypes?.[0]?.price || 500 }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      
+    </div>
+  </section>
+
+</div>

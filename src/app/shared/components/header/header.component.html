@@ -1,0 +1,175 @@
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  BAR 1 — Brand | City | Search | Notifications | User  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<header class="site-header">
+  <div class="bar-top">
+    <div class="bar-inner">
+
+      <!-- Logo -->
+      <a routerLink="/" class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 12V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 1 0 4v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6a2 2 0 0 1 0-4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M12 9v6M12 9l-1.5 1.5M12 9l1.5 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="logo-text">EventHub</span>
+      </a>
+
+      <!-- City selector -->
+      <div class="city-selector-wrap" (click)="$event.stopPropagation()">
+        <button class="city-selector" (click)="toggleCityMenu()">
+          <svg class="city-pin-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <span class="city-name">{{ selectedCity() }}</span>
+          <svg class="caret-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <!-- City Dropdown Menu -->
+        <div class="city-dropdown" *ngIf="showCityMenu">
+          <!-- Search & Detect Location -->
+          <div class="city-search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+              <path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input type="text" placeholder="Search for your city" [(ngModel)]="citySearchQuery" maxlength="50">
+          </div>
+          
+          <button class="detect-location-btn" (click)="detectLocation()">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Detect my location
+          </button>
+
+          <hr class="dropdown-divider">
+          
+          <!-- Popular Cities -->
+          <div class="popular-cities">
+            <h6 class="dropdown-subtitle">Popular Cities</h6>
+            <div class="cities-grid">
+              <button 
+                *ngFor="let city of filteredCities" 
+                class="city-item-btn" 
+                [class.active]="city === selectedCity()"
+                (click)="selectCity(city)">
+                {{ city }}
+              </button>
+            </div>
+            <div *ngIf="filteredCities.length === 0" class="no-cities">
+              No cities found matching "{{ citySearchQuery }}"
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search bar -->
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+          <path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input
+          class="search-input"
+          type="text"
+          placeholder="Search for Events, Artists or Venues..."
+          [(ngModel)]="searchQuery"
+        />
+      </div>
+
+      <!-- Right side actions -->
+      <div class="header-actions">
+
+        <!-- Guest actions -->
+        <ng-container *ngIf="!isAuthenticated()">
+          <a routerLink="/auth/login" class="action-link">Login</a>
+          <a routerLink="/auth/register" class="action-btn">Sign Up</a>
+        </ng-container>
+
+        <!-- Authenticated actions -->
+        <ng-container *ngIf="isAuthenticated()">
+          <!-- Notification bell -->
+          <button class="icon-btn" title="Notifications">
+            <svg class="bell-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="badge">3</span>
+          </button>
+
+          <!-- User avatar + dropdown -->
+          <div class="user-avatar-wrap" (click)="toggleUserMenu()">
+            <div class="avatar">{{ getInitials() }}</div>
+            <span class="user-name">{{ currentUser()?.firstName }}</span>
+            <svg class="caret-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+
+            <!-- Dropdown -->
+            <div class="user-dropdown" *ngIf="showUserMenu">
+              <div class="dropdown-user-info">
+                <div class="avatar avatar-lg">{{ getInitials() }}</div>
+                <div>
+                  <p class="dropdown-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</p>
+                  <p class="dropdown-email">{{ currentUser()?.email }}</p>
+                </div>
+              </div>
+              <hr class="dropdown-divider">
+              <a routerLink="/bookings" class="dropdown-item" (click)="showUserMenu = false">
+                <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                My Bookings
+              </a>
+              <a routerLink="/my-gift-cards" class="dropdown-item" (click)="showUserMenu = false">
+                <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><rect x="3" y="8" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M12 8v13M3 12h18M12 8H7.5a2.5 2.5 0 1 1 0-5C10 3 12 8 12 8Zm0 0h4.5a2.5 2.5 0 1 0 0-5C14 3 12 8 12 8Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                My Gift Cards
+              </a>
+              <a routerLink="/profile" class="dropdown-item" (click)="showUserMenu = false">
+                <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                My Profile
+              </a>
+              <hr class="dropdown-divider">
+              <button class="dropdown-item logout-item" (click)="logout()">
+                <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Log Out
+              </button>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════ -->
+  <!--  BAR 2 — Category Pills | Secondary Utility Links   -->
+  <!-- ════════════════════════════════════════════════════ -->
+  <div class="bar-bottom">
+    <div class="bar-inner">
+
+      <!-- Category pills -->
+      <nav class="category-nav">
+        <a
+          *ngFor="let cat of categories"
+          [routerLink]="['/discover']"
+          [queryParams]="cat.label === 'Events' ? {} : { category: cat.label }"
+          class="cat-pill"
+          routerLinkActive="cat-pill--active"
+          [routerLinkActiveOptions]="{ exact: cat.label === 'Events' }"
+          (click)="scrollToEvents()">
+          <span class="cat-icon" [innerHTML]="cat.icon"></span>
+          {{ cat.label }}
+        </a>
+      </nav>
+
+      <!-- Secondary links -->
+      <nav class="secondary-nav">
+        <a *ngFor="let link of secondaryLinks" [routerLink]="link.route" class="secondary-link">
+          {{ link.label }}
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>

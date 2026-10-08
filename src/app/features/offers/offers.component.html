@@ -1,0 +1,15 @@
+<main class="promo-page fade-in">
+  <header class="promo-hero offers-hero"><p class="eyebrow">SAVE ON YOUR NEXT EXPERIENCE</p><h1>Offers made for going out</h1><p>Use one of these active codes when you book your tickets.</p></header>
+  <section *ngIf="isLoading()" class="state"><div class="spinner"></div><p>Finding the best offers…</p></section>
+  <section *ngIf="error()" class="state"><h2>Unable to load offers</h2><p>{{ error() }}</p><app-button variant="outline" (onClick)="loadOffers()">Try again</app-button></section>
+  <section *ngIf="!isLoading() && !error()" class="offer-grid">
+    <article class="offer-card" *ngFor="let offer of offers()">
+      <div class="offer-value">{{ discountLabel(offer) }}</div><span class="badge" *ngIf="offer.badge">{{ offer.badge }}</span>
+      <h2>{{ offer.title }}</h2><p>{{ offer.description }}</p>
+      <p class="min-order" *ngIf="offer.minOrderAmount">Minimum booking of ₹{{ offer.minOrderAmount }}</p>
+      <div class="code-row"><code>{{ offer.code }}</code><button type="button" (click)="copyCode(offer.code)">{{ copiedCode() === offer.code ? 'Copied!' : 'Copy code' }}</button></div>
+      <small>Valid until {{ offer.expiresAt | date:'d MMM y' }}</small>
+    </article>
+    <div class="state" *ngIf="offers().length === 0"><h2>No active offers today</h2><p>Check back soon for new EventHub deals.</p></div>
+  </section>
+</main>

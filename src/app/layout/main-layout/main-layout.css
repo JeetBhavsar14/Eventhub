@@ -1,0 +1,4 @@
+.page-content {
+  background-color: var(--gray-50);
+  min-height: calc(100vh - 112px); /* 64px top bar + 48px bottom bar */
+}

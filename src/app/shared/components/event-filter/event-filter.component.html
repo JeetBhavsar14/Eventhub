@@ -1,0 +1,51 @@
+<div class="filter-container">
+  
+  <div class="filter-header">
+    <span class="filter-title">Filter Events</span>
+    <button type="button" class="clear-btn" (click)="clearFilters()" [disabled]="!hasActiveFilters()">Clear all</button>
+  </div>
+
+  <div class="filter-group">
+    <label class="group-label" for="event-category">Category</label>
+    <div class="select-wrapper">
+      <select id="event-category" class="modern-select" [(ngModel)]="currentFilter.category" (change)="onCategoryChange()" aria-describedby="filter-hint">
+        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="filter-group" *ngIf="categoryTypes[currentFilter.category]">
+    <label class="group-label" for="event-type">Type of {{ currentFilter.category }}</label>
+    <div class="select-wrapper">
+      <select id="event-type" class="modern-select" [(ngModel)]="currentFilter.type" (change)="onFilterChange()">
+        <option [ngValue]="undefined">All types</option>
+        <option *ngFor="let type of categoryTypes[currentFilter.category]" [value]="type">{{ type }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <label class="group-label" for="event-date">Date</label>
+    <div class="select-wrapper">
+      <select id="event-date" class="modern-select" [(ngModel)]="currentFilter.date" (change)="onFilterChange()">
+        <option *ngFor="let date of dateOptions" [value]="date">{{ date }}</option>
+      </select>
+    </div>
+    
+    <div class="custom-date-picker" *ngIf="currentFilter.date === 'Custom Date'">
+      <input type="date" class="modern-input" aria-label="Custom event date" [(ngModel)]="currentFilter.customDate" (change)="onFilterChange()">
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <label class="group-label" for="event-price">Price range</label>
+    <div class="select-wrapper">
+      <select id="event-price" class="modern-select" [(ngModel)]="currentFilter.price" (change)="onFilterChange()">
+        <option *ngFor="let price of priceOptions" [value]="price">{{ price }}</option>
+      </select>
+    </div>
+  </div>
+
+  <p id="filter-hint" class="filter-hint">Results update as you choose filters.</p>
+
+</div>

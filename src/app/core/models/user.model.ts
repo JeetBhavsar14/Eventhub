@@ -4,6 +4,7 @@ export interface User {
   phone: string;
   firstName: string;
   lastName: string;
+  bio?: string;
   avatarUrl?: string;
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
@@ -11,3 +12,6 @@ export interface User {
   platformRole: 'user' | 'admin' | 'super_admin';
   createdAt: string;
 }
+
+/** Fields a user may edit from their profile. Account and role fields stay server-managed. */
+export type UserProfileUpdate = Pick<User, 'firstName' | 'lastName' | 'phone' | 'bio'>;

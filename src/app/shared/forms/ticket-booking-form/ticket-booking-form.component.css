@@ -1,0 +1,161 @@
+.booking-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.form-header h3 {
+  font-size: 1.5rem;
+  color: var(--gray-900);
+  margin-bottom: 0.5rem;
+}
+
+.form-header p {
+  color: var(--gray-400);
+  font-size: 0.95rem;
+}
+
+.booking-section h4 {
+  font-size: 1.1rem;
+  color: var(--gray-900);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.ticket-types-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ticket-type-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.ticket-type-item:hover {
+  border-color: var(--primary-500);
+}
+
+.ticket-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ticket-info h5 {
+  font-size: 1.05rem;
+  color: var(--gray-900);
+  font-weight: 600;
+  margin: 0;
+}
+
+.ticket-price {
+  color: var(--primary-700);
+  font-weight: 600;
+}
+
+.ticket-available {
+  font-size: 0.8rem;
+  color: var(--gray-400);
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--gray-200);
+  background: var(--surface);
+  color: var(--gray-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.qty-btn:hover:not(:disabled) {
+  background: var(--primary-50);
+  color: var(--primary-700);
+  border-color: var(--primary-500);
+}
+
+.qty-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--gray-100);
+}
+
+.qty-display {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--gray-900);
+  min-width: 20px;
+  text-align: center;
+}
+
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.booking-summary {
+  background: var(--gray-50);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-200);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--gray-700);
+  font-size: 1rem;
+}
+
+.summary-row.total {
+  font-size: 1.25rem;
+  color: var(--gray-900);
+  font-weight: 700;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--gray-200);
+}
+
+.error-msg {
+  color: var(--danger);
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+}

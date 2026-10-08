@@ -1,0 +1,7 @@
+<main class="my-gift-page fade-in">
+  <header><p class="eyebrow">YOUR EVENTHUB ACCOUNT</p><h1>My Gift Cards</h1><p>Keep your active EventHub gift cards and redemption codes together.</p></header>
+  <section *ngIf="isLoading()" class="state"><div class="spinner"></div><p>Loading your gift cards…</p></section>
+  <section *ngIf="!isLoading() && error()" class="state"><h2>Unable to load gift cards</h2><p>{{ error() }}</p><app-button variant="outline" (onClick)="loadGiftCards()">Try again</app-button></section>
+  <section *ngIf="!isLoading() && !error() && giftCards().length === 0" class="state"><div class="empty-icon">🎁</div><h2>No gift cards yet</h2><p>Gift cards you purchase will appear here.</p><a routerLink="/gift-cards"><app-button>Browse gift cards</app-button></a></section>
+  <section *ngIf="!isLoading() && !error() && giftCards().length" class="cards"><article class="owned-card" *ngFor="let card of giftCards()"><img [src]="card.imageUrl" [alt]="card.title"><div class="details"><span class="status" [class.inactive]="card.status !== 'active'">{{ card.status }}</span><h2>{{ card.title }}</h2><p>Purchased {{ card.purchasedAt | date:'d MMM y' }} · Valid until {{ card.expiresAt | date:'d MMM y' }}</p><div class="balance"><span>Available balance</span><strong>₹{{ card.balance }}</strong></div><div class="code"><code>{{ card.giftCode }}</code><button type="button" (click)="copyCode(card.giftCode)">{{ copiedCode() === card.giftCode ? 'Copied!' : 'Copy' }}</button></div></div></article></section>
+</main>

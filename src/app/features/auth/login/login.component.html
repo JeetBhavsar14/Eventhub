@@ -1,0 +1,53 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Welcome Back</h2>
+      <p>Log in to EventHub to manage your bookings and events.</p>
+    </div>
+
+    <!-- Global error message -->
+    <div class="alert alert-error" *ngIf="errorMessage()">
+      {{ errorMessage() }}
+    </div>
+
+    <!-- ngSubmit prevents page reload and calls our TS method -->
+    <form (ngSubmit)="onSubmit()" class="auth-form">
+      <app-input 
+        label="Email Address" 
+        type="email" 
+        name="email"
+        placeholder="e.g. jeet@eventhub.com" 
+        [(ngModel)]="email"
+        [maxLength]="100"
+        [required]="true">
+      </app-input>
+
+      <app-input 
+        label="Password" 
+        type="password" 
+        name="password"
+        placeholder="Enter your password" 
+        [(ngModel)]="password"
+        [minLength]="8"
+        [maxLength]="64"
+        [required]="true">
+      </app-input>
+
+      <div class="forgot-password">
+        <a href="#">Forgot your password?</a>
+      </div>
+
+      <app-button 
+        type="submit" 
+        variant="primary" 
+        [fullWidth]="true" 
+        [isLoading]="isLoading()">
+        Log In
+      </app-button>
+    </form>
+
+    <div class="auth-footer">
+      Don't have an account? <a routerLink="/auth/register">Sign up</a>
+    </div>
+  </div>
+</div>

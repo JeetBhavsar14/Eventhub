@@ -1,0 +1,149 @@
+<div class="checkout-container fade-in" *ngIf="!isLoading() && event() && !bookingSuccess()">
+  
+  <div class="checkout-header">
+    <h1>Complete Your Booking</h1>
+    <p>You are booking tickets for <strong>{{ event().title }}</strong></p>
+  </div>
+
+  <div class="checkout-layout">
+    
+    <!-- Left Column: Tickets & Payment -->
+    <div class="checkout-main">
+      
+      <!-- Ticket Selection -->
+      <section class="checkout-section">
+        <h2 class="section-title">1. Select Tickets</h2>
+        <div class="ticket-list">
+          <div class="ticket-item" *ngFor="let tt of event().ticketTypes">
+            <div class="ticket-info">
+              <h3>{{ tt.name }}</h3>
+              <p class="price">₹{{ tt.price }}</p>
+              <p class="available">{{ tt.available }} available</p>
+            </div>
+            
+            <div class="quantity-controls">
+              <button class="qty-btn" (click)="updateQuantity(tt.id, -1)" [disabled]="getQuantity(tt.id) === 0">-</button>
+              <span class="qty">{{ getQuantity(tt.id) }}</span>
+              <button class="qty-btn" (click)="updateQuantity(tt.id, 1)" [disabled]="tt.available === 0 || getQuantity(tt.id) >= tt.available">+</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Payment Method -->
+      <section class="checkout-section">
+        <h2 class="section-title">2. Payment Method</h2>
+        <app-payment-form [amount]="grandTotal()"></app-payment-form>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Order Summary -->
+    <aside class="checkout-sidebar">
+      <div class="summary-card">
+        <h2>Order Summary</h2>
+        
+        <div class="summary-tickets" *ngIf="totalQuantity() > 0">
+          <div class="summary-item" *ngFor="let tt of event().ticketTypes">
+            <ng-container *ngIf="getQuantity(tt.id) > 0">
+              <span class="name">{{ getQuantity(tt.id) }}x {{ tt.name }}</span>
+              <span class="amount">₹{{ tt.price * getQuantity(tt.id) }}</span>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="summary-empty" *ngIf="totalQuantity() === 0">
+          <p>No tickets selected yet.</p>
+        </div>
+
+        <div class="coupon-section" *ngIf="totalQuantity() > 0">
+          <div class="coupon-input" *ngIf="!appliedCoupon()">
+            <input type="text" [(ngModel)]="couponCode" placeholder="Enter coupon code">
+            <app-button variant="outline" size="sm" (click)="applyCoupon()">Apply</app-button>
+          </div>
+          <p class="coupon-error" *ngIf="couponError()">{{ couponError() }}</p>
+          <div class="coupon-applied" *ngIf="appliedCoupon()">
+            <span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Coupon Applied: {{ appliedCoupon()?.code }}</span>
+            <button class="remove-coupon" (click)="removeCoupon()">Remove</button>
+          </div>
+        </div>
+
+        <div class="summary-totals" *ngIf="totalQuantity() > 0">
+          <div class="total-row">
+            <span>Subtotal</span>
+            <span>₹{{ subtotal() }}</span>
+          </div>
+          <div class="total-row text-success" *ngIf="discount() > 0">
+            <span>Discount</span>
+            <span>-₹{{ discount() }}</span>
+          </div>
+          <div class="total-row">
+            <span>Taxes & Fees (18% GST)</span>
+            <span>₹{{ taxAmount() }}</span>
+          </div>
+          <div class="total-row grand-total">
+            <span>Grand Total</span>
+            <span>₹{{ grandTotal() }}</span>
+          </div>
+        </div>
+
+        <div class="checkout-actions">
+          <app-button variant="primary" [fullWidth]="true" size="lg" (click)="processPayment()" [disabled]="isProcessing() || totalQuantity() === 0">
+            {{ isProcessing() ? 'Processing Securely...' : 'Pay ₹' + grandTotal() }}
+          </app-button>
+          <p class="secure-text">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            128-bit Encrypted Checkout
+          </p>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+  <p class="checkout-error" *ngIf="error()">{{ error() }}</p>
+</div>
+
+<!-- Success View -->
+<div class="success-container fade-in" *ngIf="bookingSuccess()">
+  <div class="success-card">
+    <div class="success-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <h2>Booking Confirmed!</h2>
+    <p class="message">Your booking is confirmed. Your ticket details have been sent to {{ bookingResult().attendee?.email || currentUser()?.email }}.</p>
+    
+    <div class="ticket-preview">
+      <div class="ticket-qr" *ngIf="qrCodeUrl()">
+        <img [src]="qrCodeUrl()" alt="Ticket QR Code">
+      </div>
+      <div class="ticket-details">
+        <p><strong>Booking reference:</strong> {{ bookingResult().bookingReference || bookingResult().id }}</p>
+        <p><strong>Guest:</strong> {{ bookingResult().attendee?.name || currentUser()?.firstName }}</p>
+        <p><strong>Event:</strong> {{ bookingResult().eventTitle }}</p>
+        <p><strong>When:</strong> {{ bookingResult().eventDate | date:'EEE, d MMM y' }} · {{ bookingResult().eventTime }}</p>
+        <p><strong>Where:</strong> {{ bookingResult().eventLocation }}, {{ bookingResult().eventAddress }}</p>
+        <p><strong>Tickets:</strong> <span *ngFor="let ticket of bookingResult().tickets; let last = last">{{ ticket.quantity }} × {{ ticket.name }}<span *ngIf="!last">, </span></span></p>
+        <p><strong>Paid:</strong> ₹{{ bookingResult().totalAmount }} via {{ bookingResult().payment?.label }}</p>
+      </div>
+    </div>
+
+    <div class="success-actions no-print">
+      <app-button variant="outline" (click)="printTicket()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+        Save / Print PDF
+      </app-button>
+      <app-button variant="primary" (click)="goHome()">Browse More Events</app-button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading & Error -->
+<div class="loading-state" *ngIf="isLoading()">
+  <div class="spinner"></div>
+  <p>Initializing Checkout...</p>
+</div>
+
+<div class="error-state" *ngIf="!isLoading() && error()">
+  <h2>Oops!</h2>
+  <p>{{ error() }}</p>
+</div>

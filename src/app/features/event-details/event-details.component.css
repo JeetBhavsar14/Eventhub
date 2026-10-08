@@ -1,0 +1,294 @@
+/* Wrapper */
+.event-details-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Hero Section */
+.details-hero {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background-color: var(--gray-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero-bg-blur {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1;
+}
+
+.hero-bg-blur img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(20px) brightness(0.4);
+  transform: scale(1.1); /* Prevent blur edges */
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  max-width: 1200px;
+  width: 100%;
+  padding: 0 1.5rem;
+}
+
+.hero-image {
+  width: 300px;
+  height: 300px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-2xl);
+  flex-shrink: 0;
+}
+
+.hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-text {
+  color: white;
+  flex-grow: 1;
+}
+
+.category-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  padding: 0.35rem 0.8rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.hero-text h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.tagline {
+  font-size: 1.25rem;
+  color: var(--gray-300);
+  line-height: 1.5;
+}
+
+/* Main Content Layout */
+.content-section {
+  padding: 4rem 1.5rem;
+  background-color: var(--gray-50);
+}
+
+.content-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 3rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .content-container {
+    grid-template-columns: 1fr;
+  }
+  .hero-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  .details-hero {
+    height: auto;
+    padding: 3rem 1.5rem;
+  }
+}
+
+/* Info Card */
+.info-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+}
+
+.info-card h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--gray-900);
+  border-bottom: 1px solid var(--gray-200);
+  padding-bottom: 1rem;
+}
+
+.info-card .description {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--gray-700);
+  white-space: pre-wrap;
+}
+
+.mt-4 { margin-top: 2rem; }
+.mt-2 { margin-top: 1rem; }
+.font-bold { font-weight: 700; color: var(--gray-900); }
+.text-gray { color: var(--gray-600); }
+
+.info-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--gray-900);
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-row .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--primary-50);
+  color: var(--primary-600);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.detail-row .icon ::ng-deep svg {
+  width: 20px;
+  height: 20px;
+}
+
+.map-placeholder {
+  width: 100%;
+  height: 250px;
+  background: var(--gray-100);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+  border: 1px dashed var(--gray-300);
+}
+
+.map-placeholder .icon ::ng-deep svg {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 0.5rem;
+}
+
+/* Sticky Booking Widget */
+.booking-sidebar {
+  position: sticky;
+  top: 100px;
+}
+
+.booking-widget {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-200);
+}
+
+.price-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--gray-200);
+  padding-bottom: 1.5rem;
+}
+
+.price-header h3 {
+  font-size: 1.25rem;
+  color: var(--gray-600);
+  margin-bottom: 0.5rem;
+}
+
+.price-tag {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--gray-900);
+}
+
+.ticket-types {
+  margin-bottom: 2rem;
+}
+
+.ticket-type {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--gray-50);
+  border-radius: var(--radius-md);
+  margin-bottom: 1rem;
+  border: 1px solid var(--gray-200);
+}
+
+.ticket-info h4 {
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 0.25rem;
+}
+
+.ticket-info p {
+  font-weight: 600;
+  color: var(--primary-600);
+}
+
+.capacity {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  font-weight: 500;
+}
+
+/* Loading & Error */
+.loading-state, .error-state {
+  text-align: center;
+  padding: 6rem 2rem;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--gray-200);
+  border-top-color: var(--primary-600);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-state h3 {
+  font-size: 2rem;
+  color: var(--danger);
+  margin-bottom: 1rem;
+}
+
+.error-state p {
+  color: var(--gray-600);
+  font-size: 1.1rem;
+}

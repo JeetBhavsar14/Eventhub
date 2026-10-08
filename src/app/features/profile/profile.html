@@ -1,0 +1,85 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <div class="profile-cover"></div>
+    <div class="profile-avatar-section">
+      <div class="avatar">
+        <img src="https://i.pravatar.cc/150?u=johndoe" alt="User Avatar">
+        <button class="edit-avatar-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c0 5.523 4.477 10 10 10s10-4.477 10-10S17.523 2 12 2 2 6.477 2 12z"/><path d="m14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83m13.79-4l-5.74 9.94"/></svg>
+        </button>
+      </div>
+      <div class="profile-title">
+        <h1>{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</h1>
+        <p>Member since 2024</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-content">
+    <aside class="profile-sidebar">
+      <nav class="sidebar-nav">
+        <button class="nav-item" [class.active]="activeTab() === 'personal'" (click)="setTab('personal')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Personal Info
+        </button>
+        <button class="nav-item" [class.active]="activeTab() === 'preferences'" (click)="setTab('preferences')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          Preferences
+        </button>
+        <button class="nav-item" [class.active]="activeTab() === 'payments'" (click)="setTab('payments')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+          Payment Methods
+        </button>
+        <button class="nav-item" [class.active]="activeTab() === 'favorites'" (click)="setTab('favorites')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          Favorites
+        </button>
+      </nav>
+    </aside>
+
+    <main class="profile-main">
+      <!-- PERSONAL INFO TAB -->
+      <section *ngIf="activeTab() === 'personal'" class="tab-pane active fade-in">
+        <h2>Personal Information</h2>
+        <p class="section-desc">Update your personal details and how we can reach you.</p>
+
+        <app-profile-form [user]="currentUser()" [isSaving]="isSaving()" (submitted)="saveProfile($event)"></app-profile-form>
+        <p *ngIf="saveMessage()" class="save-message" [class.error]="saveError()">{{ saveMessage() }}</p>
+      </section>
+
+      <!-- PREFERENCES TAB -->
+      <section *ngIf="activeTab() === 'preferences'" class="tab-pane active fade-in">
+        <h2>Event Preferences</h2>
+        <p class="section-desc">Customize your event recommendations.</p>
+        
+        <div class="coming-soon">
+           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+           <p>Preferences settings are coming soon.</p>
+        </div>
+      </section>
+
+      <!-- PAYMENTS TAB -->
+      <section *ngIf="activeTab() === 'payments'" class="tab-pane active fade-in">
+        <h2>Payment Methods</h2>
+        <p class="section-desc">Manage your saved cards and payment options.</p>
+        
+        <div class="coming-soon">
+           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+           <p>Payment management is coming soon.</p>
+        </div>
+      </section>
+
+      <!-- FAVORITES TAB -->
+      <section *ngIf="activeTab() === 'favorites'" class="tab-pane active fade-in">
+        <h2>Favorite Events</h2>
+        <p class="section-desc">Events you've saved for later.</p>
+        
+        <div class="coming-soon">
+           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+           <p>Favorites list is coming soon.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
