@@ -2690,6 +2690,141 @@
       },
       "createdAt": "2026-10-08T10:39:34.288Z",
       "id": "BAtnG6LfL1U"
+    },
+    {
+      "bookingReference": "EH-MUZIXX7U-XT0Z",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "eventDate": "2026-11-01",
+      "eventTime": "18:00",
+      "eventLocation": "Mumbai Grand Center",
+      "eventAddress": "Mumbai, State, India",
+      "eventThumbnail": "https://picsum.photos/seed/Mumbai1/600/400",
+      "attendee": {
+        "id": "user-001",
+        "name": "Jeet Shah",
+        "email": "jeet@eventhub.com",
+        "phone": "+91 98765 43210"
+      },
+      "userId": "user-001",
+      "tickets": [
+        {
+          "ticketTypeId": "tt-101-1",
+          "name": "General",
+          "price": 500,
+          "quantity": 1
+        },
+        {
+          "ticketTypeId": "tt-101-2",
+          "name": "VIP",
+          "price": 1500,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 2000,
+      "discount": 0,
+      "offerCode": null,
+      "tax": 360,
+      "totalAmount": 2360,
+      "status": "confirmed",
+      "payment": {
+        "method": "qr",
+        "label": "UPI QR",
+        "status": "paid",
+        "transactionReference": "TXN-MUZIXX7U"
+      },
+      "createdAt": "2026-10-08T12:40:12.138Z",
+      "id": "UvZhCIrlYOs"
+    },
+    {
+      "bookingReference": "EH-MUZIZPCS-7BDW",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "eventDate": "2026-11-01",
+      "eventTime": "18:00",
+      "eventLocation": "Mumbai Grand Center",
+      "eventAddress": "Mumbai, State, India",
+      "eventThumbnail": "https://picsum.photos/seed/Mumbai1/600/400",
+      "attendee": {
+        "id": "user-001",
+        "name": "Jeet Shah",
+        "email": "jeet@eventhub.com",
+        "phone": "+91 98765 43210"
+      },
+      "userId": "user-001",
+      "tickets": [
+        {
+          "ticketTypeId": "tt-101-1",
+          "name": "General",
+          "price": 500,
+          "quantity": 1
+        },
+        {
+          "ticketTypeId": "tt-101-2",
+          "name": "VIP",
+          "price": 1500,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 2000,
+      "discount": 0,
+      "offerCode": null,
+      "tax": 360,
+      "totalAmount": 2360,
+      "status": "confirmed",
+      "payment": {
+        "method": "qr",
+        "label": "UPI QR",
+        "status": "paid",
+        "transactionReference": "TXN-MUZIZPCS"
+      },
+      "createdAt": "2026-10-08T12:41:35.260Z",
+      "id": "6raMYsObBTw"
+    },
+    {
+      "bookingReference": "EH-MUZJXUX7-H5TE",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "eventDate": "2026-11-01",
+      "eventTime": "18:00",
+      "eventLocation": "Mumbai Grand Center",
+      "eventAddress": "Mumbai, State, India",
+      "eventThumbnail": "https://picsum.photos/seed/Mumbai1/600/400",
+      "attendee": {
+        "id": "user-001",
+        "name": "Jeet Shah",
+        "email": "jeet@eventhub.com",
+        "phone": "+91 98765 43210"
+      },
+      "userId": "user-001",
+      "tickets": [
+        {
+          "ticketTypeId": "tt-101-1",
+          "name": "General",
+          "price": 500,
+          "quantity": 1
+        },
+        {
+          "ticketTypeId": "tt-101-2",
+          "name": "VIP",
+          "price": 1500,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 2000,
+      "discount": 250,
+      "offerCode": "WELCOME50",
+      "tax": 315,
+      "totalAmount": 2065,
+      "status": "confirmed",
+      "payment": {
+        "method": "qr",
+        "label": "UPI QR",
+        "status": "paid",
+        "transactionReference": "TXN-MUZJXUX7"
+      },
+      "createdAt": "2026-10-08T13:08:08.779Z",
+      "id": "OoB3yR_4pPw"
     }
   ],
   "notifications": [],
@@ -2792,6 +2927,27 @@
       "status": "active",
       "purchasedAt": "2026-10-08T10:15:00.000Z",
       "expiresAt": "2027-10-08T10:15:00.000Z"
+    },
+    {
+      "giftCardId": "gift-2500",
+      "userId": "user-001",
+      "recipientName": "Jeet Shah",
+      "recipientEmail": "jeet@eventhub.com",
+      "title": "The big experience",
+      "amount": 2500,
+      "balance": 2500,
+      "imageUrl": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80",
+      "giftCode": "EHGC-NUOEWPIM",
+      "status": "active",
+      "purchasedAt": "2026-10-08T12:41:56.699Z",
+      "expiresAt": "2027-10-08T12:41:56.699Z",
+      "payment": {
+        "method": "qr",
+        "label": "UPI QR",
+        "status": "paid",
+        "transactionReference": "TXN-MUZJ05WB"
+      },
+      "id": "yfvE_ejyOQI"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
