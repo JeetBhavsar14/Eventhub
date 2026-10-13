@@ -6,3 +6,8 @@ export * from './policy.model';
 export * from './event-membership.model';
 export * from './booking.model';
 export * from './offer.model';
+export * from './host-application.model';
+export * from './host-dashboard.model';
+export * from './admin.model';
+export * from './management.model';
+export * from './staff.model';

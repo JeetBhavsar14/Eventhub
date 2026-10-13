@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Output, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SelectComponent } from '../select/select.component';
 
 export interface FilterState {
   category: string;
@@ -13,7 +14,7 @@ export interface FilterState {
 @Component({
   selector: 'app-event-filter',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SelectComponent],
   templateUrl: './event-filter.component.html',
   styleUrl: './event-filter.component.css',
 })
@@ -38,12 +39,36 @@ export class EventFilterComponent {
     price: 'Any Price'
   };
 
-  onCategoryChange() {
+  getTypeOptions(): string[] {
+    const list = this.categoryTypes[this.currentFilter.category];
+    if (!list) return [];
+    return ['All types', ...list];
+  }
+
+  onCategoryChange(newCategory?: string) {
+    if (newCategory !== undefined) {
+      this.currentFilter.category = newCategory;
+    }
     this.currentFilter.type = undefined; // Reset sub-type when category changes
     this.emitChange();
   }
 
-  onFilterChange() {
+  onTypeChange(newType?: string) {
+    this.currentFilter.type = (newType === 'All types' || !newType) ? undefined : newType;
+    this.emitChange();
+  }
+
+  onDateChange(newDate?: string) {
+    if (newDate !== undefined) {
+      this.currentFilter.date = newDate;
+    }
+    this.emitChange();
+  }
+
+  onPriceChange(newPrice?: string) {
+    if (newPrice !== undefined) {
+      this.currentFilter.price = newPrice;
+    }
     this.emitChange();
   }
 

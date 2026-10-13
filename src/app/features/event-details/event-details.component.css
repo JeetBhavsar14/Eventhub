@@ -106,14 +106,43 @@
 @media (max-width: 900px) {
   .content-container {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
   .hero-content {
     flex-direction: column;
     text-align: center;
+    gap: 1.5rem;
   }
   .details-hero {
     height: auto;
     padding: 3rem 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-image {
+    width: 220px;
+    height: 220px;
+  }
+  .hero-text h1 {
+    font-size: 1.75rem;
+  }
+  .tagline {
+    font-size: 1rem;
+  }
+  .content-section {
+    padding: 2rem 1rem;
+  }
+  .info-card {
+    padding: 1.5rem 1.25rem;
+  }
+  .ticket-type {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .price-tag {
+    font-size: 2rem;
   }
 }
 

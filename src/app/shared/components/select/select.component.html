@@ -1,0 +1,66 @@
+<div class="custom-select-container" [class.is-open]="isOpen()" [class.is-disabled]="disabled" [class.has-label]="!!label">
+  <label *ngIf="label" class="select-label" [attr.for]="id">
+    {{ label }} <span *ngIf="required" class="required-star">*</span>
+  </label>
+
+  <div class="select-control-wrap">
+    <!-- Trigger Button -->
+    <button
+      type="button"
+      class="select-trigger"
+      [id]="id"
+      [class.variant-pill]="variant === 'pill'"
+      [class.variant-filter]="variant === 'filter'"
+      [class.size-sm]="size === 'sm'"
+      [class.size-lg]="size === 'lg'"
+      [disabled]="disabled"
+      [attr.aria-expanded]="isOpen()"
+      [attr.aria-label]="ariaLabel || label || placeholder"
+      aria-haspopup="listbox"
+      (click)="toggleDropdown($event)">
+      
+      <span class="selected-text" [class.placeholder]="!selectedOption && selectedValue === null">
+        {{ displayLabel }}
+      </span>
+
+      <span class="chevron-icon-wrap" [class.open]="isOpen()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </span>
+    </button>
+
+    <!-- Floating Droplist Menu -->
+    <div class="select-dropdown-menu" *ngIf="isOpen()" role="listbox" tabindex="-1">
+      <div class="dropdown-options-scroll">
+        <div
+          *ngFor="let opt of normalizedOptions"
+          class="dropdown-option-item"
+          [class.selected]="opt.value === selectedValue"
+          [class.disabled]="opt.disabled"
+          role="option"
+          [attr.aria-selected]="opt.value === selectedValue"
+          (click)="selectOption(opt, $event)">
+          
+          <div class="option-content-left">
+            <span *ngIf="opt.icon" class="option-icon" [innerHTML]="opt.icon"></span>
+            <span class="option-label">{{ opt.label }}</span>
+          </div>
+
+          <div class="option-content-right">
+            <span *ngIf="opt.badge" class="option-badge">{{ opt.badge }}</span>
+            <span *ngIf="opt.value === selectedValue" class="check-indicator">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="normalizedOptions.length === 0" class="no-options-item">
+          No options available
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

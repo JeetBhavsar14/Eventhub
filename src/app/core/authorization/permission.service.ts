@@ -20,7 +20,7 @@ export class PermissionService {
     if (!user || !membership) return perms;
 
     // 1. Add Policy-derived permissions
-    membership.policyIds.forEach(policyId => {
+    (membership.policyIds || []).forEach(policyId => {
       const policy = POLICY_REGISTRY[policyId];
       if (policy) {
         policy.permissions.forEach(p => perms.add(p));
@@ -28,7 +28,7 @@ export class PermissionService {
     });
 
     // 2. Add Direct (ad-hoc) permissions
-    membership.directPermissions.forEach(p => perms.add(p));
+    (membership.directPermissions || []).forEach(p => perms.add(p));
 
     return perms;
   });

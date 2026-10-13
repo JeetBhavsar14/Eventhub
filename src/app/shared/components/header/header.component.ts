@@ -1,10 +1,10 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '@core/auth';
-import { LocationService } from '@core/state';
+import { LocationService, HostApplicationService } from '@core/state';
 import { SVGS } from '@shared/assets';
 
 export interface NavCategory {
@@ -31,6 +31,7 @@ export class HeaderComponent {
   private router = inject(Router);
   private sanitizer = inject(DomSanitizer);
   private locationService = inject(LocationService);
+  private hostAppService = inject(HostApplicationService);
 
   /**
    * Pass a COMPLETE Lucide/custom SVG string.
@@ -89,6 +90,27 @@ export class HeaderComponent {
   isAuthenticated = this.authService.isAuthenticated;
   currentUser     = this.authService.currentUser;
   selectedCity    = this.locationService.selectedCity;
+  hostStatus      = this.hostAppService.status;
+
+  isApprovedHost = computed(() => {
+    const role = this.currentUser()?.platformRole;
+    return this.hostStatus() === 'approved' || this.currentUser()?.isHost === true || role === 'host' || role === 'management' || role === 'admin';
+  });
+
+  isAdmin = computed(() => {
+    const role = this.currentUser()?.platformRole;
+    return role === 'admin' || role === 'super_admin';
+  });
+
+  isManagement = computed(() => {
+    const role = this.currentUser()?.platformRole;
+    return role === 'management' || role === 'admin' || role === 'super_admin';
+  });
+
+  isStaff = computed(() => {
+    const role = this.currentUser()?.platformRole;
+    return role === 'staff' || role === 'management' || role === 'admin' || role === 'super_admin';
+  });
 
   showUserMenu = false;
   showCityMenu = false;

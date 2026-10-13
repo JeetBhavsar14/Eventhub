@@ -35,11 +35,40 @@
       "phone": "+91 90000 11111",
       "firstName": "Riya",
       "lastName": "Mehta",
+      "organization": "Starlight Live Experiences",
       "avatarUrl": null,
       "isEmailVerified": true,
       "isPhoneVerified": true,
       "isHost": true,
-      "platformRole": "user",
+      "platformRole": "host",
+      "createdAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "user-004",
+      "email": "management@eventhub.com",
+      "password": "manage123",
+      "phone": "+91 98201 99887",
+      "firstName": "Rhea",
+      "lastName": "Kapoor",
+      "avatarUrl": null,
+      "isEmailVerified": true,
+      "isPhoneVerified": true,
+      "isHost": false,
+      "platformRole": "management",
+      "createdAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "user-005",
+      "email": "staff@eventhub.com",
+      "password": "staff123",
+      "phone": "+91 97112 88776",
+      "firstName": "Karan",
+      "lastName": "Malhotra",
+      "avatarUrl": null,
+      "isEmailVerified": true,
+      "isPhoneVerified": true,
+      "isHost": false,
+      "platformRole": "staff",
       "createdAt": "2025-01-01T00:00:00.000Z"
     },
     {
@@ -54,6 +83,19 @@
       "platformRole": "user",
       "createdAt": "2026-10-07T11:34:59.551Z",
       "id": "zt4g24M83t8"
+    },
+    {
+      "email": "jeetpatel@gamil.com",
+      "password": "123456789",
+      "phone": "999999999999",
+      "firstName": "jeet ",
+      "lastName": "patel",
+      "isEmailVerified": false,
+      "isPhoneVerified": false,
+      "isHost": false,
+      "platformRole": "user",
+      "createdAt": "2026-10-09T11:50:43.154Z",
+      "id": "lAYs5Hy_LaY"
     }
   ],
   "events": [
@@ -2948,6 +2990,422 @@
         "transactionReference": "TXN-MUZJ05WB"
       },
       "id": "yfvE_ejyOQI"
+    }
+  ],
+  "hostApplications": [
+    {
+      "id": "app-101",
+      "applicantName": "Aditya Rao",
+      "email": "aditya.rao@sunbeat.in",
+      "phone": "+91 98201 44520",
+      "organizationName": "Sunbeat Experiences LLP",
+      "organizationType": "Production House / Agency",
+      "city": "Mumbai",
+      "scale": "2,500 – 10,000 attendees",
+      "expectedScale": "2,500 – 10,000 attendees",
+      "primaryCategories": [
+        "Music Festivals",
+        "Concerts"
+      ],
+      "experience": "Organized 14 stadium and amphitheater music concerts across Western India over the last 6 years.",
+      "pastExperience": "Organized 14 stadium and amphitheater music concerts across Western India over the last 6 years.",
+      "docStatus": "verified",
+      "idDocName": "GST_Certificate_Sunbeat_LLP.pdf",
+      "assignedReviewer": "Rhea Kapoor (Operations Lead)",
+      "status": "rejected",
+      "submittedDate": "2026-10-08",
+      "submittedAt": "2026-10-08T10:00:00.000Z"
+    },
+    {
+      "id": "app-102",
+      "applicantName": "Meera Sen",
+      "email": "meera@techfusion.org",
+      "phone": "+91 97400 11239",
+      "organizationName": "TechFusion Conclaves",
+      "organizationType": "Corporate / Enterprise",
+      "city": "Bengaluru",
+      "scale": "500 – 2,500 attendees",
+      "expectedScale": "500 – 2,500 attendees",
+      "primaryCategories": [
+        "Tech Conferences",
+        "Workshops"
+      ],
+      "experience": "Annual Cloud Architecture Summit host with 4 past editions in Bangalore & Hyderabad.",
+      "pastExperience": "Annual Cloud Architecture Summit host with 4 past editions in Bangalore & Hyderabad.",
+      "docStatus": "verified",
+      "idDocName": "Certificate_of_Incorporation.pdf",
+      "assignedReviewer": "Vikram Seth (Compliance Manager)",
+      "status": "approved",
+      "submittedDate": "2026-10-07",
+      "submittedAt": "2026-10-07T14:30:00.000Z"
+    },
+    {
+      "id": "app-103",
+      "applicantName": "Kabir Sharma",
+      "email": "kabir@indiegig.co",
+      "phone": "+91 99112 33445",
+      "organizationName": "Indie Gig Network",
+      "organizationType": "Independent Organizer",
+      "city": "Delhi NCR",
+      "scale": "Under 500 attendees",
+      "expectedScale": "Under 500 attendees",
+      "primaryCategories": [
+        "Standup Comedy",
+        "Intimate Music"
+      ],
+      "experience": "Curating weekend open mics and acoustic sessions in Hauz Khas for 3 years.",
+      "pastExperience": "Curating weekend open mics and acoustic sessions in Hauz Khas for 3 years.",
+      "docStatus": "pending",
+      "idDocName": "PAN_Card_KabirSharma.pdf",
+      "assignedReviewer": "Rhea Kapoor (Operations Lead)",
+      "status": "changes_requested",
+      "submittedDate": "2026-10-09",
+      "submittedAt": "2026-10-09T08:15:00.000Z"
+    }
+  ],
+  "eventApprovals": [
+    {
+      "id": "appr-501",
+      "title": "Sunwave Sunset Electronic Fest",
+      "hostName": "Sunbeat Experiences",
+      "organization": "Sunbeat Experiences LLP",
+      "category": "Music Festivals",
+      "eventDate": "Sat, 24 Oct 2026",
+      "venue": "Bandra Fort Amphitheatre, Mumbai",
+      "capacity": 2500,
+      "ticketPrice": 1499,
+      "status": "under_review",
+      "documentClearance": true,
+      "urgency": "high",
+      "assignedManager": "Rhea Kapoor",
+      "submittedAt": "2026-10-08 14:30"
+    },
+    {
+      "id": "appr-502",
+      "title": "Global AI & Cloud Architecture Summit",
+      "hostName": "TechFusion Conclaves",
+      "organization": "TechFusion Media Pvt Ltd",
+      "category": "Conferences",
+      "eventDate": "Thu, 12 Nov 2026",
+      "venue": "BIEC Convention Hall 3, Bengaluru",
+      "capacity": 1800,
+      "ticketPrice": 2999,
+      "status": "approved",
+      "documentClearance": true,
+      "urgency": "normal",
+      "assignedManager": "Vikram Seth",
+      "submittedAt": "2026-10-07 09:15"
+    },
+    {
+      "id": "appr-503",
+      "title": "Standup Comedy Unfiltered with Varun",
+      "hostName": "Indie Gig Network",
+      "organization": "Indie Gig Network",
+      "category": "Comedy",
+      "eventDate": "Sun, 18 Oct 2026",
+      "venue": "The Habitat, Khar, Mumbai",
+      "capacity": 220,
+      "ticketPrice": 699,
+      "status": "changes_requested",
+      "documentClearance": false,
+      "urgency": "high",
+      "assignedManager": "Rhea Kapoor",
+      "submittedAt": "2026-10-09 11:00"
+    }
+  ],
+  "staffRoster": [
+    {
+      "id": "staff-001",
+      "name": "Karan Malhotra",
+      "email": "karan.m@eventhub.com",
+      "phone": "+91 98200 44321",
+      "role": "Gate Scanner Lead",
+      "assignedEvent": "Sunwave Sunset Electronic Fest",
+      "assignedGate": "Turnstile North (VIP Entry)",
+      "status": "on_duty"
+    },
+    {
+      "id": "staff-002",
+      "name": "Ananya Joshi",
+      "email": "ananya.j@eventhub.com",
+      "phone": "+91 97112 55432",
+      "role": "Security & Wristband Marshal",
+      "assignedEvent": "Sunwave Sunset Electronic Fest",
+      "assignedGate": "Turnstile South (General Admission)",
+      "status": "on_duty"
+    },
+    {
+      "id": "staff-003",
+      "name": "Rahul Deshmukh",
+      "email": "rahul.d@eventhub.com",
+      "phone": "+91 99341 66789",
+      "role": "Help Desk Supervisor",
+      "assignedEvent": "Sunwave Sunset Electronic Fest",
+      "assignedGate": "Box Office / Query Desk",
+      "status": "on_duty"
+    }
+  ],
+  "attendees": [
+    {
+      "id": "att-1",
+      "orderId": "ORD-9814",
+      "name": "Devansh Kothari",
+      "ticketTier": "General Admission",
+      "ticketsCount": 2,
+      "wristbandColor": "Neon Blue",
+      "checkInStatus": "pending",
+      "checkInTime": null,
+      "isVIP": false,
+      "notes": "Arriving with 1 guest"
+    },
+    {
+      "id": "att-2",
+      "orderId": "ORD-9774",
+      "name": "Pooja Hegde",
+      "ticketTier": "VIP Pass",
+      "ticketsCount": 1,
+      "wristbandColor": "Gold Hologram",
+      "checkInStatus": "pending",
+      "checkInTime": null,
+      "isVIP": true,
+      "notes": "Backstage pass included"
+    },
+    {
+      "id": "att-3",
+      "orderId": "ORD-9821",
+      "name": "Rohit Verma",
+      "ticketTier": "General Admission",
+      "ticketsCount": 1,
+      "wristbandColor": "Neon Blue",
+      "checkInStatus": "checked_in",
+      "checkInTime": "17:42",
+      "isVIP": false,
+      "notes": null
+    },
+    {
+      "id": "att-4",
+      "orderId": "ORD-9830",
+      "name": "Tanvi Shah",
+      "ticketTier": "Early Bird Entry",
+      "ticketsCount": 2,
+      "wristbandColor": "Silver Stripe",
+      "checkInStatus": "pending",
+      "checkInTime": null,
+      "isVIP": false,
+      "notes": null
+    },
+    {
+      "id": "att-5",
+      "orderId": "ORD-9844",
+      "name": "Akash Singhania",
+      "ticketTier": "VIP Pass",
+      "ticketsCount": 2,
+      "wristbandColor": "Gold Hologram",
+      "checkInStatus": "checked_in",
+      "checkInTime": "17:15",
+      "isVIP": true,
+      "notes": "Reserved table A4"
+    }
+  ],
+  "staffIncidents": [
+    {
+      "id": "inc-1",
+      "category": "Duplicate Pass",
+      "description": "Attendee presented screenshot of barcode ORD-9821 already scanned at 17:42. Redirected to Box Office.",
+      "time": "17:45",
+      "status": "resolved"
+    },
+    {
+      "id": "inc-2",
+      "category": "Lost Wristband",
+      "description": "General admission wristband snapped at turnstile 2. Replacement issued after matching order email.",
+      "time": "17:50",
+      "status": "resolved"
+    }
+  ],
+  "broadcasts": [
+    {
+      "id": "bc-101",
+      "title": "Scheduled Platform Maintenance Notice",
+      "body": "EventHub server cluster maintenance scheduled for Sunday 2:00 AM - 4:00 AM IST.",
+      "audience": "all",
+      "sentAt": "2026-10-09T06:00:00.000Z"
+    }
+  ],
+  "eventMemberships": [
+    {
+      "id": "mem-1",
+      "eventId": "evt-100",
+      "userId": "user-003",
+      "email": "host@eventhub.com",
+      "name": "Riya Mehta",
+      "role": "event_owner",
+      "roleName": "Event Owner",
+      "isOwner": true,
+      "permissions": [
+        "all"
+      ],
+      "status": "active",
+      "joinedAt": "2026-10-08T05:39:10.038Z"
+    },
+    {
+      "id": "mem-2",
+      "eventId": "evt-100",
+      "userId": "user-005",
+      "email": "staff@eventhub.com",
+      "name": "Karan Malhotra",
+      "role": "staff",
+      "roleName": "Gate & Check-In Staff",
+      "isOwner": false,
+      "permissions": [
+        "scan_tickets",
+        "view_attendees",
+        "log_incidents"
+      ],
+      "status": "active",
+      "joinedAt": "2026-10-09T08:00:00.000Z"
+    },
+    {
+      "id": "mem-3",
+      "eventId": "evt-100",
+      "userId": "user-004",
+      "email": "management@eventhub.com",
+      "name": "Rhea Kapoor",
+      "role": "event_manager",
+      "roleName": "Operations Manager",
+      "isOwner": false,
+      "permissions": [
+        "manage_roster",
+        "view_financials",
+        "coordinate_field"
+      ],
+      "status": "active",
+      "delegationActive": true,
+      "joinedAt": "2026-10-09T08:30:00.000Z"
+    }
+  ],
+  "eventInvitations": [
+    {
+      "id": "inv-1",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "inviterId": "user-003",
+      "inviteeEmail": "staff@eventhub.com",
+      "inviteeName": "Karan Malhotra",
+      "role": "staff",
+      "roleCategory": "operational",
+      "status": "accepted",
+      "sentAt": "2026-10-08T10:00:00.000Z",
+      "respondedAt": "2026-10-09T08:00:00.000Z"
+    },
+    {
+      "id": "inv-2",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "inviterId": "user-003",
+      "inviteeEmail": "ananya.volunteer@eventhub.com",
+      "inviteeName": "Ananya Joshi",
+      "role": "volunteer",
+      "roleCategory": "operational",
+      "status": "pending",
+      "sentAt": "2026-10-09T09:30:00.000Z",
+      "respondedAt": null
+    },
+    {
+      "id": "inv-3",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "inviterId": "user-003",
+      "inviteeEmail": "dj.arjun@soundlive.in",
+      "inviteeName": "DJ Arjun (Headliner)",
+      "role": "speaker",
+      "roleCategory": "participant",
+      "status": "accepted",
+      "sentAt": "2026-10-08T11:00:00.000Z",
+      "respondedAt": "2026-10-08T15:20:00.000Z"
+    },
+    {
+      "id": "inv-4",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "inviterId": "user-003",
+      "inviteeEmail": "sponsors@redbull.in",
+      "inviteeName": "Red Bull Energy",
+      "role": "sponsor",
+      "roleCategory": "participant",
+      "status": "pending",
+      "sentAt": "2026-10-09T10:15:00.000Z",
+      "respondedAt": null
+    }
+  ],
+  "hostActivities": [
+    {
+      "id": "act-1",
+      "hostId": "user-003",
+      "title": "Event Published Live",
+      "description": "Mumbai Festivals Showcase 1 is now published and open for ticket reservations.",
+      "timestamp": "10 mins ago",
+      "type": "approved",
+      "eventTitle": "Mumbai Festivals Showcase 1"
+    },
+    {
+      "id": "act-2",
+      "hostId": "user-003",
+      "title": "VIP Pass Booking Confirmed",
+      "description": "Jeet Shah purchased 2 VIP passes for Mumbai Festivals Showcase 1.",
+      "timestamp": "1 hour ago",
+      "type": "booking",
+      "eventTitle": "Mumbai Festivals Showcase 1"
+    },
+    {
+      "id": "act-3",
+      "hostId": "user-003",
+      "title": "Team Member Invited",
+      "description": "Dispatched Gate Staff operational invitation to Karan Malhotra.",
+      "timestamp": "3 hours ago",
+      "type": "team",
+      "eventTitle": "Mumbai Festivals Showcase 1"
+    },
+    {
+      "id": "act-4",
+      "hostId": "user-003",
+      "title": "Event Submission Under Review",
+      "description": "Ahmedabad Sports Showcase 2 submitted to Platform Curation.",
+      "timestamp": "Yesterday",
+      "type": "submission",
+      "eventTitle": "Ahmedabad Sports Showcase 2"
+    }
+  ],
+  "hostNotifications": [
+    {
+      "id": "notif-1",
+      "hostId": "user-003",
+      "title": "Curation Review Approved",
+      "message": "Your listing for Mumbai Festivals Showcase 1 has been approved and published to live explore.",
+      "timestamp": "15m ago",
+      "unread": true,
+      "type": "approval",
+      "eventId": "evt-100"
+    },
+    {
+      "id": "notif-2",
+      "hostId": "user-003",
+      "title": "High Velocity Ticket Sales",
+      "message": "Over 75% of early bird inventory booked for Mumbai Festivals Showcase 1.",
+      "timestamp": "2h ago",
+      "unread": true,
+      "type": "booking",
+      "eventId": "evt-100"
+    },
+    {
+      "id": "notif-3",
+      "hostId": "user-003",
+      "title": "Action Required: Venue Permit",
+      "message": "Please attach sound permit compliance for Delhi-NCR Festivals Showcase 1.",
+      "timestamp": "1d ago",
+      "unread": false,
+      "type": "action",
+      "eventId": "evt-112"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

@@ -515,3 +515,91 @@
 .secondary-link:hover {
   color: var(--primary-800);
 }
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE HEADER BREAKPOINTS
+   ───────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .bar-inner {
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .secondary-nav {
+    gap: 0.85rem;
+  }
+}
+
+@media (max-width: 820px) {
+  .bar-bottom .bar-inner {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 0.75rem;
+  }
+
+  .bar-bottom .bar-inner::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-nav {
+    flex-shrink: 0;
+    gap: 0.25rem;
+  }
+
+  .secondary-nav {
+    flex-shrink: 0;
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--gray-300);
+  }
+}
+
+@media (max-width: 640px) {
+  .bar-top .bar-inner {
+    height: 60px;
+    gap: 0.5rem;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  .city-selector {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .city-name {
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .city-dropdown {
+    width: calc(100vw - 2rem);
+    left: -20px;
+  }
+
+  .search-wrapper {
+    height: 38px;
+    padding: 0 0.75rem;
+  }
+
+  .search-input {
+    font-size: 0.8rem;
+  }
+
+  .action-btn {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .action-link {
+    display: none;
+  }
+
+  .user-name {
+    display: none;
+  }
+}

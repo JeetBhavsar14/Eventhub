@@ -131,6 +131,26 @@
                 <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 My Profile
               </a>
+              <a *ngIf="isApprovedHost()" routerLink="/host/dashboard" class="dropdown-item host-workspace-item" (click)="showUserMenu = false">
+                <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
+                Host Workspace
+              </a>
+              <a *ngIf="isAdmin()" routerLink="/admin" class="dropdown-item" (click)="showUserMenu = false">
+                <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Admin Workspace
+              </a>
+              <a *ngIf="isManagement()" routerLink="/management" class="dropdown-item" (click)="showUserMenu = false">
+                <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><line x1="18" y1="20" x2="18" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="20" x2="12" y2="4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="20" x2="6" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Operations Workspace
+              </a>
+              <a *ngIf="isStaff()" routerLink="/staff" class="dropdown-item" (click)="showUserMenu = false">
+                <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+                Staff Workspace
+              </a>
+              <a *ngIf="!isApprovedHost() && hostStatus() !== 'guest' && hostStatus() !== 'not_applied'" routerLink="/host/apply" class="dropdown-item" (click)="showUserMenu = false">
+                <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><polyline points="12 6 12 12 14 14" stroke="currentColor" stroke-width="2"/></svg>
+                Host Application Status
+              </a>
               <hr class="dropdown-divider">
               <button class="dropdown-item logout-item" (click)="logout()">
                 <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>

@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '@core/auth';
@@ -15,6 +15,7 @@ import { ButtonComponent, InputComponent } from '@shared/components';
 export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   email = '';
   password = '';
@@ -34,7 +35,8 @@ export class LoginComponent {
     const result = await this.authService.login(this.email, this.password);
     
     if (result.success) {
-      this.router.navigate(['/']); // Redirect to home page
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+      this.router.navigateByUrl(returnUrl);
     } else {
       this.errorMessage.set(result.message);
     }

@@ -1,10 +1,12 @@
 import { Routes } from '@angular/router';
-import { authGuard } from '@core/auth';
+import { authGuard, adminGuard, managementGuard, staffGuard, hostGuard } from '@core/auth';
 import { 
   ShellComponent, 
   MainLayoutComponent, 
   ManagementLayoutComponent, 
-  AdminLayoutComponent 
+  AdminLayoutComponent,
+  StaffLayoutComponent,
+  HostLayoutComponent 
 } from './layout';
 import { Component } from '@angular/core';
 import { LoginComponent } from './features/auth/login/login.component';
@@ -19,17 +21,7 @@ import { GiftCardsComponent } from './features/gift-cards/gift-cards.component';
 import { MyGiftCardsComponent } from './features/my-gift-cards/my-gift-cards.component';
 import { GiftCardCheckoutComponent } from './features/gift-card-checkout/gift-card-checkout.component';
 import { InfoPageComponent } from './features/info-page/info-page.component';
-
-// --- TEMPORARY DUMMY COMPONENTS JUST FOR TESTING ---
-@Component({ standalone: true, template: '<div style="padding: 2rem;"><h2>My Bookings</h2><p>Only logged in users can see this!</p></div>' }) 
-export class DummyUser {}
-
-@Component({ standalone: true, template: '<div style="padding: 2rem;"><h2>Event Management Dashboard Area</h2></div>' }) 
-export class DummyDashboard {}
-
-@Component({ standalone: true, template: '<div style="padding: 2rem;"><h2>Super Admin Global Settings</h2></div>' }) 
-export class DummyAdmin {}
-// -----------------------------------------------------------
+import { HostEventComponent } from './features/host-event/host-event.component';
 
 export const routes: Routes = [
   {
@@ -37,7 +29,113 @@ export const routes: Routes = [
     component: ShellComponent,
     children: [
       
-      // 1. MAIN LAYOUT ROUTES (Mixed Public and Protected)
+      // 1. HOST WORKSPACE / DASHBOARD LAYOUT
+      { 
+        path: 'host/dashboard', 
+        component: HostLayoutComponent,
+        canActivate: [hostGuard]
+      },
+      { 
+        path: 'host/workspace', 
+        component: HostLayoutComponent,
+        canActivate: [hostGuard]
+      },
+      { 
+        path: 'host/layout', 
+        component: HostLayoutComponent,
+        canActivate: [hostGuard]
+      },
+      { 
+        path: 'host-dashboard', 
+        component: HostLayoutComponent,
+        canActivate: [hostGuard]
+      },
+
+      // 2. MANAGEMENT WORKSPACE (Operations Center & Approvals Workflow)
+      {
+        path: 'management',
+        component: ManagementLayoutComponent,
+        canActivate: [managementGuard]
+      },
+      {
+        path: 'management/overview',
+        component: ManagementLayoutComponent,
+        canActivate: [managementGuard]
+      },
+      {
+        path: 'management/approvals',
+        component: ManagementLayoutComponent,
+        canActivate: [managementGuard]
+      },
+      {
+        path: 'management/hosts',
+        component: ManagementLayoutComponent,
+        canActivate: [managementGuard]
+      },
+      {
+        path: 'management/operations',
+        component: ManagementLayoutComponent,
+        canActivate: [managementGuard]
+      },
+      {
+        path: 'manage',
+        component: ManagementLayoutComponent,
+        canActivate: [managementGuard],
+        children: [
+          { path: ':eventId', component: ManagementLayoutComponent }
+        ]
+      },
+
+      // 3. EVENT-STAFF WORKSPACE (Mobile-First Venue Check-in & Ground Operations)
+      {
+        path: 'staff',
+        component: StaffLayoutComponent,
+        canActivate: [staffGuard]
+      },
+      {
+        path: 'staff/scanner',
+        component: StaffLayoutComponent,
+        canActivate: [staffGuard]
+      },
+      {
+        path: 'staff/checkin',
+        component: StaffLayoutComponent,
+        canActivate: [staffGuard]
+      },
+      {
+        path: 'staff/today',
+        component: StaffLayoutComponent,
+        canActivate: [staffGuard]
+      },
+      {
+        path: 'staff/issues',
+        component: StaffLayoutComponent,
+        canActivate: [staffGuard]
+      },
+
+      // 4. PLATFORM SUPER ADMIN WORKSPACE (Platform Governance, Verification & Finance)
+      {
+        path: 'admin',
+        component: AdminLayoutComponent,
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'admin/dashboard',
+        component: AdminLayoutComponent,
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'admin/curation',
+        component: AdminLayoutComponent,
+        canActivate: [adminGuard]
+      },
+      {
+        path: 'admin/hosts',
+        component: AdminLayoutComponent,
+        canActivate: [adminGuard]
+      },
+
+      // 3. MAIN PUBLIC & USER LAYOUT (With Public Navigation Header & Footer)
       {
         path: '',
         component: MainLayoutComponent,
@@ -53,7 +151,8 @@ export const routes: Routes = [
           { path: 'privacy', component: InfoPageComponent, data: { title: 'Privacy Policy', intro: 'How this demonstration app handles your local data.', sections: [{ heading: 'Local data', body: 'Profile, booking and gift-card records are stored in the local json-server database used by this project.' }, { heading: 'Payment details', body: 'Card number and CVV are validated for the mock checkout but are not stored with bookings or gift cards.' }] } },
           { path: 'cancellation', component: InfoPageComponent, data: { title: 'Cancellation & Refunds', intro: 'Information about ticket cancellation in this demo.', sections: [{ heading: 'Booking support', body: 'Cancellation and refund processing is not yet implemented in the mock backend.' }, { heading: 'Gift cards', body: 'Gift cards are created as active records once the mock payment succeeds.' }] } },
           { path: 'contact', component: InfoPageComponent, data: { title: 'Contact Us', intro: 'We are here to help with your EventHub experience.', sections: [{ heading: 'Customer support', body: 'For this demonstration, use the Help Center and inspect the local mock data for booking support.' }] } },
-          { path: 'host/apply', component: InfoPageComponent, data: { title: 'Host an Event', intro: 'Bring your next event to EventHub.', sections: [{ heading: 'Event hosting', body: 'The organizer onboarding workflow is the next planned feature for this project.' }] } },
+          { path: 'host', component: HostEventComponent },
+          { path: 'host/apply', component: HostEventComponent },
           { path: 'corporate', component: InfoPageComponent, data: { title: 'Corporate Ticketing', intro: 'Simplify event experiences for your team.', sections: [{ heading: 'Corporate plans', body: 'Corporate ticketing is planned and is not yet available in this demo.' }] } },
           { path: 'pricing', component: InfoPageComponent, data: { title: 'Pricing & Plans', intro: 'Simple options for event organizers.', sections: [{ heading: 'Plans', body: 'Organizer plan management will be available with the event-management feature.' }] } },
           { path: 'sitemap', component: InfoPageComponent, data: { title: 'EventHub Sitemap', intro: 'Quick links to the main EventHub experiences.', sections: [{ heading: 'Explore', body: 'Discover events, browse offers, purchase gift cards, and manage your account from the header navigation.' }] } },
@@ -66,26 +165,6 @@ export const routes: Routes = [
           { path: 'bookings', component: BookingsComponent, canActivate: [authGuard] },
           { path: 'my-gift-cards', component: MyGiftCardsComponent, canActivate: [authGuard] },
           { path: 'profile', component: Profile, canActivate: [authGuard] }
-        ]
-      },
-
-      // 2. MANAGEMENT ROUTES (e.g. localhost:4200/manage/123)
-      {
-        path: 'manage',
-        canActivate: [authGuard],
-        component: ManagementLayoutComponent,
-        children: [
-          { path: ':eventId', component: DummyDashboard }
-        ]
-      },
-
-      // 3. ADMIN ROUTES (e.g. localhost:4200/admin)
-      {
-        path: 'admin',
-        canActivate: [authGuard],
-        component: AdminLayoutComponent,
-        children: [
-          { path: '', component: DummyAdmin }
         ]
       }
 

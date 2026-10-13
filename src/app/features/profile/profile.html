@@ -9,7 +9,17 @@
         </button>
       </div>
       <div class="profile-title">
-        <h1>{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</h1>
+        <div class="profile-name-row">
+          <h1>{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</h1>
+          <span class="host-verified-pill" *ngIf="isApprovedHost()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="badge-icon"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Verified Host
+          </span>
+          <span class="host-pending-pill" *ngIf="isHostApplied() && !isApprovedHost()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="badge-icon"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+            Host Application: {{ hostStatus() === 'under_review' ? 'In Review' : (hostStatus() | titlecase) }}
+          </span>
+        </div>
         <p>Member since 2024</p>
       </div>
     </div>
@@ -18,6 +28,28 @@
   <div class="profile-content">
     <aside class="profile-sidebar">
       <nav class="sidebar-nav">
+        <!-- HOST WORKSPACE ITEM: ONLY VISIBLE IF APPLIED & APPROVED -->
+        <a *ngIf="isApprovedHost()" routerLink="/host/dashboard" class="nav-item host-workspace-nav-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+          <div class="nav-text-col">
+            <span class="nav-main-label">Host Workspace</span>
+            <span class="nav-sub-chip">Organizer Dashboard</span>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="arrow-right-icon"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+
+        <!-- HOST APPLICATION STATUS: If applied but pending review -->
+        <a *ngIf="isHostApplied() && !isApprovedHost()" routerLink="/host/apply" class="nav-item host-status-nav-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+          <div class="nav-text-col">
+            <span class="nav-main-label">Host Status</span>
+            <span class="nav-sub-chip review">{{ hostStatus() === 'under_review' ? 'In Review' : (hostStatus() | titlecase) }}</span>
+          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="arrow-right-icon"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+
+        <div class="sidebar-nav-divider" *ngIf="isHostApplied()"></div>
+
         <button class="nav-item" [class.active]="activeTab() === 'personal'" (click)="setTab('personal')">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Personal Info

@@ -24,7 +24,12 @@
   </section>
 
   <section *ngIf="!isLoading() && !error() && filteredBookings().length === 0" class="state-card">
-    <div class="empty-icon">🎟️</div>
+    <div class="empty-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"></path>
+        <line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"></line>
+      </svg>
+    </div>
     <h2>No {{ selectedFilter() === 'all' ? '' : selectedFilter() }} bookings yet</h2>
     <p>Your confirmed event tickets will appear here.</p>
     <a routerLink="/discover"><app-button>Explore events</app-button></a>

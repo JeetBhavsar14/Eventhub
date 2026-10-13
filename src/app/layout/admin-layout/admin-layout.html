@@ -1,13 +1,658 @@
-<div style="display: flex; height: 100vh;">
-  <aside style="width: 250px; background: #512da8; color: white; padding: 1rem;">
-    <h3>Platform Admin</h3>
-    <ul style="list-style: none; padding: 0; line-height: 2;">
-      <li>Host Applications</li>
-      <li>Event Approvals</li>
-      <li>All Users</li>
-    </ul>
+<div class="admin-platform-shell" [class.sidebar-collapsed]="isSidebarCollapsed()" [class.mobile-open]="isMobileNavOpen()">
+
+  <!-- MOBILE OVERLAY BACKDROP -->
+  <div class="admin-backdrop" *ngIf="isMobileNavOpen()" (click)="toggleMobileNav()"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 1. LEFT ADMIN SIDEBAR                                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <aside class="admin-sidebar" aria-label="Super Admin Navigation">
+    <div class="admin-brand-header">
+      <a routerLink="/discover" class="admin-brand-link">
+        <div class="admin-logo-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="brand-text-block">
+          <span class="brand-name">EventHub</span>
+          <span class="admin-badge">SUPER ADMIN</span>
+        </div>
+      </a>
+      <button class="mobile-close-btn" (click)="toggleMobileNav()" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Admin Navigation Links -->
+    <nav class="admin-nav-menu">
+      <div class="nav-section-title">CORE PLATFORM</div>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'overview'" 
+        (click)="setView('overview')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span class="btn-label">Dashboard Overview</span>
+      </button>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'host_applications'" 
+        (click)="setView('host_applications')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+        <span class="btn-label">Host Approvals</span>
+        <span class="badge-count" *ngIf="platformStats().pendingAppsCount > 0">{{ platformStats().pendingAppsCount }}</span>
+      </button>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'event_curation'" 
+        (click)="setView('event_curation')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="btn-label">Event Curation</span>
+        <span class="badge-count warning" *ngIf="platformStats().pendingEventsCount > 0">{{ platformStats().pendingEventsCount }}</span>
+      </button>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'users'" 
+        (click)="setView('users')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="btn-label">Users & Directory</span>
+      </button>
+
+      <div class="nav-section-title">GOVERNANCE & FINANCE</div>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'finance'" 
+        (click)="setView('finance')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span class="btn-label">Finance & GMV</span>
+      </button>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'settings'" 
+        (click)="setView('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="btn-label">System Settings</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Bottom Admin Profile -->
+    <div class="admin-sidebar-footer">
+      <div class="admin-user-card" (click)="showAdminMenu.set(!showAdminMenu())">
+        <div class="admin-avatar">AD</div>
+        <div class="admin-user-meta">
+          <strong>Admin Control</strong>
+          <small>admin@eventhub.com</small>
+        </div>
+      </div>
+    </div>
   </aside>
-  <main style="flex: 1; padding: 2rem; overflow-y: auto;">
-    <router-outlet></router-outlet>
-  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 2. MAIN ADMIN WRAPPER                                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="admin-main-wrapper">
+    
+    <!-- Top Header -->
+    <header class="admin-header">
+      <div class="header-left">
+        <button class="mobile-toggle" (click)="toggleMobileNav()" aria-label="Toggle navigation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+
+        <div class="admin-breadcrumbs">
+          <span class="crumb-root">Platform Admin</span>
+          <span class="crumb-slash">/</span>
+          <span class="crumb-active">
+            <span *ngIf="currentView() === 'overview'">Platform Overview</span>
+            <span *ngIf="currentView() === 'host_applications'">Host Verification Queue</span>
+            <span *ngIf="currentView() === 'event_curation'">Event Moderation & Curation</span>
+            <span *ngIf="currentView() === 'users'">User & Host Directory</span>
+            <span *ngIf="currentView() === 'finance'">Financial Performance</span>
+            <span *ngIf="currentView() === 'settings'">Platform Configuration</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- System Health Pill -->
+        <div class="system-status-pill">
+          <span class="status-dot-pulse"></span>
+          <span>System Healthy ({{ platformStats().systemUptime }})</span>
+        </div>
+
+        <!-- Quick Broadcast Button -->
+        <button class="btn-broadcast-quick" (click)="openBroadcastModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Broadcast</span>
+        </button>
+
+        <!-- Quick Link to Host Workspace / Public App -->
+        <a routerLink="/host/dashboard" class="btn-secondary-link" title="Open Host Workspace">
+          <span>Host SaaS</span>
+        </a>
+        <a routerLink="/discover" class="btn-secondary-link" title="Open Public Website">
+          <span>Public App</span>
+        </a>
+
+        <!-- Sign Out Button -->
+        <button class="btn-signout-icon" (click)="signOut()" title="Sign Out">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="admin-content">
+
+      <!-- Toast Feedback -->
+      <div class="admin-toast" *ngIf="toastMessage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>{{ toastMessage() }}</span>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- VIEW 1: DASHBOARD OVERVIEW                                  -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="admin-view-pane" *ngIf="currentView() === 'overview'">
+        
+        <div class="admin-hero-banner">
+          <div>
+            <h1>Global Platform Overview</h1>
+            <p>Real-time metrics across all verified hosts, ticket sales, and verification queues.</p>
+          </div>
+          <div class="hero-actions">
+            <button class="btn-primary-action" (click)="setView('host_applications')">
+              Review {{ platformStats().pendingAppsCount }} Host Applications
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Platform Metric Cards -->
+        <div class="admin-stats-grid">
+          <div class="admin-stat-card">
+            <div class="card-head">
+              <span>Gross Marketplace Volume (GMV)</span>
+              <div class="stat-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            </div>
+            <div class="card-value">{{ platformStats().totalGMV }}</div>
+            <div class="card-foot">
+              <span class="positive-trend">+18.4% this month</span>
+              <span class="foot-sub">10% Platform Cut: {{ platformStats().platformCommission }}</span>
+            </div>
+          </div>
+
+          <div class="admin-stat-card">
+            <div class="card-head">
+              <span>Registered Attendees & Users</span>
+              <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            </div>
+            <div class="card-value">{{ platformStats().activeUsers | number }}</div>
+            <div class="card-foot">
+              <span class="positive-trend">+420 new this week</span>
+              <span class="foot-sub">{{ platformStats().verifiedHosts }} Verified Hosts</span>
+            </div>
+          </div>
+
+          <div class="admin-stat-card" (click)="setView('host_applications')" style="cursor: pointer;">
+            <div class="card-head">
+              <span>Pending Host Approvals</span>
+              <div class="stat-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg></div>
+            </div>
+            <div class="card-value">{{ platformStats().pendingAppsCount }}</div>
+            <div class="card-foot">
+              <span class="action-tag">Click to review queue</span>
+              <span class="foot-sub">Avg. turnaround: 18h</span>
+            </div>
+          </div>
+
+          <div class="admin-stat-card" (click)="setView('event_curation')" style="cursor: pointer;">
+            <div class="card-head">
+              <span>Events Awaiting Curation</span>
+              <div class="stat-icon emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            </div>
+            <div class="card-value">{{ platformStats().pendingEventsCount }}</div>
+            <div class="card-foot">
+              <span class="warning-tag" *ngIf="platformStats().actionRequiredEvents > 0">{{ platformStats().actionRequiredEvents }} feedback pending</span>
+              <span class="foot-sub">Ready for live check</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Split Grid: Action Queues Preview -->
+        <div class="admin-split-grid">
+          
+          <!-- Recent Host Submissions -->
+          <div class="admin-panel-card">
+            <div class="panel-header">
+              <h3>Recent Host Applications</h3>
+              <button class="panel-link-btn" (click)="setView('host_applications')">View All Queue</button>
+            </div>
+            <div class="panel-list">
+              <div *ngFor="let app of hostApplications().slice(0, 3)" class="panel-item">
+                <div class="panel-item-left">
+                  <strong>{{ app.applicantName }}</strong>
+                  <small>{{ app.organizationName }} • {{ app.city }}</small>
+                </div>
+                <div class="panel-item-right">
+                  <span class="app-status-badge" [attr.data-status]="app.status">{{ app.status | titlecase }}</span>
+                  <button class="btn-mini-action" (click)="openAppDetailsModal(app)">Inspect</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Event Listings -->
+          <div class="admin-panel-card">
+            <div class="panel-header">
+              <h3>Pending Event Verifications</h3>
+              <button class="panel-link-btn" (click)="setView('event_curation')">Moderate Events</button>
+            </div>
+            <div class="panel-list">
+              <div *ngFor="let event of curationEvents().slice(0, 3)" class="panel-item">
+                <div class="panel-item-left">
+                  <strong>{{ event.title }}</strong>
+                  <small>{{ event.organization }} • {{ event.venue }}</small>
+                </div>
+                <div class="panel-item-right">
+                  <span class="app-status-badge" [attr.data-status]="event.status">{{ event.status | titlecase }}</span>
+                  <button class="btn-mini-action" (click)="openEventCurationModal(event)">Review</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- VIEW 2: HOST APPLICATIONS QUEUE                            -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="admin-view-pane" *ngIf="currentView() === 'host_applications'">
+        
+        <div class="view-header-row">
+          <div>
+            <h2>Host Verification Queue</h2>
+            <p>Review organization credentials, identity documentation, and grant organizer privileges.</p>
+          </div>
+          <div class="filter-pills-row">
+            <button class="filter-pill" [class.active]="hostFilter() === 'all'" (click)="hostFilter.set('all')">All</button>
+            <button class="filter-pill" [class.active]="hostFilter() === 'submitted'" (click)="hostFilter.set('submitted')">New Submissions</button>
+            <button class="filter-pill" [class.active]="hostFilter() === 'under_review'" (click)="hostFilter.set('under_review')">Under Review</button>
+            <button class="filter-pill" [class.active]="hostFilter() === 'approved'" (click)="hostFilter.set('approved')">Approved</button>
+          </div>
+        </div>
+
+        <div class="admin-table-container">
+          <table class="admin-data-table">
+            <thead>
+              <tr>
+                <th>Applicant / Organization</th>
+                <th>Categories & Scale</th>
+                <th>Location</th>
+                <th>Submitted</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let app of filteredHostApplications()">
+                <td>
+                  <div class="table-applicant-info">
+                    <strong>{{ app.applicantName }}</strong>
+                    <span>{{ app.organizationName }}</span>
+                    <small>{{ app.email }} • {{ app.phone }}</small>
+                  </div>
+                </td>
+                <td>
+                  <div class="table-category-tags">
+                    <span class="mini-tag" *ngFor="let cat of app.primaryCategories">{{ cat }}</span>
+                    <small>{{ app.expectedScale }}</small>
+                  </div>
+                </td>
+                <td>{{ app.city }}</td>
+                <td>{{ app.submittedAt }}</td>
+                <td>
+                  <span class="app-status-badge" [attr.data-status]="app.status">
+                    {{ app.status === 'under_review' ? 'Under Review' : (app.status | titlecase) }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <div class="table-actions-group">
+                    <button class="btn-action-view" (click)="openAppDetailsModal(app)">Inspect</button>
+                    <button 
+                      *ngIf="app.status !== 'approved'" 
+                      class="btn-action-approve" 
+                      (click)="approveHostApplication(app.id)" 
+                      title="Approve Host">
+                      Approve
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- VIEW 3: EVENT CURATION & MODERATION                        -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="admin-view-pane" *ngIf="currentView() === 'event_curation'">
+        
+        <div class="view-header-row">
+          <div>
+            <h2>Event Curation & Moderation Queue</h2>
+            <p>Ensure event listings meet safety, venue licensing, and ticketing standards before publishing.</p>
+          </div>
+          <div class="filter-pills-row">
+            <button class="filter-pill" [class.active]="eventFilter() === 'all'" (click)="eventFilter.set('all')">All</button>
+            <button class="filter-pill" [class.active]="eventFilter() === 'pending_review'" (click)="eventFilter.set('pending_review')">Pending Review</button>
+            <button class="filter-pill" [class.active]="eventFilter() === 'changes_requested'" (click)="eventFilter.set('changes_requested')">Action Required</button>
+            <button class="filter-pill" [class.active]="eventFilter() === 'approved'" (click)="eventFilter.set('approved')">Approved</button>
+          </div>
+        </div>
+
+        <div class="curation-cards-grid">
+          <div *ngFor="let ev of filteredCurationEvents()" class="curation-card">
+            <div class="curation-card-image" [style.backgroundImage]="'url(' + ev.imageUrl + ')'">
+              <span class="app-status-badge" [attr.data-status]="ev.status">{{ ev.status | titlecase }}</span>
+            </div>
+            <div class="curation-card-content">
+              <h3>{{ ev.title }}</h3>
+              <p class="host-meta">By <strong>{{ ev.hostName }}</strong> ({{ ev.organization }})</p>
+              
+              <div class="curation-details-grid">
+                <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> {{ ev.venue }}, {{ ev.city }}</div>
+                <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> {{ ev.date }}</div>
+                <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Capacity: {{ ev.capacity }} seats</div>
+                <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> {{ ev.ticketPrice === 0 ? 'Free Entry' : '₹' + ev.ticketPrice }}</div>
+              </div>
+
+              <div class="permits-row">
+                <span class="permit-tag" [class.verified]="ev.soundPermitUploaded">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline *ngIf="ev.soundPermitUploaded" points="20 6 9 17 4 12"/><line *ngIf="!ev.soundPermitUploaded" x1="12" y1="8" x2="12" y2="12"/><line *ngIf="!ev.soundPermitUploaded" x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  {{ ev.soundPermitUploaded ? 'Sound Permit Uploaded' : 'Sound Permit Missing' }}
+                </span>
+                <span class="permit-tag" [class.verified]="ev.venuePermitUploaded">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline *ngIf="ev.venuePermitUploaded" points="20 6 9 17 4 12"/><line *ngIf="!ev.venuePermitUploaded" x1="12" y1="8" x2="12" y2="12"/><line *ngIf="!ev.venuePermitUploaded" x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  {{ ev.venuePermitUploaded ? 'Venue Clearance Uploaded' : 'Venue Clearance Missing' }}
+                </span>
+              </div>
+
+              <div class="curation-actions">
+                <button class="btn-curation-feedback" (click)="openEventCurationModal(ev)">Send Feedback / Edit</button>
+                <button *ngIf="ev.status !== 'approved'" class="btn-curation-approve" (click)="approveEventForLive(ev.id)">
+                  Approve for Live Listing
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- VIEW 4: USER & HOST DIRECTORY                              -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="admin-view-pane" *ngIf="currentView() === 'users'">
+        
+        <div class="view-header-row">
+          <div>
+            <h2>Platform User Directory & Roles</h2>
+            <p>Manage consumer accounts, promote users to organizer hosts, or suspend malicious accounts.</p>
+          </div>
+          <div class="filter-pills-row">
+            <button class="filter-pill" [class.active]="userFilter() === 'all'" (click)="userFilter.set('all')">All</button>
+            <button class="filter-pill" [class.active]="userFilter() === 'host'" (click)="userFilter.set('host')">Hosts</button>
+            <button class="filter-pill" [class.active]="userFilter() === 'admin'" (click)="userFilter.set('admin')">Admins</button>
+            <button class="filter-pill" [class.active]="userFilter() === 'user'" (click)="userFilter.set('user')">Standard Users</button>
+          </div>
+        </div>
+
+        <div class="admin-table-container">
+          <table class="admin-data-table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Total Bookings</th>
+                <th>GMV Contributed</th>
+                <th>Joined</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let u of filteredUsers()">
+                <td>
+                  <div class="user-row-meta">
+                    <img [src]="u.avatar" class="table-user-avatar" [alt]="u.name" />
+                    <div>
+                      <strong>{{ u.name }}</strong>
+                      <small>{{ u.email }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="role-pill" [attr.data-role]="u.role">{{ u.role | uppercase }}</span>
+                </td>
+                <td>
+                  <span class="status-indicator" [class.suspended]="u.status === 'suspended'">
+                    ● {{ u.status | titlecase }}
+                  </span>
+                </td>
+                <td>{{ u.totalBookings }}</td>
+                <td>₹{{ u.totalSpent | number }}</td>
+                <td>{{ u.joinedDate }}</td>
+                <td class="text-right">
+                  <div class="table-actions-group">
+                    <button class="btn-role-toggle" (click)="toggleUserRole(u)">Change Role</button>
+                    <button 
+                      class="btn-suspend-toggle" 
+                      [class.danger]="u.status === 'active'" 
+                      (click)="toggleUserSuspension(u)">
+                      {{ u.status === 'active' ? 'Suspend' : 'Reactivate' }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- VIEW 5: FINANCE & GMV                                       -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="admin-view-pane" *ngIf="currentView() === 'finance'">
+        <div class="view-header-row">
+          <div>
+            <h2>Platform Financial Performance & Settlements</h2>
+            <p>Monitor transaction volume, organizer payout cycles, and payment gateway commission metrics.</p>
+          </div>
+        </div>
+
+        <div class="finance-overview-grid">
+          <div class="finance-box">
+            <span>Total GMV Processed</span>
+            <h3>{{ platformStats().totalGMV }}</h3>
+            <small>Across 1,480 confirmed orders</small>
+          </div>
+          <div class="finance-box">
+            <span>Platform Commission (10%)</span>
+            <h3>{{ platformStats().platformCommission }}</h3>
+            <small>Net revenue retained</small>
+          </div>
+          <div class="finance-box">
+            <span>Pending Organizer Payouts</span>
+            <h3>₹2.14 Lakhs</h3>
+            <small>Automated batch processing in 48h</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- VIEW 6: SYSTEM SETTINGS                                     -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="admin-view-pane" *ngIf="currentView() === 'settings'">
+        <div class="view-header-row">
+          <div>
+            <h2>System & Security Configuration</h2>
+            <p>Configure feature flags, maintenance windows, and global security policies.</p>
+          </div>
+        </div>
+
+        <div class="admin-settings-card">
+          <div class="setting-row">
+            <div>
+              <strong>Instant Host Application Curation</strong>
+              <p>Automatically approve verified tax registered corporate applicants.</p>
+            </div>
+            <input type="checkbox" checked />
+          </div>
+          <div class="setting-row">
+            <div>
+              <strong>Mandatory Sound Permit Clearance</strong>
+              <p>Require sound clearance documents for outdoor concert events exceeding 200 capacity.</p>
+            </div>
+            <input type="checkbox" checked />
+          </div>
+          <div class="setting-row">
+            <div>
+              <strong>QR Gate Anti-Passback Prevention</strong>
+              <p>Prevent scanned passes from being re-checked within 10 minutes at gate entry.</p>
+            </div>
+            <input type="checkbox" checked />
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MODAL: HOST APPLICATION INSPECTION                          -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="admin-modal-backdrop" *ngIf="selectedAppForModal()" (click)="selectedAppForModal.set(null)">
+    <div class="admin-modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <h3>Host Application: {{ selectedAppForModal()?.applicantName }}</h3>
+          <span class="modal-sub">{{ selectedAppForModal()?.organizationName }} • ID: {{ selectedAppForModal()?.id }}</span>
+        </div>
+        <button class="btn-modal-close" (click)="selectedAppForModal.set(null)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-section">
+          <h4>Organization Details</h4>
+          <p><strong>Type:</strong> {{ selectedAppForModal()?.organizationType }}</p>
+          <p><strong>City / Base:</strong> {{ selectedAppForModal()?.city }}</p>
+          <p><strong>Expected Scale:</strong> {{ selectedAppForModal()?.expectedScale }}</p>
+          <p><strong>Categories:</strong> {{ selectedAppForModal()?.primaryCategories?.join(', ') }}</p>
+        </div>
+
+        <div class="modal-section">
+          <h4>Past Organizing Experience</h4>
+          <p class="modal-note-box">{{ selectedAppForModal()?.pastExperience }}</p>
+        </div>
+
+        <div class="modal-section">
+          <h4>Submitted Verification Documents</h4>
+          <div class="doc-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span>{{ selectedAppForModal()?.idDocName }}</span>
+            <small class="doc-status-ok">Verified Signature</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-modal-secondary" (click)="requestMoreHostInfo(selectedAppForModal()!.id)">Request Clarification</button>
+        <button class="btn-modal-danger" (click)="rejectHostApplication(selectedAppForModal()!.id)">Reject</button>
+        <button class="btn-modal-primary" (click)="approveHostApplication(selectedAppForModal()!.id)">Approve & Grant Host Privileges</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MODAL: EVENT CURATION FEEDBACK                              -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="admin-modal-backdrop" *ngIf="selectedEventForModal()" (click)="selectedEventForModal.set(null)">
+    <div class="admin-modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <h3>Moderate Event: {{ selectedEventForModal()?.title }}</h3>
+          <span class="modal-sub">Hosted by {{ selectedEventForModal()?.hostName }}</span>
+        </div>
+        <button class="btn-modal-close" (click)="selectedEventForModal.set(null)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-section">
+          <label>Curation Review Notes / Action Items:</label>
+          <textarea 
+            [(ngModel)]="feedbackText" 
+            class="admin-textarea" 
+            rows="4" 
+            placeholder="Explain required changes before this event can be published live...">
+          </textarea>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-modal-secondary" (click)="selectedEventForModal.set(null)">Cancel</button>
+        <button class="btn-modal-warning" (click)="sendEventFeedback(selectedEventForModal()!.id)">Send Changes Requested</button>
+        <button class="btn-modal-primary" (click)="approveEventForLive(selectedEventForModal()!.id)">Approve Listing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MODAL: BROADCAST ANNOUNCEMENT                               -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="admin-modal-backdrop" *ngIf="showBroadcastModal()" (click)="showBroadcastModal.set(false)">
+    <div class="admin-modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <h3>Platform Broadcast Announcement</h3>
+          <span class="modal-sub">Push alert to all organizers and attendees</span>
+        </div>
+        <button class="btn-modal-close" (click)="showBroadcastModal.set(false)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-section">
+          <label>Broadcast Title</label>
+          <input 
+            type="text" 
+            [(ngModel)]="broadcastMessage().title" 
+            class="admin-input" 
+            placeholder="e.g. Scheduled Platform Maintenance" />
+        </div>
+        <div class="modal-section">
+          <label>Broadcast Content</label>
+          <textarea 
+            [(ngModel)]="broadcastMessage().body" 
+            class="admin-textarea" 
+            rows="3" 
+            placeholder="Enter announcement text...">
+          </textarea>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-modal-secondary" (click)="showBroadcastModal.set(false)">Cancel</button>
+        <button class="btn-modal-primary" (click)="sendBroadcast()">Send Platform Broadcast</button>
+      </div>
+    </div>
+  </div>
+
 </div>
