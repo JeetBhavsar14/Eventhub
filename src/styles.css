@@ -1,6 +1,4 @@
 /* src/styles.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 :root {
   /* Brand Navy Blue Palette */
   --primary-50: #eff6ff;
@@ -50,6 +48,47 @@
 
   /* Transitions */
   --transition-fast: 150ms ease;
+
+  /* ─────────────────────────────────────────────────────────
+     MODULAR TYPE SCALE  (1.25 × ratio — "Major Third")
+     Use ONLY these tokens for font-size throughout the app.
+     ──────────────────────────────────────────────────────── */
+  --text-2xs:  0.625rem;   /*  10px — micro labels, corner badges         */
+  --text-xs:   0.6875rem;  /*  11px — nav section titles, small tags        */
+  --text-sm:   0.8125rem;  /*  13px — table headers, secondary body copy    */
+  --text-base: 0.9375rem;  /*  15px — primary body copy, nav items          */
+  --text-md:   1rem;       /*  16px — card body, form fields                */
+  --text-lg:   1.125rem;   /*  18px — panel headings, card titles           */
+  --text-xl:   1.375rem;   /*  22px — section headings                      */
+  --text-2xl:  1.75rem;    /*  28px — page titles, dashboard heroes         */
+  --text-3xl:  2.25rem;    /*  36px — big metric values                     */
+  --text-4xl:  3rem;       /*  48px — hero display text                     */
+
+  /* ─────────────────────────────────────────────────────────
+     FONT WEIGHT CONSTANTS
+     ──────────────────────────────────────────────────────── */
+  --fw-regular:  400;  /* body copy                     */
+  --fw-medium:   500;  /* interactive labels, nav items  */
+  --fw-semibold: 600;  /* emphasis, active states        */
+  --fw-bold:     700;  /* headings, card titles          */
+  --fw-extrabold:800;  /* display metrics, hero text     */
+
+  /* ─────────────────────────────────────────────────────────
+     LINE-HEIGHT ROLES
+     ──────────────────────────────────────────────────────── */
+  --lh-tight:  1.2;   /* display headings — optical density    */
+  --lh-snug:   1.35;  /* card headings, panel titles           */
+  --lh-normal: 1.5;   /* body copy — comfortable reading       */
+  --lh-relaxed:1.65;  /* long-form paragraphs                  */
+
+  /* ─────────────────────────────────────────────────────────
+     LETTER-SPACING ROLES
+     ──────────────────────────────────────────────────────── */
+  --ls-tighter: -0.03em;  /* large display headings (h1) */
+  --ls-tight:   -0.02em;  /* h2, h3                      */
+  --ls-normal:  -0.011em; /* body paragraph copy          */
+  --ls-wide:     0.02em;  /* uppercase labels, tags       */
+  --ls-widest:   0.06em;  /* nav section group titles     */
 }
 
 * {
@@ -58,18 +97,80 @@
   padding: 0;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--gray-50);
-  color: var(--gray-900);
-  -webkit-font-smoothing: antialiased;
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Optical font sizing — lets the browser tune stroke weights at small sizes */
+  font-optical-sizing: auto;
 }
 
-/* Typography Utilities */
+body {
+  font-family: 'Inter var', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--gray-50);
+  color: var(--gray-900);
+  font-size: var(--text-base);  /* 15 px default — slightly larger than 14 px = more premium */
+  line-height: var(--lh-normal);
+  letter-spacing: var(--ls-normal);
+  /* High-Resolution Font Rendering Engine */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Inter's alternate digits + stylistic alternates for clean sans-serif reads */
+  font-feature-settings: 'cv02' 1, 'cv03' 1, 'cv04' 1, 'cv11' 1, 'ss01' 1;
+}
+
+/* ─────────────────────────────────────────────────────────
+   HEADING SCALE  — optical tracking tightens as size grows
+   ───────────────────────────────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
   color: var(--gray-900);
-  font-weight: 600;
-  line-height: 1.2;
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  font-optical-sizing: auto;
+}
+
+h1 { font-size: var(--text-2xl);  font-weight: var(--fw-extrabold); letter-spacing: var(--ls-tighter); line-height: var(--lh-tight); }
+h2 { font-size: var(--text-xl);   font-weight: var(--fw-bold);      letter-spacing: var(--ls-tight);   }
+h3 { font-size: var(--text-lg);   font-weight: var(--fw-bold);      letter-spacing: var(--ls-tight);   }
+h4 { font-size: var(--text-base); font-weight: var(--fw-semibold);  letter-spacing: var(--ls-normal);  }
+h5, h6 { font-size: var(--text-sm); font-weight: var(--fw-semibold); letter-spacing: var(--ls-normal); }
+
+p {
+  font-size: var(--text-base);
+  line-height: var(--lh-normal);
+  letter-spacing: var(--ls-normal);
+}
+
+small {
+  font-size: var(--text-sm);
+  letter-spacing: var(--ls-normal);
+}
+
+/* Tabular Numerals for Currency, Tables, Metrics & Timestamps */
+.font-tabular,
+.card-value,
+.stat-item,
+.metric-val,
+.val,
+.val-total,
+.admin-data-table td,
+.finance-box h3 {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'cv02' 1, 'cv11' 1;
+}
+
+/* Micro-labels, Pills, and Tags: Positive tracking to avoid ink bleed */
+.role-pill,
+.app-status-badge,
+.settle-badge,
+.mini-tag,
+.filter-pill,
+.metric-lbl,
+.table-sub-badge,
+.permit-tag {
+  letter-spacing: 0.025em;
+  font-feature-settings: 'cv02' 1;
 }
 
 a {
@@ -162,7 +263,7 @@ select.app-select {
   background-color: var(--surface);
   color: var(--gray-900);
   font: inherit;
-  font-size: 0.925rem;
+  font-size: var(--text-base);
   font-weight: 500;
   outline: none;
   appearance: none;

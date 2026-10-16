@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HostDashboardService } from '@core/state/host-dashboard.service';
 import { EventTeamService } from '@core/state/event-team.service';
+import { EventOwnershipService } from '@core/state/event-ownership.service';
 import { AuthService } from '@core/auth';
 import {
   HostEventItem,
@@ -14,22 +15,87 @@ import {
   HostTeamMember,
   EventMembership,
   EventInvitation,
-  MembershipRole
+  MembershipRole,
+  EventOwnerStake,
+  EventManagerAssignment,
+  EventParticipantProfile,
+  ManagerResponsibilityArea
 } from '@core/models';
-import { SelectComponent, SelectOption } from '@shared/components';
+import { SelectComponent, SelectOption, IconComponent } from '@shared/components';
 
 @Component({
   selector: 'app-host-layout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, SelectComponent],
+  imports: [CommonModule, FormsModule, RouterLink, SelectComponent, IconComponent],
   templateUrl: './host-layout.component.html',
   styleUrl: './host-layout.component.css'
 })
 export class HostLayoutComponent implements OnInit {
   readonly dashboardService = inject(HostDashboardService);
   readonly eventTeamService = inject(EventTeamService);
+  readonly ownershipService = inject(EventOwnershipService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+
+  // Phase 5: Event Ownership & Multi-Owner State (§ 11.0, § 12.0, § 14.0)
+  readonly ownerStakes = this.ownershipService.ownerStakes;
+  readonly primaryOwner = this.ownershipService.primaryOwner;
+  readonly coOwners = this.ownershipService.coOwners;
+  readonly availableCoOwnerEquity = this.ownershipService.availableCoOwnerEquity;
+  readonly totalAllocatedEquity = this.ownershipService.totalAllocatedEquity;
+  readonly remainingEquityPool = this.ownershipService.remainingEquityPool;
+  readonly isEquityValid = this.ownershipService.isEquityValid;
+  readonly eventManagers = this.ownershipService.managers;
+  readonly eventParticipants = this.ownershipService.participants;
+
+  maxCoOwnerCanHold(stakeId: string): number {
+    const primary = this.primaryOwner();
+    const target = this.ownerStakes().find(s => s.id === stakeId);
+    if (!primary || !target) return 99;
+    return target.percentage + Math.max(0, primary.percentage - 1);
+  }
+
+  // Modals for Phase 5
+  showAddOwnerModal = signal(false);
+  showAssignManagerModal = signal(false);
+  showAddParticipantModal = signal(false);
+
+  newOwnerForm = {
+    userName: '',
+    userEmail: '',
+    organizationName: '',
+    percentage: 10
+  };
+
+  newManagerForm = {
+    userName: '',
+    userEmail: '',
+    responsibilityArea: 'venue_logistics' as ManagerResponsibilityArea,
+    customTitle: ''
+  };
+
+  newParticipantForm = {
+    category: 'speaker' as 'speaker' | 'artist' | 'sponsor',
+    name: '',
+    designationOrCompany: '',
+    bio: '',
+    email: ''
+  };
+
+  readonly managerAreaOptions: SelectOption[] = [
+    { label: 'Overall Operations & Show Director', value: 'overall_operations' },
+    { label: 'Venue & Floor Logistics Lead', value: 'venue_logistics' },
+    { label: 'Sponsorships & Brand Partnerships', value: 'sponsorships' },
+    { label: 'Production, Stage & Audio-Visual Lead', value: 'production_technical' },
+    { label: 'Chief Safety & Incident Officer', value: 'security_safety' },
+    { label: 'Admissions & Box Office Supervisor', value: 'registration_ticketing' }
+  ];
+
+  readonly participantCategoryOptions: SelectOption[] = [
+    { label: 'Keynote Speaker', value: 'speaker' },
+    { label: 'Headline Artist / Performer', value: 'artist' },
+    { label: 'Brand Sponsor', value: 'sponsor' }
+  ];
 
   // Event Team & Delegation State
   readonly operationalTeam = this.eventTeamService.operationalTeam;
@@ -125,6 +191,7 @@ export class HostLayoutComponent implements OnInit {
   ngOnInit(): void {
     this.dashboardService.loadAll();
     this.eventTeamService.loadEventTeam('evt-100');
+    this.ownershipService.loadEventGovernance('evt-100');
   }
 
   // Selected Reporting Period
@@ -480,6 +547,139 @@ export class HostLayoutComponent implements OnInit {
   async removeMember(memberId: string, memberName: string) {
     await this.eventTeamService.removeMember(memberId);
     this.showToast(`Removed ${memberName} from the event team.`);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // PHASE 5: OWNERSHIP & GOVERNANCE METHODS (§ 11.0, § 12.0, § 14.0)
+  // ═══════════════════════════════════════════════════════════
+
+  openAddOwnerModal() {
+    const maxAvail = this.availableCoOwnerEquity();
+    this.newOwnerForm = {
+      userName: '',
+      userEmail: '',
+      organizationName: '',
+      percentage: Math.min(10, Math.max(1, maxAvail))
+    };
+    this.showAddOwnerModal.set(true);
+  }
+
+  async submitAddOwner() {
+    if (!this.newOwnerForm.userName || !this.newOwnerForm.userEmail) {
+      this.showToast('Please enter the owner name and verified email.');
+      return;
+    }
+
+    const res = await this.ownershipService.addCoOwnerStake(
+      'evt-100',
+      this.newOwnerForm.userName,
+      this.newOwnerForm.userEmail,
+      this.newOwnerForm.organizationName || 'Co-Owner Enterprise',
+      this.newOwnerForm.percentage
+    );
+
+    this.showToast(res.message);
+    if (res.success) {
+      this.showAddOwnerModal.set(false);
+    }
+  }
+
+  async updateStake(stakeId: string, newPercentage: number) {
+    const res = await this.ownershipService.updateStakePercentage(stakeId, newPercentage);
+    this.showToast(res.message);
+  }
+
+  async removeOwnerStake(stake: EventOwnerStake) {
+    if (stake.isPrimaryOwner) {
+      this.showToast('Primary owner cannot be removed from event.');
+      return;
+    }
+    const ok = await this.ownershipService.removeCoOwnerStake(stake.id);
+    if (ok) {
+      this.showToast(`Removed ${stake.userName} from event equity pool.`);
+    }
+  }
+
+  openAssignManagerModal() {
+    this.newManagerForm = {
+      userName: '',
+      userEmail: '',
+      responsibilityArea: 'venue_logistics',
+      customTitle: ''
+    };
+    this.showAssignManagerModal.set(true);
+  }
+
+  async submitAssignManager() {
+    if (!this.newManagerForm.userName || !this.newManagerForm.userEmail) {
+      this.showToast('Please provide manager name and email.');
+      return;
+    }
+
+    const res = await this.ownershipService.assignManager(
+      'evt-100',
+      this.newManagerForm.userName,
+      this.newManagerForm.userEmail,
+      this.newManagerForm.responsibilityArea,
+      this.newManagerForm.customTitle
+    );
+
+    this.showToast(res.message);
+    if (res.success) {
+      this.showAssignManagerModal.set(false);
+    }
+  }
+
+  async toggleMgrDelegation(mgr: EventManagerAssignment) {
+    const next = !mgr.delegationActive;
+    await this.ownershipService.toggleManagerDelegation(mgr.id, next);
+    this.showToast(
+      next
+        ? `Management delegation active for ${mgr.userName}.`
+        : `Management authority paused for ${mgr.userName}.`
+    );
+  }
+
+  async removeManagerAssignment(mgr: EventManagerAssignment) {
+    await this.ownershipService.removeManager(mgr.id);
+    this.showToast(`Removed manager assignment for ${mgr.userName}.`);
+  }
+
+  openAddParticipantModal(category: 'speaker' | 'artist' | 'sponsor' = 'speaker') {
+    this.newParticipantForm = {
+      category,
+      name: '',
+      designationOrCompany: '',
+      bio: '',
+      email: ''
+    };
+    this.showAddParticipantModal.set(true);
+  }
+
+  async submitAddParticipant() {
+    if (!this.newParticipantForm.name) {
+      this.showToast('Please enter the participant or sponsor name.');
+      return;
+    }
+
+    const res = await this.ownershipService.addParticipant(
+      'evt-100',
+      this.newParticipantForm.category,
+      this.newParticipantForm.name,
+      this.newParticipantForm.designationOrCompany,
+      this.newParticipantForm.bio,
+      this.newParticipantForm.email
+    );
+
+    this.showToast(res.message);
+    if (res.success) {
+      this.showAddParticipantModal.set(false);
+    }
+  }
+
+  async removeParticipantItem(part: EventParticipantProfile) {
+    await this.ownershipService.removeParticipant(part.id);
+    this.showToast(`Removed ${part.name} from event participants.`);
   }
 
   // Notifications

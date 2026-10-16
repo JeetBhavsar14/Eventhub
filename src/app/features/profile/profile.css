@@ -82,7 +82,7 @@
 
 .profile-title h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: var(--text-3xl);
   font-weight: 700;
   letter-spacing: -0.5px;
   color: var(--gray-900);
@@ -96,7 +96,7 @@
   border-radius: var(--radius-full);
   background: #EBF7EE;
   color: #166534;
-  font-size: 0.8125rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   border: 1px solid #BBF7D0;
 }
@@ -109,7 +109,7 @@
   border-radius: var(--radius-full);
   background: #FFFBEB;
   color: #92400E;
-  font-size: 0.8125rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   border: 1px solid #FDE68A;
 }
@@ -122,7 +122,7 @@
 .profile-title p {
   margin: 0.25rem 0 0;
   color: var(--gray-400);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
 }
 
 .profile-content {
@@ -193,11 +193,11 @@
 
 .nav-main-label {
   font-weight: 600;
-  font-size: 0.9375rem;
+  font-size: var(--text-base);
 }
 
 .nav-sub-chip {
-  font-size: 0.6875rem;
+  font-size: var(--text-xs);
   color: #6170C3;
   font-weight: 500;
 }
@@ -221,7 +221,7 @@
   background: transparent;
   color: var(--gray-700);
   border: none;
-  font-size: 1rem;
+  font-size: var(--text-md);
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -258,7 +258,7 @@
 
 .tab-pane h2 {
   margin: 0;
-  font-size: 1.75rem;
+  font-size: var(--text-2xl);
   font-weight: 600;
   color: var(--gray-900);
 }

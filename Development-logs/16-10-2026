@@ -140,3 +140,153 @@ graph TD
 > [!TIP]
 > **Key Architectural Takeaway:**  
 > Staff access is not a blanket global privilege. It exists strictly as an event-specific membership with a designated operational profile, fully satisfying Section § 5 of the EventHub specification.
+
+---
+
+# 🚀 EventHub Optimization Log: Route-Level Lazy Loading & Codebase Modularization (Step 1)
+
+> **Date:** October 16, 2026  
+> **Module:** Architecture, Code Splitting & Routing Performance  
+> **Status:**  Completed & Build Verified  
+> **Specification Reference:** Architectural Maintainability & Optimization (Step 1: Code Splitting)
+
+---
+
+## 📌 Executive Summary
+
+To improve codebase scalability, maintainability, and initial page load performance, all eager component imports in [`app.routes.ts`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/app.routes.ts) have been transitioned to dynamic asynchronous imports via Angular's standalone `loadComponent` API.
+
+Prior to this refactoring, all layout components, admin sub-modules, host dashboards, checkout flows, and guest views were statically bundled into a single monolithic bundle exceeding **3.69 MB**. Following the refactoring, the initial entry bundle (`main.js`) has been reduced down to **15.02 kB**, achieving a **>99% reduction** in initial JavaScript parsed on cold boot.
+
+---
+
+## 1. Architectural Changes
+
+### 🔹 Dynamic Route Resolution
+Every top-level layout and leaf feature route now loads its corresponding component on demand when navigated:
+
+```typescript
+// Before: Monolithic eager bundling
+import { HostLayoutComponent } from './layout/host-layout/host-layout.component';
+{ path: 'host', component: HostLayoutComponent }
+
+// After: Dynamic asynchronous chunk loading
+{
+  path: 'host',
+  loadComponent: () => import('./layout/host-layout/host-layout.component').then(m => m.HostLayoutComponent)
+}
+```
+
+### 🔹 Chunk Distribution
+- **Shell / Root Outlets**: `ShellComponent` and `MainLayoutComponent` remain eager wrappers to host the top-level `<router-outlet>` seamlessly.
+- **Portals & Workspaces**: Separated into autonomous chunks:
+  - `AdminLayoutComponent` & sub-views (`/admin`)
+  - `HostLayoutComponent` & sub-views (`/host`)
+  - `ManagementLayoutComponent` (`/management`)
+  - `StaffLayoutComponent` (`/staff`)
+- **Feature Pages**:
+  - `DiscoverComponent` (`/discover`)
+  - `EventDetailsComponent` (`/events/:id`)
+  - `CheckoutComponent` (`/checkout`)
+  - `BookingsComponent` (`/bookings`)
+  - `OffersComponent` (`/offers`)
+  - `GiftCardsComponent` (`/gift-cards`)
+  - `ProfileComponent` (`/profile`)
+  - `HostEventComponent` (`/host-event`)
+  - `LoginComponent` & `RegisterComponent` (`/auth/*`)
+  - `InfoPageComponent` (`/about`, `/contact`, `/terms`, etc.)
+
+---
+
+## 2. Verification & Performance Impact
+
+| Metric | Before Optimization | After Optimization | Delta |
+| :--- | :--- | :--- | :--- |
+| **Initial `main.js` Raw Size** | `3,694,547 bytes` (~3.69 MB) | `15,022 bytes` (15.02 kB) | **-99.59%** |
+| **Chunking Strategy** | Monolithic (1 massive bundle) | Distributed (25+ route chunks) | Granular On-Demand |
+| **Angular CLI Build Result** | Pass | `Application bundle generation complete` (0 errors) |  Clean |
+
+---
+
+# 🎨 EventHub Clean-Up Log: Shared `<app-icon>` Component & SVG De-cluttering (Step 2)
+
+> **Date:** October 16, 2026  
+> **Module:** Shared UI System & Template Architecture  
+> **Status:**  Completed & Build Verified  
+> **Specification Reference:** Architectural Maintainability (Step 2: Shared Icon Component)
+
+---
+
+## 📌 Executive Summary
+
+Prior to Step 2, both [`admin-layout.html`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/admin-layout/admin-layout.html) and [`host-layout.component.html`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/host-layout/host-layout.component.html) contained over **130 raw inline `<svg>` elements** pasted directly into the HTML templates. This bloated file sizes, caused visual noise during template development, and made styling or icon stroke alterations cumbersome.
+
+We created a centralized, standalone [`IconComponent`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/shared/components/icon/icon.component.ts) and [`ICON_REGISTRY`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/shared/components/icon/icon.registry.ts) in `@shared/components/icon`, replacing **124 inline raw SVGs** with clean declarative tags (`<app-icon name="..." [size]="..."></app-icon>`).
+
+---
+
+## 1. Architecture & Design
+
+### 🔹 The `<app-icon>` Component
+- **Location**: `src/app/shared/components/icon/`
+- **Features**:
+  - Standalone Angular component exporting `IconComponent`.
+  - Type-safe icon lookup from a centralized dictionary of 40+ Lucide / Feather icon paths.
+  - Standardized `0 0 24 24` viewBox with reactive sizing (`size`, defaults to `16px`).
+  - Configurable `strokeWidth` (defaults to `2`).
+  - Optional `customFill`, `customStroke`, and CSS `spin` animation support.
+  - Safe inner SVG rendering powered by Angular's `DomSanitizer`.
+
+```html
+<!-- Example Usage -->
+<app-icon name="rupee" [size]="16" class="text-emerald"></app-icon>
+<app-icon name="calendar" [size]="14"></app-icon>
+<app-icon name="check" [size]="14"></app-icon>
+<app-icon name="users" [size]="20"></app-icon>
+```
+
+---
+
+## 2. Refactoring Summary
+
+| Area | Inline SVGs Replaced | Resulting Tag | Cleanliness Gain |
+| :--- | :--- | :--- | :--- |
+| **Admin Layout** (`admin-layout.html`) | 40 inline `<svg>` blocks | `<app-icon name="...">` | Template lines streamlined, navigation easily readable |
+| **Host Layout** (`host-layout.component.html`) | 84 inline `<svg>` blocks | `<app-icon name="...">` | Modals, tables, metrics, and equity tabs simplified |
+| **Total Replaced** | **124 raw SVGs** | Reusable declarative icons | Centralized single-point maintenance |
+
+---
+
+## 3. Verification & Build Confirmation
+
+- **Angular CLI**: Run `ng build --configuration=development`
+- **Result**: `✔ Browser application bundle generation complete.` Zero compilation or template binding errors.
+
+---
+
+# 📈 EventHub Development Log: 100% Equity Invariant & Automatic Co-Founder Stake Re-Allocation
+
+> **Date:** October 16, 2026  
+> **Module:** Event Governance, Equity Split & Co-Ownership (§ 11.0)  
+> **Status:** ✅ Completed & Verified  
+
+### 1. Business Requirements & Invariants
+1. **100% Default for Primary Host**: If no co-founders/co-owners exist for an event, 100% of event equity belongs to the primary event-host by default.
+2. **Direct Re-Allocation on Removal**: Whenever any co-founder is removed, their equity stake returns directly to the primary owner. If no other co-founders remain, the primary owner's stake directly restores to 100%.
+3. **Dynamic Balance on Stake Change**: When a co-founder's equity is adjusted (via slider or input), the difference is immediately balanced with the primary host (`primaryOwner % = 100 - sum(coOwners %)`), ensuring total equity always sums to exactly 100%.
+4. **Co-Owner Allocation Safety**: Adding a co-founder is bounded by the primary host's available pool (retaining at least 1% for the primary host).
+
+### 2. Files Updated
+- [`event-ownership.service.ts`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/core/state/event-ownership.service.ts):
+  - Updated `loadEventGovernance()` to ensure 100% default when 0 co-owners exist, and sync balance when co-owners exist.
+  - Updated `removeCoOwnerStake()` to directly transfer the removed stake to the primary owner, guaranteeing 100% if no co-founders remain.
+  - Updated `addCoOwnerStake()` and `updateStakePercentage()` to maintain zero-sum 100% pool.
+- [`host-layout.component.ts`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/host-layout/host-layout.component.ts):
+  - Added `primaryOwner`, `availableCoOwnerEquity`, and `maxCoOwnerCanHold` helper.
+  - Updated `openAddOwnerModal()` to default to permissible allocation pool.
+- [`host-layout.component.html`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/host-layout/host-layout.component.html):
+  - Added primary owner balance indicator and sole-host banner.
+  - Bound co-owner sliders to max permissible range.
+  - Updated Add Co-Owner modal to use `availableCoOwnerEquity()`.
+- [`host-layout.component.css`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/host-layout/host-layout.component.css):
+  - Added `.primary-owner-equity-indicator` and `.no-coowners-banner` styling.

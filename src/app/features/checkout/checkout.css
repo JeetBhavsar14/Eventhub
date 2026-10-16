@@ -10,7 +10,7 @@
 }
 
 .checkout-header h1 {
-  font-size: 2rem;
+  font-size: var(--text-3xl);
   font-weight: 800;
   color: var(--gray-900);
   margin-bottom: 0.5rem;
@@ -18,7 +18,7 @@
 
 .checkout-header p {
   color: var(--gray-600);
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
 }
 
 .checkout-layout {
@@ -70,7 +70,7 @@
 }
 
 .section-title {
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   font-weight: 700;
   color: var(--gray-900);
   margin-bottom: 1.5rem;
@@ -96,7 +96,7 @@
 }
 
 .ticket-info h3 {
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   font-weight: 600;
   margin: 0 0 0.25rem;
 }
@@ -107,7 +107,7 @@
 }
 
 .ticket-info .available {
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   color: var(--gray-500);
 }
 
@@ -125,7 +125,7 @@
   background: var(--primary-50);
   color: var(--primary-700);
   font-weight: bold;
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -141,7 +141,7 @@
 }
 
 .qty {
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   font-weight: 600;
   min-width: 24px;
   text-align: center;
@@ -162,7 +162,7 @@
 }
 
 .summary-card h2 {
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   font-weight: 700;
   margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
@@ -210,7 +210,7 @@
 
 .coupon-error {
   color: var(--danger);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   margin-top: 0.5rem;
 }
 
@@ -220,14 +220,14 @@
   align-items: center;
   color: var(--success);
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
 }
 
 .remove-coupon {
   background: transparent;
   border: none;
   color: var(--danger);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   cursor: pointer;
   text-decoration: underline;
 }
@@ -248,7 +248,7 @@
 .text-success { color: var(--success); }
 
 .grand-total {
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   font-weight: 800;
   color: var(--gray-900);
   padding-top: 1rem;
@@ -273,7 +273,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   color: var(--gray-400);
 }
 
@@ -299,14 +299,14 @@
 }
 
 .success-card h2 {
-  font-size: 2.5rem;
+  font-size: var(--text-3xl);
   font-weight: 800;
   margin-bottom: 1rem;
   color: var(--gray-900);
 }
 
 .success-card .message {
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   color: var(--gray-600);
   max-width: 500px;
   margin: 0 auto 3rem;
@@ -328,7 +328,7 @@
 
 .ticket-details p {
   margin-bottom: 0.5rem;
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   color: var(--gray-700);
 }
 

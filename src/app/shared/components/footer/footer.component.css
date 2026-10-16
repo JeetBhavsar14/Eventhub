@@ -1,7 +1,7 @@
 .app-footer {
   background-color: var(--primary-900);
   color: var(--gray-200);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   margin-top: auto;
 }
 
@@ -50,13 +50,13 @@
 
 .feature-text strong {
   color: #ffffff;
-  font-size: 0.9rem;
+  font-size: var(--text-base);
   font-weight: 600;
 }
 
 .feature-text small {
   color: var(--gray-400);
-  font-size: 0.775rem;
+  font-size: var(--text-xs);
 }
 
 /* Main Footer Content */
@@ -96,22 +96,30 @@
   background-color: #ffffff;
   color: var(--primary-800);
   font-weight: 800;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   border-radius: var(--radius-sm);
   letter-spacing: -0.5px;
+}
+
+.footer-brand-logo-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: block;
+  flex-shrink: 0;
 }
 
 .brand-name {
   color: #ffffff;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: var(--text-xl);
   letter-spacing: -0.02em;
 }
 
 .brand-desc {
   color: var(--gray-400);
   line-height: 1.5;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   margin-bottom: 1.5rem;
 }
 
@@ -143,7 +151,7 @@
 /* Links Columns */
 .col-title {
   color: #ffffff;
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   font-weight: 600;
   margin-bottom: 1.25rem;
   letter-spacing: 0.01em;
@@ -159,7 +167,7 @@
 .footer-links a {
   color: var(--gray-400);
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   transition: color var(--transition-fast);
 }
 
@@ -184,7 +192,7 @@
 
 .copyright-text {
   color: var(--gray-400);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
 }
 
 .legal-mini-links {
@@ -195,7 +203,7 @@
 
 .legal-mini-links a {
   color: var(--gray-400);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
@@ -206,7 +214,7 @@
 
 .dot {
   color: var(--gray-400);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
 }
 
 /* Responsive adjustments */

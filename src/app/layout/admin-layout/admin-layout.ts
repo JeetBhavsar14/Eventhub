@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/auth';
 import { HostApplicationService, AdminService, AdminHostApplication, AdminCurationEvent, AdminUser, AdminSettlement } from '@core/state';
+import { IconComponent } from '@shared/components';
 
 export type AdminView = 'overview' | 'host_applications' | 'event_curation' | 'users' | 'revenue' | 'system' | 'finance' | 'settings';
 
@@ -17,7 +18,7 @@ export interface AdminConfirmDialogData {
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, IconComponent],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.css'
 })
@@ -364,12 +365,18 @@ export class AdminLayoutComponent implements OnInit {
     }, 3600);
   }
 
+  toggleAdminMenu(event: MouseEvent) {
+    event.stopPropagation();
+    this.showAdminMenu.update(v => !v);
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.user-menu-wrap') && !target.closest('.notif-menu-wrap')) {
+    if (!target.closest('.user-menu-wrap') && !target.closest('.notif-menu-wrap') && !target.closest('.admin-sidebar-footer')) {
       this.showUserMenu.set(false);
       this.showNotifications.set(false);
+      this.showAdminMenu.set(false);
     }
   }
 

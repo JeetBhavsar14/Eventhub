@@ -2868,6 +2868,51 @@
       },
       "createdAt": "2026-10-08T13:08:08.779Z",
       "id": "OoB3yR_4pPw"
+    },
+    {
+      "bookingReference": "EH-MVAS4JRW-3O5K",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "eventDate": "2026-11-01",
+      "eventTime": "18:00",
+      "eventLocation": "Mumbai Grand Center",
+      "eventAddress": "Mumbai, State, India",
+      "eventThumbnail": "https://picsum.photos/seed/Mumbai1/600/400",
+      "attendee": {
+        "id": "user-001",
+        "name": "Jeet Shah",
+        "email": "jeet@eventhub.com",
+        "phone": "+91 98765 43210"
+      },
+      "userId": "user-001",
+      "tickets": [
+        {
+          "ticketTypeId": "tt-101-1",
+          "name": "General",
+          "price": 500,
+          "quantity": 1
+        },
+        {
+          "ticketTypeId": "tt-101-2",
+          "name": "VIP",
+          "price": 1500,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 2000,
+      "discount": 0,
+      "offerCode": null,
+      "tax": 360,
+      "totalAmount": 2360,
+      "status": "confirmed",
+      "payment": {
+        "method": "qr",
+        "label": "UPI QR",
+        "status": "paid",
+        "transactionReference": "TXN-MVAS4JRW"
+      },
+      "createdAt": "2026-10-16T09:42:45.788Z",
+      "id": "9dYu-h4nVuo"
     }
   ],
   "notifications": [],
@@ -3409,6 +3454,93 @@
       "unread": false,
       "type": "action",
       "eventId": "evt-112"
+    }
+  ],
+  "eventOwnerStakes": [
+    {
+      "id": "stake-1",
+      "eventId": "evt-100",
+      "userId": "user-003",
+      "userName": "Riya Mehta",
+      "userEmail": "host@eventhub.com",
+      "organizationName": "Starlight Live Experiences Pvt Ltd",
+      "percentage": 80,
+      "isPrimaryOwner": true,
+      "status": "active",
+      "assignedAt": "2026-01-10T10:00:00.000Z"
+    },
+    {
+      "id": "stake-3",
+      "eventId": "evt-100",
+      "userId": "user-006",
+      "userName": "Aarav Soundworks",
+      "userEmail": "aarav.sound@partners.com",
+      "organizationName": "Sonic Soundworks India",
+      "percentage": 20,
+      "isPrimaryOwner": false,
+      "status": "active",
+      "assignedAt": "2026-02-01T09:00:00.000Z"
+    }
+  ],
+  "eventManagerAssignments": [
+    {
+      "id": "mgr-1",
+      "eventId": "evt-100",
+      "userId": "user-004",
+      "userName": "Rhea Kapoor",
+      "userEmail": "management@eventhub.com",
+      "responsibilityArea": "overall_operations",
+      "responsibilityTitle": "General Operations & Schedule Director",
+      "delegationActive": true,
+      "status": "active",
+      "assignedAt": "2026-02-10T11:00:00.000Z"
+    },
+    {
+      "id": "mgr-2",
+      "eventId": "evt-100",
+      "userId": "user-005",
+      "userName": "Vikram Patel",
+      "userEmail": "staff@eventhub.com",
+      "responsibilityArea": "venue_logistics",
+      "responsibilityTitle": "Venue & Floor Logistics Lead",
+      "delegationActive": true,
+      "status": "active",
+      "assignedAt": "2026-02-12T16:00:00.000Z"
+    }
+  ],
+  "eventParticipants": [
+    {
+      "id": "part-1",
+      "eventId": "evt-100",
+      "category": "artist",
+      "name": "Prateek Kuhad",
+      "designationOrCompany": "Headline Performing Artist",
+      "email": "prateek@musicmgmnt.com",
+      "avatarUrl": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=120&q=80",
+      "bio": "Acclaimed indie folk singer-songwriter performing a 90-minute sunset acoustic headline set.",
+      "status": "confirmed"
+    },
+    {
+      "id": "part-2",
+      "eventId": "evt-100",
+      "category": "speaker",
+      "name": "Dr. Ananya Roy",
+      "designationOrCompany": "Festival Curator & Keynote Speaker",
+      "email": "ananya@indiearts.org",
+      "avatarUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80",
+      "bio": "Speaking on Cultural Renaissance & Regional Music in Modern India.",
+      "status": "confirmed"
+    },
+    {
+      "id": "part-3",
+      "eventId": "evt-100",
+      "category": "sponsor",
+      "name": "Red Bull India",
+      "designationOrCompany": "Official Energy Beverage Partner",
+      "email": "partnerships@redbull.in",
+      "avatarUrl": "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=120&q=80",
+      "bio": "Title sponsor delivering athlete lounges, sampling stations, and VIP backstage experience.",
+      "status": "confirmed"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
