@@ -1,19 +1,29 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { ApiClient } from '@core/api';
-import { ManagementApprovalItem, ManagementHostReviewItem, ManagementStaffMember } from '@core/models';
+import { ManagementStaffMember } from '@core/models';
 
 export interface ManagementMonitoredEvent {
   id: string;
   title: string;
+  hostName: string;
+  organization: string;
   venue: string;
   capacity: number;
   bookedCount: number;
   revenue: number;
   opsStatus: 'smooth' | 'high_demand';
   managerInCharge: string;
+  delegationStatus: 'active' | 'temporary';
 }
 
-export type { ManagementApprovalItem, ManagementHostReviewItem, ManagementStaffMember };
+export interface ManagementGateStatus {
+  gate: string;
+  staffAssigned: string;
+  throughputPerHour: number;
+  status: 'normal' | 'crowded' | 'hold';
+}
+
+export type { ManagementStaffMember };
 
 @Injectable({
   providedIn: 'root'
@@ -21,57 +31,48 @@ export type { ManagementApprovalItem, ManagementHostReviewItem, ManagementStaffM
 export class ManagementService {
   private api = inject(ApiClient);
 
-  readonly approvalsQueue = signal<ManagementApprovalItem[]>([]);
-  readonly hostApplications = signal<ManagementHostReviewItem[]>([]);
   readonly monitoredEvents = signal<ManagementMonitoredEvent[]>([]);
   readonly staffRoster = signal<ManagementStaffMember[]>([]);
+  readonly gateStatuses = signal<ManagementGateStatus[]>([
+    { gate: 'Gate 1 — Main Turnstiles', staffAssigned: 'Karan Malhotra', throughputPerHour: 280, status: 'normal' },
+    { gate: 'Gate 2 — VIP FastPass', staffAssigned: 'Ananya Joshi', throughputPerHour: 140, status: 'normal' },
+    { gate: 'Gate 3 — Media & Backstage', staffAssigned: 'Vikram Seth', throughputPerHour: 45, status: 'normal' },
+    { gate: 'Gate 4 — General East', staffAssigned: 'Pooja Hegde', throughputPerHour: 320, status: 'crowded' }
+  ]);
   readonly isLoading = signal<boolean>(false);
   readonly error = signal<string | null>(null);
+
+  // Computed summary metrics for delegated operations
+  readonly totalDelegatedEvents = computed(() => this.monitoredEvents().length);
+  readonly totalOnDutyStaff = computed(() => this.staffRoster().filter(s => s.status === 'on_duty').length);
+  readonly totalAdmissionsMonitored = computed(() =>
+    this.monitoredEvents().reduce((acc, ev) => acc + ev.bookedCount, 0)
+  );
 
   async loadAll(): Promise<void> {
     this.isLoading.set(true);
     this.error.set(null);
 
     try {
-      const [approvalsRes, hostAppsRes, eventsRes, staffRes] = await Promise.all([
-        this.api.get<ManagementApprovalItem[]>('/eventApprovals'),
-        this.api.get<any[]>('/hostApplications'),
+      const [eventsRes, staffRes] = await Promise.all([
         this.api.get<any[]>('/events'),
         this.api.get<ManagementStaffMember[]>('/staffRoster')
       ]);
 
-      if (approvalsRes.data) {
-        this.approvalsQueue.set(approvalsRes.data);
-      }
-
-      if (hostAppsRes.data) {
-        const mappedHosts: ManagementHostReviewItem[] = hostAppsRes.data.map((h: any) => ({
-          id: h.id,
-          applicantName: h.applicantName,
-          email: h.email,
-          phone: h.phone,
-          organizationName: h.organizationName,
-          city: h.city,
-          scale: h.scale || h.expectedScale || '500 – 2,500 attendees',
-          experience: h.experience || h.pastExperience || 'Experienced event organizer',
-          docStatus: h.docStatus || 'verified',
-          assignedReviewer: h.assignedReviewer || 'Rhea Kapoor (Operations Lead)',
-          status: h.status || 'under_review',
-          submittedDate: h.submittedDate || '2026-10-08'
-        }));
-        this.hostApplications.set(mappedHosts);
-      }
-
       if (eventsRes.data) {
+        // Events specifically delegated by Event Owners to this Management operations desk
         const mappedMonitored: ManagementMonitoredEvent[] = eventsRes.data.slice(0, 4).map((e: any, idx: number) => ({
           id: e.id,
           title: e.title,
+          hostName: e.hostName || 'Riya Mehta (Event Owner)',
+          organization: e.organization || 'Starlight Live Experiences',
           venue: e.location?.venue || 'Bandra Fort Amphitheatre, Mumbai',
           capacity: e.capacity || 2000,
           bookedCount: Math.floor((e.capacity || 2000) * (0.65 + (idx * 0.08))),
           revenue: (e.ticketTypes?.[0]?.price || 999) * Math.floor((e.capacity || 2000) * 0.75),
           opsStatus: idx === 0 ? 'high_demand' : 'smooth',
-          managerInCharge: idx % 2 === 0 ? 'Rhea Kapoor' : 'Vikram Seth'
+          managerInCharge: 'Rhea Kapoor (Operations Lead)',
+          delegationStatus: 'active'
         }));
         this.monitoredEvents.set(mappedMonitored);
       }
@@ -86,26 +87,13 @@ export class ManagementService {
     }
   }
 
-  async approveEvent(submissionId: string): Promise<boolean> {
-    await this.api.patch(`/eventApprovals/${submissionId}`, { status: 'approved' });
-    this.approvalsQueue.update(list =>
-      list.map(item => item.id === submissionId ? { ...item, status: 'approved' } : item)
-    );
-    return true;
-  }
-
-  async requestChangesOnEvent(submissionId: string, note?: string): Promise<boolean> {
-    await this.api.patch(`/eventApprovals/${submissionId}`, { status: 'changes_requested' });
-    this.approvalsQueue.update(list =>
-      list.map(item => item.id === submissionId ? { ...item, status: 'changes_requested' } : item)
-    );
-    return true;
-  }
-
-  async approveHostApplication(hostId: string): Promise<boolean> {
-    await this.api.patch(`/hostApplications/${hostId}`, { status: 'approved' });
-    this.hostApplications.update(list =>
-      list.map(h => h.id === hostId ? { ...h, status: 'approved' } : h)
+  /**
+   * Operations duty assignment for on-ground staff
+   */
+  async updateStaffAssignment(staffId: string, assignedGate: string, status: 'on_duty' | 'break' | 'off_duty'): Promise<boolean> {
+    await this.api.patch(`/staffRoster/${staffId}`, { assignedGate, status });
+    this.staffRoster.update(list =>
+      list.map(s => s.id === staffId ? { ...s, assignedGate, status } : s)
     );
     return true;
   }

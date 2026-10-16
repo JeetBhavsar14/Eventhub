@@ -39,32 +39,24 @@
 
       <button 
         class="mgmt-nav-btn" 
-        [class.active]="currentView() === 'event_approvals'" 
-        (click)="switchView('event_approvals')"
-        id="mgmt-nav-approvals">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <span>Event Approvals</span>
-        <span class="nav-count-pill" *ngIf="operationalKPIs().pendingApprovals > 0">{{ operationalKPIs().pendingApprovals }}</span>
-      </button>
-
-      <button 
-        class="mgmt-nav-btn" 
-        [class.active]="currentView() === 'host_applications'" 
-        (click)="switchView('host_applications')"
-        id="mgmt-nav-hosts">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
-        <span>Host Applications</span>
-        <span class="nav-count-pill warning" *ngIf="operationalKPIs().pendingHostApps > 0">{{ operationalKPIs().pendingHostApps }}</span>
-      </button>
-
-      <button 
-        class="mgmt-nav-btn" 
         [class.active]="currentView() === 'event_operations'" 
         (click)="switchView('event_operations')"
         id="mgmt-nav-ops">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="12 6 12 12 16 14"/></svg>
         <span>Event Operations</span>
+        <span class="nav-count-pill" *ngIf="operationalKPIs().activeLiveEvents > 0">{{ operationalKPIs().activeLiveEvents }}</span>
       </button>
+
+      <button 
+        class="mgmt-nav-btn" 
+        [class.active]="currentView() === 'gates'" 
+        (click)="switchView('gates')"
+        id="mgmt-nav-gates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
+        <span>Gates & Turnstiles</span>
+        <span class="nav-count-pill warning" *ngIf="operationalKPIs().crowdedGatesCount > 0">{{ operationalKPIs().crowdedGatesCount }} Crowded</span>
+      </button>
+
 
       <button 
         class="mgmt-nav-btn" 
@@ -140,19 +132,19 @@
 
         <!-- Breadcrumbs -->
         <div class="mgmt-breadcrumbs">
-          <span class="crumb-root">Management</span>
+          <span class="crumb-root">Management Operations</span>
           <span class="crumb-sep">/</span>
           <span class="crumb-current">
             <span *ngIf="currentView() === 'overview'">Operations Dashboard</span>
-            <span *ngIf="currentView() === 'event_approvals'">Event Approvals Queue</span>
-            <span *ngIf="currentView() === 'host_applications'">Host Application Reviews</span>
-            <span *ngIf="currentView() === 'event_operations'">Active Event Operations</span>
+            <span *ngIf="currentView() === 'event_operations'">Assigned Event Operations</span>
+            <span *ngIf="currentView() === 'gates'">Gate Throughput & Turnstiles</span>
             <span *ngIf="currentView() === 'bookings'">Bookings & Capacity</span>
-            <span *ngIf="currentView() === 'staff_teams'">Staff & Field Rosters</span>
+            <span *ngIf="currentView() === 'staff_teams'">Staff Deployments & Rosters</span>
             <span *ngIf="currentView() === 'reports'">Performance Reports</span>
             <span *ngIf="currentView() === 'notifications'">Notifications</span>
             <span *ngIf="currentView() === 'settings'">Workspace Settings</span>
           </span>
+          <span class="delegated-pill" title="Operations desk delegated by Event Host">Host Delegated</span>
         </div>
       </div>
 
@@ -162,7 +154,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input 
             type="text" 
-            placeholder="Search approvals, hosts, events..." 
+            placeholder="Search events, gates, staff members..." 
             [(ngModel)]="searchQuery" 
             class="mgmt-search-input" />
         </div>
@@ -203,52 +195,52 @@
         <!-- Hero Header -->
         <div class="mgmt-hero-card">
           <div class="hero-text">
-            <h1>Operations Center</h1>
-            <p>Monitor event approvals, host verifications, and ground operations in real time.</p>
+            <h1>Ground Operations Desk</h1>
+            <p>Delegated by Host (Event Owner) for live entry management, turnstile flow, and staff dispatch.</p>
           </div>
           <div class="hero-actions">
-            <button class="btn-primary-action" (click)="switchView('event_approvals')">
-              Review {{ operationalKPIs().pendingApprovals }} Event Approvals
+            <button class="btn-primary-action" (click)="switchView('gates')">
+              Monitor Turnstile Gates
             </button>
           </div>
         </div>
 
-        <!-- SECTION: Prioritized "Needs Attention" Banner -->
-        <div class="needs-attention-banner" *ngIf="operationalKPIs().actionRequired > 0 || operationalKPIs().pendingHostApps > 0">
+        <!-- SECTION: Delegation Context Banner -->
+        <div class="needs-attention-banner">
           <div class="attention-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
           <div class="attention-text">
-            <strong>Action Required: {{ operationalKPIs().actionRequired }} event awaiting clarification feedback</strong>
-            <span>1 event has missing sound permits. {{ operationalKPIs().pendingHostApps }} host applications are queued for initial credential verification.</span>
+            <strong>Delegated Operations Active: Managing events on behalf of Host (Event Owner)</strong>
+            <span>Host retains supreme event ownership, ticketing revenue, and platform compliance approvals (reviewed by Super Admin). Management operates field turnstiles and staff deployment.</span>
           </div>
-          <button class="btn-attention-action" (click)="switchView('event_approvals')">Resolve Now</button>
+          <button class="btn-attention-action" (click)="switchView('staff_teams')">Assign Staff</button>
         </div>
 
         <!-- SECTION: Operations Progress KPI Cards (4 Cards) -->
         <div class="kpi-cards-grid">
           
-          <div class="kpi-card" (click)="switchView('event_approvals')">
+          <div class="kpi-card" (click)="switchView('event_operations')">
             <div class="kpi-card-top">
-              <span class="kpi-label">Pending Approvals</span>
-              <div class="kpi-icon-box bg-pale-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <span class="kpi-label">Delegated Events</span>
+              <div class="kpi-icon-box bg-pale-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
             </div>
-            <div class="kpi-value">{{ operationalKPIs().pendingApprovals }}</div>
+            <div class="kpi-value">{{ operationalKPIs().activeLiveEvents }}</div>
             <div class="kpi-foot">
-              <span class="kpi-status-urgent">Avg queue time: ~18h</span>
-              <span class="kpi-sub">Across 4 hosts</span>
+              <span class="kpi-status-ok">Under management</span>
+              <span class="kpi-sub">Assigned by Hosts</span>
             </div>
           </div>
 
-          <div class="kpi-card" (click)="switchView('host_applications')">
+          <div class="kpi-card" (click)="switchView('staff_teams')">
             <div class="kpi-card-top">
-              <span class="kpi-label">Host Applications</span>
-              <div class="kpi-icon-box bg-soft-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg></div>
+              <span class="kpi-label">On-Duty Staff</span>
+              <div class="kpi-icon-box bg-soft-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
             </div>
-            <div class="kpi-value">{{ operationalKPIs().pendingHostApps }}</div>
+            <div class="kpi-value">{{ operationalKPIs().onDutyStaffCount }}</div>
             <div class="kpi-foot">
-              <span class="kpi-status-ok">3 new this week</span>
-              <span class="kpi-sub">Identity verified</span>
+              <span class="kpi-status-ok">Active on ground</span>
+              <span class="kpi-sub">Across gates</span>
             </div>
           </div>
 
@@ -281,31 +273,22 @@
         <!-- SECTION: Workflow & Queue Previews -->
         <div class="dashboard-split-grid">
           
-          <!-- Event Approvals Queue Summary -->
+          <!-- Turnstiles Live Monitor -->
           <div class="mgmt-panel-card">
             <div class="panel-head">
-              <h3>Pending Event Verifications</h3>
-              <button class="panel-btn-link" (click)="switchView('event_approvals')">View Full Queue</button>
+              <h3>Live Gate Turnstiles</h3>
+              <button class="panel-btn-link" (click)="switchView('gates')">View All Gates</button>
             </div>
             <div class="queue-list">
-              <div *ngFor="let item of approvalsQueue().slice(0, 3)" class="queue-item" (click)="openApprovalDrawer(item)">
-                <div class="queue-item-left">
-                  <strong>{{ item.title }}</strong>
-                  <span class="meta-sub">{{ item.hostName }} ({{ item.organization }}) • {{ item.category }}</span>
-                  <div class="workflow-timeline-mini">
-                    <span class="wf-step done">Submitted</span>
-                    <span class="wf-step" [class.done]="item.status === 'under_review' || item.status === 'approved' || item.status === 'published'" [class.warning]="item.status === 'changes_requested'">
-                      {{ item.status === 'changes_requested' ? 'Changes Needed' : 'Under Review' }}
-                    </span>
-                    <span class="wf-step" [class.done]="item.status === 'approved' || item.status === 'published'">Approved</span>
-                  </div>
+              <div *ngFor="let gate of gateStatuses()" class="event-ops-item">
+                <div class="ops-item-left">
+                  <strong>{{ gate.gate }}</strong>
+                  <span class="meta-sub">Staff: {{ gate.staffAssigned }} • {{ gate.throughputPerHour }} entries / hr</span>
                 </div>
-                <div class="queue-item-right">
-                  <span class="urgency-pill" [class.high]="item.urgency === 'high'">
-                    <svg *ngIf="item.urgency === 'high'" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                    {{ item.urgency === 'high' ? 'High Priority' : 'Normal' }}
+                <div class="ops-item-right">
+                  <span class="ops-status-tag" [class.demand]="gate.status === 'crowded'">
+                    {{ gate.status === 'crowded' ? 'Congested' : 'Normal Flow' }}
                   </span>
-                  <button class="btn-inspect">Inspect</button>
                 </div>
               </div>
             </div>
@@ -314,14 +297,14 @@
           <!-- Active Event Operations Status -->
           <div class="mgmt-panel-card">
             <div class="panel-head">
-              <h3>Live Operations & Turnstiles</h3>
+              <h3>Host Delegated Events</h3>
               <button class="panel-btn-link" (click)="switchView('event_operations')">Manage Field Ops</button>
             </div>
             <div class="queue-list">
               <div *ngFor="let ev of monitoredEvents()" class="event-ops-item">
                 <div class="ops-item-left">
                   <strong>{{ ev.title }}</strong>
-                  <span class="meta-sub"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> {{ ev.venue }}</span>
+                  <span class="meta-sub"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> {{ ev.venue }} • Host: {{ ev.hostName }}</span>
                   <div class="capacity-bar-wrap">
                     <div class="capacity-bar-track">
                       <div class="capacity-bar-fill" [style.width.%]="(ev.bookedCount / ev.capacity) * 100"></div>
@@ -343,144 +326,44 @@
       </div>
 
       <!-- ─────────────────────────────────────────────────────────
-           VIEW 2: EVENT APPROVALS QUEUE
+           VIEW 2: GATES & TURNSTILES
            ───────────────────────────────────────────────────────── -->
-      <div class="view-pane" *ngIf="currentView() === 'event_approvals'">
+      <div class="view-pane" *ngIf="currentView() === 'gates'">
         
         <div class="view-title-row">
           <div>
-            <h2>Event Approvals Queue</h2>
-            <p>Review event compliance, venue licensing, speaker clearances, and publication approvals.</p>
-          </div>
-
-          <!-- Filters -->
-          <div class="filter-group-row">
-            <button class="filter-tab" [class.active]="approvalFilter() === 'all'" (click)="approvalFilter.set('all')">All ({{ approvalsQueue().length }})</button>
-            <button class="filter-tab" [class.active]="approvalFilter() === 'under_review'" (click)="approvalFilter.set('under_review')">Under Review</button>
-            <button class="filter-tab" [class.active]="approvalFilter() === 'changes_requested'" (click)="approvalFilter.set('changes_requested')">Changes Requested</button>
-            <button class="filter-tab" [class.active]="approvalFilter() === 'approved'" (click)="approvalFilter.set('approved')">Approved</button>
+            <h2>Turnstiles & Gate Throughput</h2>
+            <p>Real-time queue balancing, gate scanner monitoring, and bottleneck prevention.</p>
           </div>
         </div>
 
-        <!-- Approvals Data Table -->
-        <div class="mgmt-table-card">
-          <table class="mgmt-data-table">
-            <thead>
-              <tr>
-                <th>Event & Host</th>
-                <th>Workflow Stage</th>
-                <th>Event Date & Venue</th>
-                <th>Capacity / Price</th>
-                <th>Assigned Manager</th>
-                <th class="text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of filteredApprovals()" (click)="openApprovalDrawer(item)" class="clickable-row">
-                <td>
-                  <div class="cell-event-info">
-                    <strong>{{ item.title }}</strong>
-                    <span class="sub-text">By {{ item.hostName }} ({{ item.organization }})</span>
-                    <span class="category-pill">{{ item.category }}</span>
-                  </div>
-                </td>
-                <td>
-                  <div class="workflow-timeline-inline">
-                    <span class="status-chip" [attr.data-status]="item.status">
-                      {{ item.status === 'changes_requested' ? 'Action Required' : item.status === 'under_review' ? 'In Review' : (item.status | titlecase) }}
-                    </span>
-                    <small *ngIf="!item.documentClearance" class="doc-warning-text"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Permits Missing</small>
-                  </div>
-                </td>
-                <td>
-                  <div class="cell-date-info">
-                    <strong>{{ item.eventDate }}</strong>
-                    <small>{{ item.venue }}</small>
-                  </div>
-                </td>
-                <td>
-                  <div class="cell-cap-info">
-                    <strong>{{ item.capacity }} seats</strong>
-                    <small>{{ item.ticketPrice === 0 ? 'Free' : '₹' + item.ticketPrice }}</small>
-                  </div>
-                </td>
-                <td>
-                  <span class="manager-name">{{ item.assignedManager }}</span>
-                </td>
-                <td class="text-right" (click)="$event.stopPropagation()">
-                  <div class="row-action-btns">
-                    <button class="btn-review-item" (click)="openApprovalDrawer(item)">Review</button>
-                    <button *ngIf="item.status !== 'approved' && item.status !== 'published'" class="btn-quick-approve" (click)="approveEventSubmission(item.id)">Approve</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="monitoring-cards-grid">
+          <div *ngFor="let gate of gateStatuses()" class="event-monitor-card">
+            <div class="monitor-card-header">
+              <div>
+                <h3>{{ gate.gate }}</h3>
+                <span class="monitor-venue">Assigned Staff: <strong>{{ gate.staffAssigned }}</strong></span>
+              </div>
+              <span class="ops-status-tag" [class.demand]="gate.status === 'crowded'">
+                {{ gate.status === 'crowded' ? 'Congested / Need Staff' : 'Optimal Flow' }}
+              </span>
+            </div>
 
-      </div>
+            <div class="monitor-metrics-row">
+              <div class="m-box">
+                <span class="m-box-lbl">Hourly Pace</span>
+                <strong class="m-box-val">{{ gate.throughputPerHour }} entries / hr</strong>
+              </div>
+              <div class="m-box">
+                <span class="m-box-lbl">Gate Status</span>
+                <strong class="m-box-val" [class.text-danger]="gate.status === 'crowded'">{{ gate.status | titlecase }}</strong>
+              </div>
+            </div>
 
-      <!-- ─────────────────────────────────────────────────────────
-           VIEW 3: HOST APPLICATIONS REVIEW
-           ───────────────────────────────────────────────────────── -->
-      <div class="view-pane" *ngIf="currentView() === 'host_applications'">
-        
-        <div class="view-title-row">
-          <div>
-            <h2>Host Application Reviews</h2>
-            <p>Evaluate prospective event organizers, review identification proofs, and assign permissions.</p>
+            <div class="monitor-footer">
+              <a routerLink="/staff/scanner" class="btn-staff-desk-link">Join Scanner Turnstile</a>
+            </div>
           </div>
-
-          <div class="filter-group-row">
-            <button class="filter-tab" [class.active]="hostAppFilter() === 'all'" (click)="hostAppFilter.set('all')">All Applications</button>
-            <button class="filter-tab" [class.active]="hostAppFilter() === 'submitted'" (click)="hostAppFilter.set('submitted')">New Submissions</button>
-            <button class="filter-tab" [class.active]="hostAppFilter() === 'approved'" (click)="hostAppFilter.set('approved')">Approved</button>
-          </div>
-        </div>
-
-        <div class="mgmt-table-card">
-          <table class="mgmt-data-table">
-            <thead>
-              <tr>
-                <th>Applicant / Organization</th>
-                <th>Expected Scale</th>
-                <th>Location</th>
-                <th>Doc Status</th>
-                <th>Reviewer</th>
-                <th>Status</th>
-                <th class="text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let host of filteredHostApps()" (click)="openHostDrawer(host)" class="clickable-row">
-                <td>
-                  <div class="cell-event-info">
-                    <strong>{{ host.applicantName }}</strong>
-                    <span class="sub-text">{{ host.organizationName }}</span>
-                    <small>{{ host.email }} • {{ host.phone }}</small>
-                  </div>
-                </td>
-                <td>{{ host.scale }}</td>
-                <td>{{ host.city }}</td>
-                <td>
-                  <span class="doc-badge" [class.verified]="host.docStatus === 'verified'">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline *ngIf="host.docStatus === 'verified'" points="20 6 9 17 4 12"/><circle *ngIf="host.docStatus !== 'verified'" cx="12" cy="12" r="10"/></svg>
-                    {{ host.docStatus === 'verified' ? 'Verified ID' : 'Pending Proof' }}
-                  </span>
-                </td>
-                <td>{{ host.assignedReviewer }}</td>
-                <td>
-                  <span class="status-chip" [attr.data-status]="host.status">{{ host.status | titlecase }}</span>
-                </td>
-                <td class="text-right" (click)="$event.stopPropagation()">
-                  <div class="row-action-btns">
-                    <button class="btn-review-item" (click)="openHostDrawer(host)">Inspect</button>
-                    <button *ngIf="host.status !== 'approved'" class="btn-quick-approve" (click)="approveHostApp(host.id)">Approve</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
 
       </div>
@@ -586,121 +469,7 @@
     </main>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- DETAIL DRAWER: EVENT APPROVAL INSPECTION                    -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <div class="mgmt-drawer-overlay" *ngIf="selectedApprovalForDrawer()" (click)="closeApprovalDrawer()">
-    <div class="mgmt-drawer-card" (click)="$event.stopPropagation()">
-      <div class="drawer-header">
-        <div>
-          <h3>Review Event Listing</h3>
-          <span class="drawer-sub">ID: {{ selectedApprovalForDrawer()?.id }}</span>
-        </div>
-        <button class="btn-drawer-close" (click)="closeApprovalDrawer()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-      </div>
 
-      <div class="drawer-body">
-        
-        <!-- Workflow Status Tracker -->
-        <div class="drawer-section">
-          <h4>Workflow Progress</h4>
-          <div class="workflow-stepper">
-            <div class="step-point done">1. Submitted</div>
-            <div class="step-point" [class.done]="selectedApprovalForDrawer()?.status === 'approved' || selectedApprovalForDrawer()?.status === 'published'" [class.active]="selectedApprovalForDrawer()?.status === 'under_review'">
-              2. Under Review
-            </div>
-            <div class="step-point" [class.done]="selectedApprovalForDrawer()?.status === 'approved' || selectedApprovalForDrawer()?.status === 'published'">
-              3. Approved
-            </div>
-            <div class="step-point" [class.done]="selectedApprovalForDrawer()?.status === 'published'">
-              4. Live on App
-            </div>
-          </div>
-        </div>
-
-        <!-- Event Details -->
-        <div class="drawer-section">
-          <h4>Event Overview</h4>
-          <p><strong>Title:</strong> {{ selectedApprovalForDrawer()?.title }}</p>
-          <p><strong>Organizer:</strong> {{ selectedApprovalForDrawer()?.hostName }} ({{ selectedApprovalForDrawer()?.organization }})</p>
-          <p><strong>Venue:</strong> {{ selectedApprovalForDrawer()?.venue }}</p>
-          <p><strong>Scheduled Date:</strong> {{ selectedApprovalForDrawer()?.eventDate }}</p>
-          <p><strong>Capacity & Price:</strong> {{ selectedApprovalForDrawer()?.capacity }} seats • {{ selectedApprovalForDrawer()?.ticketPrice === 0 ? 'Free Entry' : '₹' + selectedApprovalForDrawer()?.ticketPrice }}</p>
-        </div>
-
-        <!-- Compliance & Permits Check -->
-        <div class="drawer-section">
-          <h4>Permits & Compliance Verification</h4>
-          <div class="compliance-row">
-            <span class="comp-badge" [class.valid]="selectedApprovalForDrawer()?.documentClearance">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline *ngIf="selectedApprovalForDrawer()?.documentClearance" points="20 6 9 17 4 12"/><path *ngIf="!selectedApprovalForDrawer()?.documentClearance" d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
-              {{ selectedApprovalForDrawer()?.documentClearance ? 'Sound & Venue Documents Clear' : 'Missing Clearances' }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Review Feedback Note -->
-        <div class="drawer-section">
-          <label class="drawer-label">Review Feedback / Requested Modifications:</label>
-          <textarea 
-            [(ngModel)]="reviewFeedbackNote" 
-            rows="3" 
-            class="drawer-textarea" 
-            placeholder="Notes will be sent directly to the host for revision...">
-          </textarea>
-        </div>
-
-      </div>
-
-      <div class="drawer-footer">
-        <button class="btn-drawer-secondary" (click)="closeApprovalDrawer()">Cancel</button>
-        <button class="btn-drawer-warning" (click)="requestChangesOnEvent(selectedApprovalForDrawer()!.id)">Request Changes</button>
-        <button class="btn-drawer-primary" (click)="approveEventSubmission(selectedApprovalForDrawer()!.id)">Approve Listing</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- DETAIL DRAWER: HOST APPLICATION INSPECTION                  -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <div class="mgmt-drawer-overlay" *ngIf="selectedHostForDrawer()" (click)="closeHostDrawer()">
-    <div class="mgmt-drawer-card" (click)="$event.stopPropagation()">
-      <div class="drawer-header">
-        <div>
-          <h3>Host Credential Review</h3>
-          <span class="drawer-sub">{{ selectedHostForDrawer()?.applicantName }} • {{ selectedHostForDrawer()?.id }}</span>
-        </div>
-        <button class="btn-drawer-close" (click)="closeHostDrawer()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-      </div>
-
-      <div class="drawer-body">
-        <div class="drawer-section">
-          <h4>Organization Details</h4>
-          <p><strong>Organization:</strong> {{ selectedHostForDrawer()?.organizationName }}</p>
-          <p><strong>City / Base:</strong> {{ selectedHostForDrawer()?.city }}</p>
-          <p><strong>Expected Attendee Scale:</strong> {{ selectedHostForDrawer()?.scale }}</p>
-        </div>
-
-        <div class="drawer-section">
-          <h4>Experience Description</h4>
-          <p class="drawer-note-box">{{ selectedHostForDrawer()?.experience }}</p>
-        </div>
-
-        <div class="drawer-section">
-          <h4>Government Identity Document</h4>
-          <div class="doc-verification-box">
-            <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Identity Proof Document</span>
-            <strong class="text-emerald"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Verified Format</strong>
-          </div>
-        </div>
-      </div>
-
-      <div class="drawer-footer">
-        <button class="btn-drawer-secondary" (click)="closeHostDrawer()">Close</button>
-        <button class="btn-drawer-primary" (click)="approveHostApp(selectedHostForDrawer()!.id)">Approve Host</button>
-      </div>
-    </div>
-  </div>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- CONFIRMATION DIALOG                                         -->

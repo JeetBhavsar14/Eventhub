@@ -792,3 +792,204 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* ─────────────────────────────────────────────────────────
+   DYNAMIC STATION ASSIGNMENT & PERMISSIONS STYLING
+   ───────────────────────────────────────────────────────── */
+
+/* Designation Chip & Title Row in Header */
+.venue-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.designation-chip {
+  background: rgba(16, 185, 129, 0.15);
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+}
+
+/* Station Switcher Bar */
+.station-switcher-bar {
+  background: #1e1b4b;
+  border-bottom: 1px solid #312e81;
+  padding: 0.6rem 1rem;
+}
+
+.switcher-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.switcher-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.switcher-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: #c7d2fe;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.preset-chips-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.station-chip-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e0e7ff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.station-chip-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.station-chip-btn.active {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #818cf8;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
+}
+
+/* Station Permissions Card on Today tab */
+.shift-designation-badge {
+  display: inline-block;
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  margin-top: 0.25rem;
+}
+
+.shift-perms-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.perms-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.25rem;
+  gap: 0.75rem;
+}
+
+.perms-card-head h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.perms-card-sub {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 0.25rem 0 1rem;
+}
+
+.active-perm-count {
+  font-size: 0.725rem;
+  font-weight: 700;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid #a7f3d0;
+  white-space: nowrap;
+}
+
+.station-perms-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .station-perms-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.station-perm-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  opacity: 0.55;
+  transition: all 0.2s ease;
+}
+
+.station-perm-item.granted {
+  opacity: 1;
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.station-perm-item .perm-status-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.station-perm-item.granted .perm-status-icon {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.perm-text-info strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #1e293b;
+  line-height: 1.25;
+}
+
+.perm-text-info small {
+  font-size: 0.725rem;
+  color: #64748b;
+}
+
+.station-perm-item.granted .perm-text-info small {
+  color: #047857;
+  font-weight: 600;
+}

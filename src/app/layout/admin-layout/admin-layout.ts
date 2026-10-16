@@ -3,15 +3,21 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/auth';
-import { HostApplicationService, AdminService, AdminHostApplication, AdminCurationEvent, AdminUser } from '@core/state';
-import { SelectComponent, SelectOption } from '@shared/components';
+import { HostApplicationService, AdminService, AdminHostApplication, AdminCurationEvent, AdminUser, AdminSettlement } from '@core/state';
 
 export type AdminView = 'overview' | 'host_applications' | 'event_curation' | 'users' | 'revenue' | 'system' | 'finance' | 'settings';
+
+export interface AdminConfirmDialogData {
+  title: string;
+  message: string;
+  actionBtnText: string;
+  isDestructive: boolean;
+}
 
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, SelectComponent],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.css'
 })
@@ -33,39 +39,55 @@ export class AdminLayoutComponent implements OnInit {
 
   // Filter States
   hostFilter = signal<'all' | 'under_review' | 'approved' | 'rejected' | 'changes_requested' | 'submitted'>('all');
-  eventFilter = signal<'all' | 'pending_review' | 'changes_requested' | 'approved'>('all');
+  eventFilter = signal<'all' | 'pending_review' | 'changes_requested' | 'approved' | 'rejected'>('all');
   userRoleFilter = signal<string>('all');
-  userFilter = signal<string>('all');
+  userStatusFilter = signal<'all' | 'active' | 'suspended'>('all');
   userSearch = signal('');
   searchQuery = signal('');
 
-  // Modals State
+  // Modals & Drawers State
   selectedAppForModal = signal<AdminHostApplication | null>(null);
   selectedEventForModal = signal<AdminCurationEvent | null>(null);
+  selectedUserForDossier = signal<AdminUser | null>(null);
   feedbackText = signal('');
   showBroadcastModal = signal(false);
   broadcastMessage = signal({ title: '', body: '', audience: 'all' });
+
+  // Confirmation Dialog System
+  showConfirmationDialog = signal(false);
+  confirmDialogData: AdminConfirmDialogData = {
+    title: '',
+    message: '',
+    actionBtnText: 'Confirm',
+    isDestructive: false
+  };
+  pendingConfirmAction: (() => Promise<void> | void) | null = null;
 
   // Expose signals from AdminService
   readonly hostApplications = this.adminService.hostApplications;
   readonly curationEvents = this.adminService.curationEvents;
   readonly users = this.adminService.users;
+  readonly settlements = this.adminService.settlements;
+  readonly financialMetrics = this.adminService.financialMetrics;
 
   // Computed Platform Metrics
   platformStats = computed(() => {
     const apps = this.hostApplications();
     const curEvents = this.curationEvents();
     const usersList = this.users();
+    const fin = this.financialMetrics();
 
     const pendingApps = apps.filter(a => a.status === 'under_review' || a.status === 'changes_requested').length;
     const pendingEvents = curEvents.filter(e => e.status === 'pending_review').length;
     const verifiedHosts = usersList.filter(u => u.role === 'host' || u.role === 'admin').length;
 
     return {
-      totalGMV: '₹28,45,200',
-      platformCommission: '₹2,27,616',
-      totalUsers: usersList.length || 1420,
-      activeUsers: usersList.length || 1420,
+      totalGMV: '₹' + fin.totalGMV.toLocaleString('en-IN'),
+      platformCommission: '₹' + fin.totalPlatformCommission.toLocaleString('en-IN'),
+      pendingPayouts: '₹' + fin.pendingPayouts.toLocaleString('en-IN'),
+      settledPayouts: '₹' + fin.settledPayouts.toLocaleString('en-IN'),
+      totalUsers: usersList.length,
+      activeUsers: usersList.filter(u => u.status === 'active').length,
       verifiedHosts,
       pendingAppsCount: pendingApps,
       pendingEventsCount: pendingEvents,
@@ -123,32 +145,21 @@ export class AdminLayoutComponent implements OnInit {
   // Filtered Users
   filteredUsers = computed(() => {
     const list = this.users();
-    const f = this.userFilter() !== 'all' ? this.userFilter() : this.userRoleFilter();
+    const roleF = this.userRoleFilter();
+    const statusF = this.userStatusFilter();
     const q = this.userSearch().toLowerCase().trim();
 
     return list.filter(item => {
-      const matchRole = f === 'all' || item.role === f;
+      const matchRole = roleF === 'all' || item.role === roleF;
+      const matchStatus = statusF === 'all' || item.status === statusF;
       const matchQuery =
         !q ||
         item.name?.toLowerCase().includes(q) ||
-        item.email?.toLowerCase().includes(q);
-      return matchRole && matchQuery;
+        item.email?.toLowerCase().includes(q) ||
+        item.role?.toLowerCase().includes(q);
+      return matchRole && matchStatus && matchQuery;
     });
   });
-
-  async toggleUserRole(u: AdminUser) {
-    const nextRole: AdminUser['role'] = u.role === 'host' ? 'user' : 'host';
-    await this.adminService.changeUserRole(u.id, nextRole);
-    this.showToast(`Changed ${u.name}'s role to ${nextRole.toUpperCase()}`);
-  }
-
-  async toggleUserSuspension(u: AdminUser) {
-    const nextStatus = u.status === 'active' ? 'suspended' : 'active';
-    this.adminService.users.update(list =>
-      list.map(user => user.id === u.id ? { ...user, status: nextStatus } : user)
-    );
-    this.showToast(`User ${u.name} is now ${nextStatus}`);
-  }
 
   ngOnInit() {
     this.adminService.loadAll();
@@ -160,26 +171,105 @@ export class AdminLayoutComponent implements OnInit {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // Confirmation Modal Engine
+  triggerConfirm(title: string, message: string, actionBtnText: string, isDestructive: boolean, action: () => Promise<void> | void) {
+    this.confirmDialogData = { title, message, actionBtnText, isDestructive };
+    this.pendingConfirmAction = action;
+    this.showConfirmationDialog.set(true);
+  }
+
+  async executeConfirmAction() {
+    if (this.pendingConfirmAction) {
+      await this.pendingConfirmAction();
+      this.pendingConfirmAction = null;
+    }
+    this.showConfirmationDialog.set(false);
+  }
+
+  cancelConfirm() {
+    this.pendingConfirmAction = null;
+    this.showConfirmationDialog.set(false);
+  }
+
+  // User Management Actions
+  openUserDossier(u: AdminUser) {
+    this.selectedUserForDossier.set(u);
+  }
+
+  closeUserDossier() {
+    this.selectedUserForDossier.set(null);
+  }
+
+  promptChangeUserRole(u: AdminUser, newRole: AdminUser['role']) {
+    this.triggerConfirm(
+      `Change Role to ${newRole.toUpperCase()}?`,
+      `Are you sure you want to change ${u.name}'s platform role to "${newRole.toUpperCase()}"? This immediately updates database credentials and permission layouts.`,
+      `Update to ${newRole.toUpperCase()}`,
+      false,
+      async () => {
+        await this.adminService.changeUserRole(u.id, newRole);
+        this.selectedUserForDossier.set(null);
+        this.showToast(`Updated ${u.name}'s role to ${newRole.toUpperCase()}.`);
+      }
+    );
+  }
+
+  promptToggleUserSuspension(u: AdminUser) {
+    const isSuspended = u.status === 'suspended';
+    const nextStatus = isSuspended ? 'active' : 'suspended';
+    const actionText = isSuspended ? 'Reactivate Account' : 'Suspend Account';
+
+    this.triggerConfirm(
+      `${actionText}?`,
+      isSuspended
+        ? `Reactivate account for ${u.name} (${u.email})? They will be allowed to log in and participate in events.`
+        : `Are you sure you want to suspend ${u.name} (${u.email})? They will be blocked from logging in across all apps.`,
+      actionText,
+      !isSuspended,
+      async () => {
+        await this.adminService.changeUserStatus(u.id, nextStatus);
+        this.selectedUserForDossier.set(null);
+        this.showToast(`User ${u.name} is now ${nextStatus.toUpperCase()}.`);
+      }
+    );
+  }
+
   // Host Application Actions
   openAppDetailsModal(app: AdminHostApplication) {
     this.selectedAppForModal.set(app);
   }
 
-  async approveHostApplication(appId: string) {
-    const success = await this.adminService.approveHostApplication(appId);
-    if (success) {
-      this.hostAppService.setPrototypeState('approved');
-      this.selectedAppForModal.set(null);
-      this.showToast('Host application verified and approved! Host privileges granted.');
-    }
+  promptApproveHostApplication(appId: string, applicantName: string) {
+    this.triggerConfirm(
+      'Approve Host Application & Grant SaaS Access?',
+      `Confirm approval for ${applicantName}? This promotes their profile to a Verified Host in db.json and unlocks the Host Studio.`,
+      'Approve & Promote',
+      false,
+      async () => {
+        const success = await this.adminService.approveHostApplication(appId);
+        if (success) {
+          this.hostAppService.setPrototypeState('approved');
+          this.selectedAppForModal.set(null);
+          this.showToast(`Host application for ${applicantName} approved and promoted!`);
+        }
+      }
+    );
   }
 
-  async rejectHostApplication(appId: string) {
-    const success = await this.adminService.rejectHostApplication(appId);
-    if (success) {
-      this.selectedAppForModal.set(null);
-      this.showToast('Host application rejected.');
-    }
+  promptRejectHostApplication(appId: string, applicantName: string) {
+    this.triggerConfirm(
+      'Reject Host Application?',
+      `Are you sure you want to reject the application for ${applicantName}? An official rejection notification will be logged.`,
+      'Reject Application',
+      true,
+      async () => {
+        const success = await this.adminService.rejectHostApplication(appId);
+        if (success) {
+          this.selectedAppForModal.set(null);
+          this.showToast(`Host application for ${applicantName} rejected.`);
+        }
+      }
+    );
   }
 
   async requestMoreHostInfo(appId: string) {
@@ -196,12 +286,41 @@ export class AdminLayoutComponent implements OnInit {
     this.feedbackText.set('');
   }
 
-  async approveEventForLive(eventId: string) {
-    const success = await this.adminService.approveEvent(eventId);
-    if (success) {
-      this.selectedEventForModal.set(null);
-      this.showToast('Event approved for live discovery listing.');
-    }
+  promptApproveEventForLive(eventId: string, eventTitle: string) {
+    this.triggerConfirm(
+      'Approve Event for Public Feed?',
+      `Publish "${eventTitle}" live to the public Discover feed? Attendees will be able to book tickets immediately.`,
+      'Publish Live',
+      false,
+      async () => {
+        const success = await this.adminService.approveEvent(eventId);
+        if (success) {
+          this.selectedEventForModal.set(null);
+          this.showToast(`"${eventTitle}" is now published LIVE on EventHub.`);
+        }
+      }
+    );
+  }
+
+  promptDelistEvent(eventId: string, eventTitle: string) {
+    this.triggerConfirm(
+      'Delist Event from Discover?',
+      `Delist "${eventTitle}" from the public marketplace? It will be removed from discover searches and ticket booking will freeze.`,
+      'Delist Event',
+      true,
+      async () => {
+        const success = await this.adminService.delistEvent(eventId);
+        if (success) {
+          this.selectedEventForModal.set(null);
+          this.showToast(`"${eventTitle}" has been delisted.`);
+        }
+      }
+    );
+  }
+
+  async toggleEventFeatured(eventId: string, eventTitle: string) {
+    await this.adminService.toggleEventFeatured(eventId);
+    this.showToast(`Updated featured showcase banner for "${eventTitle}".`);
   }
 
   async sendEventFeedback(eventId: string) {
@@ -209,14 +328,22 @@ export class AdminLayoutComponent implements OnInit {
     const success = await this.adminService.sendEventFeedback(eventId, note);
     if (success) {
       this.selectedEventForModal.set(null);
-      this.showToast('Modifications requested sent to host.');
+      this.showToast('Compliance feedback dispatched to organizer.');
     }
   }
 
-  // User Role Management
-  async changeUserRole(userId: string, newRole: any) {
-    await this.adminService.changeUserRole(userId, newRole);
-    this.showToast(`Updated user role to ${String(newRole).toUpperCase()}.`);
+  // Settlement Release Action
+  promptReleaseSettlementPayout(settlement: AdminSettlement) {
+    this.triggerConfirm(
+      `Release Payout of ₹${settlement.netPayout.toLocaleString('en-IN')}?`,
+      `Confirm electronic disbursement of ₹${settlement.netPayout.toLocaleString('en-IN')} to ${settlement.hostName} (${settlement.bankAccount}) for "${settlement.eventTitle}"? EventHub 5% cut (₹${settlement.platformCommission.toLocaleString('en-IN')}) has been retained.`,
+      'Release Payout',
+      false,
+      async () => {
+        await this.adminService.releaseSettlementPayout(settlement.id);
+        this.showToast(`Payout of ₹${settlement.netPayout.toLocaleString('en-IN')} successfully settled!`);
+      }
+    );
   }
 
   // Broadcast Announcement
@@ -225,7 +352,7 @@ export class AdminLayoutComponent implements OnInit {
     if (msg.title && msg.body) {
       await this.adminService.sendBroadcast(msg.title, msg.body);
       this.showBroadcastModal.set(false);
-      this.showToast(`Platform broadcast "${msg.title}" dispatched.`);
+      this.showToast(`Global broadcast "${msg.title}" dispatched.`);
     }
   }
 
@@ -234,7 +361,7 @@ export class AdminLayoutComponent implements OnInit {
     this.toastMessage.set(msg);
     setTimeout(() => {
       this.toastMessage.set(null);
-    }, 3500);
+    }, 3600);
   }
 
   @HostListener('document:click', ['$event'])

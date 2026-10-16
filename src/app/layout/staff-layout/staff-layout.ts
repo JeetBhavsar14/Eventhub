@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/auth';
-import { StaffService, StaffAttendee, StaffIncident } from '@core/state';
+import { StaffService, StaffAttendee, StaffIncident, STAFF_DESIGNATION_PRESETS, StaffDesignationPreset } from '@core/state';
 
 export type StaffTab = 'today' | 'checkin' | 'attendees' | 'issues';
 export type ScanOutcome = 'idle' | 'valid' | 'invalid' | 'duplicate';
@@ -20,11 +20,30 @@ export class StaffLayoutComponent implements OnInit {
   private readonly router = inject(Router);
   readonly staffService = inject(StaffService);
 
+  // Designation Presets for live demonstration & testing
+  readonly rolePresets = STAFF_DESIGNATION_PRESETS;
+
+  // Dynamic capabilities and permissions from StaffService
+  readonly currentEvent = this.staffService.currentEvent;
+  readonly activeDesignation = this.staffService.activeDesignation;
+  readonly permissions = this.staffService.permissions;
+  readonly canScanTickets = this.staffService.canScanTickets;
+  readonly canViewAttendees = this.staffService.canViewAttendees;
+  readonly canLogIncidents = this.staffService.canLogIncidents;
+  readonly canViewDuty = this.staffService.canViewDuty;
+
+  // Dynamic tabs allowed according to granted permissions
+  readonly allowedTabs = computed<StaffTab[]>(() => {
+    const tabs: StaffTab[] = [];
+    if (this.canViewDuty()) tabs.push('today');
+    if (this.canScanTickets()) tabs.push('checkin');
+    if (this.canViewAttendees()) tabs.push('attendees');
+    if (this.canLogIncidents()) tabs.push('issues');
+    return tabs.length > 0 ? tabs : ['today'];
+  });
+
   // Active Bottom Tab (Mobile-first)
   activeTab = signal<StaffTab>('checkin');
-
-  // Active Event Context
-  readonly currentEvent = this.staffService.currentEvent;
 
   // Ticket Validation Scanner Simulator
   ticketSearchInput = signal('');
@@ -92,15 +111,37 @@ export class StaffLayoutComponent implements OnInit {
 
   ngOnInit() {
     this.staffService.loadAll();
+    // Default active tab to first allowed tab
+    const allowed = this.allowedTabs();
+    if (!allowed.includes(this.activeTab())) {
+      this.activeTab.set(allowed[0] || 'today');
+    }
   }
 
   setTab(tab: StaffTab) {
+    if (!this.allowedTabs().includes(tab)) {
+      this.showToast(`Access Restricted: You lack permission for the "${tab}" tab.`);
+      return;
+    }
     this.activeTab.set(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  switchDesignationPreset(presetId: string) {
+    this.staffService.setDesignationPreset(presetId);
+    const allowed = this.allowedTabs();
+    if (!allowed.includes(this.activeTab())) {
+      this.activeTab.set(allowed[0] || 'today');
+    }
+    this.showToast(`Switched Station to: ${this.activeDesignation()} (${this.permissions().length} permissions)`);
+  }
+
   // Fast Pass Scanner Simulator
   verifyPass(codeOrOrder?: string) {
+    if (!this.canScanTickets()) {
+      this.showToast('Access Restricted: Ticket scanning permission not assigned to your station.');
+      return;
+    }
     const target = (codeOrOrder || this.ticketSearchInput()).trim().toUpperCase();
     if (!target) return;
 

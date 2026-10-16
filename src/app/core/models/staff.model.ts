@@ -1,3 +1,17 @@
+export type StaffPermission = 'scan_tickets' | 'view_attendees' | 'log_incidents' | 'view_duty';
+
+export interface StaffEventDuty {
+  title: string;
+  venue: string;
+  gate: string;
+  startTime: string;
+  endTime: string;
+  roleDuty: string;
+  designation?: string;
+  responsibility?: string;
+  permissions?: string[];
+}
+
 export interface StaffAttendee {
   id: string;
   orderId: string;
@@ -25,6 +39,8 @@ export interface StaffRosterItem {
   email: string;
   phone: string;
   role: string;
+  designation?: string;
+  permissions?: string[];
   assignedEvent: string;
   assignedGate: string;
   status: 'on_duty' | 'break' | 'off_duty';

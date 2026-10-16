@@ -10,8 +10,8 @@
       "avatarUrl": null,
       "isEmailVerified": true,
       "isPhoneVerified": true,
-      "isHost": false,
-      "platformRole": "user",
+      "isHost": true,
+      "platformRole": "host",
       "createdAt": "2025-01-01T00:00:00.000Z"
     },
     {
@@ -299,7 +299,8 @@
       ],
       "maxTicketsPerBooking": 4,
       "hostId": "user-003",
-      "createdAt": "2026-10-08T05:39:10.040Z"
+      "createdAt": "2026-10-08T05:39:10.040Z",
+      "adminFeedback": "Please provide updated permit documentation."
     },
     {
       "id": "evt-105",
@@ -3012,7 +3013,7 @@
       "docStatus": "verified",
       "idDocName": "GST_Certificate_Sunbeat_LLP.pdf",
       "assignedReviewer": "Rhea Kapoor (Operations Lead)",
-      "status": "rejected",
+      "status": "changes_requested",
       "submittedDate": "2026-10-08",
       "submittedAt": "2026-10-08T10:00:00.000Z"
     },
@@ -3256,11 +3257,13 @@
       "name": "Karan Malhotra",
       "role": "staff",
       "roleName": "Gate & Check-In Staff",
+      "designation": "Gate & Barcode Scanner",
+      "responsibility": "ticketing",
       "isOwner": false,
       "permissions": [
         "scan_tickets",
         "view_attendees",
-        "log_incidents"
+        "view_duty"
       ],
       "status": "active",
       "joinedAt": "2026-10-09T08:00:00.000Z"

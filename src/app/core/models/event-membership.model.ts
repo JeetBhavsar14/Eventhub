@@ -32,6 +32,7 @@ export interface EventMembership {
   name: string;
   role: MembershipRole;
   roleName?: string;
+  designation?: string;
   isOwner?: boolean;
   roleCategory: 'operational' | 'participant';
   delegationActive?: boolean;
@@ -55,8 +56,11 @@ export interface EventInvitation {
   inviteeName?: string;
   role: MembershipRole;
   roleCategory: 'operational' | 'participant';
+  designation?: string;
+  responsibility?: StaffResponsibility;
   customRoleName?: string;
   customPermissions?: string[];
+  permissions?: string[];
   status: 'pending' | 'accepted' | 'rejected' | 'expired';
   sentAt: string;
   respondedAt?: string | null;

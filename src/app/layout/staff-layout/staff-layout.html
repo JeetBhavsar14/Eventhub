@@ -20,8 +20,11 @@
     <div class="event-venue-indicator">
       <span class="pulse-emerald"></span>
       <div class="venue-info-text">
-        <strong>{{ currentEvent().title }}</strong>
-        <small><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> {{ currentEvent().gate }}</small>
+        <div class="venue-title-row">
+          <strong>{{ currentEvent().title }}</strong>
+          <span class="designation-chip">{{ activeDesignation() }}</span>
+        </div>
+        <small><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> {{ currentEvent().gate }} • {{ permissions().length }} Permissions Granted</small>
       </div>
     </div>
 
@@ -34,6 +37,26 @@
       </button>
     </div>
   </header>
+
+  <!-- Interactive Role / Station Simulator (Shows how permissions reshape layout) -->
+  <div class="station-switcher-bar">
+    <div class="switcher-inner">
+      <span class="switcher-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Assigned Station Role:
+      </span>
+      <div class="preset-chips-wrap">
+        <button 
+          *ngFor="let p of rolePresets" 
+          type="button"
+          class="station-chip-btn" 
+          [class.active]="activeDesignation() === p.title"
+          (click)="switchDesignationPreset(p.id)">
+          {{ p.title }}
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- 2. LIVE GATE ADMISSION PROGRESS BAR                         -->
@@ -62,7 +85,7 @@
     <!-- ─────────────────────────────────────────────────────────
          TAB 1: TICKET VALIDATION & CHECK-IN (Primary Action Screen)
          ───────────────────────────────────────────────────────── -->
-    <div class="staff-pane" *ngIf="activeTab() === 'checkin'">
+    <div class="staff-pane" *ngIf="activeTab() === 'checkin' && canScanTickets()">
       
       <!-- Prominent Check In Scanner Card -->
       <div class="scanner-hero-box">
@@ -147,7 +170,7 @@
     <!-- ─────────────────────────────────────────────────────────
          TAB 2: ATTENDEES LIST & MANUAL CHECK-IN
          ───────────────────────────────────────────────────────── -->
-    <div class="staff-pane" *ngIf="activeTab() === 'attendees'">
+    <div class="staff-pane" *ngIf="activeTab() === 'attendees' && canViewAttendees()">
       
       <div class="attendees-header-wrap">
         <h2>Guest Admissions List</h2>
@@ -212,10 +235,13 @@
     <!-- ─────────────────────────────────────────────────────────
          TAB 3: TODAY'S SHIFT & EVENT ASSIGNMENTS
          ───────────────────────────────────────────────────────── -->
-    <div class="staff-pane" *ngIf="activeTab() === 'today'">
+    <div class="staff-pane" *ngIf="activeTab() === 'today' && canViewDuty()">
       <div class="shift-hero-card">
         <div class="shift-head">
-          <h2>Today's Duty Roster</h2>
+          <div>
+            <h2>Today's Duty Roster</h2>
+            <span class="shift-designation-badge">{{ activeDesignation() }}</span>
+          </div>
           <span class="shift-live-tag">● Live Shift</span>
         </div>
 
@@ -239,6 +265,59 @@
         </div>
       </div>
 
+      <!-- Official Station Designation & Granted Permissions Card -->
+      <div class="shift-perms-card">
+        <div class="perms-card-head">
+          <div>
+            <h3>Station Authority & Granted Permissions</h3>
+            <p class="perms-card-sub">Authorized by Event Owner & Operations Lead for current assignment.</p>
+          </div>
+          <span class="active-perm-count">{{ permissions().length }} Active Permissions</span>
+        </div>
+        
+        <div class="station-perms-grid">
+          <div class="station-perm-item" [class.granted]="canScanTickets()">
+            <div class="perm-status-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="perm-text-info">
+              <strong>Gate QR & Barcode Scanner</strong>
+              <small>{{ canScanTickets() ? 'Active at Turnstiles' : 'Restricted for this Station' }}</small>
+            </div>
+          </div>
+
+          <div class="station-perm-item" [class.granted]="canViewAttendees()">
+            <div class="perm-status-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="perm-text-info">
+              <strong>Attendee Roster & Status Lookup</strong>
+              <small>{{ canViewAttendees() ? 'Access Authorized' : 'Restricted for this Station' }}</small>
+            </div>
+          </div>
+
+          <div class="station-perm-item" [class.granted]="canLogIncidents()">
+            <div class="perm-status-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="perm-text-info">
+              <strong>Incident Dispatch & Security Reporting</strong>
+              <small>{{ canLogIncidents() ? 'Reporting Granted' : 'Restricted for this Station' }}</small>
+            </div>
+          </div>
+
+          <div class="station-perm-item" [class.granted]="canViewDuty()">
+            <div class="perm-status-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="perm-text-info">
+              <strong>Operational Briefings & Station Duty</strong>
+              <small>Authorized</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Gate Safety & Check-in Rules -->
       <div class="shift-handbook-card">
         <h3>Gate Admission Guidelines</h3>
@@ -253,7 +332,7 @@
     <!-- ─────────────────────────────────────────────────────────
          TAB 4: INCIDENT & PROBLEM REPORTING
          ───────────────────────────────────────────────────────── -->
-    <div class="staff-pane" *ngIf="activeTab() === 'issues'">
+    <div class="staff-pane" *ngIf="activeTab() === 'issues' && canLogIncidents()">
       <div class="issues-head-row">
         <div>
           <h2>Ground Incidents</h2>
@@ -308,6 +387,7 @@
   <nav class="staff-bottom-nav" aria-label="Staff Bottom Navigation">
     
     <button 
+      *ngIf="canViewDuty()"
       class="nav-tab-btn" 
       [class.active]="activeTab() === 'today'" 
       (click)="setTab('today')">
@@ -316,6 +396,7 @@
     </button>
 
     <button 
+      *ngIf="canScanTickets()"
       class="nav-tab-btn primary-scan-tab" 
       [class.active]="activeTab() === 'checkin'" 
       (click)="setTab('checkin')">
@@ -326,6 +407,7 @@
     </button>
 
     <button 
+      *ngIf="canViewAttendees()"
       class="nav-tab-btn" 
       [class.active]="activeTab() === 'attendees'" 
       (click)="setTab('attendees')">
@@ -334,6 +416,7 @@
     </button>
 
     <button 
+      *ngIf="canLogIncidents()"
       class="nav-tab-btn" 
       [class.active]="activeTab() === 'issues'" 
       (click)="setTab('issues')">

@@ -118,16 +118,10 @@
       </div>
 
       <div class="header-right">
-        <!-- System Health Pill -->
-        <div class="system-status-pill">
-          <span class="status-dot-pulse"></span>
-          <span>System Healthy ({{ platformStats().systemUptime }})</span>
-        </div>
-
         <!-- Quick Broadcast Button -->
         <button class="btn-broadcast-quick" (click)="openBroadcastModal()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>Broadcast</span>
+          <span class="btn-text">Broadcast</span>
         </button>
 
         <!-- Quick Link to Host Workspace / Public App -->
@@ -287,7 +281,8 @@
           </div>
         </div>
 
-        <div class="admin-table-container">
+        <!-- Desktop Table View (Hidden on mobile) -->
+        <div class="admin-table-container host-desktop-table">
           <table class="admin-data-table">
             <thead>
               <tr>
@@ -327,7 +322,7 @@
                     <button 
                       *ngIf="app.status !== 'approved'" 
                       class="btn-action-approve" 
-                      (click)="approveHostApplication(app.id)" 
+                      (click)="promptApproveHostApplication(app.id, app.applicantName)" 
                       title="Approve Host">
                       Approve
                     </button>
@@ -336,6 +331,69 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- Mobile Responsive Cards View (Visible on small screens) -->
+        <div class="host-mobile-cards-list">
+          <div class="host-app-card" *ngFor="let app of filteredHostApplications()">
+            <!-- Header: Applicant & Status -->
+            <div class="host-app-card-header">
+              <div class="host-app-card-title-group">
+                <span class="host-app-card-name">{{ app.applicantName }}</span>
+                <span class="host-app-card-org">{{ app.organizationName }}</span>
+              </div>
+              <span class="app-status-badge" [attr.data-status]="app.status">
+                {{ app.status === 'under_review' ? 'Under Review' : (app.status | titlecase) }}
+              </span>
+            </div>
+
+            <!-- Meta details (Location, Scale, Submitted) -->
+            <div class="host-app-card-details">
+              <div class="host-detail-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <span>{{ app.city }}</span>
+              </div>
+              <div class="host-detail-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                <span>{{ app.expectedScale }}</span>
+              </div>
+              <div class="host-detail-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span>{{ app.submittedAt }}</span>
+              </div>
+            </div>
+
+            <!-- Categories tags -->
+            <div class="host-app-card-tags">
+              <span class="mini-tag" *ngFor="let cat of app.primaryCategories">{{ cat }}</span>
+            </div>
+
+            <!-- Contact Line -->
+            <div class="host-app-card-contact">
+              <small>{{ app.email }} • {{ app.phone }}</small>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="host-app-card-actions">
+              <button class="btn-action-view flex-1" (click)="openAppDetailsModal(app)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                Inspect
+              </button>
+              <button 
+                *ngIf="app.status !== 'approved'" 
+                class="btn-action-approve flex-1" 
+                (click)="promptApproveHostApplication(app.id, app.applicantName)" 
+                title="Approve Host">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Approve
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty state if no applications -->
+          <div *ngIf="filteredHostApplications().length === 0" class="admin-empty-state">
+            <p>No host applications found matching the selected filter.</p>
+          </div>
         </div>
 
       </div>
@@ -347,21 +405,33 @@
         
         <div class="view-header-row">
           <div>
-            <h2>Event Curation & Moderation Queue</h2>
-            <p>Ensure event listings meet safety, venue licensing, and ticketing standards before publishing.</p>
+            <h2>Event Curation & Gatekeeper Queue</h2>
+            <p>Ensure event listings meet safety, venue licensing, and ticketing standards before publishing live to Discover.</p>
           </div>
           <div class="filter-pills-row">
-            <button class="filter-pill" [class.active]="eventFilter() === 'all'" (click)="eventFilter.set('all')">All</button>
+            <button class="filter-pill" [class.active]="eventFilter() === 'all'" (click)="eventFilter.set('all')">All ({{ curationEvents().length }})</button>
             <button class="filter-pill" [class.active]="eventFilter() === 'pending_review'" (click)="eventFilter.set('pending_review')">Pending Review</button>
             <button class="filter-pill" [class.active]="eventFilter() === 'changes_requested'" (click)="eventFilter.set('changes_requested')">Action Required</button>
-            <button class="filter-pill" [class.active]="eventFilter() === 'approved'" (click)="eventFilter.set('approved')">Approved</button>
+            <button class="filter-pill" [class.active]="eventFilter() === 'approved'" (click)="eventFilter.set('approved')">Published Live</button>
+            <button class="filter-pill" [class.active]="eventFilter() === 'rejected'" (click)="eventFilter.set('rejected')">Delisted</button>
           </div>
         </div>
 
         <div class="curation-cards-grid">
           <div *ngFor="let ev of filteredCurationEvents()" class="curation-card">
             <div class="curation-card-image" [style.backgroundImage]="'url(' + ev.imageUrl + ')'">
-              <span class="app-status-badge" [attr.data-status]="ev.status">{{ ev.status | titlecase }}</span>
+              <div class="card-image-overlay-top">
+                <button 
+                  class="btn-featured-star" 
+                  [class.active]="ev.isFeatured" 
+                  (click)="toggleEventFeatured(ev.id, ev.title)"
+                  title="Toggle Featured on Discover Hero">
+                  ★ {{ ev.isFeatured ? 'Featured on Hero' : 'Feature' }}
+                </button>
+                <span class="app-status-badge" [attr.data-status]="ev.status">
+                  {{ ev.status === 'approved' ? 'Published Live' : ev.status === 'pending_review' ? 'In Review' : (ev.status | titlecase) }}
+                </span>
+              </div>
             </div>
             <div class="curation-card-content">
               <h3>{{ ev.title }}</h3>
@@ -377,18 +447,21 @@
               <div class="permits-row">
                 <span class="permit-tag" [class.verified]="ev.soundPermitUploaded">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline *ngIf="ev.soundPermitUploaded" points="20 6 9 17 4 12"/><line *ngIf="!ev.soundPermitUploaded" x1="12" y1="8" x2="12" y2="12"/><line *ngIf="!ev.soundPermitUploaded" x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  {{ ev.soundPermitUploaded ? 'Sound Permit Uploaded' : 'Sound Permit Missing' }}
+                  {{ ev.soundPermitUploaded ? 'Sound Decibel Clear' : 'Sound Permit Missing' }}
                 </span>
                 <span class="permit-tag" [class.verified]="ev.venuePermitUploaded">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline *ngIf="ev.venuePermitUploaded" points="20 6 9 17 4 12"/><line *ngIf="!ev.venuePermitUploaded" x1="12" y1="8" x2="12" y2="12"/><line *ngIf="!ev.venuePermitUploaded" x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  {{ ev.venuePermitUploaded ? 'Venue Clearance Uploaded' : 'Venue Clearance Missing' }}
+                  {{ ev.venuePermitUploaded ? 'Fire & Venue NOC Clear' : 'Venue Clearance Missing' }}
                 </span>
               </div>
 
               <div class="curation-actions">
-                <button class="btn-curation-feedback" (click)="openEventCurationModal(ev)">Send Feedback / Edit</button>
-                <button *ngIf="ev.status !== 'approved'" class="btn-curation-approve" (click)="approveEventForLive(ev.id)">
+                <button class="btn-curation-feedback" (click)="openEventCurationModal(ev)">Feedback / Review</button>
+                <button *ngIf="ev.status !== 'approved'" class="btn-curation-approve" (click)="promptApproveEventForLive(ev.id, ev.title)">
                   Approve for Live Listing
+                </button>
+                <button *ngIf="ev.status === 'approved'" class="btn-curation-delist" (click)="promptDelistEvent(ev.id, ev.title)">
+                  Delist from App
                 </button>
               </div>
             </div>
@@ -404,14 +477,34 @@
         
         <div class="view-header-row">
           <div>
-            <h2>Platform User Directory & Roles</h2>
-            <p>Manage consumer accounts, promote users to organizer hosts, or suspend malicious accounts.</p>
+            <h2>Platform User Directory & Role Governance</h2>
+            <p>Manage consumer accounts, promote users to Organizer Hosts or Field Operations, or suspend accounts.</p>
           </div>
-          <div class="filter-pills-row">
-            <button class="filter-pill" [class.active]="userFilter() === 'all'" (click)="userFilter.set('all')">All</button>
-            <button class="filter-pill" [class.active]="userFilter() === 'host'" (click)="userFilter.set('host')">Hosts</button>
-            <button class="filter-pill" [class.active]="userFilter() === 'admin'" (click)="userFilter.set('admin')">Admins</button>
-            <button class="filter-pill" [class.active]="userFilter() === 'user'" (click)="userFilter.set('user')">Standard Users</button>
+          
+          <!-- Filters & Search -->
+          <div class="user-filters-bar">
+            <div class="filter-pills-row">
+              <button class="filter-pill" [class.active]="userRoleFilter() === 'all'" (click)="userRoleFilter.set('all')">All Roles ({{ users().length }})</button>
+              <button class="filter-pill" [class.active]="userRoleFilter() === 'admin'" (click)="userRoleFilter.set('admin')">Admins</button>
+              <button class="filter-pill" [class.active]="userRoleFilter() === 'host'" (click)="userRoleFilter.set('host')">Hosts</button>
+              <button class="filter-pill" [class.active]="userRoleFilter() === 'management'" (click)="userRoleFilter.set('management')">Operations</button>
+              <button class="filter-pill" [class.active]="userRoleFilter() === 'staff'" (click)="userRoleFilter.set('staff')">Staff</button>
+              <button class="filter-pill" [class.active]="userRoleFilter() === 'user'" (click)="userRoleFilter.set('user')">Attendees</button>
+            </div>
+
+            <div class="filter-sub-row">
+              <input 
+                type="text" 
+                [(ngModel)]="userSearch" 
+                placeholder="Search by name, email, or role..." 
+                class="admin-table-search" />
+
+              <div class="status-toggle-pills">
+                <button class="mini-pill" [class.active]="userStatusFilter() === 'all'" (click)="userStatusFilter.set('all')">All Status</button>
+                <button class="mini-pill" [class.active]="userStatusFilter() === 'active'" (click)="userStatusFilter.set('active')">Active</button>
+                <button class="mini-pill" [class.active]="userStatusFilter() === 'suspended'" (click)="userStatusFilter.set('suspended')">Suspended</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -419,17 +512,17 @@
           <table class="admin-data-table">
             <thead>
               <tr>
-                <th>User</th>
-                <th>Role</th>
+                <th>User Account</th>
+                <th>Platform Role</th>
                 <th>Status</th>
-                <th>Total Bookings</th>
-                <th>GMV Contributed</th>
-                <th>Joined</th>
+                <th>Bookings / Usage</th>
+                <th>Lifetime GMV</th>
+                <th>Joined Date</th>
                 <th class="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let u of filteredUsers()">
+              <tr *ngFor="let u of filteredUsers()" class="clickable-user-row" (click)="openUserDossier(u)">
                 <td>
                   <div class="user-row-meta">
                     <img [src]="u.avatar" class="table-user-avatar" [alt]="u.name" />
@@ -447,16 +540,16 @@
                     ● {{ u.status | titlecase }}
                   </span>
                 </td>
-                <td>{{ u.totalBookings }}</td>
+                <td>{{ u.totalBookings }} bookings</td>
                 <td>₹{{ u.totalSpent | number }}</td>
                 <td>{{ u.joinedDate }}</td>
-                <td class="text-right">
+                <td class="text-right" (click)="$event.stopPropagation()">
                   <div class="table-actions-group">
-                    <button class="btn-role-toggle" (click)="toggleUserRole(u)">Change Role</button>
+                    <button class="btn-inspect-user" (click)="openUserDossier(u)">Dossier</button>
                     <button 
                       class="btn-suspend-toggle" 
                       [class.danger]="u.status === 'active'" 
-                      (click)="toggleUserSuspension(u)">
+                      (click)="promptToggleUserSuspension(u)">
                       {{ u.status === 'active' ? 'Suspend' : 'Reactivate' }}
                     </button>
                   </div>
@@ -474,27 +567,92 @@
       <div class="admin-view-pane" *ngIf="currentView() === 'finance'">
         <div class="view-header-row">
           <div>
-            <h2>Platform Financial Performance & Settlements</h2>
-            <p>Monitor transaction volume, organizer payout cycles, and payment gateway commission metrics.</p>
+            <h2>Platform Financial Performance & Host Settlements</h2>
+            <p>Platform gross revenue, EventHub 5% marketplace take rate, and host payout disbursement cycles.</p>
           </div>
         </div>
 
+        <!-- 4 Finance Metric Cards -->
         <div class="finance-overview-grid">
           <div class="finance-box">
-            <span>Total GMV Processed</span>
+            <span class="fin-lbl">Gross Marketplace Value (GMV)</span>
             <h3>{{ platformStats().totalGMV }}</h3>
-            <small>Across 1,480 confirmed orders</small>
+            <small class="text-positive">+22.4% vs last cycle</small>
           </div>
+
           <div class="finance-box">
-            <span>Platform Commission (10%)</span>
+            <span class="fin-lbl">EventHub Platform Cut (5%)</span>
             <h3>{{ platformStats().platformCommission }}</h3>
-            <small>Net revenue retained</small>
+            <small>Direct commission retained</small>
           </div>
+
           <div class="finance-box">
-            <span>Pending Organizer Payouts</span>
-            <h3>₹2.14 Lakhs</h3>
-            <small>Automated batch processing in 48h</small>
+            <span class="fin-lbl">Pending Escrow Payouts</span>
+            <h3 class="text-amber">{{ platformStats().pendingPayouts }}</h3>
+            <small>Awaiting admin release</small>
           </div>
+
+          <div class="finance-box">
+            <span class="fin-lbl">Settled to Organizers</span>
+            <h3 class="text-emerald">{{ platformStats().settledPayouts }}</h3>
+            <small>Disbursed via IMPS/NEFT</small>
+          </div>
+        </div>
+
+        <!-- Host Settlements Disbursal Table -->
+        <div class="admin-table-container mt-6">
+          <div class="table-section-head">
+            <h3>Organizer Payout Settlement Queue</h3>
+            <span class="table-sub-badge">Escrow Release Engine</span>
+          </div>
+          
+          <table class="admin-data-table">
+            <thead>
+              <tr>
+                <th>Event & Organizer</th>
+                <th>Bank Account</th>
+                <th>Gross Revenue</th>
+                <th>5% Platform Cut</th>
+                <th>Net Organizer Payout</th>
+                <th>Status</th>
+                <th class="text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of settlements()">
+                <td>
+                  <strong>{{ s.eventTitle }}</strong>
+                  <span class="sub-text">{{ s.hostName }} • {{ s.organization }}</span>
+                </td>
+                <td>{{ s.bankAccount }}</td>
+                <td>₹{{ s.grossAmount | number }}</td>
+                <td class="text-emerald font-semibold">- ₹{{ s.platformCommission | number }}</td>
+                <td><strong>₹{{ s.netPayout | number }}</strong></td>
+                <td>
+                  <span class="settle-badge" [attr.data-status]="s.status">
+                    {{ s.status === 'settled' ? 'Settled (' + s.settledDate + ')' : (s.status | titlecase) }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <button 
+                    *ngIf="s.status === 'pending'" 
+                    class="btn-release-payout" 
+                    (click)="promptReleaseSettlementPayout(s)">
+                    Release Payout
+                  </button>
+                  <span *ngIf="s.status === 'settled'" class="settled-check">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Disbursed
+                  </span>
+                  <button 
+                    *ngIf="s.status === 'on_hold'" 
+                    class="btn-investigate" 
+                    (click)="promptReleaseSettlementPayout(s)">
+                    Clear Hold & Pay
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -576,8 +734,8 @@
 
       <div class="modal-foot">
         <button class="btn-modal-secondary" (click)="requestMoreHostInfo(selectedAppForModal()!.id)">Request Clarification</button>
-        <button class="btn-modal-danger" (click)="rejectHostApplication(selectedAppForModal()!.id)">Reject</button>
-        <button class="btn-modal-primary" (click)="approveHostApplication(selectedAppForModal()!.id)">Approve & Grant Host Privileges</button>
+        <button class="btn-modal-danger" (click)="promptRejectHostApplication(selectedAppForModal()!.id, selectedAppForModal()!.applicantName)">Reject</button>
+        <button class="btn-modal-primary" (click)="promptApproveHostApplication(selectedAppForModal()!.id, selectedAppForModal()!.applicantName)">Approve & Grant Host Privileges</button>
       </div>
     </div>
   </div>
@@ -610,7 +768,7 @@
       <div class="modal-foot">
         <button class="btn-modal-secondary" (click)="selectedEventForModal.set(null)">Cancel</button>
         <button class="btn-modal-warning" (click)="sendEventFeedback(selectedEventForModal()!.id)">Send Changes Requested</button>
-        <button class="btn-modal-primary" (click)="approveEventForLive(selectedEventForModal()!.id)">Approve Listing</button>
+        <button class="btn-modal-primary" (click)="promptApproveEventForLive(selectedEventForModal()!.id, selectedEventForModal()!.title)">Approve Listing</button>
       </div>
     </div>
   </div>
@@ -651,6 +809,134 @@
       <div class="modal-foot">
         <button class="btn-modal-secondary" (click)="showBroadcastModal.set(false)">Cancel</button>
         <button class="btn-modal-primary" (click)="sendBroadcast()">Send Platform Broadcast</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- DRAWER: USER DOSSIER & ROLE REASSIGNMENT                    -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="admin-modal-backdrop" *ngIf="selectedUserForDossier()" (click)="closeUserDossier()">
+    <div class="user-dossier-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="dossier-header-profile">
+          <img [src]="selectedUserForDossier()?.avatar" class="dossier-avatar" [alt]="selectedUserForDossier()?.name" />
+          <div>
+            <h3>{{ selectedUserForDossier()?.name }}</h3>
+            <span class="modal-sub">{{ selectedUserForDossier()?.email }} • ID: {{ selectedUserForDossier()?.id }}</span>
+          </div>
+        </div>
+        <button class="btn-modal-close" (click)="closeUserDossier()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Status & Role Banner -->
+        <div class="dossier-meta-grid">
+          <div class="meta-card">
+            <span>Current Role</span>
+            <strong class="role-pill" [attr.data-role]="selectedUserForDossier()?.role">{{ selectedUserForDossier()?.role | uppercase }}</strong>
+          </div>
+          <div class="meta-card">
+            <span>Account Status</span>
+            <strong [class.text-danger]="selectedUserForDossier()?.status === 'suspended'" [class.text-emerald]="selectedUserForDossier()?.status === 'active'">
+              {{ selectedUserForDossier()?.status | uppercase }}
+            </strong>
+          </div>
+          <div class="meta-card">
+            <span>Lifetime GMV</span>
+            <strong>₹{{ selectedUserForDossier()?.totalSpent | number }}</strong>
+          </div>
+          <div class="meta-card">
+            <span>Total Bookings</span>
+            <strong>{{ selectedUserForDossier()?.totalBookings }} orders</strong>
+          </div>
+        </div>
+
+        <!-- Role Reassignment Section -->
+        <div class="modal-section mt-4">
+          <h4>Reassign Platform Privilege</h4>
+          <p class="section-desc">Change user permissions according to system hierarchy (Super Admin $\rightarrow$ Host $\rightarrow$ Operations $\rightarrow$ Staff $\rightarrow$ Attendee).</p>
+          
+          <div class="role-promotion-buttons">
+            <button 
+              class="btn-promo-role" 
+              [class.current]="selectedUserForDossier()?.role === 'user'" 
+              (click)="promptChangeUserRole(selectedUserForDossier()!, 'user')">
+              Attendee User
+            </button>
+            <button 
+              class="btn-promo-role" 
+              [class.current]="selectedUserForDossier()?.role === 'host'" 
+              (click)="promptChangeUserRole(selectedUserForDossier()!, 'host')">
+              ★ Event Host (Owner)
+            </button>
+            <button 
+              class="btn-promo-role" 
+              [class.current]="selectedUserForDossier()?.role === 'management'" 
+              (click)="promptChangeUserRole(selectedUserForDossier()!, 'management')">
+              Operations Lead
+            </button>
+            <button 
+              class="btn-promo-role" 
+              [class.current]="selectedUserForDossier()?.role === 'staff'" 
+              (click)="promptChangeUserRole(selectedUserForDossier()!, 'staff')">
+              Field Staff
+            </button>
+            <button 
+              class="btn-promo-role" 
+              [class.current]="selectedUserForDossier()?.role === 'admin'" 
+              (click)="promptChangeUserRole(selectedUserForDossier()!, 'admin')">
+              Super Admin
+            </button>
+          </div>
+        </div>
+
+        <!-- Security & Ban Action -->
+        <div class="modal-section mt-4 border-top">
+          <h4>Security & Access Controls</h4>
+          <p class="section-desc">Suspending an account revokes active tokens and immediately redirects any active session to login.</p>
+          
+          <button 
+            class="btn-suspend-account" 
+            [class.active-reactivate]="selectedUserForDossier()?.status === 'suspended'" 
+            (click)="promptToggleUserSuspension(selectedUserForDossier()!)">
+            {{ selectedUserForDossier()?.status === 'active' ? 'Suspend & Freeze Account' : 'Reactivate User Account' }}
+          </button>
+        </div>
+
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-modal-secondary" (click)="closeUserDossier()">Close Dossier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- CONFIRMATION DIALOG MODAL (POPUP VERIFICATION)               -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="admin-modal-backdrop" *ngIf="showConfirmationDialog()" (click)="cancelConfirm()">
+    <div class="admin-confirm-card" (click)="$event.stopPropagation()">
+      <div class="confirm-head">
+        <div class="confirm-icon-box" [class.destructive]="confirmDialogData.isDestructive">
+          <svg *ngIf="!confirmDialogData.isDestructive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <svg *ngIf="confirmDialogData.isDestructive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <h3>{{ confirmDialogData.title }}</h3>
+          <p class="confirm-desc">{{ confirmDialogData.message }}</p>
+        </div>
+      </div>
+
+      <div class="confirm-actions">
+        <button class="btn-confirm-cancel" (click)="cancelConfirm()">Cancel</button>
+        <button 
+          class="btn-confirm-proceed" 
+          [class.destructive]="confirmDialogData.isDestructive" 
+          (click)="executeConfirmAction()">
+          {{ confirmDialogData.actionBtnText }}
+        </button>
       </div>
     </div>
   </div>

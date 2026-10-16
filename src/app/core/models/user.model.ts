@@ -9,7 +9,7 @@ export interface User {
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
   isHost: boolean;
-  platformRole: 'user' | 'host' | 'staff' | 'management' | 'admin' | 'super_admin';
+  platformRole: 'user' | 'host' | 'staff' | 'management' | 'admin' | 'super_admin';//need to remove he admin
   organization?: string;
   createdAt: string;
 }

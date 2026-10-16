@@ -65,7 +65,12 @@ export class EventTeamService {
     inviteeName: string,
     role: MembershipRole,
     roleCategory: 'operational' | 'participant',
-    customRoleName?: string
+    customRoleName?: string,
+    options?: {
+      designation?: string;
+      responsibility?: any;
+      permissions?: string[];
+    }
   ): Promise<{ success: boolean; message: string }> {
     // Check duplicate active membership for same role
     const existingRole = this.memberships().find(
@@ -102,6 +107,9 @@ export class EventTeamService {
       inviteeName: inviteeName || inviteeEmail.split('@')[0],
       role,
       roleCategory,
+      designation: options?.designation || customRoleName || formatRoleLabel(role),
+      responsibility: options?.responsibility,
+      permissions: options?.permissions || (role === 'staff' ? ['scan_tickets', 'view_attendees'] : ['view_duty']),
       customRoleName,
       status: 'pending',
       sentAt: new Date().toISOString()
@@ -136,7 +144,10 @@ export class EventTeamService {
       email: user.email,
       name: user.name,
       role: invite.role,
-      roleName: invite.customRoleName || formatRoleLabel(invite.role),
+      roleName: invite.customRoleName || invite.designation || formatRoleLabel(invite.role),
+      designation: invite.designation || invite.customRoleName || formatRoleLabel(invite.role),
+      responsibility: invite.responsibility,
+      permissions: invite.permissions || ['scan_tickets', 'view_attendees', 'view_duty'],
       isOwner: invite.role === 'event_owner',
       roleCategory: invite.roleCategory,
       status: 'active',

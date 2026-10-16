@@ -35,8 +35,27 @@ export class LoginComponent {
     const result = await this.authService.login(this.email, this.password);
     
     if (result.success) {
-      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-      this.router.navigateByUrl(returnUrl);
+      const explicitReturnUrl = this.route.snapshot.queryParams['returnUrl'];
+      if (explicitReturnUrl && explicitReturnUrl !== '/') {
+        this.router.navigateByUrl(explicitReturnUrl);
+        return;
+      }
+
+      // Dynamic Role-Based Landing Redirect
+      const user = this.authService.currentUser();
+      const role = user?.platformRole;
+
+      if (role === 'admin') {
+        this.router.navigate(['/admin']);
+      } else if (role === 'host' || user?.isHost) {
+        this.router.navigate(['/host/dashboard']);
+      } else if (role === 'management') {
+        this.router.navigate(['/management']);
+      } else if (role === 'staff') {
+        this.router.navigate(['/staff']);
+      } else {
+        this.router.navigate(['/discover']);
+      }
     } else {
       this.errorMessage.set(result.message);
     }
