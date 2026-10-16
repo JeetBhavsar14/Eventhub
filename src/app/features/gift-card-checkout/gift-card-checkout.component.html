@@ -1,0 +1,74 @@
+<main class="checkout-page fade-in" *ngIf="!isLoading() && giftCard()">
+  <header>
+    <p class="eyebrow">SECURE GIFT CARD CHECKOUT</p>
+    <h1>Complete your purchase</h1>
+    <p>Your gift card will be available in My Gift Cards immediately after payment.</p>
+  </header>
+  
+  <div class="layout">
+    <section class="payment-section">
+      <h2>Payment method</h2>
+      <app-payment-form [amount]="giftCard()!.amount"></app-payment-form>
+      <p class="error" *ngIf="error()">{{ error() }}</p>
+    </section>
+    
+    <aside class="summary">
+      <img [src]="giftCard()!.imageUrl" [alt]="giftCard()!.title">
+      <h2>{{ giftCard()!.title }}</h2>
+      <p>{{ giftCard()!.description }}</p>
+      <div>
+        <span>Gift card value</span>
+        <strong>₹{{ giftCard()!.amount }}</strong>
+      </div>
+      <app-button [fullWidth]="true" size="lg" [isLoading]="isProcessing()" (onClick)="pay()">
+        {{ isProcessing() ? 'Confirming payment…' : 'Pay ₹' + giftCard()!.amount }}
+      </app-button>
+      <small>Card details are validated locally in this mock checkout and are never saved.</small>
+    </aside>
+  </div>
+</main>
+
+<section class="state" *ngIf="isLoading()">
+  <div class="spinner"></div>
+  <p>Preparing secure checkout…</p>
+</section>
+
+<section class="state" *ngIf="!isLoading() && error() && !giftCard()">
+  <h2>Unable to continue</h2>
+  <p>{{ error() }}</p>
+  <a href="/gift-cards">Back to gift cards</a>
+</section>
+
+<!-- Success Popup Modal -->
+<div class="success-overlay fade-in" *ngIf="purchaseSuccess()">
+  <div class="success-modal scale-in">
+    <div class="success-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+    </div>
+    <h2>Congratulations!</h2>
+    <p>Your gift card purchase was successful.</p>
+    
+    <div class="gift-card-preview">
+      <img [src]="giftCard()?.imageUrl" [alt]="giftCard()?.title" class="preview-img">
+      <div class="preview-details">
+        <h3>{{ giftCard()?.title }}</h3>
+        <p class="value">Value: ₹{{ giftCard()?.amount }}</p>
+        <div class="gift-code-box">
+          <span class="code-label">Gift Code:</span>
+          <strong class="code-value">{{ giftCode() }}</strong>
+        </div>
+      </div>
+    </div>
+    
+    <p class="hint">This gift card has been added to your account and is ready to use.</p>
+    
+    <div class="modal-actions">
+      <app-button variant="primary" (onClick)="goToMyGiftCards()" [fullWidth]="true">
+        View My Gift Cards
+      </app-button>
+    </div>
+  </div>
+</div>

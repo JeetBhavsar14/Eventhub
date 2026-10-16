@@ -1,0 +1,1221 @@
+<div class="host-landing-page">
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- TOP DYNAMIC APPLICATION STATUS BANNER (If Active)       -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="status-top-strip" *ngIf="appStatus() !== 'guest' && appStatus() !== 'not_applied'" [attr.data-status]="appStatus()">
+    <div class="container status-strip-inner">
+      <div class="status-strip-left">
+        <span class="status-pulse-dot"></span>
+        <div class="status-strip-content">
+          <span class="status-strip-tag">
+            <span *ngIf="appStatus() === 'submitted'">APPLICATION SUBMITTED</span>
+            <span *ngIf="appStatus() === 'under_review'">CURATION REVIEW IN PROGRESS</span>
+            <span *ngIf="appStatus() === 'info_required'">ACTION REQUIRED: CLARIFICATION NEEDED</span>
+            <span *ngIf="appStatus() === 'approved'">APPROVED HOST ACCOUNT</span>
+            <span *ngIf="appStatus() === 'rejected'">APPLICATION NOT APPROVED</span>
+          </span>
+          <p class="status-strip-text">
+            <span *ngIf="appStatus() === 'submitted'">Application #{{ appData()?.id || 'EH-APP-7829' }} received. Verification queue: ~24 hours.</span>
+            <span *ngIf="appStatus() === 'under_review'">Our host verification panel is currently reviewing your event portfolio and credentials.</span>
+            <span *ngIf="appStatus() === 'info_required'">Please provide the requested venue clearance note or event history details.</span>
+            <span *ngIf="appStatus() === 'approved'">Your host profile is fully active! You can now manage events in the host workspace.</span>
+            <span *ngIf="appStatus() === 'rejected'">Your application did not meet eligibility criteria at this time. You may submit a new application.</span>
+          </p>
+        </div>
+      </div>
+      <div class="status-strip-actions">
+        <button class="status-strip-btn" (click)="handleApplyClick()">
+          <span *ngIf="appStatus() === 'submitted' || appStatus() === 'under_review'">View Status Details</span>
+          <span *ngIf="appStatus() === 'info_required'">Respond Now</span>
+          <span *ngIf="appStatus() === 'approved'">Open Host Workspace</span>
+          <span *ngIf="appStatus() === 'rejected'">Review Details & Reapply</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: HERO — HOST YOUR NEXT BIG EVENT             -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="hero-section" id="hero">
+    <div class="hero-bg-shapes">
+      <div class="shape-glow glow-1"></div>
+      <div class="shape-glow glow-2"></div>
+      <div class="hero-grid-pattern"></div>
+    </div>
+
+    <div class="container hero-container">
+      <div class="hero-content">
+        <div class="eyebrow-pill">
+          <span class="eyebrow-dot"></span>
+          <span class="eyebrow-text">HOST WITH EVENTHUB</span>
+        </div>
+
+        <h1 class="hero-title">
+          Bring Your Events <br class="hidden-mobile" />
+          <span class="title-gradient">to Life.</span>
+        </h1>
+
+        <p class="hero-subtext">
+          From intimate workshops to large-scale festivals, discover the tools and audience you need to create memorable experiences across cities.
+        </p>
+
+        <!-- CTA Button Group -->
+        <div class="hero-cta-group">
+          <button class="btn-hero-primary" (click)="handleApplyClick()" id="hero-primary-cta">
+            <span *ngIf="appStatus() === 'guest' || appStatus() === 'not_applied'">Apply to Become a Host</span>
+            <span *ngIf="appStatus() === 'submitted' || appStatus() === 'under_review'">Check Application Status</span>
+            <span *ngIf="appStatus() === 'info_required'">Submit Requested Info</span>
+            <span *ngIf="appStatus() === 'approved'">Go to Host Workspace</span>
+            <span *ngIf="appStatus() === 'rejected'">View Application Status</span>
+            <svg class="cta-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+          <button class="btn-hero-secondary" (click)="scrollToSection('how-it-works')" id="hero-secondary-cta">
+            <svg class="play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/>
+            </svg>
+            How It Works
+          </button>
+        </div>
+
+        <!-- Sample Trust Indicators (Clearly identified prototype metrics) -->
+        <div class="hero-trust-bar">
+          <div class="trust-metric">
+            <span class="trust-val">500K+</span>
+            <span class="trust-label">Monthly Explorers</span>
+          </div>
+          <div class="trust-divider"></div>
+          <div class="trust-metric">
+            <span class="trust-val">99.8%</span>
+            <span class="trust-label">QR Scan Reliability</span>
+          </div>
+          <div class="trust-divider"></div>
+          <div class="trust-metric">
+            <span class="trust-val">100%</span>
+            <span class="trust-label">Verified Organizers</span>
+          </div>
+          <div class="trust-divider"></div>
+          <div class="trust-metric">
+            <span class="trust-val">4.9/5</span>
+            <span class="trust-label">Host Satisfaction</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual Composition Card -->
+      <div class="hero-visual-card">
+        <div class="visual-glass-wrapper">
+          <div class="visual-hero-image-wrap">
+            <img 
+              src="https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80" 
+              alt="Excited audience at an organized live EventHub stage performance"
+              class="hero-img-main"
+            />
+            <div class="hero-image-overlay"></div>
+          </div>
+
+          <!-- Floating Interactive Sample Badges -->
+          <div class="floating-badge badge-top-right">
+            <div class="badge-icon-wrap bg-green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+              <span class="badge-title">Host Verification</span>
+              <span class="badge-sub">Eligibility Certified</span>
+            </div>
+          </div>
+
+          <div class="floating-badge badge-bottom-left">
+            <div class="badge-icon-wrap bg-periwinkle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg>
+            </div>
+            <div>
+              <span class="badge-title">Ticket Velocity</span>
+              <span class="badge-sub">+42% Sales in First 24h</span>
+            </div>
+          </div>
+
+          <div class="floating-badge badge-bottom-right">
+            <div class="badge-icon-wrap bg-indigo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </div>
+            <div>
+              <span class="badge-title">Gate QR Check-in</span>
+              <span class="badge-sub">Fast & Synchronized</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: WHY HOST ON EVENTHUB?                       -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="section-benefits" id="why-host">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-tag">HOST ADVANTAGE</span>
+        <h2 class="section-title">Why Host on EventHub?</h2>
+        <p class="section-subtitle">
+          Built specifically for creators, community managers, and event producers who demand smooth operations and wide audience reach.
+        </p>
+      </div>
+
+      <div class="benefits-grid">
+        <div class="benefit-card" *ngFor="let benefit of benefits">
+          <div class="benefit-header">
+            <div class="benefit-icon-box">
+              <!-- Users / Audience -->
+              <svg *ngIf="benefit.icon === 'users'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <!-- Calendar / Event Management -->
+              <svg *ngIf="benefit.icon === 'calendar'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <!-- Ticket / Ticketing -->
+              <svg *ngIf="benefit.icon === 'ticket'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="9" width="20" height="6" rx="2"/><path d="M7 15v4a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-4"/><path d="M7 9V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4"/>
+              </svg>
+              <!-- Shield / Team Collaboration -->
+              <svg *ngIf="benefit.icon === 'shield-check'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>
+              </svg>
+              <!-- User-Check / Attendee Management -->
+              <svg *ngIf="benefit.icon === 'user-check'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/>
+              </svg>
+              <!-- Trending / Event Insights -->
+              <svg *ngIf="benefit.icon === 'trending-up'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+              </svg>
+            </div>
+            <span class="benefit-badge">{{ benefit.badge }}</span>
+          </div>
+
+          <h3 class="benefit-title">{{ benefit.title }}</h3>
+          <p class="benefit-desc">{{ benefit.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 4: HOW HOSTING WORKS (TIMELINE)                -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="section-how-it-works" id="how-it-works">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-tag">CLEAR 4-STEP ONBOARDING</span>
+        <h2 class="section-title">How Hosting Works</h2>
+        <p class="section-subtitle">
+          Our straightforward onboarding process ensures safe attendee experiences while empowering you with complete event control.
+        </p>
+      </div>
+
+      <!-- Process Timeline (Horizontal Desktop / Vertical Mobile) -->
+      <div class="timeline-container">
+        <div class="timeline-track-line"></div>
+        <div class="timeline-grid">
+          <div class="timeline-step" *ngFor="let step of timelineSteps; let i = index">
+            <div class="step-marker-box">
+              <div class="step-num-circle">{{ step.stepNumber }}</div>
+              <div class="step-pulse"></div>
+            </div>
+            <div class="step-card">
+              <div class="step-top">
+                <span class="step-badge">{{ step.badge }}</span>
+                <span class="step-index">Step {{ i + 1 }}</span>
+              </div>
+              <h3 class="step-title">{{ step.title }}</h3>
+              <p class="step-desc">{{ step.description }}</p>
+              
+              <ul class="step-highlights">
+                <li *ngFor="let h of step.highlights">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="highlight-check">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <span>{{ h }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Critical Quality Distinction Notice -->
+      <div class="quality-callout-box">
+        <div class="callout-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+        </div>
+        <div class="callout-text">
+          <strong>Important Process Note:</strong> Host Approval and Event Approval are separate quality stages. Getting approved as an EventHub Host verifies your organizer credentials. Once approved, each specific event listing you create undergoes a rapid publishing review before going public.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 5: EVENT TYPES YOU CAN HOST                    -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="section-categories" id="categories">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-tag">DIVERSE CATEGORIES</span>
+        <h2 class="section-title">Event Types You Can Host</h2>
+        <p class="section-subtitle">
+          Whatever your passion, format, or crowd size, EventHub provides the audience and ticketing infrastructure to power your experience.
+        </p>
+      </div>
+
+      <div class="categories-grid">
+        <div 
+          class="category-card" 
+          *ngFor="let cat of eventCategories" 
+          (click)="handleCategoryClick(cat)"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'Explore category ' + cat.title">
+          
+          <div class="category-img-wrap">
+            <img [src]="cat.imageUrl" [alt]="cat.title" class="category-img" loading="lazy" />
+            <div class="category-gradient-scrim"></div>
+            <span class="category-tag">{{ cat.tag }}</span>
+          </div>
+
+          <div class="category-body">
+            <div class="category-title-row">
+              <h3 class="category-title">{{ cat.title }}</h3>
+              <button class="info-circle-btn" (click)="openCategoryDetails(cat, $event)" title="Category Host Guide">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+              </button>
+            </div>
+            <p class="category-desc">{{ cat.description }}</p>
+
+            <div class="category-footer">
+              <span class="category-stats">{{ cat.stats }}</span>
+              <span class="category-link-text">
+                Browse Events
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 6: HOST APPLICATION REQUIREMENTS               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="section-requirements" id="requirements">
+    <div class="container">
+      <div class="requirements-header-wrap">
+        <div class="section-header">
+          <span class="section-tag">CLEAR EXPECTATIONS</span>
+          <h2 class="section-title">Host Application Requirements</h2>
+          <p class="section-subtitle">
+            Here is a summary of what you will need ready before submitting your host application.
+          </p>
+        </div>
+        <div class="requirements-quick-tip">
+          <div class="tip-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div>
+            <strong>Quick Submission Tip</strong>
+            <p>Applications with complete social links and sample past event references are verified fastest.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="requirements-grid">
+        <div class="requirement-card" *ngFor="let req of requirements">
+          <div class="req-header">
+            <div class="req-icon-box">
+              <svg *ngIf="req.icon === 'contact'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+              <svg *ngIf="req.icon === 'building'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><line x1="8" y1="6" x2="8" y2="6"/><line x1="16" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>
+              <svg *ngIf="req.icon === 'award'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+              <svg *ngIf="req.icon === 'shield'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <svg *ngIf="req.icon === 'file-text'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              <svg *ngIf="req.icon === 'check-square'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <div>
+              <span class="req-category">{{ req.category }}</span>
+              <h3 class="req-title">{{ req.title }}</h3>
+            </div>
+          </div>
+
+          <p class="req-desc">{{ req.description }}</p>
+
+          <ul class="req-checklist">
+            <li *ngFor="let item of req.details">
+              <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>{{ item }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Prototype Disclaimer Callout -->
+      <div class="prototype-notice-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="prototype-notice-icon">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <div>
+          <strong>Prototype Simulation Note:</strong> Identity verification and document uploads on this landing page are design demonstration features. No government services, DigiLocker, or external identification APIs are connected in this environment. No application fees are charged.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 7: HOST DASHBOARD PREVIEW                      -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="section-dashboard-preview" id="dashboard-preview">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-tag">ORGANIZER WORKSPACE</span>
+        <h2 class="section-title">Host Dashboard Preview</h2>
+        <p class="section-subtitle">
+          Approved hosts gain access to a dedicated organizer workspace built to monitor ticket sales, check-in guests, and manage event schedules.
+        </p>
+      </div>
+
+      <!-- Preview Mockup Container -->
+      <div class="preview-mockup-wrapper">
+        <div class="preview-mockup-browser-bar">
+          <div class="browser-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="browser-url-bar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="url-lock-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>https://eventhub.com/manage/host-workspace</span>
+            <span class="sample-data-pill">SAMPLE DATA PREVIEW</span>
+          </div>
+        </div>
+
+        <div class="preview-mockup-body">
+          <!-- Mockup Navigation Tab Bar -->
+          <div class="preview-tabs">
+            <button 
+              class="preview-tab" 
+              [class.active]="selectedDashboardTab() === 'overview'" 
+              (click)="selectedDashboardTab.set('overview')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              Overview & Metrics
+            </button>
+            <button 
+              class="preview-tab" 
+              [class.active]="selectedDashboardTab() === 'events'" 
+              (click)="selectedDashboardTab.set('events')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+              Events Management (12)
+            </button>
+            <button 
+              class="preview-tab" 
+              [class.active]="selectedDashboardTab() === 'revenue'" 
+              (click)="selectedDashboardTab.set('revenue')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Ticket Summary & Revenue
+            </button>
+            <button 
+              class="preview-tab" 
+              [class.active]="selectedDashboardTab() === 'activity'" 
+              (click)="selectedDashboardTab.set('activity')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Recent Activity Feed
+            </button>
+          </div>
+
+          <!-- Tab Content 1: Overview & Metrics -->
+          <div class="preview-tab-pane" *ngIf="selectedDashboardTab() === 'overview'">
+            <!-- Status Stats Grid -->
+            <div class="preview-metrics-grid">
+              <div class="metric-card bg-indigo-tint">
+                <div class="metric-top">
+                  <span class="metric-label">My Events</span>
+                  <span class="metric-badge-status">All Time</span>
+                </div>
+                <div class="metric-value">12</div>
+                <div class="metric-sub">3 currently active in Mumbai</div>
+              </div>
+
+              <div class="metric-card bg-amber-tint">
+                <div class="metric-top">
+                  <span class="metric-label">Draft Events</span>
+                  <span class="metric-badge-draft">In Preparation</span>
+                </div>
+                <div class="metric-value">2</div>
+                <div class="metric-sub">Tech Talk & Acoustic Jam</div>
+              </div>
+
+              <div class="metric-card bg-blue-tint">
+                <div class="metric-top">
+                  <span class="metric-label">Pending Review</span>
+                  <span class="metric-badge-pending">Curation Queue</span>
+                </div>
+                <div class="metric-value">1</div>
+                <div class="metric-sub">Submitted yesterday at 4:30 PM</div>
+              </div>
+
+              <div class="metric-card bg-green-tint">
+                <div class="metric-top">
+                  <span class="metric-label">Approved & Live</span>
+                  <span class="metric-badge-approved">Published</span>
+                </div>
+                <div class="metric-value">9</div>
+                <div class="metric-sub">100% attendee satisfaction</div>
+              </div>
+            </div>
+
+            <!-- Two-column Preview layout -->
+            <div class="preview-split-grid">
+              <!-- Ticket Sales Snapshot -->
+              <div class="preview-card-box">
+                <div class="preview-box-header">
+                  <div>
+                    <h4 class="preview-box-title">Ticket Summary Snapshot</h4>
+                    <span class="preview-box-sub">Sample aggregated revenue & capacity</span>
+                  </div>
+                  <span class="preview-box-pill">₹4,82,500 Total Gross</span>
+                </div>
+
+                <div class="ticket-progress-list">
+                  <div class="progress-item">
+                    <div class="prog-labels">
+                      <span>VIP Platinum Passes (₹2,500)</span>
+                      <strong>240 / 250 Sold (96%)</strong>
+                    </div>
+                    <div class="prog-bar-track">
+                      <div class="prog-bar-fill fill-indigo" style="width: 96%"></div>
+                    </div>
+                  </div>
+
+                  <div class="progress-item">
+                    <div class="prog-labels">
+                      <span>Early Bird General (₹999)</span>
+                      <strong>600 / 600 Sold (100%)</strong>
+                    </div>
+                    <div class="prog-bar-track">
+                      <div class="prog-bar-fill fill-green" style="width: 100%"></div>
+                    </div>
+                  </div>
+
+                  <div class="progress-item">
+                    <div class="prog-labels">
+                      <span>Standard Phase 2 (₹1,499)</span>
+                      <strong>580 / 700 Sold (82%)</strong>
+                    </div>
+                    <div class="prog-bar-track">
+                      <div class="prog-bar-fill fill-periwinkle" style="width: 82%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recent Activity Snapshot -->
+              <div class="preview-card-box">
+                <div class="preview-box-header">
+                  <div>
+                    <h4 class="preview-box-title">Recent Activity Feed</h4>
+                    <span class="preview-box-sub">Real-time mock event operations</span>
+                  </div>
+                  <span class="live-dot-pill"><span class="dot-pulse"></span> LIVE</span>
+                </div>
+
+                <div class="activity-feed-list">
+                  <div class="activity-item">
+                    <div class="activity-icon bg-green">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="activity-info">
+                      <p class="activity-text"><strong>2x VIP Passes</strong> booked by Rahul Sharma for Mumbai Vibe Fest</p>
+                      <span class="activity-time">3 minutes ago</span>
+                    </div>
+                  </div>
+
+                  <div class="activity-item">
+                    <div class="activity-icon bg-blue">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                    </div>
+                    <div class="activity-info">
+                      <p class="activity-text"><strong>Event Review Approved:</strong> "Design Sprint 2026" is now published.</p>
+                      <span class="activity-time">2 hours ago</span>
+                    </div>
+                  </div>
+
+                  <div class="activity-item">
+                    <div class="activity-icon bg-indigo">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
+                    </div>
+                    <div class="activity-info">
+                      <p class="activity-text"><strong>Staff Access:</strong> Scanner role granted to gate coordinator Priya K.</p>
+                      <span class="activity-time">5 hours ago</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content 2: Events List -->
+          <div class="preview-tab-pane" *ngIf="selectedDashboardTab() === 'events'">
+            <div class="preview-table-wrapper">
+              <table class="preview-table">
+                <thead>
+                  <tr>
+                    <th>Event Title</th>
+                    <th>Date & City</th>
+                    <th>Status</th>
+                    <th>Tickets Sold</th>
+                    <th>Gross</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Mumbai Indie Stage Live</strong></td>
+                    <td>14 Nov 2026 • Mumbai</td>
+                    <td><span class="table-badge badge-published">Live Published</span></td>
+                    <td>1,420 / 1,550</td>
+                    <td>₹4,82,500</td>
+                    <td><span class="table-action-link">View Stats</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>UX & AI Leaders Summit</strong></td>
+                    <td>22 Nov 2026 • Bengaluru</td>
+                    <td><span class="table-badge badge-review">Under Review</span></td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td><span class="table-action-link">Review Status</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Pottery & Artisan Clay Workshop</strong></td>
+                    <td>28 Nov 2026 • Pune</td>
+                    <td><span class="table-badge badge-draft">Draft</span></td>
+                    <td>0 / 40</td>
+                    <td>—</td>
+                    <td><span class="table-action-link">Edit Draft</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tab Content 3: Revenue -->
+          <div class="preview-tab-pane" *ngIf="selectedDashboardTab() === 'revenue'">
+            <div class="preview-revenue-breakdown">
+              <div class="revenue-summary-banner">
+                <div>
+                  <span class="rev-label">Total Platform Net Payout (Sample)</span>
+                  <h3 class="rev-val">₹4,58,375 <small class="text-muted">after 5% platform fee</small></h3>
+                </div>
+                <div class="rev-tag">Next Automated Payout: Monday 10:00 AM</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab Content 4: Activity -->
+          <div class="preview-tab-pane" *ngIf="selectedDashboardTab() === 'activity'">
+            <div class="activity-full-feed">
+              <div class="activity-item" *ngFor="let item of [1,2,3,4]">
+                <div class="activity-icon bg-indigo">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <div class="activity-info">
+                  <p class="activity-text"><strong>Gate Check-in Scan:</strong> Attendee QR pass #TKT-8910 verified by Gate 1 Scanner.</p>
+                  <span class="activity-time">Earlier today</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-mockup-footer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span><strong>Static Product Preview:</strong> Approved hosts receive access to the full authenticated organizer dashboard with live ticket tracking, scanner app integration, and instant settlement tools.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 8: FREQUENTLY ASKED QUESTIONS                  -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="section-faq" id="faq">
+    <div class="container">
+      <div class="section-header text-center">
+        <span class="section-tag">COMMON QUESTIONS</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-subtitle">
+          Everything you need to know about becoming an EventHub host, verification requirements, and managing ticket sales.
+        </p>
+      </div>
+
+      <!-- FAQ Category Filter & Search Bar -->
+      <div class="faq-controls">
+        <div class="faq-tabs">
+          <button 
+            class="faq-cat-btn" 
+            [class.active]="activeFaqCategory() === 'all'" 
+            (click)="activeFaqCategory.set('all')">
+            All Questions
+          </button>
+          <button 
+            class="faq-cat-btn" 
+            [class.active]="activeFaqCategory() === 'eligibility'" 
+            (click)="activeFaqCategory.set('eligibility')">
+            Eligibility
+          </button>
+          <button 
+            class="faq-cat-btn" 
+            [class.active]="activeFaqCategory() === 'application'" 
+            (click)="activeFaqCategory.set('application')">
+            Application
+          </button>
+          <button 
+            class="faq-cat-btn" 
+            [class.active]="activeFaqCategory() === 'review'" 
+            (click)="activeFaqCategory.set('review')">
+            Review Process
+          </button>
+          <button 
+            class="faq-cat-btn" 
+            [class.active]="activeFaqCategory() === 'publishing'" 
+            (click)="activeFaqCategory.set('publishing')">
+            Event Publishing
+          </button>
+        </div>
+
+        <div class="faq-search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="faq-search-icon">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input 
+            type="text" 
+            placeholder="Search questions (e.g. review, documents, fees)..." 
+            [(ngModel)]="faqSearchTerm"
+            class="faq-search-input"
+          />
+        </div>
+      </div>
+
+      <!-- FAQ Accordion List -->
+      <div class="faq-accordion-list">
+        <div 
+          class="faq-accordion-item" 
+          *ngFor="let faq of filteredFaqs; let idx = index" 
+          [class.is-open]="faq.isOpen">
+          
+          <button 
+            class="faq-question-btn" 
+            (click)="toggleFaq(faq)" 
+            [attr.aria-expanded]="faq.isOpen"
+            [attr.aria-controls]="'faq-ans-' + idx">
+            <span class="faq-q-text">{{ faq.question }}</span>
+            <span class="faq-chevron-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </button>
+
+          <div 
+            class="faq-answer-pane" 
+            [id]="'faq-ans-' + idx" 
+            *ngIf="faq.isOpen">
+            <p class="faq-ans-text">{{ faq.answer }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="filteredFaqs.length === 0" class="faq-no-results">
+          <p>No questions found matching "{{ faqSearchTerm() }}". Please try a different search term or view all questions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 9: FINAL CALL TO ACTION                        -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <section class="section-final-cta" id="apply-cta">
+    <div class="container">
+      <div class="final-cta-card">
+        <div class="cta-glow glow-a"></div>
+        <div class="cta-glow glow-b"></div>
+
+        <div class="final-cta-content text-center">
+          <span class="cta-badge">GET STARTED TODAY</span>
+          <h2 class="final-cta-title">Ready to Bring Your Event to Life?</h2>
+          <p class="final-cta-desc">
+            Start your host application and take the first step toward managing your events on EventHub. Join verified organizers across the nation.
+          </p>
+
+          <div class="final-cta-actions">
+            <button class="btn-cta-primary" (click)="handleApplyClick()" id="final-apply-btn">
+              <span *ngIf="appStatus() === 'guest' || appStatus() === 'not_applied'">Apply to Become a Host</span>
+              <span *ngIf="appStatus() === 'submitted' || appStatus() === 'under_review'">Check Application Status</span>
+              <span *ngIf="appStatus() === 'info_required'">Submit Requested Info</span>
+              <span *ngIf="appStatus() === 'approved'">Go to Host Workspace</span>
+              <span *ngIf="appStatus() === 'rejected'">View Status & Reapply</span>
+              <svg class="cta-arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+
+            <a routerLink="/discover" class="btn-cta-secondary" id="final-explore-btn">
+              Explore Events
+            </a>
+          </div>
+
+          <div class="cta-trust-tags">
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> No upfront registration fees</span>
+            <span>•</span>
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Instant application tracking</span>
+            <span>•</span>
+            <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Dedicated host support</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- MODAL 1: HOST APPLICATION MULTI-STEP WIZARD            -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showApplicationModal()" (click)="showApplicationModal.set(false)">
+    <div class="modal-container wizard-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">STEP {{ currentWizardStep() }} OF 4</span>
+          <h3 class="modal-title">Host Application</h3>
+        </div>
+        <button class="modal-close-btn" (click)="showApplicationModal.set(false)" title="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Stepper Progress Bar -->
+      <div class="wizard-stepper">
+        <div class="step-indicator" [class.active]="currentWizardStep() >= 1" [class.current]="currentWizardStep() === 1" (click)="goToWizardStep(1)">
+          <div class="step-circle">1</div>
+          <span class="step-text">Basic Profile</span>
+        </div>
+        <div class="step-line" [class.active]="currentWizardStep() >= 2"></div>
+        <div class="step-indicator" [class.active]="currentWizardStep() >= 2" [class.current]="currentWizardStep() === 2" (click)="goToWizardStep(2)">
+          <div class="step-circle">2</div>
+          <span class="step-text">Event Niche</span>
+        </div>
+        <div class="step-line" [class.active]="currentWizardStep() >= 3"></div>
+        <div class="step-indicator" [class.active]="currentWizardStep() >= 3" [class.current]="currentWizardStep() === 3" (click)="goToWizardStep(3)">
+          <div class="step-circle">3</div>
+          <span class="step-text">Verification</span>
+        </div>
+        <div class="step-line" [class.active]="currentWizardStep() >= 4"></div>
+        <div class="step-indicator" [class.active]="currentWizardStep() >= 4" [class.current]="currentWizardStep() === 4" (click)="goToWizardStep(4)">
+          <div class="step-circle">4</div>
+          <span class="step-text">Review</span>
+        </div>
+      </div>
+
+      <div class="modal-body wizard-body">
+        <!-- STEP 1: Basic & Organizer Details -->
+        <div class="wizard-step-pane" *ngIf="currentWizardStep() === 1">
+          <h4 class="pane-title">Organizer Information</h4>
+          <p class="pane-sub">Tell us who is applying to become an EventHub host.</p>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Full Name / Contact Person *</label>
+              <input type="text" class="form-input" [(ngModel)]="wizardForm.applicantName" placeholder="e.g. Jeet Shah" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Official Email Address *</label>
+              <input type="email" class="form-input" [(ngModel)]="wizardForm.email" placeholder="e.g. organizer@domain.com" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mobile Phone Number *</label>
+              <input type="tel" class="form-input" [(ngModel)]="wizardForm.phone" placeholder="e.g. +91 98765 43210" />
+            </div>
+
+            <div class="form-group">
+              <app-select
+                label="Hosting Structure"
+                [required]="true"
+                [options]="organizationTypeOptions"
+                [(ngModel)]="wizardForm.organizationType">
+              </app-select>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">Brand / Organization Display Name</label>
+              <input type="text" class="form-input" [(ngModel)]="wizardForm.organizationName" placeholder="e.g. Starlight Live Experiences" />
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">Website or Active Social Profile</label>
+              <input type="url" class="form-input" [(ngModel)]="wizardForm.websiteOrSocial" placeholder="e.g. https://instagram.com/starlightlive" />
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: Event Details & Niche -->
+        <div class="wizard-step-pane" *ngIf="currentWizardStep() === 2">
+          <h4 class="pane-title">Event Experience & Scale</h4>
+          <p class="pane-sub">Select your primary event formats and expected audience numbers.</p>
+
+          <div class="form-group full-width">
+            <label class="form-label">Primary Event Categories (Select all that apply) *</label>
+            <div class="category-chips-grid">
+              <button 
+                type="button"
+                *ngFor="let cat of eventCategories" 
+                class="chip-btn" 
+                [class.selected]="isCategorySelected(cat.title)"
+                (click)="toggleCategorySelection(cat.title)">
+                <span class="chip-check" *ngIf="isCategorySelected(cat.title)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+                {{ cat.title }}
+              </button>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <app-select
+                label="Expected Attendee Scale per Event"
+                [options]="expectedAttendeeScaleOptions"
+                [(ngModel)]="wizardForm.expectedAttendeeScale">
+              </app-select>
+            </div>
+
+            <div class="form-group">
+              <app-select
+                label="Primary Event City"
+                [required]="true"
+                [options]="cityOptions"
+                [(ngModel)]="wizardForm.city">
+              </app-select>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">Past Event Track Record / Experience</label>
+              <textarea class="form-textarea" rows="3" [(ngModel)]="wizardForm.pastEventDescription" placeholder="Briefly describe events you have hosted previously, past attendance numbers, or links to photos/videos."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Verification & Prototype Upload -->
+        <div class="wizard-step-pane" *ngIf="currentWizardStep() === 3">
+          <h4 class="pane-title">Verification & Identification</h4>
+          <p class="pane-sub">Sample document submission for host eligibility verification.</p>
+
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <app-select
+                label="Verification ID Type"
+                [required]="true"
+                [options]="idTypeOptions"
+                [(ngModel)]="wizardForm.idType">
+              </app-select>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="form-label">Prototype Document Upload</label>
+              <div class="upload-dropzone">
+                <div class="dropzone-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <div class="dropzone-text">
+                  <span class="dropzone-title">Uploaded Mock File: <strong>{{ wizardForm.documentFileName }}</strong></span>
+                  <span class="dropzone-sub">PDF, PNG, or JPG (Simulated prototype file)</span>
+                </div>
+                <span class="dropzone-badge">Ready</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="verification-disclaimer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>This is a prototype demonstration. Uploaded documents are simulated locally and no government databases are queried.</span>
+          </div>
+        </div>
+
+        <!-- STEP 4: Terms & Review -->
+        <div class="wizard-step-pane" *ngIf="currentWizardStep() === 4">
+          <h4 class="pane-title">Review & Submit Application</h4>
+          <p class="pane-sub">Please review your submission details before sending to the curation queue.</p>
+
+          <div class="review-summary-card">
+            <div class="summary-row">
+              <span class="sum-label">Applicant:</span>
+              <strong class="sum-val">{{ wizardForm.applicantName || 'Jeet Shah' }} ({{ wizardForm.organizationType }})</strong>
+            </div>
+            <div class="summary-row">
+              <span class="sum-label">Contact:</span>
+              <span class="sum-val">{{ wizardForm.email }} • {{ wizardForm.phone }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="sum-label">Organization:</span>
+              <span class="sum-val">{{ wizardForm.organizationName || 'Independent Host' }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="sum-label">Event Focus:</span>
+              <span class="sum-val">{{ wizardForm.primaryCategories.join(', ') }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="sum-label">City & Scale:</span>
+              <span class="sum-val">{{ wizardForm.city }} ({{ wizardForm.expectedAttendeeScale }})</span>
+            </div>
+          </div>
+
+          <div class="terms-checkbox-wrap">
+            <label class="custom-checkbox-label">
+              <input type="checkbox" [(ngModel)]="wizardForm.termsAccepted" />
+              <span>I confirm the accuracy of the details provided and agree to abide by the EventHub Host Guidelines and Attendee Safety Code.</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-modal-back" *ngIf="currentWizardStep() > 1" (click)="prevWizardStep()">Back</button>
+        <div class="footer-spacer"></div>
+        <button class="btn-modal-cancel" (click)="showApplicationModal.set(false)">Cancel</button>
+        
+        <button class="btn-modal-next" *ngIf="currentWizardStep() < 4" (click)="nextWizardStep()">
+          Continue
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+
+        <button class="btn-modal-submit" *ngIf="currentWizardStep() === 4" [disabled]="!wizardForm.termsAccepted" (click)="submitHostApplication()">
+          Submit Host Application
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- MODAL 2: APPLICATION STATUS TRACKER MODAL               -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showStatusModal()" (click)="showStatusModal.set(false)">
+    <div class="modal-container status-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">APPLICATION TRACKER</span>
+          <h3 class="modal-title">Host Application Status</h3>
+        </div>
+        <button class="modal-close-btn" (click)="showStatusModal.set(false)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Status Hero Banner -->
+        <div class="status-modal-banner" [attr.data-status]="appStatus()">
+          <div class="status-banner-icon">
+            <svg *ngIf="appStatus() === 'submitted'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+            <svg *ngIf="appStatus() === 'under_review'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <svg *ngIf="appStatus() === 'info_required'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <svg *ngIf="appStatus() === 'approved'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <svg *ngIf="appStatus() === 'rejected'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+
+          <div>
+            <span class="status-pill-badge">
+              <span *ngIf="appStatus() === 'submitted'">Submitted</span>
+              <span *ngIf="appStatus() === 'under_review'">Under Review</span>
+              <span *ngIf="appStatus() === 'info_required'">Action Required</span>
+              <span *ngIf="appStatus() === 'approved'">Approved</span>
+              <span *ngIf="appStatus() === 'rejected'">Not Approved</span>
+            </span>
+            <h4 class="status-modal-headline">
+              <span *ngIf="appStatus() === 'submitted'">Application Received</span>
+              <span *ngIf="appStatus() === 'under_review'">Curation Review In Progress</span>
+              <span *ngIf="appStatus() === 'info_required'">Additional Clarification Requested</span>
+              <span *ngIf="appStatus() === 'approved'">Host Profile Approved!</span>
+              <span *ngIf="appStatus() === 'rejected'">Application Not Approved</span>
+            </h4>
+            <p class="status-modal-desc">{{ appData()?.statusMessage }}</p>
+          </div>
+        </div>
+
+        <!-- Application Metadata -->
+        <div class="application-details-box">
+          <div class="detail-col">
+            <span class="detail-label">Application ID</span>
+            <strong>#{{ appData()?.id || 'EH-APP-7829' }}</strong>
+          </div>
+          <div class="detail-col">
+            <span class="detail-label">Organization / Brand</span>
+            <strong>{{ appData()?.organizationName || 'Starlight Live Experiences' }}</strong>
+          </div>
+          <div class="detail-col">
+            <span class="detail-label">Submission Date</span>
+            <span>Oct 8, 2026 • 2:30 PM</span>
+          </div>
+        </div>
+
+        <!-- Clarification Note if needed -->
+        <div class="action-required-callout" *ngIf="appStatus() === 'info_required'">
+          <div class="callout-badge">Reviewer Note</div>
+          <p>Please provide confirmation of your primary venue layout or a reference link to past workshops.</p>
+          <button class="btn-respond-now" (click)="showStatusModal.set(false); showAdditionalInfoModal.set(true)">
+            Provide Requested Information
+          </button>
+        </div>
+
+        <!-- Reapplication if rejected -->
+        <div class="reapply-box" *ngIf="appStatus() === 'rejected'">
+          <p>You can revise your hosting experience details and submit an updated application.</p>
+          <button class="btn-reapply" (click)="handleReapply()">
+            Start New Application
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" (click)="showStatusModal.set(false)">Close</button>
+        <button class="btn-modal-submit" *ngIf="appStatus() === 'approved'" (click)="showStatusModal.set(false); navigateToHostWorkspace()">
+          Open Host Workspace
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- MODAL 3: ADDITIONAL INFORMATION SUBMISSION MODAL        -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showAdditionalInfoModal()" (click)="showAdditionalInfoModal.set(false)">
+    <div class="modal-container info-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">ACTION REQUIRED</span>
+          <h3 class="modal-title">Provide Additional Information</h3>
+        </div>
+        <button class="modal-close-btn" (click)="showAdditionalInfoModal.set(false)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="reviewer-request-banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong>Reviewer Clarification Request:</strong>
+            <p>Our curation team has requested a link to your past event portfolio or written venue clearance notes.</p>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Your Response / Clarification Notes *</label>
+          <textarea 
+            class="form-textarea" 
+            rows="4" 
+            [(ngModel)]="additionalInfoNote" 
+            placeholder="e.g. Attached are our past festival photos at https://instagram.com/... and venue safety clearance details.">
+          </textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" (click)="showAdditionalInfoModal.set(false)">Cancel</button>
+        <button 
+          class="btn-modal-submit" 
+          [disabled]="!additionalInfoNote().trim() || isSubmittingAdditionalInfo()"
+          (click)="submitAdditionalInfo()">
+          <span *ngIf="!isSubmittingAdditionalInfo()">Submit Clarification</span>
+          <span *ngIf="isSubmittingAdditionalInfo()">Submitting...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- MODAL 4: GUEST SIGN IN / REGISTER PROMPT                -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showGuestAuthModal()" (click)="showGuestAuthModal.set(false)">
+    <div class="modal-container auth-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">SIGN IN REQUIRED</span>
+          <h3 class="modal-title">Host with EventHub</h3>
+        </div>
+        <button class="modal-close-btn" (click)="showGuestAuthModal.set(false)" title="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body auth-modal-body text-center">
+        <div class="auth-modal-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h4 class="auth-modal-headline">Sign In to Begin Your Host Application</h4>
+        <p class="auth-modal-sub">
+          Please log in or create an account to start your host application and track verification progress.
+        </p>
+
+        <div class="auth-modal-buttons">
+          <button class="btn-auth-primary" (click)="navigateToLogin()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            Log In to Continue
+          </button>
+          <button class="btn-auth-secondary" (click)="navigateToRegister()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            Create New Account
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- MODAL 5: CATEGORY DETAILS DRAWER                        -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showCategoryDetailsModal()" (click)="showCategoryDetailsModal.set(null)">
+    <div class="modal-container cat-detail-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">CATEGORY GUIDE</span>
+          <h3 class="modal-title">{{ showCategoryDetailsModal()?.title }}</h3>
+        </div>
+        <button class="modal-close-btn" (click)="showCategoryDetailsModal.set(null)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="cat-modal-img-box">
+          <img [src]="showCategoryDetailsModal()?.imageUrl" [alt]="showCategoryDetailsModal()?.title" class="cat-modal-img" />
+          <span class="cat-modal-badge">{{ showCategoryDetailsModal()?.tag }}</span>
+        </div>
+        <p class="cat-modal-desc">{{ showCategoryDetailsModal()?.description }}</p>
+        
+        <div class="cat-features-list">
+          <div class="cat-feature-item">
+            <strong>Target Audience:</strong> High-intent explorers in {{ selectedCity() }} looking for {{ showCategoryDetailsModal()?.title }}.
+          </div>
+          <div class="cat-feature-item">
+            <strong>Ticketing Formats:</strong> General Admission, Tiered Seating, Early-Bird & Group Passes.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" (click)="showCategoryDetailsModal.set(null)">Close</button>
+        <button class="btn-modal-submit" (click)="handleCategoryClick(showCategoryDetailsModal()!); showCategoryDetailsModal.set(null)">
+          Explore Category Events
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

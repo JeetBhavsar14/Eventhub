@@ -1,0 +1,429 @@
+<div class="staff-app-container">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 1. COMPACT VENUE HEADER                                     -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <header class="staff-top-bar">
+    <div class="header-left">
+      <a routerLink="/discover" class="staff-brand">
+        <div class="brand-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div class="brand-text">
+          <span class="app-title">EventHub</span>
+          <span class="role-pill">EVENT STAFF</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Active Event Badge in Header -->
+    <div class="event-venue-indicator">
+      <span class="pulse-emerald"></span>
+      <div class="venue-info-text">
+        <div class="venue-title-row">
+          <strong>{{ currentEvent().title }}</strong>
+          <span class="designation-chip">{{ activeDesignation() }}</span>
+        </div>
+        <small><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> {{ currentEvent().gate }} • {{ permissions().length }} Permissions Granted</small>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <a routerLink="/host/dashboard" class="btn-host-switch" title="Open Host Workspace">
+        <span>Host Workspace</span>
+      </a>
+      <button class="btn-staff-exit" (click)="signOut()" title="Sign Out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Interactive Role / Station Simulator (Shows how permissions reshape layout) -->
+  <div class="station-switcher-bar">
+    <div class="switcher-inner">
+      <span class="switcher-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Assigned Station Role:
+      </span>
+      <div class="preset-chips-wrap">
+        <button 
+          *ngFor="let p of rolePresets" 
+          type="button"
+          class="station-chip-btn" 
+          [class.active]="activeDesignation() === p.title"
+          (click)="switchDesignationPreset(p.id)">
+          {{ p.title }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 2. LIVE GATE ADMISSION PROGRESS BAR                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="gate-progress-strip">
+    <div class="strip-labels">
+      <span>Checked In: <strong>{{ admissionStats().checked }}/{{ admissionStats().total }}</strong> ({{ admissionStats().percent }}%)</span>
+      <span class="remaining-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> {{ admissionStats().remaining }} Remaining</span>
+    </div>
+    <div class="strip-track">
+      <div class="strip-fill" [style.width.%]="admissionStats().percent"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 3. MAIN TASK CONTENT (Mobile-first View Switcher)           -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <main class="staff-content-area">
+
+    <!-- Feedback Toast -->
+    <div class="staff-toast" *ngIf="toastMessage()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <span>{{ toastMessage() }}</span>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────
+         TAB 1: TICKET VALIDATION & CHECK-IN (Primary Action Screen)
+         ───────────────────────────────────────────────────────── -->
+    <div class="staff-pane" *ngIf="activeTab() === 'checkin' && canScanTickets()">
+      
+      <!-- Prominent Check In Scanner Card -->
+      <div class="scanner-hero-box">
+        
+        <!-- Camera Laser Viewfinder Simulator -->
+        <div class="viewfinder-frame">
+          <div class="laser-beam"></div>
+          <div class="frame-corner c-tl"></div>
+          <div class="frame-corner c-tr"></div>
+          <div class="frame-corner c-bl"></div>
+          <div class="frame-corner c-br"></div>
+          
+          <div class="viewfinder-content">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="qr-target-icon"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span class="scan-instruction">Scan Attendee Ticket QR / Barcode</span>
+          </div>
+        </div>
+
+        <!-- Rapid Simulation Scan Buttons -->
+        <div class="simulation-actions-bar">
+          <span class="sim-title">Fast Pass Simulators:</span>
+          <div class="sim-grid">
+            <button class="sim-btn valid" (click)="verifyPass('ORD-9814')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Scan Devansh (2 Passes)</button>
+            <button class="sim-btn vip" (click)="verifyPass('ORD-9774')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Scan Pooja (VIP Gold)</button>
+            <button class="sim-btn duplicate" (click)="verifyPass('ORD-9821')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Test Duplicate Scan</button>
+            <button class="sim-btn invalid" (click)="verifyPass('INVALID-PASS-999')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Test Invalid Pass</button>
+          </div>
+        </div>
+
+        <!-- Manual Pass Search / Entry -->
+        <div class="manual-entry-row">
+          <input 
+            type="text" 
+            placeholder="Enter Order # or Attendee Name..." 
+            [(ngModel)]="ticketSearchInput" 
+            (keyup.enter)="verifyPass()"
+            class="ticket-text-input" />
+          <button class="btn-verify-action" (click)="verifyPass()">Check In</button>
+        </div>
+
+        <!-- UNAMBIGUOUS TICKET VALIDATION OUTCOME CARD -->
+        <div class="validation-result-card" *ngIf="validationOutcome() !== 'idle'" [attr.data-outcome]="validationOutcome()">
+          
+          <div class="result-header">
+            <div class="result-badge-icon">
+              <svg width="22" height="22" *ngIf="validationOutcome() === 'valid'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg width="22" height="22" *ngIf="validationOutcome() === 'duplicate'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <svg width="22" height="22" *ngIf="validationOutcome() === 'invalid'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </div>
+            <div class="result-title-wrap">
+              <h3>{{ validationOutcome() === 'valid' ? 'VALID TICKET' : validationOutcome() === 'duplicate' ? 'DUPLICATE / ALREADY USED' : 'INVALID TICKET' }}</h3>
+              <span class="result-sub-msg">{{ validationResult()?.message }}</span>
+            </div>
+            <button class="btn-clear-result" (click)="resetScanResult()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+
+          <div class="result-attendee-details" *ngIf="validationResult()?.name">
+            <div class="detail-row">
+              <span>Attendee Name:</span>
+              <strong>{{ validationResult()?.name }}</strong>
+            </div>
+            <div class="detail-row">
+              <span>Ticket Tier:</span>
+              <strong class="tier-name" [class.vip]="validationResult()?.isVIP">{{ validationResult()?.tier }} ({{ validationResult()?.tickets }} Tickets)</strong>
+            </div>
+            <div class="detail-row" *ngIf="validationResult()?.wristband">
+              <span>Required Wristband:</span>
+              <strong class="wristband-tag"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> {{ validationResult()?.wristband }}</strong>
+            </div>
+            <div class="detail-row" *ngIf="validationResult()?.time">
+              <span>Check-in Timestamp:</span>
+              <small>{{ validationResult()?.time }}</small>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────
+         TAB 2: ATTENDEES LIST & MANUAL CHECK-IN
+         ───────────────────────────────────────────────────────── -->
+    <div class="staff-pane" *ngIf="activeTab() === 'attendees' && canViewAttendees()">
+      
+      <div class="attendees-header-wrap">
+        <h2>Guest Admissions List</h2>
+        
+        <!-- Search -->
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input 
+            type="text" 
+            placeholder="Search attendee by name, email, order..." 
+            [(ngModel)]="attendeeSearch" 
+            class="attendee-search-input" />
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="filter-tabs-row">
+          <button class="filter-pill" [class.active]="attendeeFilter() === 'all'" (click)="attendeeFilter.set('all')">All ({{ attendees().length }})</button>
+          <button class="filter-pill" [class.active]="attendeeFilter() === 'pending'" (click)="attendeeFilter.set('pending')">Pending Entry</button>
+          <button class="filter-pill" [class.active]="attendeeFilter() === 'checked_in'" (click)="attendeeFilter.set('checked_in')">Checked In</button>
+        </div>
+      </div>
+
+      <!-- Attendee Mobile-Optimized Cards List -->
+      <div class="attendees-cards-list">
+        <div *ngFor="let att of filteredAttendees()" class="staff-attendee-card" [class.is-checked]="att.checkInStatus === 'checked_in'">
+          <div class="card-top-row">
+            <div>
+              <strong class="att-name">{{ att.name }}</strong>
+              <span class="att-order">{{ att.orderId }} • {{ att.ticketsCount }}x Tickets</span>
+            </div>
+            <span class="checkin-status-badge" [class.in]="att.checkInStatus === 'checked_in'">
+              {{ att.checkInStatus === 'checked_in' ? 'Checked In (' + att.checkInTime + ')' : 'Pending' }}
+            </span>
+          </div>
+
+          <div class="card-tier-row">
+            <span class="tier-pill" [class.vip]="att.isVIP">{{ att.ticketTier }}</span>
+            <span class="wristband-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> {{ att.wristbandColor }}</span>
+          </div>
+
+          <p *ngIf="att.notes" class="att-notes-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> {{ att.notes }}</p>
+
+          <div class="card-action-row">
+            <button 
+              *ngIf="att.checkInStatus === 'pending'" 
+              class="btn-tap-checkin" 
+              (click)="checkInAttendee(att.id)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Confirm Entry
+            </button>
+            <button 
+              *ngIf="att.checkInStatus === 'checked_in'" 
+              class="btn-tap-undo" 
+              (click)="undoCheckIn(att.id)">
+              Undo Check-in
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────
+         TAB 3: TODAY'S SHIFT & EVENT ASSIGNMENTS
+         ───────────────────────────────────────────────────────── -->
+    <div class="staff-pane" *ngIf="activeTab() === 'today' && canViewDuty()">
+      <div class="shift-hero-card">
+        <div class="shift-head">
+          <div>
+            <h2>Today's Duty Roster</h2>
+            <span class="shift-designation-badge">{{ activeDesignation() }}</span>
+          </div>
+          <span class="shift-live-tag">● Live Shift</span>
+        </div>
+
+        <div class="shift-details-grid">
+          <div class="shift-info-item">
+            <span>Event Assigned</span>
+            <strong>{{ currentEvent().title }}</strong>
+          </div>
+          <div class="shift-info-item">
+            <span>Venue Station</span>
+            <strong>{{ currentEvent().venue }}</strong>
+          </div>
+          <div class="shift-info-item">
+            <span>Shift Timings</span>
+            <strong>{{ currentEvent().startTime }} – {{ currentEvent().endTime }}</strong>
+          </div>
+          <div class="shift-info-item">
+            <span>Primary Responsibility</span>
+            <strong>{{ currentEvent().roleDuty }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Official Station Designation & Granted Permissions Card -->
+      <div class="shift-perms-card">
+        <div class="perms-card-head">
+          <div>
+            <h3>Station Authority & Granted Permissions</h3>
+            <p class="perms-card-sub">Authorized by Event Owner & Operations Lead for current assignment.</p>
+          </div>
+          <span class="active-perm-count">{{ permissions().length }} Active Permissions</span>
+        </div>
+        
+        <div class="station-perms-grid">
+          <div class="station-perm-item" [class.granted]="canScanTickets()">
+            <div class="perm-status-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="perm-text-info">
+              <strong>Gate QR & Barcode Scanner</strong>
+              <small>{{ canScanTickets() ? 'Active at Turnstiles' : 'Restricted for this Station' }}</small>
+            </div>
+          </div>
+
+          <div class="station-perm-item" [class.granted]="canViewAttendees()">
+            <div class="perm-status-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="perm-text-info">
+              <strong>Attendee Roster & Status Lookup</strong>
+              <small>{{ canViewAttendees() ? 'Access Authorized' : 'Restricted for this Station' }}</small>
+            </div>
+          </div>
+
+          <div class="station-perm-item" [class.granted]="canLogIncidents()">
+            <div class="perm-status-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="perm-text-info">
+              <strong>Incident Dispatch & Security Reporting</strong>
+              <small>{{ canLogIncidents() ? 'Reporting Granted' : 'Restricted for this Station' }}</small>
+            </div>
+          </div>
+
+          <div class="station-perm-item" [class.granted]="canViewDuty()">
+            <div class="perm-status-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="perm-text-info">
+              <strong>Operational Briefings & Station Duty</strong>
+              <small>Authorized</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gate Safety & Check-in Rules -->
+      <div class="shift-handbook-card">
+        <h3>Gate Admission Guidelines</h3>
+        <ul class="handbook-list">
+          <li><strong>VIP Passes:</strong> Issue Gold Hologram wristbands and verify 18+ ID badge.</li>
+          <li><strong>General Admission:</strong> Issue Neon Blue wristbands after scanning barcode.</li>
+          <li><strong>Duplicate Passes:</strong> If pass alerts duplicate, refer attendee to Box Office Desk.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────
+         TAB 4: INCIDENT & PROBLEM REPORTING
+         ───────────────────────────────────────────────────────── -->
+    <div class="staff-pane" *ngIf="activeTab() === 'issues' && canLogIncidents()">
+      <div class="issues-head-row">
+        <div>
+          <h2>Ground Incidents</h2>
+          <p>Report ticket discrepancies, lost wristbands, or crowd congestion.</p>
+        </div>
+        <button class="btn-report-incident" (click)="showIncidentForm.set(true)">+ Report Issue</button>
+      </div>
+
+      <!-- Incident Form Modal / Expansion -->
+      <div class="incident-form-card" *ngIf="showIncidentForm()">
+        <h3>New Incident Log</h3>
+        <div class="form-field">
+          <label>Category</label>
+          <select [(ngModel)]="newIncidentCategory" class="incident-select">
+            <option value="Lost Wristband">Lost Wristband Replacement</option>
+            <option value="Duplicate Pass">Duplicate Pass Discrepancy</option>
+            <option value="Medical Assistance">Medical / First Aid Request</option>
+            <option value="Gate Congestion">Turnstile Queue Congestion</option>
+            <option value="Other">Other Operational Issue</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Description & Notes</label>
+          <textarea [(ngModel)]="newIncidentNote" rows="3" class="incident-textarea" placeholder="Provide details for operations dispatch..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button class="btn-form-cancel" (click)="showIncidentForm.set(false)">Cancel</button>
+          <button class="btn-form-submit" (click)="submitIncidentReport()">Dispatch Incident</button>
+        </div>
+      </div>
+
+      <!-- Recent Incidents List -->
+      <div class="incidents-list">
+        <div *ngFor="let inc of incidents()" class="incident-item">
+          <div class="inc-head">
+            <strong class="inc-cat">{{ inc.category }}</strong>
+            <span class="inc-time">{{ inc.time }}</span>
+          </div>
+          <p class="inc-desc">{{ inc.description }}</p>
+          <span class="inc-status-tag" [class.resolved]="inc.status === 'resolved'">
+            {{ inc.status === 'resolved' ? 'Resolved' : 'Dispatched' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 4. BOTTOM MOBILE NAVIGATION BAR                             -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <nav class="staff-bottom-nav" aria-label="Staff Bottom Navigation">
+    
+    <button 
+      *ngIf="canViewDuty()"
+      class="nav-tab-btn" 
+      [class.active]="activeTab() === 'today'" 
+      (click)="setTab('today')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Today</span>
+    </button>
+
+    <button 
+      *ngIf="canScanTickets()"
+      class="nav-tab-btn primary-scan-tab" 
+      [class.active]="activeTab() === 'checkin'" 
+      (click)="setTab('checkin')">
+      <div class="scan-tab-circle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <span>Check-in</span>
+    </button>
+
+    <button 
+      *ngIf="canViewAttendees()"
+      class="nav-tab-btn" 
+      [class.active]="activeTab() === 'attendees'" 
+      (click)="setTab('attendees')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Attendees</span>
+    </button>
+
+    <button 
+      *ngIf="canLogIncidents()"
+      class="nav-tab-btn" 
+      [class.active]="activeTab() === 'issues'" 
+      (click)="setTab('issues')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Issues</span>
+    </button>
+
+  </nav>
+
+</div>

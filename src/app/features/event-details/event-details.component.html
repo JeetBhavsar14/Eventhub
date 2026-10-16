@@ -1,0 +1,102 @@
+<div class="event-details-wrapper fade-in" *ngIf="!isLoading() && event()">
+
+  
+  <!-- Hero Section with blurred background effect -->
+  <section class="details-hero">
+    <div class="hero-bg-blur">
+      <img [src]="event().thumbnailUrl" alt="Background">
+    </div>
+    <div class="hero-content">
+      <div class="hero-image">
+        <img [src]="event().thumbnailUrl" [alt]="event().title">
+      </div>
+      <div class="hero-text">
+        <span class="category-badge">{{ event().category }}</span>
+        <h1>{{ event().title }}</h1>
+        <p class="tagline">{{ event().description | slice:0:100 }}...</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Layout -->
+  <section class="content-section">
+    <div class="content-container">
+      
+      <!-- Left side: Details -->
+      <main class="main-info">
+        <div class="info-card">
+          <h2>About this Event</h2>
+          <p class="description">{{ event().description }}</p>
+          
+          <h3 class="mt-4">Date and Time</h3>
+          <div class="detail-row">
+            <span class="icon" [innerHTML]="calendarSvg"></span>
+            <div>
+              <p class="font-bold">{{ event().date | date:'EEEE, MMMM d, yyyy' }}</p>
+              <p class="text-gray">{{ event().time || '10:00 AM - 5:00 PM' }}</p>
+            </div>
+          </div>
+
+          <h3 class="mt-4">Location</h3>
+          <div class="detail-row">
+            <span class="icon" [innerHTML]="mapPinSvg"></span>
+            <div>
+              <p class="font-bold">{{ event().location.venue }}</p>
+              <p class="text-gray">{{ event().location.address || event().location.city + ', ' + event().location.country }}</p>
+            </div>
+          </div>
+          
+          <div class="map-placeholder mt-2">
+            <span class="icon" [innerHTML]="mapPinSvg"></span>
+            <p>Interactive Map coming soon</p>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right side: Sticky Booking Widget -->
+      <aside class="booking-sidebar">
+        <div class="booking-widget">
+          <div class="price-header">
+            <h3>Tickets</h3>
+            <p class="price-tag">From ₹{{ event().ticketTypes?.[0]?.price || 500 }}</p>
+          </div>
+          
+          <div class="ticket-types" *ngIf="event().ticketTypes?.length">
+            <div class="ticket-type" *ngFor="let ticket of event().ticketTypes">
+              <div class="ticket-info">
+                <h4>{{ ticket.name }}</h4>
+                <p>₹{{ ticket.price }}</p>
+              </div>
+              <p class="capacity">{{ ticket.availableCount }} remaining</p>
+            </div>
+          </div>
+          <div class="ticket-types" *ngIf="!event().ticketTypes?.length">
+             <div class="ticket-type">
+              <div class="ticket-info">
+                <h4>General Admission</h4>
+                <p>₹500</p>
+              </div>
+              <p class="capacity">Available</p>
+            </div>
+          </div>
+
+          <app-button variant="primary" size="lg" [fullWidth]="true" (onClick)="bookTicket()">
+            Book Tickets Now
+          </app-button>
+        </div>
+      </aside>
+      
+    </div>
+  </section>
+
+</div>
+
+<div class="loading-state" *ngIf="isLoading()">
+  <div class="spinner"></div>
+  <p>Loading event details...</p>
+</div>
+
+<div class="error-state" *ngIf="!isLoading() && error()">
+  <h3>Oops!</h3>
+  <p>{{ error() }}</p>
+</div>

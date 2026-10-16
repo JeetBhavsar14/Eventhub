@@ -1,0 +1,42 @@
+<div class="payment-container">
+  <div class="payment-methods">
+    <button type="button" class="method-btn" [class.active]="activeMethod() === 'card'" (click)="setMethod('card')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+      Credit / Debit Card
+    </button>
+    <button type="button" class="method-btn" [class.active]="activeMethod() === 'upi'" (click)="setMethod('upi')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      UPI
+    </button>
+    <button type="button" class="method-btn" [class.active]="activeMethod() === 'qr'" (click)="setMethod('qr')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+      Scan QR
+    </button>
+  </div>
+
+  <div class="payment-content">
+    <!-- Card Form -->
+    <form *ngIf="activeMethod() === 'card'" [formGroup]="cardForm" class="card-form fade-in">
+      <app-input formControlName="nameOnCard" label="Name on card" placeholder="Cardholder name" [required]="true"></app-input>
+      <app-input formControlName="cardNumber" label="Card Number" placeholder="0000000000000000" type="tel" [required]="true" [maxLength]="16"></app-input>
+      <div class="form-row">
+        <app-input formControlName="expiry" label="Expiry Date" placeholder="MM/YY" [required]="true" [maxLength]="5"></app-input>
+        <app-input formControlName="cvv" label="CVV" placeholder="123" type="password" [required]="true" [maxLength]="4"></app-input>
+      </div>
+    </form>
+
+    <!-- UPI Form -->
+    <form *ngIf="activeMethod() === 'upi'" [formGroup]="upiForm" class="upi-form fade-in">
+      <app-input formControlName="upiId" label="UPI ID / VPA" placeholder="username@bank" [required]="true"></app-input>
+      <p class="hint">A payment request will be sent to your UPI app.</p>
+    </form>
+
+    <!-- QR Code -->
+    <div *ngIf="activeMethod() === 'qr'" class="qr-form fade-in">
+      <div class="qr-wrapper">
+        <img *ngIf="qrCodeUrl()" [src]="qrCodeUrl()" alt="UPI payment QR code">
+      </div>
+      <p class="hint">Scan with any UPI app to pay ₹{{ amount }}</p>
+    </div>
+  </div>
+</div>

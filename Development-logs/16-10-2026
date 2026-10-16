@@ -1,0 +1,142 @@
+#  EventHub Development Log: Dynamic Staff Designation & Permission-Driven Layout
+
+> **Date:** October 16, 2026  
+> **Module:** Event Team Delegation & Operational Staff Workspace  
+> **Status:**  Completed & Verified  
+> **Specification Reference:** Sections § 5.2, § 5.3, § 5.4 & § 7.6 (Product & System Overview)
+
+---
+
+## 📌 Executive Summary
+
+We have engineered the complete end-to-end operational delegation workflow connecting **Event Owners / Management** with the **On-Ground Event Staff**. 
+
+Instead of a generic staff role with static tabs, the system now enforces **role-based and designation-specific permissions**. When an Event Owner or Operations Lead invites a staff member to an event, they select a specific **functional designation** (e.g., *Gate Scanner*, *Security & Incident Officer*, *Guest Relations*, or *Custom Specialist*). Upon login, the **Staff Mobile Workspace dynamically adapts its layout, operational tabs, and action tools** strictly according to the permissions granted.
+
+---
+
+## 1. Architecture & End-to-End Data Flow
+
+```mermaid
+graph TD
+    A[Event Owner / Management Portal] -->|Selects Designation & Permissions| B[Dispatches Invitation]
+    B -->|Stored with Station Profile & Perms| C[(db.json / eventInvitations)]
+    C -->|Invitee Accepts Invitation| D[(db.json / eventMemberships)]
+    D -->|Loaded on Staff Login / Session| E[StaffService Reactive State]
+    E -->|Evaluates Computed Signals| F[Staff Layout Component]
+    
+    F -->|canScanTickets = true| G[QR Barcode Scanner & Admissions]
+    F -->|canViewAttendees = true| H[Live Attendee Roster & Status]
+    F -->|canLogIncidents = true| I[Security & Ground Incident Logs]
+    F -->|canViewDuty = true| J[Station Briefing & Gate Handbook]
+    
+    style A fill:#e0e7ff,stroke:#4338ca,stroke-width:2px
+    style D fill:#dcfce7,stroke:#15803d,stroke-width:2px
+    style F fill:#fef3c7,stroke:#b45309,stroke-width:2px
+```
+
+---
+
+## 2. Standard Staff Designation Matrix
+
+| Station Designation | Operational Area | Responsibility | Granted Permissions | Available Workspace Tabs |
+| :--- | :--- | :--- | :--- | :--- |
+| **Gate & Barcode Scanner** | Turnstiles & Gates | `ticketing` | `scan_tickets`, `view_attendees`, `view_duty` |  **Check-in**,  **Attendees**,  **Today** |
+| **Security & Incident Officer** | Perimeter & Rapid Response | `security_safety` | `log_incidents`, `view_duty` |  **Issues**,  **Today** |
+| **Guest Relations & Info Desk** | Concierge & Foyer | `registration` | `view_attendees`, `view_duty` |  **Attendees**,  **Today** |
+| **Venue Operations Supervisor** | Central Ops Command | `venue_operations` | *All Permissions Granted* |  *All Tabs Unlocked* |
+| **Custom Staff Specialist** | User-defined Station | `volunteer` / Custom | Granular Checkbox Selection |  *Dynamically Configured* |
+
+---
+
+## 3. Core Components & Functions Modified
+
+### 🔹 A. Data Models & Type System
+* **[`staff.model.ts`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/core/models/staff.model.ts)**
+  * Added `StaffPermission` union type: `'scan_tickets' | 'view_attendees' | 'log_incidents' | 'view_duty'`.
+  * Added `StaffEventDuty` interface defining shift schedules, gate assignments, and granted permissions.
+  * Extended `StaffRosterItem` with `designation` and `permissions`.
+* **[`event-membership.model.ts`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/core/models/event-membership.model.ts)**
+  * Extended `EventMembership` and `EventInvitation` interfaces with `designation`, `responsibility`, and `permissions`.
+
+---
+
+### 🔹 B. Event Team Delegation Service
+* **[`event-team.service.ts`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/core/state/event-team.service.ts)**
+  * **`sendInvitation()`**: Updated signature to accept an `options` payload containing `{ designation, responsibility, permissions }`. Dispatches an invitation record holding the exact functional station configuration.
+  * **`acceptInvitation()`**: Copies the designation and granted permissions directly into the newly instantiated `EventMembership` record upon invitee confirmation.
+
+---
+
+### 🔹 C. Host & Event Owner Workspace
+* **[`host-layout.component.ts`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/host-layout/host-layout.component.ts)**
+  * Added `staffDesignationOptions` dropdown containing functional presets.
+  * Implemented `onDesignationPresetChange()` to automatically pre-fill responsibility codes and permission sets.
+  * Implemented `toggleInvitePermission()` and `hasInvitePermission()` for custom role configurations.
+  * Updated `submitTeamInvite()` to forward station metadata to `EventTeamService`.
+* **[`host-layout.component.html`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/host-layout/host-layout.component.html)**
+  * Enhanced the **Invite Team Modal** with:
+    1. **Staff Designation & Station Dropdown**.
+    2. **Granted Permissions Matrix Preview** with visual status pills.
+    3. Custom role designation input with granular permission checkboxes.
+* **[`host-layout.component.css`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/host-layout/host-layout.component.css)**
+  * Added dedicated styling for `.staff-designation-box`, `.staff-perms-preview`, `.perm-pill.active`, and `.custom-perms-checks`.
+
+---
+
+### 🔹 D. Staff State Management
+* **[`staff.service.ts`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/core/state/staff.service.ts)**
+  * Defined `STAFF_DESIGNATION_PRESETS` for station assignments and live simulation.
+  * Added reactive Signals:
+    * `activeDesignation`: Currently active designation badge.
+    * `permissions`: Array of active operational permissions.
+    * `canScanTickets`: Computed boolean for `'scan_tickets'`.
+    * `canViewAttendees`: Computed boolean for `'view_attendees'`.
+    * `canLogIncidents`: Computed boolean for `'log_incidents'`.
+    * `canViewDuty`: Computed boolean for `'view_duty'`.
+  * Implemented `setDesignationPreset()` for real-time station profile switching.
+  * Updated `loadAll()` to automatically match the logged-in user against `/eventMemberships` in `db.json` and hydrate their assigned permissions.
+
+---
+
+### 🔹 E. Dynamic Staff Workspace UI
+* **[`staff-layout.ts`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/staff-layout/staff-layout.ts)**
+  * Implemented dynamic `allowedTabs` signal that recomputes accessible tabs (`'today'`, `'checkin'`, `'attendees'`, `'issues'`) strictly from active permissions.
+  * Implemented `switchDesignationPreset()` to test station layouts in real time.
+  * Guarded `setTab()`, `verifyPass()`, and `submitIncidentReport()` against unauthorized access.
+* **[`staff-layout.html`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/staff-layout/staff-layout.html)**
+  * **Header**: Displays the official **Designation Badge** (e.g. `Gate & Barcode Scanner`) alongside the event title and gate code.
+  * **Station Switcher Bar**: Added a quick-toggle bar to test how changing station roles reshapes the screen.
+  * **Today Tab**: Added the **Station Authority & Granted Permissions Card** displaying active vs. restricted capabilities.
+  * **Bottom Navigation Bar**: Conditionally renders **only** permitted tabs (`*ngIf="canScanTickets()"`, `*ngIf="canLogIncidents()"`, etc.).
+* **[`staff-layout.css`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/staff-layout/staff-layout.css)**
+  * Added styles for `.designation-chip`, `.station-switcher-bar`, `.station-chip-btn.active`, and `.shift-perms-card`.
+
+---
+
+## 4. Verification & Testing Walkthrough
+
+### 🧪 Scenario 1: Verify the Dynamic Staff Layout
+1. Open the Staff Workspace at [`/staff`](http://localhost:4200/staff).
+2. Observe the header badge: **`Gate & Barcode Scanner`**.
+3. In the **Assigned Station Role** bar, click **"Security & Incident Officer"**:
+   *  The **Check-in (QR Scanner)** and **Attendees** tabs immediately vanish from the bottom navigation.
+   *  Only **Today** and **Issues** tabs remain visible and accessible.
+4. Click **"Guest Relations & Info Desk"**:
+   *  The **Scanner** and **Issues** tabs disappear, leaving **Today** and **Attendees**.
+5. Click **"Venue Operations Supervisor"**:
+   *  All 4 tabs reappear with full permissions unlocked.
+
+### 🧪 Scenario 2: Dispatch a Tailored Staff Invitation
+1. Navigate to [`/host/dashboard`](http://localhost:4200/host/dashboard) and click the **"Event Team & Operational Delegation"** tab.
+2. Click **"+ Invite Team or Participant"**.
+3. Under Role Assignment, select **"Field & Gate Staff"**.
+4. Choose **"Security & Incident Officer"**:
+   * Notice the permission pills dynamically highlight **Incident Reporting** and **Duty Briefing**, while keeping Gate Scanner access restricted.
+5. Click **Dispatch Invitation**. The invitation is persisted to `db.json` with the exact permissions attached.
+
+---
+
+> [!TIP]
+> **Key Architectural Takeaway:**  
+> Staff access is not a blanket global privilege. It exists strictly as an event-specific membership with a designated operational profile, fully satisfying Section § 5 of the EventHub specification.

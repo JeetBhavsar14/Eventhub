@@ -1,0 +1,93 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Create an Account</h2>
+      <p>Join EventHub to book tickets and manage your events.</p>
+    </div>
+
+    <!-- Error message banner -->
+    <div class="alert alert-error" *ngIf="errorMessage()">
+      {{ errorMessage() }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="auth-form">
+      
+      <!-- Side-by-side First and Last name -->
+      <div class="name-row">
+        <app-input 
+          label="First Name" 
+          name="firstName"
+          placeholder="Jeet" 
+          [(ngModel)]="firstName"
+          [maxLength]="50"
+          [required]="true">
+        </app-input>
+        
+        <app-input 
+          label="Last Name" 
+          name="lastName"
+          placeholder="Shah" 
+          [(ngModel)]="lastName"
+          [maxLength]="50"
+          [required]="true">
+        </app-input>
+      </div>
+
+      <app-input 
+        label="Email Address" 
+        type="email" 
+        name="email"
+        placeholder="e.g. jeet@eventhub.com" 
+        [(ngModel)]="email"
+        [maxLength]="100"
+        [required]="true">
+      </app-input>
+
+      <app-input 
+        label="Phone Number (Optional)" 
+        type="tel" 
+        name="phone"
+        placeholder="+91 99999 00000" 
+        [(ngModel)]="phone"
+        [maxLength]="15">
+      </app-input>
+
+      <app-input 
+        label="Password" 
+        type="password" 
+        name="password"
+        placeholder="Create a strong password" 
+        [(ngModel)]="password"
+        [minLength]="8"
+        [maxLength]="64"
+        [required]="true">
+      </app-input>
+
+      <app-input 
+        label="Confirm Password" 
+        type="password" 
+        name="confirmPassword"
+        placeholder="Type password again" 
+        [(ngModel)]="confirmPassword"
+        [minLength]="8"
+        [maxLength]="64"
+        [required]="true">
+      </app-input>
+
+      <!-- Added some spacing before the button -->
+      <div style="margin-top: 1rem;">
+        <app-button 
+          type="submit" 
+          variant="primary" 
+          [fullWidth]="true" 
+          [isLoading]="isLoading()">
+          Create Account
+        </app-button>
+      </div>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a routerLink="/auth/login">Log in</a>
+    </div>
+  </div>
+</div>

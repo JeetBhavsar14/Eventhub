@@ -1,0 +1,69 @@
+<main class="bookings-page fade-in">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">YOUR EVENTHUB ACCOUNT</p>
+      <h1>My bookings</h1>
+      <p>View your confirmed tickets and event details in one place.</p>
+    </div>
+    <a routerLink="/discover" class="browse-link">Browse events →</a>
+  </header>
+
+  <nav class="booking-tabs" aria-label="Booking filters">
+    <button type="button" [class.active]="selectedFilter() === 'upcoming'" (click)="selectedFilter.set('upcoming')">Upcoming</button>
+    <button type="button" [class.active]="selectedFilter() === 'past'" (click)="selectedFilter.set('past')">Past events</button>
+    <button type="button" [class.active]="selectedFilter() === 'all'" (click)="selectedFilter.set('all')">All bookings</button>
+  </nav>
+
+  <section *ngIf="isLoading()" class="state-card loading-state">
+    <div class="spinner"></div><p>Loading your bookings…</p>
+  </section>
+
+  <section *ngIf="!isLoading() && error()" class="state-card">
+    <h2>Something went wrong</h2><p>{{ error() }}</p>
+    <app-button variant="outline" (onClick)="loadBookings()">Try again</app-button>
+  </section>
+
+  <section *ngIf="!isLoading() && !error() && filteredBookings().length === 0" class="state-card">
+    <div class="empty-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"></path>
+        <line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"></line>
+      </svg>
+    </div>
+    <h2>No {{ selectedFilter() === 'all' ? '' : selectedFilter() }} bookings yet</h2>
+    <p>Your confirmed event tickets will appear here.</p>
+    <a routerLink="/discover"><app-button>Explore events</app-button></a>
+  </section>
+
+  <section *ngIf="!isLoading() && !error() && filteredBookings().length" class="booking-list">
+    <article class="booking-card" *ngFor="let booking of filteredBookings()" [class.expanded]="expandedBookingId() === booking.id">
+      <img class="event-image" [src]="booking.eventThumbnail || 'https://picsum.photos/seed/' + booking.eventId + '/360/240'" [alt]="booking.eventTitle">
+      <div class="booking-date"><span>{{ booking.eventDate | date:'MMM' }}</span><strong>{{ booking.eventDate | date:'d' }}</strong><small>{{ booking.eventDate | date:'y' }}</small></div>
+      <div class="booking-summary">
+        <div class="booking-title-row"><h2>{{ booking.eventTitle }}</h2><span class="status" [class.cancelled]="booking.status === 'cancelled'">{{ booking.status }}</span></div>
+        <p class="event-meta">{{ booking.eventTime || 'Time to be announced' }} · {{ booking.eventLocation || 'Venue to be announced' }}</p>
+        <p class="ticket-meta">{{ ticketCount(booking) }} ticket{{ ticketCount(booking) === 1 ? '' : 's' }} · Booking {{ booking.bookingReference || booking.id }}</p>
+        <div class="booking-actions no-print">
+          <a [routerLink]="['/events', booking.eventId]"><app-button variant="outline" size="sm">View event</app-button></a>
+          <app-button variant="primary" size="sm" (onClick)="toggleTicket(booking)">{{ expandedBookingId() === booking.id ? 'Hide ticket' : 'View ticket' }}</app-button>
+        </div>
+      </div>
+
+      <section *ngIf="expandedBookingId() === booking.id" class="ticket-panel">
+        <div class="ticket-main">
+          <p class="ticket-label">ADMIT ONE / EVENT TICKET</p>
+          <h3>{{ booking.eventTitle }}</h3>
+          <div class="ticket-grid">
+            <p><span>Guest</span>{{ booking.attendee?.name || currentUser()?.firstName + ' ' + currentUser()?.lastName }}</p>
+            <p><span>When</span>{{ booking.eventDate | date:'EEE, d MMM y' }} · {{ booking.eventTime }}</p>
+            <p><span>Where</span>{{ booking.eventLocation }}<small>{{ booking.eventAddress }}</small></p>
+            <p><span>Reference</span>{{ booking.bookingReference || booking.id }}</p>
+          </div>
+          <div class="ticket-types"><span *ngFor="let ticket of booking.tickets">{{ ticket.quantity }} × {{ ticket.name }}</span></div>
+        </div>
+        <div class="ticket-code"><img *ngIf="qrCodeUrl()" [src]="qrCodeUrl()" alt="Ticket check-in QR code"><span>Scan at entry</span></div>
+        <div class="ticket-footer"><span>Paid ₹{{ booking.totalAmount }}{{ booking.payment?.label ? ' · ' + booking.payment?.label : '' }}</span><button type="button" class="print-button no-print" (click)="printTicket()">Print ticket</button></div>
+      </section>
+    </article>
+  </section>
+</main>

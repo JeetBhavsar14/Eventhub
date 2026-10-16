@@ -1,0 +1,22 @@
+.form-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+.form-group label { color: var(--gray-700); font-size: 0.9rem; font-weight: 500; }
+.custom-textarea { 
+  background: var(--surface); 
+  border: 1px solid var(--gray-200); 
+  border-radius: var(--radius-md); 
+  color: var(--gray-900); 
+  font: inherit; 
+  padding: 1rem; 
+  resize: vertical; 
+  transition: all var(--transition-fast);
+}
+.custom-textarea:focus { 
+  background: var(--surface); 
+  border-color: var(--primary-500); 
+  outline: none; 
+  box-shadow: 0 0 0 3px var(--primary-100);
+}
+.form-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
+@media (max-width: 900px) { .form-row { grid-template-columns: 1fr; } }

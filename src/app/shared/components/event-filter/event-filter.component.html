@@ -1,0 +1,58 @@
+<div class="filter-container">
+  
+  <div class="filter-header">
+    <span class="filter-title">Filter Events</span>
+    <button type="button" class="clear-btn" (click)="clearFilters()" [disabled]="!hasActiveFilters()">Clear all</button>
+  </div>
+
+  <div class="filter-group">
+    <app-select
+      label="Category"
+      variant="filter"
+      [options]="categories"
+      [(ngModel)]="currentFilter.category"
+      (selectionChange)="onCategoryChange($event)"
+      id="event-category">
+    </app-select>
+  </div>
+
+  <div class="filter-group" *ngIf="categoryTypes[currentFilter.category]">
+    <app-select
+      [label]="'Type of ' + currentFilter.category"
+      variant="filter"
+      [options]="getTypeOptions()"
+      [ngModel]="currentFilter.type || 'All types'"
+      (selectionChange)="onTypeChange($event)"
+      id="event-type">
+    </app-select>
+  </div>
+
+  <div class="filter-group">
+    <app-select
+      label="Date"
+      variant="filter"
+      [options]="dateOptions"
+      [(ngModel)]="currentFilter.date"
+      (selectionChange)="onDateChange($event)"
+      id="event-date">
+    </app-select>
+    
+    <div class="custom-date-picker" *ngIf="currentFilter.date === 'Custom Date'">
+      <input type="date" class="modern-input" aria-label="Custom event date" [(ngModel)]="currentFilter.customDate" (change)="onDateChange()">
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <app-select
+      label="Price range"
+      variant="filter"
+      [options]="priceOptions"
+      [(ngModel)]="currentFilter.price"
+      (selectionChange)="onPriceChange($event)"
+      id="event-price">
+    </app-select>
+  </div>
+
+  <p id="filter-hint" class="filter-hint">Results update as you choose filters.</p>
+
+</div>
