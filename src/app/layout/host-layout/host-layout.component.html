@@ -14,7 +14,7 @@
     <div class="sidebar-brand-header">
       <a routerLink="/discover" class="brand-logo-link" title="EventHub Home">
         <div class="logo-symbol">
-          <app-icon name="layers" class="symbol-svg" strokeWidth="2.5" [size]="2.5"></app-icon>
+          <app-icon name="layers" class="symbol-svg" [strokeWidth]="2.5"></app-icon>
         </div>
         <div class="brand-text-block">
           <span class="brand-title">EventHub</span>
@@ -22,7 +22,7 @@
         </div>
       </a>
       <button class="mobile-sidebar-close" (click)="toggleMobileSidebar()" aria-label="Close Sidebar">
-        <app-icon name="close" [size]="2"></app-icon>
+        <app-icon name="close"></app-icon>
       </button>
     </div>
 
@@ -35,7 +35,7 @@
         [class.active]="currentView() === 'overview'" 
         (click)="switchView('overview')"
         id="nav-overview">
-        <app-icon name="grid" class="nav-icon" [size]="2"></app-icon>
+        <app-icon name="grid" class="nav-icon"></app-icon>
         <span class="nav-label">Overview</span>
         <span class="nav-active-pill" *ngIf="currentView() === 'overview'"></span>
       </button>
@@ -45,7 +45,7 @@
         [class.active]="currentView() === 'my_events'" 
         (click)="switchView('my_events')"
         id="nav-my-events">
-        <app-icon name="calendar" class="nav-icon" [size]="2"></app-icon>
+        <app-icon name="calendar" class="nav-icon"></app-icon>
         <span class="nav-label">My Events</span>
         <span class="nav-badge" *ngIf="events().length > 0">{{ events().length }}</span>
       </button>
@@ -54,7 +54,7 @@
         class="nav-item-btn highlight-btn" 
         (click)="openCreateWizard()"
         id="nav-create-event">
-        <app-icon name="plus" class="nav-icon" strokeWidth="2.5" [size]="2.5"></app-icon>
+        <app-icon name="plus" class="nav-icon" [strokeWidth]="2.5"></app-icon>
         <span class="nav-label">Create Event</span>
         <span class="nav-sparkle-tag">New</span>
       </button>
@@ -64,7 +64,7 @@
         [class.active]="currentView() === 'bookings'" 
         (click)="switchView('bookings')"
         id="nav-bookings">
-        <app-icon name="ticket" class="nav-icon" [size]="2"></app-icon>
+        <app-icon name="ticket" class="nav-icon"></app-icon>
         <span class="nav-label">Bookings & Attendees</span>
         <span class="nav-badge" *ngIf="stats().totalBookings > 0">{{ stats().totalBookings }}</span>
       </button>
@@ -76,7 +76,7 @@
         [class.active]="currentView() === 'team'" 
         (click)="switchView('team')"
         id="nav-team">
-        <app-icon name="users" class="nav-icon" [size]="2"></app-icon>
+        <app-icon name="users" class="nav-icon"></app-icon>
         <span class="nav-label">Team Management</span>
         <span class="nav-badge" *ngIf="teamMembers().length > 0">{{ teamMembers().length }}</span>
       </button>
@@ -86,7 +86,7 @@
         [class.active]="currentView() === 'analytics'" 
         (click)="switchView('analytics')"
         id="nav-analytics">
-        <app-icon name="bar-chart" class="nav-icon" [size]="2"></app-icon>
+        <app-icon name="bar-chart" class="nav-icon"></app-icon>
         <span class="nav-label">Analytics</span>
       </button>
 
@@ -95,7 +95,7 @@
         [class.active]="currentView() === 'notifications'" 
         (click)="switchView('notifications')"
         id="nav-notifications">
-        <app-icon name="bell" class="nav-icon" [size]="2"></app-icon>
+        <app-icon name="bell" class="nav-icon"></app-icon>
         <span class="nav-label">Notifications</span>
         <span class="nav-badge unread-badge" *ngIf="unreadCount() > 0">{{ unreadCount() }}</span>
       </button>
@@ -105,7 +105,7 @@
         [class.active]="currentView() === 'settings'" 
         (click)="switchView('settings')"
         id="nav-settings">
-        <app-icon name="settings" class="nav-icon" [size]="2"></app-icon>
+        <app-icon name="settings" class="nav-icon"></app-icon>
         <span class="nav-label">Settings</span>
       </button>
     </nav>
@@ -113,7 +113,7 @@
     <!-- Sidebar Bottom: Help & Host Profile Card -->
     <div class="sidebar-footer">
       <button class="help-link-btn" (click)="showHelpModal.set(true)">
-        <app-icon name="help-circle" class="help-icon" [size]="2"></app-icon>
+        <app-icon name="help-circle" class="help-icon"></app-icon>
         <span>Help & Host Support</span>
       </button>
 
@@ -128,20 +128,20 @@
           </div>
           <div class="user-menu-divider"></div>
           <button class="user-menu-item" (click)="switchView('settings'); showSidebarUserMenu.set(false)">
-            <app-icon name="settings" [size]="2"></app-icon>
+            <app-icon name="settings"></app-icon>
             <span>Workspace Settings</span>
           </button>
           <button class="user-menu-item" (click)="switchView('team'); showSidebarUserMenu.set(false)">
-            <app-icon name="user" [size]="2"></app-icon>
+            <app-icon name="user"></app-icon>
             <span>Team & Permissions</span>
           </button>
           <a routerLink="/discover" class="user-menu-item" (click)="showSidebarUserMenu.set(false)">
-            <app-icon name="compass" [size]="2"></app-icon>
+            <app-icon name="compass"></app-icon>
             <span>Explore Events as Guest</span>
           </a>
           <div class="user-menu-divider"></div>
           <button class="user-menu-item signout-item" (click)="signOut()">
-            <app-icon name="log-out" [size]="2"></app-icon>
+            <app-icon name="log-out"></app-icon>
             <span>Sign Out of Workspace</span>
           </button>
         </div>
@@ -153,7 +153,7 @@
             <span class="user-name">{{ hostInfo().name }}</span>
             <span class="user-role-tag">{{ hostInfo().verificationBadge }}</span>
           </div>
-          <app-icon name="chevron-down" class="user-chevron" [class.rotated]="showSidebarUserMenu()" [size]="2"></app-icon>
+          <app-icon name="chevron-down" class="user-chevron" [class.rotated]="showSidebarUserMenu()"></app-icon>
         </div>
       </div>
     </div>
@@ -169,7 +169,7 @@
       <div class="header-left">
         <!-- Mobile Sidebar Toggle -->
         <button class="mobile-toggle-btn" (click)="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">
-          <app-icon name="menu" [size]="2"></app-icon>
+          <app-icon name="menu"></app-icon>
         </button>
 
         <!-- Breadcrumb & Context Title -->
@@ -193,7 +193,7 @@
       <div class="header-right">
         <!-- Quick Search -->
         <div class="header-search-box">
-          <app-icon name="search" class="search-icon" [size]="2"></app-icon>
+          <app-icon name="search" class="search-icon"></app-icon>
           <input 
             type="text" 
             placeholder="Search events, bookings, attendees..." 
@@ -203,7 +203,7 @@
 
         <!-- Help Button -->
         <button class="header-icon-btn" (click)="showHelpModal.set(true)" title="Help & Documentation">
-          <app-icon name="help-circle" [size]="2"></app-icon>
+          <app-icon name="help-circle"></app-icon>
         </button>
 
         <!-- Notifications Bell with Badge & Dropdown -->
@@ -212,7 +212,7 @@
             class="header-icon-btn dropdown-trigger" 
             (click)="toggleNotifications($event)" 
             title="Notifications">
-            <app-icon name="bell" [size]="2"></app-icon>
+            <app-icon name="bell"></app-icon>
             <span class="notification-dot" *ngIf="unreadCount() > 0"></span>
           </button>
 
@@ -231,10 +231,10 @@
                 [class.unread]="notif.unread"
                 (click)="dashboardService.markNotificationRead(notif.id)">
                 <div class="notif-icon-circle" [attr.data-type]="notif.type">
-                  <app-icon name="check-circle" *ngIf="notif.type === 'approval'" [size]="2"></app-icon>
-                  <app-icon name="alert-circle" *ngIf="notif.type === 'action'" [size]="2"></app-icon>
-                  <app-icon name="ticket-simple" *ngIf="notif.type === 'booking'" [size]="2"></app-icon>
-                  <app-icon name="shield" *ngIf="notif.type === 'system'" [size]="2"></app-icon>
+                  <app-icon name="check-circle" *ngIf="notif.type === 'approval'"></app-icon>
+                  <app-icon name="alert-circle" *ngIf="notif.type === 'action'"></app-icon>
+                  <app-icon name="ticket-simple" *ngIf="notif.type === 'booking'"></app-icon>
+                  <app-icon name="shield" *ngIf="notif.type === 'system'"></app-icon>
                 </div>
                 <div class="notif-text-wrap">
                   <span class="notif-title">{{ notif.title }}</span>
@@ -256,7 +256,7 @@
           <button class="header-avatar-btn dropdown-trigger" (click)="toggleTopUserMenu($event)">
             <div class="header-avatar-badge">{{ getInitials() }}</div>
             <span class="header-user-name">{{ hostInfo().name }}</span>
-            <app-icon name="chevron-down" class="header-chevron" [class.rotated]="showTopUserMenu()" [size]="2"></app-icon>
+            <app-icon name="chevron-down" class="header-chevron" [class.rotated]="showTopUserMenu()"></app-icon>
           </button>
 
           <!-- User Menu Dropdown -->
@@ -269,20 +269,20 @@
             </div>
             <div class="user-menu-divider"></div>
             <button class="user-menu-item" (click)="switchView('settings'); showTopUserMenu.set(false)">
-              <app-icon name="settings" [size]="2"></app-icon>
+              <app-icon name="settings"></app-icon>
               <span>Workspace Settings</span>
             </button>
             <button class="user-menu-item" (click)="switchView('team'); showTopUserMenu.set(false)">
-              <app-icon name="user" [size]="2"></app-icon>
+              <app-icon name="user"></app-icon>
               <span>Team & Permissions</span>
             </button>
             <a routerLink="/discover" class="user-menu-item" (click)="showTopUserMenu.set(false)">
-              <app-icon name="compass" [size]="2"></app-icon>
+              <app-icon name="compass"></app-icon>
               <span>Explore Events as Guest</span>
             </a>
             <div class="user-menu-divider"></div>
             <button class="user-menu-item signout-item" (click)="signOut()">
-              <app-icon name="log-out" [size]="2"></app-icon>
+              <app-icon name="log-out"></app-icon>
               <span>Sign Out of Workspace</span>
             </button>
           </div>
@@ -299,7 +299,7 @@
            TOAST NOTIFICATION (Interactive Feedback)
            ───────────────────────────────────────────────────────── -->
       <div class="dashboard-toast" *ngIf="toastMessage()">
-        <app-icon name="check-circle" [size]="2"></app-icon>
+        <app-icon name="check-circle"></app-icon>
         <span>{{ toastMessage() }}</span>
       </div>
 
@@ -315,14 +315,14 @@
             <p class="welcome-subtext">Here's what's happening with your events today.</p>
             
             <div class="welcome-period-badge">
-              <app-icon name="calendar" [size]="2"></app-icon>
+              <app-icon name="calendar"></app-icon>
               <span>Reporting Period: <strong>{{ selectedPeriod() === '7d' ? 'Last 7 Days' : selectedPeriod() === '90d' ? 'Last 90 Days' : 'Last 30 Days' }}</strong></span>
             </div>
           </div>
 
           <div class="welcome-action-wrap">
             <button class="btn-create-event-primary" (click)="openCreateWizard()" id="btn-create-event-top">
-              <app-icon name="plus" strokeWidth="2.5" [size]="2.5"></app-icon>
+              <app-icon name="plus" [strokeWidth]="2.5"></app-icon>
               <span>Create Event</span>
             </button>
           </div>
@@ -336,7 +336,7 @@
             <div class="stat-card-top">
               <span class="stat-label">Total Events</span>
               <div class="stat-icon-wrap icon-indigo">
-                <app-icon name="calendar" [size]="2"></app-icon>
+                <app-icon name="calendar"></app-icon>
               </div>
             </div>
             <div class="stat-value">{{ stats().totalEvents }}</div>
@@ -351,7 +351,7 @@
             <div class="stat-card-top">
               <span class="stat-label">Published Events</span>
               <div class="stat-icon-wrap icon-emerald">
-                <app-icon name="check-circle" [size]="2"></app-icon>
+                <app-icon name="check-circle"></app-icon>
               </div>
             </div>
             <div class="stat-value">{{ stats().publishedEvents }}</div>
@@ -366,7 +366,7 @@
             <div class="stat-card-top">
               <span class="stat-label">Pending Review</span>
               <div class="stat-icon-wrap icon-amber">
-                <app-icon name="clock" [size]="2"></app-icon>
+                <app-icon name="clock"></app-icon>
               </div>
             </div>
             <div class="stat-value">{{ stats().pendingReview }}</div>
@@ -381,7 +381,7 @@
             <div class="stat-card-top">
               <span class="stat-label">Total Bookings</span>
               <div class="stat-icon-wrap icon-periwinkle">
-                <app-icon name="ticket" [size]="2"></app-icon>
+                <app-icon name="ticket"></app-icon>
               </div>
             </div>
             <div class="stat-value">{{ stats().totalBookings }}</div>
@@ -480,7 +480,7 @@
             </div>
 
             <div class="chart-sample-notice">
-              <app-icon name="info" [size]="2"></app-icon>
+              <app-icon name="info"></app-icon>
               <span>Illustrative prototype sample data for {{ hostInfo().organization }}.</span>
             </div>
           </div>
@@ -561,7 +561,7 @@
 
             <!-- Status Notice Box -->
             <div class="status-card-notice" *ngIf="stats().changesRequestedCount > 0">
-              <app-icon name="alert-circle" [size]="2"></app-icon>
+              <app-icon name="alert-circle"></app-icon>
               <div>
                 <strong>Action Needed:</strong>
                 <p>1 event requires clarification notes before curation approval.</p>
@@ -615,7 +615,7 @@
 
               <button class="view-all-link-btn" (click)="switchView('my_events')">
                 <span>View All Events</span>
-                <app-icon name="chevron-right" [size]="2"></app-icon>
+                <app-icon name="chevron-right"></app-icon>
               </button>
             </div>
           </div>
@@ -731,39 +731,39 @@
                           class="btn-three-dots" 
                           (click)="toggleActionMenu(event.id, $event)" 
                           [attr.aria-label]="'Actions for ' + event.title">
-                          <app-icon name="more-vertical" [size]="2"></app-icon>
+                          <app-icon name="more-vertical"></app-icon>
                         </button>
 
                         <!-- Context Menu Dropdown -->
                         <div class="context-menu-box" *ngIf="activeActionMenuId() === event.id">
                           <button class="context-menu-item" (click)="openEventDetails(event)">
-                            <app-icon name="eye" [size]="2"></app-icon>
+                            <app-icon name="eye"></app-icon>
                             <span>View Details</span>
                           </button>
 
                           <button class="context-menu-item" *ngIf="event.status === 'draft' || event.status === 'changes_requested'" (click)="openEventDetails(event)">
-                            <app-icon name="edit" [size]="2"></app-icon>
+                            <app-icon name="edit"></app-icon>
                             <span>Edit Event</span>
                           </button>
 
                           <button class="context-menu-item" *ngIf="event.status === 'published'" (click)="switchView('analytics')">
-                            <app-icon name="bar-chart" [size]="2"></app-icon>
+                            <app-icon name="bar-chart"></app-icon>
                             <span>View Analytics</span>
                           </button>
 
                           <button class="context-menu-item" *ngIf="event.status === 'draft'" (click)="submitDraftForReview(event.id)">
-                            <app-icon name="check" [size]="2"></app-icon>
+                            <app-icon name="check"></app-icon>
                             <span>Submit for Review</span>
                           </button>
 
                           <button class="context-menu-item" *ngIf="event.status === 'changes_requested'" (click)="openFeedbackModal(event)">
-                            <app-icon name="alert-circle" [size]="2"></app-icon>
+                            <app-icon name="alert-circle"></app-icon>
                             <span>Review Feedback</span>
                           </button>
 
                           <div class="menu-divider" *ngIf="event.status === 'draft'"></div>
                           <button class="context-menu-item item-danger" *ngIf="event.status === 'draft'" (click)="deleteDraftEvent(event.id)">
-                            <app-icon name="trash" [size]="2"></app-icon>
+                            <app-icon name="trash"></app-icon>
                             <span>Delete Draft</span>
                           </button>
                         </div>
@@ -867,7 +867,7 @@
                   </div>
                   <h4 class="upcoming-title">{{ up.title }}</h4>
                   <div class="upcoming-venue-text">
-                    <app-icon name="map-pin" [size]="2"></app-icon>
+                    <app-icon name="map-pin"></app-icon>
                     <span>{{ up.venue }} • {{ up.date }}</span>
                   </div>
                   
@@ -898,7 +898,7 @@
             <!-- Empty State for Pending Actions -->
             <div class="panel-all-clear-box" *ngIf="pendingActions().length === 0">
               <div class="all-clear-icon">
-                <app-icon name="check-circle" strokeWidth="2.5" [size]="2.5"></app-icon>
+                <app-icon name="check-circle" [strokeWidth]="2.5"></app-icon>
               </div>
               <h4>All caught up!</h4>
               <p>You have no pending curation actions or incomplete drafts at this time.</p>
@@ -913,8 +913,8 @@
                 <div class="action-top">
                   <span class="action-badge-pill">{{ act.badgeText }}</span>
                   <div class="action-icon">
-                    <app-icon name="alert-circle" *ngIf="act.severity === 'warning'" [size]="2"></app-icon>
-                    <app-icon name="alert-circle" *ngIf="act.severity === 'info'" [size]="2"></app-icon>
+                    <app-icon name="alert-circle" *ngIf="act.severity === 'warning'"></app-icon>
+                    <app-icon name="alert-circle" *ngIf="act.severity === 'info'"></app-icon>
                     <svg *ngIf="act.severity === 'notice'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
                   </div>
                 </div>
@@ -958,7 +958,7 @@
                 <p class="panel-sub">Real-time audit log and event milestones</p>
               </div>
               <button class="btn-refresh-activity" (click)="showToast('Activity log refreshed')" title="Refresh Activity">
-                <app-icon name="refresh" [size]="2"></app-icon>
+                <app-icon name="refresh"></app-icon>
               </button>
             </div>
 
@@ -969,11 +969,11 @@
                 class="timeline-row-item">
                 <div class="timeline-left">
                   <div class="timeline-dot" [attr.data-type]="item.type">
-                    <app-icon name="check" *ngIf="item.type === 'approved'" [size]="2"></app-icon>
-                    <app-icon name="ticket-simple" *ngIf="item.type === 'booking'" [size]="2"></app-icon>
-                    <app-icon name="send" *ngIf="item.type === 'submission'" [size]="2"></app-icon>
-                    <app-icon name="alert-circle" *ngIf="item.type === 'feedback'" [size]="2"></app-icon>
-                    <app-icon name="user" *ngIf="item.type === 'team'" [size]="2"></app-icon>
+                    <app-icon name="check" *ngIf="item.type === 'approved'"></app-icon>
+                    <app-icon name="ticket-simple" *ngIf="item.type === 'booking'"></app-icon>
+                    <app-icon name="send" *ngIf="item.type === 'submission'"></app-icon>
+                    <app-icon name="alert-circle" *ngIf="item.type === 'feedback'"></app-icon>
+                    <app-icon name="user" *ngIf="item.type === 'team'"></app-icon>
                     <svg *ngIf="item.type === 'update'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </div>
                   <div class="timeline-line"></div>
@@ -1026,7 +1026,7 @@
                   <span>{{ ev.date }} • {{ ev.time }}</span>
                 </div>
                 <div class="meta-item">
-                  <app-icon name="map-pin" [size]="2"></app-icon>
+                  <app-icon name="map-pin"></app-icon>
                   <span>{{ ev.venue }}, {{ ev.city }}</span>
                 </div>
               </div>
@@ -1077,7 +1077,7 @@
             <p class="view-sub">Track ticket orders, attendee passes, and check-in readiness</p>
           </div>
           <button class="btn-export-csv" (click)="showToast('Exported attendee roster to CSV')">
-            <app-icon name="download" [size]="2"></app-icon>
+            <app-icon name="download"></app-icon>
             <span>Export CSV</span>
           </button>
         </div>
@@ -1475,10 +1475,10 @@
         <div class="notifications-full-list">
           <div *ngFor="let item of notifications()" class="notif-full-item" [class.unread]="item.unread">
             <div class="notif-full-icon" [attr.data-type]="item.type">
-              <app-icon name="check" *ngIf="item.type === 'approval'" [size]="2"></app-icon>
-              <app-icon name="alert-circle" *ngIf="item.type === 'action'" [size]="2"></app-icon>
-              <app-icon name="ticket-simple" *ngIf="item.type === 'booking'" [size]="2"></app-icon>
-              <app-icon name="shield" *ngIf="item.type === 'system'" [size]="2"></app-icon>
+              <app-icon name="check" *ngIf="item.type === 'approval'"></app-icon>
+              <app-icon name="alert-circle" *ngIf="item.type === 'action'"></app-icon>
+              <app-icon name="ticket-simple" *ngIf="item.type === 'booking'"></app-icon>
+              <app-icon name="shield" *ngIf="item.type === 'system'"></app-icon>
             </div>
             <div class="notif-full-content">
               <div class="notif-top">
@@ -1530,12 +1530,12 @@
           <div class="settings-card">
             <h3 class="settings-card-title">Payout & Bank Account (Simulated)</h3>
             <div class="payout-banner">
-              <app-icon name="credit-card" [size]="2"></app-icon>
+              <app-icon name="credit-card"></app-icon>
               <div>
                 <strong>HDFC Bank — Current Account</strong>
                 <small>•••• •••• •••• 4829 (Verified for Direct Payouts)</small>
               </div>
-              <span class="payout-verified-tag"><app-icon name="check" strokeWidth="2.5" [size]="12"></app-icon> Active</span>
+              <span class="payout-verified-tag"><app-icon name="check" [strokeWidth]="2.5" [size]="12"></app-icon> Active</span>
             </div>
           </div>
         </div>
@@ -1557,7 +1557,7 @@
           <h3 class="modal-title">Create New Event</h3>
         </div>
         <button class="modal-close-btn" (click)="showCreateEventModal.set(false)">
-          <app-icon name="close" [size]="2"></app-icon>
+          <app-icon name="close"></app-icon>
         </button>
       </div>
 
@@ -1736,7 +1736,7 @@
           <h3 class="modal-title">{{ selectedEventForDetails()?.title }}</h3>
         </div>
         <button class="modal-close-btn" (click)="selectedEventForDetails.set(null)">
-          <app-icon name="close" [size]="2"></app-icon>
+          <app-icon name="close"></app-icon>
         </button>
       </div>
 
@@ -1774,7 +1774,7 @@
         </div>
 
         <div class="feedback-alert-box" *ngIf="selectedEventForDetails()?.feedbackNotes">
-          <app-icon name="alert-circle" [size]="2"></app-icon>
+          <app-icon name="alert-circle"></app-icon>
           <div>
             <strong>Reviewer Feedback Note:</strong>
             <p>{{ selectedEventForDetails()?.feedbackNotes }}</p>
@@ -1810,13 +1810,13 @@
           <h3 class="modal-title">Review Feedback & Update</h3>
         </div>
         <button class="modal-close-btn" (click)="selectedEventForFeedback.set(null)">
-          <app-icon name="close" [size]="2"></app-icon>
+          <app-icon name="close"></app-icon>
         </button>
       </div>
 
       <div class="modal-body">
         <div class="feedback-banner">
-          <app-icon name="alert-circle" [size]="2"></app-icon>
+          <app-icon name="alert-circle"></app-icon>
           <div>
             <strong>Feedback from Curation Team:</strong>
             <p>{{ selectedEventForFeedback()?.feedbackNotes || 'Please provide updated safety or sound permit clearance.' }}</p>
@@ -1855,7 +1855,7 @@
           <h3 class="modal-title">Invite Team or Participant</h3>
         </div>
         <button class="modal-close-btn" (click)="showInviteTeamModal.set(false)">
-          <app-icon name="close" [size]="2"></app-icon>
+          <app-icon name="close"></app-icon>
         </button>
       </div>
 
@@ -1922,19 +1922,19 @@
             <span class="perms-label">Granted Operational Permissions:</span>
             <div class="perms-pills-list">
               <span class="perm-pill" [class.active]="hasInvitePermission('scan_tickets')">
-                <app-icon name="check" [size]="2"></app-icon>
+                <app-icon name="check"></app-icon>
                 Gate Scanner Access
               </span>
               <span class="perm-pill" [class.active]="hasInvitePermission('view_attendees')">
-                <app-icon name="check" [size]="2"></app-icon>
+                <app-icon name="check"></app-icon>
                 Attendee Roster
               </span>
               <span class="perm-pill" [class.active]="hasInvitePermission('log_incidents')">
-                <app-icon name="check" [size]="2"></app-icon>
+                <app-icon name="check"></app-icon>
                 Incident Reporting
               </span>
               <span class="perm-pill" [class.active]="hasInvitePermission('view_duty')">
-                <app-icon name="check" [size]="2"></app-icon>
+                <app-icon name="check"></app-icon>
                 Duty Briefing
               </span>
             </div>
@@ -1967,7 +1967,7 @@
 
         <!-- Delegation notice for Event Manager -->
         <div class="delegation-info-box" *ngIf="inviteForm.role === 'event_manager'">
-          <app-icon name="info" [size]="2"></app-icon>
+          <app-icon name="info"></app-icon>
           <p><strong>Temporary Management Delegation:</strong> You are granting operational authority to coordinate venue logistics and staff without transferring event ownership.</p>
         </div>
 
@@ -1994,7 +1994,7 @@
           <h3 class="modal-title">Host Help Center</h3>
         </div>
         <button class="modal-close-btn" (click)="showHelpModal.set(false)">
-          <app-icon name="close" [size]="2"></app-icon>
+          <app-icon name="close"></app-icon>
         </button>
       </div>
 
@@ -2030,7 +2030,7 @@
           <h3 class="modal-title">Allocate Co-Owner Stake</h3>
         </div>
         <button class="modal-close-btn" (click)="showAddOwnerModal.set(false)">
-          <app-icon name="close" [size]="2"></app-icon>
+          <app-icon name="close"></app-icon>
         </button>
       </div>
 
@@ -2093,7 +2093,7 @@
           <h3 class="modal-title">Assign Event Manager</h3>
         </div>
         <button class="modal-close-btn" (click)="showAssignManagerModal.set(false)">
-          <app-icon name="close" [size]="2"></app-icon>
+          <app-icon name="close"></app-icon>
         </button>
       </div>
 
@@ -2145,7 +2145,7 @@
           <h3 class="modal-title">Add Event Participant</h3>
         </div>
         <button class="modal-close-btn" (click)="showAddParticipantModal.set(false)">
-          <app-icon name="close" [size]="2"></app-icon>
+          <app-icon name="close"></app-icon>
         </button>
       </div>
 

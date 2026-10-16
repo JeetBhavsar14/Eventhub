@@ -10,7 +10,7 @@
     <div class="admin-brand-header">
       <a routerLink="/discover" class="admin-brand-link">
         <div class="admin-logo-badge">
-          <app-icon name="layers" strokeWidth="2.5" [size]="2.5"></app-icon>
+          <app-icon name="layers" [strokeWidth]="2.5"></app-icon>
         </div>
         <div class="brand-text-block">
           <span class="brand-name">EventHub</span>
@@ -18,7 +18,7 @@
         </div>
       </a>
       <button class="mobile-close-btn" (click)="toggleMobileNav()" aria-label="Close menu">
-        <app-icon name="close" [size]="2"></app-icon>
+        <app-icon name="close"></app-icon>
       </button>
     </div>
 
@@ -30,7 +30,7 @@
         class="admin-nav-btn" 
         [class.active]="currentView() === 'overview'" 
         (click)="setView('overview')">
-        <app-icon name="grid" [size]="2"></app-icon>
+        <app-icon name="grid"></app-icon>
         <span class="btn-label">Dashboard Overview</span>
       </button>
 
@@ -38,7 +38,7 @@
         class="admin-nav-btn" 
         [class.active]="currentView() === 'host_applications'" 
         (click)="setView('host_applications')">
-        <app-icon name="user-check" [size]="2"></app-icon>
+        <app-icon name="user-check"></app-icon>
         <span class="btn-label">Host Approvals</span>
         <span class="badge-count" *ngIf="platformStats().pendingAppsCount > 0">{{ platformStats().pendingAppsCount }}</span>
       </button>
@@ -47,7 +47,7 @@
         class="admin-nav-btn" 
         [class.active]="currentView() === 'event_curation'" 
         (click)="setView('event_curation')">
-        <app-icon name="calendar" [size]="2"></app-icon>
+        <app-icon name="calendar"></app-icon>
         <span class="btn-label">Event Curation</span>
         <span class="badge-count warning" *ngIf="platformStats().pendingEventsCount > 0">{{ platformStats().pendingEventsCount }}</span>
       </button>
@@ -56,7 +56,7 @@
         class="admin-nav-btn" 
         [class.active]="currentView() === 'users'" 
         (click)="setView('users')">
-        <app-icon name="users" [size]="2"></app-icon>
+        <app-icon name="users"></app-icon>
         <span class="btn-label">Users & Directory</span>
       </button>
 
@@ -66,7 +66,7 @@
         class="admin-nav-btn" 
         [class.active]="currentView() === 'finance'" 
         (click)="setView('finance')">
-        <app-icon name="rupee" [size]="2"></app-icon>
+        <app-icon name="rupee"></app-icon>
         <span class="btn-label">Finance & GMV</span>
       </button>
 
@@ -74,7 +74,7 @@
         class="admin-nav-btn" 
         [class.active]="currentView() === 'settings'" 
         (click)="setView('settings')">
-        <app-icon name="settings" [size]="2"></app-icon>
+        <app-icon name="settings"></app-icon>
         <span class="btn-label">System Settings</span>
       </button>
     </nav>
@@ -95,29 +95,29 @@
         <div class="admin-menu-divider"></div>
 
         <button class="admin-menu-item" (click)="setView('settings'); showAdminMenu.set(false)">
-          <app-icon name="settings" [size]="2"></app-icon>
+          <app-icon name="settings"></app-icon>
           <span>Platform Settings</span>
         </button>
 
         <a routerLink="/host/dashboard" class="admin-menu-item" (click)="showAdminMenu.set(false)">
-          <app-icon name="monitor" [size]="2"></app-icon>
+          <app-icon name="monitor"></app-icon>
           <span>Host SaaS Portal</span>
         </a>
 
         <a routerLink="/management" class="admin-menu-item" (click)="showAdminMenu.set(false)">
-          <app-icon name="shield" [size]="2"></app-icon>
+          <app-icon name="shield"></app-icon>
           <span>Operations Center</span>
         </a>
 
         <a routerLink="/discover" class="admin-menu-item" (click)="showAdminMenu.set(false)">
-          <app-icon name="compass" [size]="2"></app-icon>
+          <app-icon name="compass"></app-icon>
           <span>Explore Public Website</span>
         </a>
 
         <div class="admin-menu-divider"></div>
 
         <button class="admin-menu-item signout-item" (click)="signOut()">
-          <app-icon name="log-out" [size]="2"></app-icon>
+          <app-icon name="log-out"></app-icon>
           <span>Sign Out</span>
         </button>
       </div>
@@ -128,7 +128,7 @@
           <strong>Admin Control</strong>
           <small>admin@eventhub.com</small>
         </div>
-        <app-icon name="chevron-down" class="admin-card-chevron" [class.rotated]="showAdminMenu()" [size]="2"></app-icon>
+        <app-icon name="chevron-down" class="admin-card-chevron" [class.rotated]="showAdminMenu()"></app-icon>
       </div>
     </div>
   </aside>
@@ -142,7 +142,7 @@
     <header class="admin-header">
       <div class="header-left">
         <button class="mobile-toggle" (click)="toggleMobileNav()" aria-label="Toggle navigation">
-          <app-icon name="menu" [size]="2"></app-icon>
+          <app-icon name="menu"></app-icon>
         </button>
 
         <div class="admin-breadcrumbs">
@@ -162,7 +162,7 @@
       <div class="header-right">
         <!-- Quick Broadcast Button -->
         <button class="btn-broadcast-quick" (click)="openBroadcastModal()">
-          <app-icon name="message-square" [size]="2"></app-icon>
+          <app-icon name="message-square"></app-icon>
           <span class="btn-text">Broadcast</span>
         </button>
 
@@ -176,7 +176,7 @@
 
         <!-- Sign Out Button -->
         <button class="btn-signout-icon" (click)="signOut()" title="Sign Out">
-          <app-icon name="log-out" [size]="2"></app-icon>
+          <app-icon name="log-out"></app-icon>
         </button>
       </div>
     </header>
@@ -186,7 +186,7 @@
 
       <!-- Toast Feedback -->
       <div class="admin-toast" *ngIf="toastMessage()">
-        <app-icon name="check-circle" [size]="2"></app-icon>
+        <app-icon name="check-circle"></app-icon>
         <span>{{ toastMessage() }}</span>
       </div>
 
@@ -212,7 +212,7 @@
           <div class="admin-stat-card">
             <div class="card-head">
               <span>Gross Marketplace Volume (GMV)</span>
-              <div class="stat-icon purple"><app-icon name="rupee" [size]="2"></app-icon></div>
+              <div class="stat-icon purple"><app-icon name="rupee"></app-icon></div>
             </div>
             <div class="card-value">{{ platformStats().totalGMV }}</div>
             <div class="card-foot">
@@ -224,7 +224,7 @@
           <div class="admin-stat-card">
             <div class="card-head">
               <span>Registered Attendees & Users</span>
-              <div class="stat-icon blue"><app-icon name="users" [size]="2"></app-icon></div>
+              <div class="stat-icon blue"><app-icon name="users"></app-icon></div>
             </div>
             <div class="card-value">{{ platformStats().activeUsers | number }}</div>
             <div class="card-foot">
@@ -236,7 +236,7 @@
           <div class="admin-stat-card" (click)="setView('host_applications')" style="cursor: pointer;">
             <div class="card-head">
               <span>Pending Host Approvals</span>
-              <div class="stat-icon amber"><app-icon name="user-check" [size]="2"></app-icon></div>
+              <div class="stat-icon amber"><app-icon name="user-check"></app-icon></div>
             </div>
             <div class="card-value">{{ platformStats().pendingAppsCount }}</div>
             <div class="card-foot">
@@ -248,7 +248,7 @@
           <div class="admin-stat-card" (click)="setView('event_curation')" style="cursor: pointer;">
             <div class="card-head">
               <span>Events Awaiting Curation</span>
-              <div class="stat-icon emerald"><app-icon name="calendar" [size]="2"></app-icon></div>
+              <div class="stat-icon emerald"><app-icon name="calendar"></app-icon></div>
             </div>
             <div class="card-value">{{ platformStats().pendingEventsCount }}</div>
             <div class="card-foot">
@@ -642,14 +642,14 @@
             <!-- Action buttons -->
             <div class="user-card-actions" (click)="$event.stopPropagation()">
               <button class="btn-inspect-user flex-1" (click)="openUserDossier(u)">
-                <app-icon name="user-plus" [size]="2"></app-icon>
+                <app-icon name="user-plus"></app-icon>
                 Manage Dossier
               </button>
               <button 
                 class="btn-suspend-toggle flex-1" 
                 [class.danger]="u.status === 'active'" 
                 (click)="promptToggleUserSuspension(u)">
-                <app-icon name="ban" [size]="2"></app-icon>
+                <app-icon name="ban"></app-icon>
                 {{ u.status === 'active' ? 'Suspend' : 'Reactivate' }}
               </button>
             </div>
@@ -743,7 +743,7 @@
                     Release Payout
                   </button>
                   <span *ngIf="s.status === 'settled'" class="settled-check">
-                    <app-icon name="check" strokeWidth="2.5" [size]="14"></app-icon> Disbursed
+                    <app-icon name="check" [strokeWidth]="2.5" [size]="14"></app-icon> Disbursed
                   </span>
                   <button 
                     *ngIf="s.status === 'on_hold'" 
@@ -795,11 +795,11 @@
             <!-- Bank & Date Info -->
             <div class="settle-meta-line">
               <div class="meta-item">
-                <app-icon name="wallet" [size]="2"></app-icon>
+                <app-icon name="wallet"></app-icon>
                 <span>{{ s.bankAccount }}</span>
               </div>
               <div class="meta-item" *ngIf="s.settledDate">
-                <app-icon name="clock" [size]="2"></app-icon>
+                <app-icon name="clock"></app-icon>
                 <span>Paid {{ s.settledDate }}</span>
               </div>
             </div>
@@ -810,11 +810,11 @@
                 *ngIf="s.status === 'pending'" 
                 class="btn-release-payout w-full" 
                 (click)="promptReleaseSettlementPayout(s)">
-                <app-icon name="rupee" [size]="2"></app-icon>
+                <app-icon name="rupee"></app-icon>
                 Release Payout (₹{{ s.netPayout | number }})
               </button>
               <div *ngIf="s.status === 'settled'" class="settled-status-banner">
-                <app-icon name="check" strokeWidth="2.5"></app-icon>
+                <app-icon name="check" [strokeWidth]="2.5"></app-icon>
                 Disbursed to Host Account
               </div>
               <button 
@@ -897,7 +897,7 @@
         <div class="modal-section">
           <h4>Submitted Verification Documents</h4>
           <div class="doc-pill">
-            <app-icon name="file-text" [size]="2"></app-icon>
+            <app-icon name="file-text"></app-icon>
             <span>{{ selectedAppForModal()?.idDocName }}</span>
             <small class="doc-status-ok">Verified Signature</small>
           </div>
@@ -1092,8 +1092,8 @@
     <div class="admin-confirm-card" (click)="$event.stopPropagation()">
       <div class="confirm-head">
         <div class="confirm-icon-box" [class.destructive]="confirmDialogData.isDestructive">
-          <app-icon name="shield" *ngIf="!confirmDialogData.isDestructive" strokeWidth="2.5" [size]="2.5"></app-icon>
-          <app-icon name="alert-circle" *ngIf="confirmDialogData.isDestructive" strokeWidth="2.5" [size]="2.5"></app-icon>
+          <app-icon name="shield" *ngIf="!confirmDialogData.isDestructive" [strokeWidth]="2.5"></app-icon>
+          <app-icon name="alert-circle" *ngIf="confirmDialogData.isDestructive" [strokeWidth]="2.5"></app-icon>
         </div>
         <div>
           <h3>{{ confirmDialogData.title }}</h3>
