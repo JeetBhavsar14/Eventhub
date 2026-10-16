@@ -11,7 +11,6 @@ The platform provides a complete ecosystem for all event stakeholders:
 - 🏢 **Event Hosts**: Create and edit event listings, manage tier pricing, monitor ticket sales & revenue analytics, manage team staff permissions, and submit organizer verification dossiers.
 - ⚡ **Management / Operations Staff**: Review incoming event approvals, inspect changes requested, manage live operational incidents, and monitor attendance metrics.
 - 🛡️ **Super Admin**: Platform-wide governance, user directory role reassignment (freeze/suspend/assign roles), event curation gatekeeping (Hero showcase / Delist), host verification queue (with responsive mobile cards), and financial GMV / 5% platform cut escrow settlements.
-- 📱 **On-site Staff**: Check-in portal, fast attendee scanner, and access control.
 
 ---
 
@@ -53,7 +52,7 @@ Open your browser and navigate to: **`http://localhost:4200/`**
 | **Host / Organizer** | `host@eventhub.com` | `host123` | `/host/dashboard` |
 | **Management / Ops** | `management@eventhub.com` | `manage123` | `/management` |
 | **Field Staff** | `staff@eventhub.com` | `staff123` | `/staff` |
-| **Standard User** | `demo@eventhub.com` | `demo123` | `/discover` |
+| **Standard User** | `jeet@eventhub.com` | `password123` | `/discover` |
 
 ---
 
