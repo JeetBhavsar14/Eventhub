@@ -4093,6 +4093,50 @@
   cursor: pointer;
 }
 
+.primary-owner-equity-indicator {
+  display: flex;
+  flex-direction: column;
+  padding: 0.35rem 0.5rem;
+  background: #F8FAFC;
+  border-radius: var(--radius-sm);
+  border: 1px dashed #CBD5E1;
+  margin-top: 0.25rem;
+}
+
+.equity-owner-role-desc {
+  font-size: var(--text-xs);
+  color: #64748B;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.no-coowners-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: var(--radius-md);
+  padding: 0.875rem 1rem;
+  margin-top: 1.25rem;
+  color: #1E3A8A;
+}
+
+.no-coowners-banner strong {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: #1E40AF;
+  margin-bottom: 0.2rem;
+}
+
+.no-coowners-banner p {
+  font-size: var(--text-xs);
+  color: #3B82F6;
+  margin: 0;
+  line-height: 1.45;
+}
+
 .responsibility-title-badge {
   display: inline-flex;
   align-items: center;

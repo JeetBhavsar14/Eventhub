@@ -39,11 +39,21 @@ export class HostLayoutComponent implements OnInit {
 
   // Phase 5: Event Ownership & Multi-Owner State (§ 11.0, § 12.0, § 14.0)
   readonly ownerStakes = this.ownershipService.ownerStakes;
+  readonly primaryOwner = this.ownershipService.primaryOwner;
+  readonly coOwners = this.ownershipService.coOwners;
+  readonly availableCoOwnerEquity = this.ownershipService.availableCoOwnerEquity;
   readonly totalAllocatedEquity = this.ownershipService.totalAllocatedEquity;
   readonly remainingEquityPool = this.ownershipService.remainingEquityPool;
   readonly isEquityValid = this.ownershipService.isEquityValid;
   readonly eventManagers = this.ownershipService.managers;
   readonly eventParticipants = this.ownershipService.participants;
+
+  maxCoOwnerCanHold(stakeId: string): number {
+    const primary = this.primaryOwner();
+    const target = this.ownerStakes().find(s => s.id === stakeId);
+    if (!primary || !target) return 99;
+    return target.percentage + Math.max(0, primary.percentage - 1);
+  }
 
   // Modals for Phase 5
   showAddOwnerModal = signal(false);
@@ -544,11 +554,12 @@ export class HostLayoutComponent implements OnInit {
   // ═══════════════════════════════════════════════════════════
 
   openAddOwnerModal() {
+    const maxAvail = this.availableCoOwnerEquity();
     this.newOwnerForm = {
       userName: '',
       userEmail: '',
       organizationName: '',
-      percentage: Math.min(10, this.remainingEquityPool() || 10)
+      percentage: Math.min(10, Math.max(1, maxAvail))
     };
     this.showAddOwnerModal.set(true);
   }

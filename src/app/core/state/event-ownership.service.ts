@@ -20,11 +20,25 @@ export class EventOwnershipService {
   readonly error = signal<string | null>(null);
 
   // 100% Equity Allocation Computations (§ 11.0)
+  readonly primaryOwner = computed(() =>
+    this.ownerStakes().find(s => s.isPrimaryOwner) || null
+  );
+
+  readonly coOwners = computed(() =>
+    this.ownerStakes().filter(s => !s.isPrimaryOwner)
+  );
+
   readonly totalAllocatedEquity = computed(() =>
     this.ownerStakes()
       .filter(s => s.status === 'active' || s.status === 'invited')
       .reduce((sum, s) => sum + (Number(s.percentage) || 0), 0)
   );
+
+  readonly availableCoOwnerEquity = computed(() => {
+    const primary = this.primaryOwner();
+    // Primary host keeps at least 1% equity, remaining can be distributed to co-owners
+    return primary ? Math.max(0, Number(primary.percentage) - 1) : 0;
+  });
 
   readonly remainingEquityPool = computed(() => {
     return Math.max(0, 100 - this.totalAllocatedEquity());
@@ -65,12 +79,23 @@ export class EventOwnershipService {
 
       if (stakesRes.data) {
         let stakes = stakesRes.data;
-        // Business Rule: If no co-founders/co-owners exist, event primary host is directly given 100% by default
         const primary = stakes.find(s => s.isPrimaryOwner);
         const coOwners = stakes.filter(s => !s.isPrimaryOwner);
-        if (primary && coOwners.length === 0 && primary.percentage !== 100) {
-          primary.percentage = 100;
-          this.api.patch(`/eventOwnerStakes/${primary.id}`, { percentage: 100 });
+
+        if (coOwners.length === 0) {
+          // Rule: If no co-founders/co-owners exist, event primary host is directly given 100% by default
+          if (primary && primary.percentage !== 100) {
+            primary.percentage = 100;
+            this.api.patch(`/eventOwnerStakes/${primary.id}`, { percentage: 100 });
+          }
+        } else if (primary) {
+          // If co-owners exist, balance primary owner stake to ensure total is exactly 100%
+          const coOwnersTotal = coOwners.reduce((sum, s) => sum + (Number(s.percentage) || 0), 0);
+          const expectedPrimary = Math.max(1, 100 - coOwnersTotal);
+          if (primary.percentage !== expectedPrimary) {
+            primary.percentage = expectedPrimary;
+            this.api.patch(`/eventOwnerStakes/${primary.id}`, { percentage: expectedPrimary });
+          }
         }
         this.ownerStakes.set(stakes);
       }
@@ -89,8 +114,8 @@ export class EventOwnershipService {
 
   /**
    * § 11.0: Add / Invite Co-Owner with Equity Stake
-   * If primary host holds 100%, carve out the requested percentage from primary host
-   * so total allocated remains compliant (100%).
+   * The requested percentage is carved out directly from the primary owner's pool.
+   * Total allocated equity remains strictly 100%.
    */
   async addCoOwnerStake(
     eventId: string,
@@ -99,7 +124,7 @@ export class EventOwnershipService {
     organizationName: string,
     percentage: number
   ): Promise<{ success: boolean; message: string }> {
-    const requested = Number(percentage);
+    const requested = Math.round(Number(percentage));
     if (requested <= 0 || requested >= 100) {
       return { success: false, message: 'Co-owner ownership percentage must be between 1% and 99%.' };
     }
@@ -112,22 +137,25 @@ export class EventOwnershipService {
     }
 
     const primaryOwner = this.ownerStakes().find(s => s.isPrimaryOwner);
-    const available = this.remainingEquityPool();
+    const coOwners = this.ownerStakes().filter(s => !s.isPrimaryOwner);
+    const currentCoOwnersTotal = coOwners.reduce((sum, s) => sum + (Number(s.percentage) || 0), 0);
 
-    // If no unallocated pool exists but primary owner has enough to share
-    if (requested > available) {
-      if (primaryOwner && primaryOwner.percentage > requested) {
-        const newPrimaryShare = primaryOwner.percentage - requested;
-        await this.api.patch<EventOwnerStake>(`/eventOwnerStakes/${primaryOwner.id}`, {
-          percentage: newPrimaryShare
-        });
-        primaryOwner.percentage = newPrimaryShare;
-      } else {
-        return {
-          success: false,
-          message: `Cannot allocate ${requested}%. Primary host only holds ${primaryOwner ? primaryOwner.percentage : 0}% and available pool is ${available}%.`
-        };
-      }
+    // Primary owner must retain at least 1%
+    if (currentCoOwnersTotal + requested > 99) {
+      const maxAllowed = Math.max(0, 99 - currentCoOwnersTotal);
+      return {
+        success: false,
+        message: `Cannot allocate ${requested}%. Maximum equity available for new co-owners is ${maxAllowed}% (Primary host retains at least 1%).`
+      };
+    }
+
+    const newPrimaryPercentage = 100 - (currentCoOwnersTotal + requested);
+
+    if (primaryOwner) {
+      await this.api.patch<EventOwnerStake>(`/eventOwnerStakes/${primaryOwner.id}`, {
+        percentage: newPrimaryPercentage
+      });
+      primaryOwner.percentage = newPrimaryPercentage;
     }
 
     const newStake: EventOwnerStake = {
@@ -146,52 +174,84 @@ export class EventOwnershipService {
     const res = await this.api.post<EventOwnerStake>('/eventOwnerStakes', newStake);
     if (res.data) {
       this.ownerStakes.update(list => {
-        const updatedPrimary = primaryOwner ? list.map(s => s.id === primaryOwner.id ? { ...s, percentage: primaryOwner.percentage } : s) : list;
-        return [...updatedPrimary, res.data!];
+        const updated = list.map(s => s.id === primaryOwner?.id ? { ...s, percentage: newPrimaryPercentage } : s);
+        return [...updated, res.data!];
       });
       return {
         success: true,
-        message: `Successfully added ${userName} (${requested}% equity allocated).`
+        message: `Successfully added ${userName} (${requested}% equity allocated). Primary host equity is now ${newPrimaryPercentage}%.`
       };
     }
     return { success: false, message: res.error?.message || 'Failed to save co-owner stake.' };
   }
 
   /**
-   * Update existing stake percentage
+   * Update existing stake percentage.
+   * If a co-owner's equity changes, the difference is directly balanced with the primary owner.
    */
   async updateStakePercentage(
     stakeId: string,
     newPercentage: number
   ): Promise<{ success: boolean; message: string }> {
-    const stake = this.ownerStakes().find(s => s.id === stakeId);
-    if (!stake) return { success: false, message: 'Stake not found.' };
+    const targetStake = this.ownerStakes().find(s => s.id === stakeId);
+    if (!targetStake) return { success: false, message: 'Stake not found.' };
 
-    const diff = Number(newPercentage) - stake.percentage;
-    if (diff > this.remainingEquityPool()) {
+    if (targetStake.isPrimaryOwner) {
       return {
         success: false,
-        message: `Allocation error: Total equity would exceed 100%. Max available is ${stake.percentage + this.remainingEquityPool()}%.`
+        message: 'Primary owner equity automatically holds the remaining pool (100% minus co-owners).'
       };
     }
 
-    const res = await this.api.patch<EventOwnerStake>(`/eventOwnerStakes/${stakeId}`, {
-      percentage: Number(newPercentage)
+    const primaryOwner = this.ownerStakes().find(s => s.isPrimaryOwner);
+    if (!primaryOwner) return { success: false, message: 'Primary owner not found.' };
+
+    const requested = Math.round(Number(newPercentage));
+    if (requested < 1 || requested > 99) {
+      return { success: false, message: 'Co-owner equity must be between 1% and 99%.' };
+    }
+
+    const otherCoOwners = this.ownerStakes().filter(s => !s.isPrimaryOwner && s.id !== stakeId);
+    const otherCoOwnersTotal = otherCoOwners.reduce((sum, s) => sum + (Number(s.percentage) || 0), 0);
+
+    if (otherCoOwnersTotal + requested > 99) {
+      const maxAllowed = 99 - otherCoOwnersTotal;
+      return {
+        success: false,
+        message: `Maximum equity allowed for this co-owner is ${maxAllowed}% so the primary host retains at least 1%.`
+      };
+    }
+
+    const newPrimaryPercentage = 100 - (otherCoOwnersTotal + requested);
+
+    await this.api.patch<EventOwnerStake>(`/eventOwnerStakes/${stakeId}`, {
+      percentage: requested
     });
 
-    if (res.data) {
-      this.ownerStakes.update(list =>
-        list.map(s => (s.id === stakeId ? { ...s, percentage: Number(newPercentage) } : s))
-      );
-      return { success: true, message: 'Stake updated successfully.' };
-    }
-    return { success: false, message: 'Failed to update stake.' };
+    await this.api.patch<EventOwnerStake>(`/eventOwnerStakes/${primaryOwner.id}`, {
+      percentage: newPrimaryPercentage
+    });
+    primaryOwner.percentage = newPrimaryPercentage;
+    targetStake.percentage = requested;
+
+    this.ownerStakes.update(list =>
+      list.map(s => {
+        if (s.id === stakeId) return { ...s, percentage: requested };
+        if (s.id === primaryOwner.id) return { ...s, percentage: newPrimaryPercentage };
+        return s;
+      })
+    );
+
+    return {
+      success: true,
+      message: `Updated ${targetStake.userName} to ${requested}%. Primary host holds ${newPrimaryPercentage}%.`
+    };
   }
 
   /**
-   * Remove co-owner stake
-   * When a co-owner is removed, their equity returns to the primary host.
-   * If no co-founders remain, the primary host returns to 100% by default.
+   * Remove co-owner stake.
+   * When ANY co-owner is removed, their equity goes directly to the primary owner.
+   * If no co-founders remain, the primary host directly gets 100% by default.
    */
   async removeCoOwnerStake(stakeId: string): Promise<boolean> {
     const stake = this.ownerStakes().find(s => s.id === stakeId);
@@ -204,10 +264,11 @@ export class EventOwnershipService {
     const remainingCoOwners = this.ownerStakes().filter(s => s.id !== stakeId && !s.isPrimaryOwner);
     const primaryOwner = this.ownerStakes().find(s => s.isPrimaryOwner);
 
-    let newPrimaryPercentage = primaryOwner ? primaryOwner.percentage + stake.percentage : 100;
-    if (remainingCoOwners.length === 0) {
-      newPrimaryPercentage = 100; // Directly 100% by default if no co-founder is there
-    }
+    // Business Rule:
+    // If no co-founders remain, the primary host directly gets 100%.
+    // If other co-founders remain, the removed co-founder's entire stake goes directly to the primary owner.
+    const remainingCoOwnersTotal = remainingCoOwners.reduce((sum, s) => sum + (Number(s.percentage) || 0), 0);
+    const newPrimaryPercentage = remainingCoOwners.length === 0 ? 100 : (100 - remainingCoOwnersTotal);
 
     if (primaryOwner) {
       await this.api.patch<EventOwnerStake>(`/eventOwnerStakes/${primaryOwner.id}`, {

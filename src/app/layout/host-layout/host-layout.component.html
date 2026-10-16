@@ -1200,13 +1200,25 @@
                     <span class="stake-label">Equity Share:</span>
                     <strong class="stake-val">{{ stake.percentage }}%</strong>
                   </div>
+                  <!-- For Co-Owners: interactive range slider bounded by primary owner's available stake -->
                   <input 
+                    *ngIf="!stake.isPrimaryOwner"
                     type="range" 
                     min="1" 
-                    max="100" 
+                    [max]="maxCoOwnerCanHold(stake.id)" 
                     [ngModel]="stake.percentage" 
                     (change)="updateStake(stake.id, +$any($event.target).value)" 
                     class="stake-range-slider" />
+                  
+                  <!-- For Primary Host: balance display -->
+                  <div *ngIf="stake.isPrimaryOwner" class="primary-owner-equity-indicator">
+                    <small class="equity-owner-role-desc" *ngIf="ownerStakes().length === 1">
+                      Sole Event Host — Holds 100% equity by default (no co-founders)
+                    </small>
+                    <small class="equity-owner-role-desc" *ngIf="ownerStakes().length > 1">
+                      Primary Host balance (100% minus co-founders' shares)
+                    </small>
+                  </div>
                 </div>
               </div>
 
@@ -1215,6 +1227,15 @@
                   Remove Co-Owner
                 </button>
               </div>
+            </div>
+          </div>
+
+          <!-- Banner when no co-founders exist -->
+          <div class="no-coowners-banner" *ngIf="ownerStakes().length === 1">
+            <app-icon name="info" [size]="18"></app-icon>
+            <div>
+              <strong>100% Sole Host Equity Active</strong>
+              <p>No co-founders currently assigned. 100% of event equity belongs to the primary host. Click <strong>"Add Co-Owner"</strong> to allocate equity. If any co-founder is removed, their stake returns to the owner directly.</p>
             </div>
           </div>
         </div>
@@ -2039,8 +2060,8 @@
 
       <div class="modal-body">
         <div class="equity-pool-reminder-box">
-          <span>Unallocated Available Equity:</span>
-          <strong>{{ remainingEquityPool() }}%</strong>
+          <span>Available Equity for Co-Owners:</span>
+          <strong>{{ availableCoOwnerEquity() }}%</strong>
         </div>
 
         <div class="form-group full-width">
@@ -2066,10 +2087,10 @@
           <input 
             type="range" 
             min="1" 
-            [max]="remainingEquityPool() > 0 ? remainingEquityPool() : 1" 
+            [max]="availableCoOwnerEquity() > 0 ? availableCoOwnerEquity() : 1" 
             [(ngModel)]="newOwnerForm.percentage" 
             class="stake-range-slider" />
-          <small class="form-hint">Maximum permissible allocation right now is {{ remainingEquityPool() }}%.</small>
+          <small class="form-hint">Maximum permissible allocation right now is {{ availableCoOwnerEquity() }}% (Primary host retains at least 1%).</small>
         </div>
       </div>
 
@@ -2077,7 +2098,7 @@
         <button class="btn-modal-cancel" (click)="showAddOwnerModal.set(false)">Cancel</button>
         <button 
           class="btn-modal-submit" 
-          [disabled]="!newOwnerForm.userEmail.trim() || newOwnerForm.percentage <= 0 || newOwnerForm.percentage > remainingEquityPool()"
+          [disabled]="!newOwnerForm.userEmail.trim() || newOwnerForm.percentage <= 0 || newOwnerForm.percentage > availableCoOwnerEquity()"
           (click)="submitAddOwner()">
           Confirm Co-Ownership
         </button>
