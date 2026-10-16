@@ -101,6 +101,14 @@
   letter-spacing: -0.5px;
 }
 
+.footer-brand-logo-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: block;
+  flex-shrink: 0;
+}
+
 .brand-name {
   color: #ffffff;
   font-weight: 700;

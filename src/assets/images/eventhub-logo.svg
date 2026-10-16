@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="100%" height="100%" fill="none">
+  <defs>
+    <linearGradient id="ehLogoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D31A5"/>
+      <stop offset="100%" stop-color="#6170C3"/>
+    </linearGradient>
+    <filter id="ehLogoShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#2D31A5" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Rounded Gradient Badge Container -->
+  <rect width="40" height="40" rx="10" fill="url(#ehLogoGradient)" filter="url(#ehLogoShadow)"/>
+
+  <!-- Geometric Layers Icon inside Container -->
+  <g transform="translate(8, 8)" stroke="#C8EEFF" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+    <path d="M2 17l10 5 10-5"/>
+    <path d="M2 12l10 5 10-5"/>
+  </g>
+</svg>

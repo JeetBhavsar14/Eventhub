@@ -3464,22 +3464,10 @@
       "userName": "Riya Mehta",
       "userEmail": "host@eventhub.com",
       "organizationName": "Starlight Live Experiences Pvt Ltd",
-      "percentage": 50,
+      "percentage": 80,
       "isPrimaryOwner": true,
       "status": "active",
       "assignedAt": "2026-01-10T10:00:00.000Z"
-    },
-    {
-      "id": "stake-2",
-      "eventId": "evt-100",
-      "userId": "user-001",
-      "userName": "Jeet Shah",
-      "userEmail": "jeet@eventhub.com",
-      "organizationName": "Ahmedabad Liveworks & Co",
-      "percentage": 30,
-      "isPrimaryOwner": false,
-      "status": "active",
-      "assignedAt": "2026-01-15T14:30:00.000Z"
     },
     {
       "id": "stake-3",

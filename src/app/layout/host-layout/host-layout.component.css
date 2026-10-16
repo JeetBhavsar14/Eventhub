@@ -95,6 +95,15 @@
   justify-content: center;
 }
 
+.host-brand-logo-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: block;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(45, 49, 165, 0.25);
+}
+
 .symbol-svg {
   width: 20px;
   height: 20px;
@@ -4150,6 +4159,442 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HOST SIDEBAR USER DROPDOWN POPUP
+   ═══════════════════════════════════════════════════════════ */
+.host-sidebar-dropdown-box {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.22), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+  padding: 0.625rem;
+  z-index: 1000;
+  animation: hostDropdownPopUp 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-sizing: border-box;
+}
+
+@keyframes hostDropdownPopUp {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.host-sidebar-profile-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+}
+
+.host-dropdown-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.host-dropdown-meta strong {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.host-dropdown-meta small {
+  font-size: 0.6875rem;
+  color: #64748B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.host-dropdown-meta .role-badge {
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: #15803D;
+  background: #DCFCE7;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  display: inline-block;
+  margin-top: 0.25rem;
+  width: fit-content;
+}
+
+.host-dropdown-divider {
+  height: 1px;
+  background: #F1F5F9;
+  margin: 0.4rem 0;
+}
+
+.host-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.host-dropdown-item:hover {
+  background: #F8FAFC;
+  color: #2D31A5;
+}
+
+.host-dropdown-item app-icon {
+  color: #64748B;
+  flex-shrink: 0;
+}
+
+.host-dropdown-item:hover app-icon {
+  color: #2D31A5;
+}
+
+.host-dropdown-item.signout-item {
+  color: #DC2626;
+}
+
+.host-dropdown-item.signout-item:hover {
+  background: #FEF2F2;
+  color: #B91C1C;
+}
+
+.host-dropdown-item.signout-item app-icon {
+  color: #DC2626;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TEAM MANAGEMENT VIEW POLISH & STYLING
+   ═══════════════════════════════════════════════════════════ */
+.view-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  gap: 1.5rem;
+}
+
+.view-header-bar .view-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem 0;
+}
+
+.view-header-bar .view-sub {
+  font-size: 0.875rem;
+  color: #64748B;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.header-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.btn-team-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #2D31A5;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1.15rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(45, 49, 165, 0.25);
+  transition: all 0.18s ease;
+}
+
+.btn-team-primary:hover {
+  background: #1E1B4B;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(45, 49, 165, 0.35);
+}
+
+.btn-team-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #FFFFFF;
+  color: #2D31A5;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-team-secondary:hover {
+  background: #F8FAFC;
+  border-color: #2D31A5;
+  color: #1E1B4B;
+}
+
+.team-section-container {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.section-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-title-row h3 {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 0.25rem 0;
+}
+
+.section-title-row p {
+  font-size: 0.8125rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.team-count-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #EEF2FF;
+  color: #2D31A5;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.team-count-badge.warning {
+  background: #FEF3C7;
+  color: #B45309;
+}
+
+.team-members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+.team-member-card {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.18s ease;
+}
+
+.team-member-card:hover {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.team-member-card .team-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin-bottom: 0.75rem;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.team-meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.member-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.team-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0;
+}
+
+.team-email {
+  font-size: 0.78125rem;
+  color: #64748B;
+  margin-bottom: 0.25rem;
+}
+
+.team-org {
+  font-size: 0.75rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.owner-tag-pill {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  background: #2D31A5;
+  color: #FFFFFF;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+.team-actions-footer {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn-remove-member {
+  background: transparent;
+  border: 1px solid #FCA5A5;
+  color: #DC2626;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-remove-member:hover {
+  background: #FEF2F2;
+  border-color: #DC2626;
+}
+
+.btn-delegation-toggle {
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  color: #334155;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-delegation-toggle.active {
+  background: #DCFCE7;
+  color: #15803D;
+  border-color: #BBF7D0;
+}
+
+.delegation-badge {
+  font-size: 0.71875rem;
+  font-weight: 600;
+  color: #64748B;
+}
+
+.delegation-badge.active {
+  color: #15803D;
+  font-weight: 700;
+}
+
+.btn-small-link {
+  background: transparent;
+  border: 1px solid #CBD5E1;
+  color: #2D31A5;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-small-link:hover {
+  background: #EEF2FF;
+  border-color: #2D31A5;
+}
+
+.invitations-table-card {
+  overflow-x: auto;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+}
+
+.invitations-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.8125rem;
+}
+
+.invitations-table th {
+  background: #F8FAFC;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  color: #475569;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.invitations-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #F1F5F9;
+  color: #1E293B;
+}
+
+.inv-invitee-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.inv-invitee-cell strong {
+  color: #0F172A;
+}
+
+.inv-invitee-cell small {
+  color: #64748B;
+}
+
+.status-indicator-pending {
+  color: #D97706;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.empty-table-cell {
+  text-align: center;
+  color: #64748B;
+  padding: 1.5rem !important;
+  font-style: italic;
 }
 
 

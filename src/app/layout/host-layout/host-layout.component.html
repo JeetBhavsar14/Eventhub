@@ -13,9 +13,7 @@
     <!-- Sidebar Top: Brand Logo & Workspace Pill -->
     <div class="sidebar-brand-header">
       <a routerLink="/discover" class="brand-logo-link" title="EventHub Home">
-        <div class="logo-symbol">
-          <app-icon name="layers" class="symbol-svg" [strokeWidth]="2.5"></app-icon>
-        </div>
+        <img src="assets/images/eventhub-logo.svg" alt="EventHub Logo" class="host-brand-logo-img" width="38" height="38" />
         <div class="brand-text-block">
           <span class="brand-title">EventHub</span>
           <span class="workspace-tag">HOST WORKSPACE</span>
@@ -119,29 +117,31 @@
 
       <div class="relative-sidebar-user-container">
         <!-- Sidebar User Menu Popup (Anchored Above the Sidebar Card) -->
-        <div class="dropdown-menu-box sidebar-user-menu-dropdown" *ngIf="showSidebarUserMenu()" (click)="$event.stopPropagation()">
-          <div class="user-menu-profile-box">
-            <div class="user-menu-avatar-badge">{{ getInitials() }}</div>
-            <strong>{{ hostInfo().name }}</strong>
-            <small>{{ hostInfo().organization }}</small>
-            <span class="role-badge">{{ hostInfo().verificationBadge }}</span>
+        <div class="host-sidebar-dropdown-box" *ngIf="showSidebarUserMenu()" (click)="$event.stopPropagation()">
+          <div class="host-sidebar-profile-box">
+            <div class="user-avatar-badge">{{ getInitials() }}</div>
+            <div class="host-dropdown-meta">
+              <strong>{{ hostInfo().name }}</strong>
+              <small>{{ hostInfo().organization }}</small>
+              <span class="role-badge">{{ hostInfo().verificationBadge }}</span>
+            </div>
           </div>
-          <div class="user-menu-divider"></div>
-          <button class="user-menu-item" (click)="switchView('settings'); showSidebarUserMenu.set(false)">
-            <app-icon name="settings"></app-icon>
+          <div class="host-dropdown-divider"></div>
+          <button class="host-dropdown-item" (click)="switchView('settings'); showSidebarUserMenu.set(false)">
+            <app-icon name="settings" [size]="16"></app-icon>
             <span>Workspace Settings</span>
           </button>
-          <button class="user-menu-item" (click)="switchView('team'); showSidebarUserMenu.set(false)">
-            <app-icon name="user"></app-icon>
+          <button class="host-dropdown-item" (click)="switchView('team'); showSidebarUserMenu.set(false)">
+            <app-icon name="user" [size]="16"></app-icon>
             <span>Team & Permissions</span>
           </button>
-          <a routerLink="/discover" class="user-menu-item" (click)="showSidebarUserMenu.set(false)">
-            <app-icon name="compass"></app-icon>
+          <a routerLink="/discover" class="host-dropdown-item" (click)="showSidebarUserMenu.set(false)">
+            <app-icon name="compass" [size]="16"></app-icon>
             <span>Explore Events as Guest</span>
           </a>
-          <div class="user-menu-divider"></div>
-          <button class="user-menu-item signout-item" (click)="signOut()">
-            <app-icon name="log-out"></app-icon>
+          <div class="host-dropdown-divider"></div>
+          <button class="host-dropdown-item signout-item" (click)="signOut()">
+            <app-icon name="log-out" [size]="16"></app-icon>
             <span>Sign Out of Workspace</span>
           </button>
         </div>
@@ -1131,14 +1131,17 @@
             <p class="view-sub">Manage 100% equity allocation among co-owners, assign managers with specific responsibilities, and invite artists/sponsors.</p>
           </div>
           <div class="header-actions-group">
-            <button class="btn-secondary-action" (click)="openAddOwnerModal()">
-              + Add Co-Owner
+            <button class="btn-team-secondary" (click)="openAddOwnerModal()">
+              <app-icon name="plus" [size]="14"></app-icon>
+              <span>Add Co-Owner</span>
             </button>
-            <button class="btn-secondary-action" (click)="openAssignManagerModal()">
-              + Assign Manager
+            <button class="btn-team-secondary" (click)="openAssignManagerModal()">
+              <app-icon name="user" [size]="14"></app-icon>
+              <span>Assign Manager</span>
             </button>
-            <button class="btn-create-event-primary" (click)="openInviteTeamModal()">
-              + Invite Staff / Role
+            <button class="btn-team-primary" (click)="openInviteTeamModal()">
+              <app-icon name="user-plus" [size]="14"></app-icon>
+              <span>Invite Staff / Role</span>
             </button>
           </div>
         </div>

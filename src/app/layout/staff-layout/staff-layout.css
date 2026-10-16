@@ -63,6 +63,14 @@
   justify-content: center;
 }
 
+.staff-brand-logo-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: block;
+  flex-shrink: 0;
+}
+
 .brand-badge svg { width: 18px; height: 18px; }
 
 .brand-text {

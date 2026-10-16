@@ -63,6 +63,15 @@
   box-shadow: 0 2px 8px rgba(45, 49, 165, 0.25);
 }
 
+.mgmt-brand-logo-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: block;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(45, 49, 165, 0.25);
+}
+
 .mgmt-logo-badge svg {
   width: 20px;
   height: 20px;

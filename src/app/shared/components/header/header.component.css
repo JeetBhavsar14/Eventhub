@@ -46,6 +46,14 @@
   flex-shrink: 0;
 }
 
+.logo-icon-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: block;
+}
+
 .logo-text {
   font-size: 1.15rem;
   font-weight: 800;
