@@ -364,12 +364,18 @@ export class AdminLayoutComponent implements OnInit {
     }, 3600);
   }
 
+  toggleAdminMenu(event: MouseEvent) {
+    event.stopPropagation();
+    this.showAdminMenu.update(v => !v);
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.user-menu-wrap') && !target.closest('.notif-menu-wrap')) {
+    if (!target.closest('.user-menu-wrap') && !target.closest('.notif-menu-wrap') && !target.closest('.admin-sidebar-footer')) {
       this.showUserMenu.set(false);
       this.showNotifications.set(false);
+      this.showAdminMenu.set(false);
     }
   }
 

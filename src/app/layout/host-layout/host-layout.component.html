@@ -448,7 +448,7 @@
                 <strong>{{ hoveredChartPoint()?.label }}</strong>
                 <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg> Bookings: <span>{{ hoveredChartPoint()?.bookings }}</span></div>
                 <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Attendees: <span>{{ hoveredChartPoint()?.attendees }}</span></div>
-                <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Revenue: <span>₹{{ hoveredChartPoint()?.revenue | number }}</span></div>
+                <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3a4.5 4.5 0 0 0 0-9H6"/></svg> Revenue: <span>₹{{ hoveredChartPoint()?.revenue | number }}</span></div>
               </div>
             </div>
 
@@ -1129,62 +1129,167 @@
         <!-- View Header -->
         <div class="view-header-bar">
           <div>
-            <h2 class="view-title">Event Team & Operational Delegation</h2>
-            <p class="view-sub">As Event Owner, appoint Event Managers, assign gate staff, and invite speakers or sponsors.</p>
+            <h2 class="view-title">Event Governance, Equity & Team Operations</h2>
+            <p class="view-sub">Manage 100% equity allocation among co-owners, assign managers with specific responsibilities, and invite artists/sponsors.</p>
           </div>
-          <button class="btn-create-event-primary" (click)="openInviteTeamModal()">
-            + Invite Team or Participant
-          </button>
+          <div class="header-actions-group">
+            <button class="btn-secondary-action" (click)="openAddOwnerModal()">
+              + Add Co-Owner
+            </button>
+            <button class="btn-secondary-action" (click)="openAssignManagerModal()">
+              + Assign Manager
+            </button>
+            <button class="btn-create-event-primary" (click)="openInviteTeamModal()">
+              + Invite Staff / Role
+            </button>
+          </div>
         </div>
 
-        <!-- Event Owner Supreme Authority Banner (§ 5.1) -->
-        <div class="owner-authority-banner">
-          <div class="banner-owner-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-          </div>
-          <div class="banner-content">
-            <h4>Event Owner (Highest Authority)</h4>
-            <p>You hold permanent event ownership and supreme configuration authority for <strong>{{ hostInfo().organization }}</strong>. Temporary management delegation grants operational powers to managers without transferring ownership.</p>
-          </div>
-          <span class="owner-badge-tag">Owner: {{ hostInfo().name }}</span>
-        </div>
-
-        <!-- Section 1: Operational Roles (§ 5.3 & § 5.4) -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- SECTION 1: 100% OWNERSHIP & EQUITY ALLOCATION (§ 11.0)       -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
         <div class="team-section-container">
           <div class="section-title-row">
             <div>
-              <h3>Event Operational Roles</h3>
-              <p>Operational members can hold up to 3 operational roles per event (Event Manager, Gate Staff, Volunteer).</p>
+              <h3>Event Co-Ownership & Equity Split</h3>
+              <p>Total equity must sum to exactly 100%. Ownership is event-specific and distinct from management responsibilities.</p>
             </div>
-            <span class="team-count-badge">{{ operationalTeam().length }} Active Roles</span>
+            <div class="equity-status-pill" [class.valid]="isEquityValid()" [class.invalid]="!isEquityValid()">
+              <span *ngIf="isEquityValid()">● 100% Equity Allocated (Compliant)</span>
+              <span *ngIf="!isEquityValid()">⚠️ {{ totalAllocatedEquity() }}% Allocated ({{ remainingEquityPool() }}% Remaining)</span>
+            </div>
+          </div>
+
+          <!-- Multi-Color Visual Equity Progress Bar -->
+          <div class="equity-progress-card">
+            <div class="equity-progress-track">
+              <div 
+                *ngFor="let stake of ownerStakes(); let i = index"
+                class="equity-progress-bar"
+                [attr.data-index]="i % 4"
+                [style.width.%]="stake.percentage"
+                [title]="stake.userName + ' (' + stake.percentage + '%)'">
+                <span class="bar-tag" *ngIf="stake.percentage >= 15">{{ stake.userName }} • {{ stake.percentage }}%</span>
+              </div>
+            </div>
+            <div class="equity-legend-row">
+              <div *ngFor="let stake of ownerStakes(); let i = index" class="legend-item">
+                <span class="legend-dot" [attr.data-index]="i % 4"></span>
+                <strong>{{ stake.userName }}</strong>
+                <span class="text-muted">({{ stake.percentage }}%)</span>
+                <small *ngIf="stake.isPrimaryOwner" class="primary-tag">Primary Host</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Co-Owners Grid -->
+          <div class="team-members-grid mt-4">
+            <div *ngFor="let stake of ownerStakes()" class="team-member-card owner-card">
+              <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + stake.userEmail" [alt]="stake.userName" class="team-avatar" />
+              <div class="team-meta">
+                <div class="member-name-row">
+                  <h3 class="team-name">{{ stake.userName }}</h3>
+                  <span class="owner-tag-pill" *ngIf="stake.isPrimaryOwner">Primary Owner</span>
+                </div>
+                <span class="team-email">{{ stake.userEmail }}</span>
+                <span class="team-org" *ngIf="stake.organizationName">{{ stake.organizationName }}</span>
+                
+                <div class="stake-slider-row">
+                  <div class="stake-display">
+                    <span class="stake-label">Equity Share:</span>
+                    <strong class="stake-val">{{ stake.percentage }}%</strong>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="1" 
+                    max="100" 
+                    [ngModel]="stake.percentage" 
+                    (change)="updateStake(stake.id, +$any($event.target).value)" 
+                    class="stake-range-slider" />
+                </div>
+              </div>
+
+              <div class="team-actions-footer" *ngIf="!stake.isPrimaryOwner">
+                <button class="btn-remove-member" (click)="removeOwnerStake(stake)">
+                  Remove Co-Owner
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- SECTION 2: EVENT MANAGERS & RESPONSIBILITIES (§ 12.0)       -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div class="team-section-container">
+          <div class="section-title-row">
+            <div>
+              <h3>Event Managers & Functional Portfolios</h3>
+              <p>Managers handle distinct operational domains (Logistics, Technical AV, Safety, Sponsorships). Temporary delegation can be paused anytime.</p>
+            </div>
+            <span class="team-count-badge">{{ eventManagers().length }} Managers</span>
           </div>
 
           <div class="team-members-grid">
-            <div *ngFor="let member of operationalTeam()" class="team-member-card" [class.owner-card]="member.isOwner">
-              <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + member.email" [alt]="member.name" class="team-avatar" />
+            <div *ngFor="let mgr of eventManagers()" class="team-member-card manager-card">
+              <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + mgr.userEmail" [alt]="mgr.userName" class="team-avatar" />
               <div class="team-meta">
                 <div class="member-name-row">
-                  <h3 class="team-name">{{ member.name }}</h3>
-                  <span class="owner-tag-pill" *ngIf="member.isOwner">Owner</span>
+                  <h3 class="team-name">{{ mgr.userName }}</h3>
+                  <span class="role-pill manager-pill">Event Manager</span>
                 </div>
-                <span class="team-email">{{ member.email }}</span>
-                <div class="team-tags-row">
-                  <span class="role-pill">{{ member.roleName || member.role }}</span>
-                  <span class="delegation-badge" *ngIf="member.role === 'event_manager'" [class.active]="member.delegationActive">
-                    {{ member.delegationActive ? '● Delegation Active' : '○ Delegation Revoked' }}
+                <span class="team-email">{{ mgr.userEmail }}</span>
+                <div class="responsibility-title-badge">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  <span>{{ mgr.responsibilityTitle }}</span>
+                </div>
+                <div class="team-tags-row mt-2">
+                  <span class="delegation-badge" [class.active]="mgr.delegationActive">
+                    {{ mgr.delegationActive ? '● Operational Authority Active' : '○ Delegation Paused' }}
                   </span>
                 </div>
               </div>
 
-              <!-- Delegation & Removal Actions -->
-              <div class="team-actions-footer" *ngIf="!member.isOwner">
+              <div class="team-actions-footer">
                 <button 
-                  *ngIf="member.role === 'event_manager'"
                   class="btn-delegation-toggle" 
-                  [class.active]="member.delegationActive"
-                  (click)="toggleDelegation(member)">
-                  {{ member.delegationActive ? 'Revoke Delegation' : 'Delegate Management' }}
+                  [class.active]="mgr.delegationActive"
+                  (click)="toggleMgrDelegation(mgr)">
+                  {{ mgr.delegationActive ? 'Pause Delegation' : 'Resume Authority' }}
                 </button>
+                <button class="btn-remove-member" (click)="removeManagerAssignment(mgr)">
+                  Unassign
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- SECTION 3: OPERATIONAL STAFF ROLES (§ 13.0)                 -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div class="team-section-container">
+          <div class="section-title-row">
+            <div>
+              <h3>Field & Gate Staff Roster</h3>
+              <p>Field staff assigned to gate check-in, safety, and info desks with duty-specific permissions.</p>
+            </div>
+            <span class="team-count-badge">{{ operationalTeam().length }} Active Staff</span>
+          </div>
+
+          <div class="team-members-grid">
+            <div *ngFor="let member of operationalTeam()" class="team-member-card">
+              <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + member.email" [alt]="member.name" class="team-avatar" />
+              <div class="team-meta">
+                <h3 class="team-name">{{ member.name }}</h3>
+                <span class="team-email">{{ member.email }}</span>
+                <div class="team-tags-row">
+                  <span class="role-pill">{{ member.roleName || member.role }}</span>
+                  <small class="text-muted">{{ member.responsibility || 'General Staff' }}</small>
+                </div>
+              </div>
+
+              <div class="team-actions-footer">
                 <button class="btn-remove-member" (click)="removeMember(member.id, member.name)">
                   Remove
                 </button>
@@ -1193,32 +1298,48 @@
           </div>
         </div>
 
-        <!-- Section 2: Event Participants (§ 6.0) -->
-        <div class="team-section-container" *ngIf="participantMembers().length > 0">
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- SECTION 4: EVENT PARTICIPANTS (Artists, Speakers, Sponsors) § 14.0 -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div class="team-section-container">
           <div class="section-title-row">
             <div>
-              <h3>Invited Event Participants</h3>
-              <p>Keynote speakers, performers, and brand sponsors connected to this event.</p>
+              <h3>Event Participants & Brand Sponsors</h3>
+              <p>Keynote speakers, performing artists, and corporate sponsors associated with this event.</p>
             </div>
-            <span class="team-count-badge">{{ participantMembers().length }} Participants</span>
+            <div class="header-actions-group">
+              <button class="btn-small-link" (click)="openAddParticipantModal('artist')">+ Add Artist</button>
+              <button class="btn-small-link" (click)="openAddParticipantModal('speaker')">+ Add Speaker</button>
+              <button class="btn-small-link" (click)="openAddParticipantModal('sponsor')">+ Add Sponsor</button>
+            </div>
           </div>
 
           <div class="team-members-grid">
-            <div *ngFor="let part of participantMembers()" class="team-member-card participant-card">
-              <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + part.email" [alt]="part.name" class="team-avatar" />
+            <div *ngFor="let part of eventParticipants()" class="team-member-card participant-card">
+              <img [src]="part.avatarUrl" [alt]="part.name" class="team-avatar" />
               <div class="team-meta">
-                <h3 class="team-name">{{ part.name }}</h3>
-                <span class="team-email">{{ part.email }}</span>
-                <div class="team-tags-row">
-                  <span class="role-pill participant-pill">{{ part.role === 'speaker' ? 'Keynote Speaker / Artist' : 'Brand Sponsor' }}</span>
-                  <span class="member-status-tag">Confirmed</span>
+                <div class="member-name-row">
+                  <h3 class="team-name">{{ part.name }}</h3>
+                  <span class="role-pill participant-pill" [attr.data-cat]="part.category">
+                    {{ part.category | uppercase }}
+                  </span>
                 </div>
+                <span class="team-org font-semibold">{{ part.designationOrCompany }}</span>
+                <p class="participant-bio-snippet">{{ part.bio }}</p>
+              </div>
+
+              <div class="team-actions-footer">
+                <button class="btn-remove-member" (click)="removeParticipantItem(part)">
+                  Remove
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Section 3: Pending Dispatched Invitations (§ 5.2) -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- SECTION 5: DISPATCHED INVITATIONS TRACKER (§ 16.0)          -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
         <div class="team-section-container">
           <div class="section-title-row">
             <div>
@@ -1896,6 +2017,173 @@
 
       <div class="modal-footer">
         <button class="btn-modal-cancel" (click)="showHelpModal.set(false)">Close Help</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MODAL 6: ADD CO-OWNER MODAL (§ 11.0)                        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showAddOwnerModal()" (click)="showAddOwnerModal.set(false)">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">EQUITY ALLOCATION</span>
+          <h3 class="modal-title">Allocate Co-Owner Stake</h3>
+        </div>
+        <button class="modal-close-btn" (click)="showAddOwnerModal.set(false)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="equity-pool-reminder-box">
+          <span>Unallocated Available Equity:</span>
+          <strong>{{ remainingEquityPool() }}%</strong>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Co-Owner Full Name *</label>
+          <input type="text" class="form-input" [(ngModel)]="newOwnerForm.userName" placeholder="e.g. Rahul Verma" />
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Verified Email Address *</label>
+          <input type="email" class="form-input" [(ngModel)]="newOwnerForm.userEmail" placeholder="e.g. rahul@musicfest.in" />
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Organization / Production Company</label>
+          <input type="text" class="form-input" [(ngModel)]="newOwnerForm.organizationName" placeholder="e.g. Verma Live Productions LLP" />
+        </div>
+
+        <div class="form-group full-width">
+          <div class="label-with-val">
+            <label class="form-label">Equity Stake Percentage (%) *</label>
+            <strong class="text-primary">{{ newOwnerForm.percentage }}%</strong>
+          </div>
+          <input 
+            type="range" 
+            min="1" 
+            [max]="remainingEquityPool() > 0 ? remainingEquityPool() : 1" 
+            [(ngModel)]="newOwnerForm.percentage" 
+            class="stake-range-slider" />
+          <small class="form-hint">Maximum permissible allocation right now is {{ remainingEquityPool() }}%.</small>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" (click)="showAddOwnerModal.set(false)">Cancel</button>
+        <button 
+          class="btn-modal-submit" 
+          [disabled]="!newOwnerForm.userEmail.trim() || newOwnerForm.percentage <= 0 || newOwnerForm.percentage > remainingEquityPool()"
+          (click)="submitAddOwner()">
+          Confirm Co-Ownership
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MODAL 7: ASSIGN EVENT MANAGER MODAL (§ 12.0)                -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showAssignManagerModal()" (click)="showAssignManagerModal.set(false)">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">OPERATIONAL PORTFOLIO</span>
+          <h3 class="modal-title">Assign Event Manager</h3>
+        </div>
+        <button class="modal-close-btn" (click)="showAssignManagerModal.set(false)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group full-width">
+          <label class="form-label">Manager Full Name *</label>
+          <input type="text" class="form-input" [(ngModel)]="newManagerForm.userName" placeholder="e.g. Siddharth Shah" />
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Manager Email Address *</label>
+          <input type="email" class="form-input" [(ngModel)]="newManagerForm.userEmail" placeholder="e.g. siddharth@operations.com" />
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Responsibility Portfolio *</label>
+          <app-select 
+            [options]="managerAreaOptions" 
+            [(ngModel)]="newManagerForm.responsibilityArea">
+          </app-select>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Custom Designation / Title (Optional)</label>
+          <input type="text" class="form-input" [(ngModel)]="newManagerForm.customTitle" placeholder="e.g. Head of Stage & Audio Engineering" />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" (click)="showAssignManagerModal.set(false)">Cancel</button>
+        <button 
+          class="btn-modal-submit" 
+          [disabled]="!newManagerForm.userEmail.trim()"
+          (click)="submitAssignManager()">
+          Assign Manager Portfolio
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MODAL 8: ADD PARTICIPANT (Speaker / Artist / Sponsor) § 14.0-->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" *ngIf="showAddParticipantModal()" (click)="showAddParticipantModal.set(false)">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">PARTICIPANTS & PARTNERS</span>
+          <h3 class="modal-title">Add Event Participant</h3>
+        </div>
+        <button class="modal-close-btn" (click)="showAddParticipantModal.set(false)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group full-width">
+          <label class="form-label">Participant Category *</label>
+          <app-select 
+            [options]="participantCategoryOptions" 
+            [(ngModel)]="newParticipantForm.category">
+          </app-select>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Name / Stage Name / Brand *</label>
+          <input type="text" class="form-input" [(ngModel)]="newParticipantForm.name" placeholder="e.g. Divine / Red Bull / Dr. V. Patel" />
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Designation / Role / Brand Title</label>
+          <input type="text" class="form-input" [(ngModel)]="newParticipantForm.designationOrCompany" placeholder="e.g. Headline Rapper / Keynote Speaker / Official Hydration Partner" />
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Bio / Profile Snippet</label>
+          <textarea class="form-textarea" rows="3" [(ngModel)]="newParticipantForm.bio" placeholder="Short description or bio for public display..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" (click)="showAddParticipantModal.set(false)">Cancel</button>
+        <button 
+          class="btn-modal-submit" 
+          [disabled]="!newParticipantForm.name.trim()"
+          (click)="submitAddParticipant()">
+          Save Participant
+        </button>
       </div>
     </div>
   </div>
