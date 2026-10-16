@@ -207,3 +207,57 @@ import { HostLayoutComponent } from './layout/host-layout/host-layout.component'
 | **Angular CLI Build Result** | Pass | `Application bundle generation complete` (0 errors) |  Clean |
 
 ---
+
+# 🎨 EventHub Clean-Up Log: Shared `<app-icon>` Component & SVG De-cluttering (Step 2)
+
+> **Date:** October 16, 2026  
+> **Module:** Shared UI System & Template Architecture  
+> **Status:**  Completed & Build Verified  
+> **Specification Reference:** Architectural Maintainability (Step 2: Shared Icon Component)
+
+---
+
+## 📌 Executive Summary
+
+Prior to Step 2, both [`admin-layout.html`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/admin-layout/admin-layout.html) and [`host-layout.component.html`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/layout/host-layout/host-layout.component.html) contained over **130 raw inline `<svg>` elements** pasted directly into the HTML templates. This bloated file sizes, caused visual noise during template development, and made styling or icon stroke alterations cumbersome.
+
+We created a centralized, standalone [`IconComponent`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/shared/components/icon/icon.component.ts) and [`ICON_REGISTRY`](file:///c:/Users/Hp/Desktop/Event-Mangement-System/Eventhub/src/app/shared/components/icon/icon.registry.ts) in `@shared/components/icon`, replacing **124 inline raw SVGs** with clean declarative tags (`<app-icon name="..." [size]="..."></app-icon>`).
+
+---
+
+## 1. Architecture & Design
+
+### 🔹 The `<app-icon>` Component
+- **Location**: `src/app/shared/components/icon/`
+- **Features**:
+  - Standalone Angular component exporting `IconComponent`.
+  - Type-safe icon lookup from a centralized dictionary of 40+ Lucide / Feather icon paths.
+  - Standardized `0 0 24 24` viewBox with reactive sizing (`size`, defaults to `16px`).
+  - Configurable `strokeWidth` (defaults to `2`).
+  - Optional `customFill`, `customStroke`, and CSS `spin` animation support.
+  - Safe inner SVG rendering powered by Angular's `DomSanitizer`.
+
+```html
+<!-- Example Usage -->
+<app-icon name="rupee" [size]="16" class="text-emerald"></app-icon>
+<app-icon name="calendar" [size]="14"></app-icon>
+<app-icon name="check" [size]="14"></app-icon>
+<app-icon name="users" [size]="20"></app-icon>
+```
+
+---
+
+## 2. Refactoring Summary
+
+| Area | Inline SVGs Replaced | Resulting Tag | Cleanliness Gain |
+| :--- | :--- | :--- | :--- |
+| **Admin Layout** (`admin-layout.html`) | 40 inline `<svg>` blocks | `<app-icon name="...">` | Template lines streamlined, navigation easily readable |
+| **Host Layout** (`host-layout.component.html`) | 84 inline `<svg>` blocks | `<app-icon name="...">` | Modals, tables, metrics, and equity tabs simplified |
+| **Total Replaced** | **124 raw SVGs** | Reusable declarative icons | Centralized single-point maintenance |
+
+---
+
+## 3. Verification & Build Confirmation
+
+- **Angular CLI**: Run `ng build --configuration=development`
+- **Result**: `✔ Browser application bundle generation complete.` Zero compilation or template binding errors.

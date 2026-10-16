@@ -21,12 +21,12 @@ import {
   EventParticipantProfile,
   ManagerResponsibilityArea
 } from '@core/models';
-import { SelectComponent, SelectOption } from '@shared/components';
+import { SelectComponent, SelectOption, IconComponent } from '@shared/components';
 
 @Component({
   selector: 'app-host-layout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, SelectComponent],
+  imports: [CommonModule, FormsModule, RouterLink, SelectComponent, IconComponent],
   templateUrl: './host-layout.component.html',
   styleUrl: './host-layout.component.css'
 })

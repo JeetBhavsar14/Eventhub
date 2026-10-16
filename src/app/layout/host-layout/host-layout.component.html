@@ -14,9 +14,7 @@
     <div class="sidebar-brand-header">
       <a routerLink="/discover" class="brand-logo-link" title="EventHub Home">
         <div class="logo-symbol">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="symbol-svg">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-          </svg>
+          <app-icon name="layers" class="symbol-svg" strokeWidth="2.5" [size]="2.5"></app-icon>
         </div>
         <div class="brand-text-block">
           <span class="brand-title">EventHub</span>
@@ -24,7 +22,7 @@
         </div>
       </a>
       <button class="mobile-sidebar-close" (click)="toggleMobileSidebar()" aria-label="Close Sidebar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <app-icon name="close" [size]="2"></app-icon>
       </button>
     </div>
 
@@ -37,7 +35,7 @@
         [class.active]="currentView() === 'overview'" 
         (click)="switchView('overview')"
         id="nav-overview">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="nav-icon"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <app-icon name="grid" class="nav-icon" [size]="2"></app-icon>
         <span class="nav-label">Overview</span>
         <span class="nav-active-pill" *ngIf="currentView() === 'overview'"></span>
       </button>
@@ -47,7 +45,7 @@
         [class.active]="currentView() === 'my_events'" 
         (click)="switchView('my_events')"
         id="nav-my-events">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="nav-icon"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <app-icon name="calendar" class="nav-icon" [size]="2"></app-icon>
         <span class="nav-label">My Events</span>
         <span class="nav-badge" *ngIf="events().length > 0">{{ events().length }}</span>
       </button>
@@ -56,7 +54,7 @@
         class="nav-item-btn highlight-btn" 
         (click)="openCreateWizard()"
         id="nav-create-event">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="nav-icon"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <app-icon name="plus" class="nav-icon" strokeWidth="2.5" [size]="2.5"></app-icon>
         <span class="nav-label">Create Event</span>
         <span class="nav-sparkle-tag">New</span>
       </button>
@@ -66,7 +64,7 @@
         [class.active]="currentView() === 'bookings'" 
         (click)="switchView('bookings')"
         id="nav-bookings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="nav-icon"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+        <app-icon name="ticket" class="nav-icon" [size]="2"></app-icon>
         <span class="nav-label">Bookings & Attendees</span>
         <span class="nav-badge" *ngIf="stats().totalBookings > 0">{{ stats().totalBookings }}</span>
       </button>
@@ -78,7 +76,7 @@
         [class.active]="currentView() === 'team'" 
         (click)="switchView('team')"
         id="nav-team">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="nav-icon"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <app-icon name="users" class="nav-icon" [size]="2"></app-icon>
         <span class="nav-label">Team Management</span>
         <span class="nav-badge" *ngIf="teamMembers().length > 0">{{ teamMembers().length }}</span>
       </button>
@@ -88,7 +86,7 @@
         [class.active]="currentView() === 'analytics'" 
         (click)="switchView('analytics')"
         id="nav-analytics">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="nav-icon"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <app-icon name="bar-chart" class="nav-icon" [size]="2"></app-icon>
         <span class="nav-label">Analytics</span>
       </button>
 
@@ -97,7 +95,7 @@
         [class.active]="currentView() === 'notifications'" 
         (click)="switchView('notifications')"
         id="nav-notifications">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="nav-icon"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <app-icon name="bell" class="nav-icon" [size]="2"></app-icon>
         <span class="nav-label">Notifications</span>
         <span class="nav-badge unread-badge" *ngIf="unreadCount() > 0">{{ unreadCount() }}</span>
       </button>
@@ -107,7 +105,7 @@
         [class.active]="currentView() === 'settings'" 
         (click)="switchView('settings')"
         id="nav-settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="nav-icon"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <app-icon name="settings" class="nav-icon" [size]="2"></app-icon>
         <span class="nav-label">Settings</span>
       </button>
     </nav>
@@ -115,7 +113,7 @@
     <!-- Sidebar Bottom: Help & Host Profile Card -->
     <div class="sidebar-footer">
       <button class="help-link-btn" (click)="showHelpModal.set(true)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="help-icon"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <app-icon name="help-circle" class="help-icon" [size]="2"></app-icon>
         <span>Help & Host Support</span>
       </button>
 
@@ -130,20 +128,20 @@
           </div>
           <div class="user-menu-divider"></div>
           <button class="user-menu-item" (click)="switchView('settings'); showSidebarUserMenu.set(false)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <app-icon name="settings" [size]="2"></app-icon>
             <span>Workspace Settings</span>
           </button>
           <button class="user-menu-item" (click)="switchView('team'); showSidebarUserMenu.set(false)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <app-icon name="user" [size]="2"></app-icon>
             <span>Team & Permissions</span>
           </button>
           <a routerLink="/discover" class="user-menu-item" (click)="showSidebarUserMenu.set(false)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+            <app-icon name="compass" [size]="2"></app-icon>
             <span>Explore Events as Guest</span>
           </a>
           <div class="user-menu-divider"></div>
           <button class="user-menu-item signout-item" (click)="signOut()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <app-icon name="log-out" [size]="2"></app-icon>
             <span>Sign Out of Workspace</span>
           </button>
         </div>
@@ -155,7 +153,7 @@
             <span class="user-name">{{ hostInfo().name }}</span>
             <span class="user-role-tag">{{ hostInfo().verificationBadge }}</span>
           </div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="user-chevron" [class.rotated]="showSidebarUserMenu()"><polyline points="6 9 12 15 18 9"/></svg>
+          <app-icon name="chevron-down" class="user-chevron" [class.rotated]="showSidebarUserMenu()" [size]="2"></app-icon>
         </div>
       </div>
     </div>
@@ -171,7 +169,7 @@
       <div class="header-left">
         <!-- Mobile Sidebar Toggle -->
         <button class="mobile-toggle-btn" (click)="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <app-icon name="menu" [size]="2"></app-icon>
         </button>
 
         <!-- Breadcrumb & Context Title -->
@@ -195,7 +193,7 @@
       <div class="header-right">
         <!-- Quick Search -->
         <div class="header-search-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <app-icon name="search" class="search-icon" [size]="2"></app-icon>
           <input 
             type="text" 
             placeholder="Search events, bookings, attendees..." 
@@ -205,7 +203,7 @@
 
         <!-- Help Button -->
         <button class="header-icon-btn" (click)="showHelpModal.set(true)" title="Help & Documentation">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <app-icon name="help-circle" [size]="2"></app-icon>
         </button>
 
         <!-- Notifications Bell with Badge & Dropdown -->
@@ -214,7 +212,7 @@
             class="header-icon-btn dropdown-trigger" 
             (click)="toggleNotifications($event)" 
             title="Notifications">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <app-icon name="bell" [size]="2"></app-icon>
             <span class="notification-dot" *ngIf="unreadCount() > 0"></span>
           </button>
 
@@ -233,10 +231,10 @@
                 [class.unread]="notif.unread"
                 (click)="dashboardService.markNotificationRead(notif.id)">
                 <div class="notif-icon-circle" [attr.data-type]="notif.type">
-                  <svg *ngIf="notif.type === 'approval'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                  <svg *ngIf="notif.type === 'action'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <svg *ngIf="notif.type === 'booking'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
-                  <svg *ngIf="notif.type === 'system'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <app-icon name="check-circle" *ngIf="notif.type === 'approval'" [size]="2"></app-icon>
+                  <app-icon name="alert-circle" *ngIf="notif.type === 'action'" [size]="2"></app-icon>
+                  <app-icon name="ticket-simple" *ngIf="notif.type === 'booking'" [size]="2"></app-icon>
+                  <app-icon name="shield" *ngIf="notif.type === 'system'" [size]="2"></app-icon>
                 </div>
                 <div class="notif-text-wrap">
                   <span class="notif-title">{{ notif.title }}</span>
@@ -258,7 +256,7 @@
           <button class="header-avatar-btn dropdown-trigger" (click)="toggleTopUserMenu($event)">
             <div class="header-avatar-badge">{{ getInitials() }}</div>
             <span class="header-user-name">{{ hostInfo().name }}</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="header-chevron" [class.rotated]="showTopUserMenu()"><polyline points="6 9 12 15 18 9"/></svg>
+            <app-icon name="chevron-down" class="header-chevron" [class.rotated]="showTopUserMenu()" [size]="2"></app-icon>
           </button>
 
           <!-- User Menu Dropdown -->
@@ -271,20 +269,20 @@
             </div>
             <div class="user-menu-divider"></div>
             <button class="user-menu-item" (click)="switchView('settings'); showTopUserMenu.set(false)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <app-icon name="settings" [size]="2"></app-icon>
               <span>Workspace Settings</span>
             </button>
             <button class="user-menu-item" (click)="switchView('team'); showTopUserMenu.set(false)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <app-icon name="user" [size]="2"></app-icon>
               <span>Team & Permissions</span>
             </button>
             <a routerLink="/discover" class="user-menu-item" (click)="showTopUserMenu.set(false)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+              <app-icon name="compass" [size]="2"></app-icon>
               <span>Explore Events as Guest</span>
             </a>
             <div class="user-menu-divider"></div>
             <button class="user-menu-item signout-item" (click)="signOut()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <app-icon name="log-out" [size]="2"></app-icon>
               <span>Sign Out of Workspace</span>
             </button>
           </div>
@@ -301,7 +299,7 @@
            TOAST NOTIFICATION (Interactive Feedback)
            ───────────────────────────────────────────────────────── -->
       <div class="dashboard-toast" *ngIf="toastMessage()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <app-icon name="check-circle" [size]="2"></app-icon>
         <span>{{ toastMessage() }}</span>
       </div>
 
@@ -317,14 +315,14 @@
             <p class="welcome-subtext">Here's what's happening with your events today.</p>
             
             <div class="welcome-period-badge">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <app-icon name="calendar" [size]="2"></app-icon>
               <span>Reporting Period: <strong>{{ selectedPeriod() === '7d' ? 'Last 7 Days' : selectedPeriod() === '90d' ? 'Last 90 Days' : 'Last 30 Days' }}</strong></span>
             </div>
           </div>
 
           <div class="welcome-action-wrap">
             <button class="btn-create-event-primary" (click)="openCreateWizard()" id="btn-create-event-top">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <app-icon name="plus" strokeWidth="2.5" [size]="2.5"></app-icon>
               <span>Create Event</span>
             </button>
           </div>
@@ -338,7 +336,7 @@
             <div class="stat-card-top">
               <span class="stat-label">Total Events</span>
               <div class="stat-icon-wrap icon-indigo">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <app-icon name="calendar" [size]="2"></app-icon>
               </div>
             </div>
             <div class="stat-value">{{ stats().totalEvents }}</div>
@@ -353,7 +351,7 @@
             <div class="stat-card-top">
               <span class="stat-label">Published Events</span>
               <div class="stat-icon-wrap icon-emerald">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <app-icon name="check-circle" [size]="2"></app-icon>
               </div>
             </div>
             <div class="stat-value">{{ stats().publishedEvents }}</div>
@@ -368,7 +366,7 @@
             <div class="stat-card-top">
               <span class="stat-label">Pending Review</span>
               <div class="stat-icon-wrap icon-amber">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <app-icon name="clock" [size]="2"></app-icon>
               </div>
             </div>
             <div class="stat-value">{{ stats().pendingReview }}</div>
@@ -383,7 +381,7 @@
             <div class="stat-card-top">
               <span class="stat-label">Total Bookings</span>
               <div class="stat-icon-wrap icon-periwinkle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+                <app-icon name="ticket" [size]="2"></app-icon>
               </div>
             </div>
             <div class="stat-value">{{ stats().totalBookings }}</div>
@@ -447,8 +445,8 @@
               <div class="chart-tooltip" *ngIf="hoveredChartPoint()">
                 <strong>{{ hoveredChartPoint()?.label }}</strong>
                 <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/></svg> Bookings: <span>{{ hoveredChartPoint()?.bookings }}</span></div>
-                <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Attendees: <span>{{ hoveredChartPoint()?.attendees }}</span></div>
-                <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3a4.5 4.5 0 0 0 0-9H6"/></svg> Revenue: <span>₹{{ hoveredChartPoint()?.revenue | number }}</span></div>
+                <div><app-icon name="users" [size]="13"></app-icon> Attendees: <span>{{ hoveredChartPoint()?.attendees }}</span></div>
+                <div><app-icon name="rupee" [size]="13"></app-icon> Revenue: <span>₹{{ hoveredChartPoint()?.revenue | number }}</span></div>
               </div>
             </div>
 
@@ -482,7 +480,7 @@
             </div>
 
             <div class="chart-sample-notice">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <app-icon name="info" [size]="2"></app-icon>
               <span>Illustrative prototype sample data for {{ hostInfo().organization }}.</span>
             </div>
           </div>
@@ -563,7 +561,7 @@
 
             <!-- Status Notice Box -->
             <div class="status-card-notice" *ngIf="stats().changesRequestedCount > 0">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <app-icon name="alert-circle" [size]="2"></app-icon>
               <div>
                 <strong>Action Needed:</strong>
                 <p>1 event requires clarification notes before curation approval.</p>
@@ -617,7 +615,7 @@
 
               <button class="view-all-link-btn" (click)="switchView('my_events')">
                 <span>View All Events</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                <app-icon name="chevron-right" [size]="2"></app-icon>
               </button>
             </div>
           </div>
@@ -625,7 +623,7 @@
           <!-- Empty Events State -->
           <div class="events-empty-card" *ngIf="filteredEvents().length === 0">
             <div class="empty-icon-box">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <app-icon name="calendar" strokeWidth="1.5" [size]="1.5"></app-icon>
             </div>
             <h4>No events match your criteria</h4>
             <p>Try adjusting your search terms or create a new event for your audience.</p>
@@ -733,39 +731,39 @@
                           class="btn-three-dots" 
                           (click)="toggleActionMenu(event.id, $event)" 
                           [attr.aria-label]="'Actions for ' + event.title">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                          <app-icon name="more-vertical" [size]="2"></app-icon>
                         </button>
 
                         <!-- Context Menu Dropdown -->
                         <div class="context-menu-box" *ngIf="activeActionMenuId() === event.id">
                           <button class="context-menu-item" (click)="openEventDetails(event)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <app-icon name="eye" [size]="2"></app-icon>
                             <span>View Details</span>
                           </button>
 
                           <button class="context-menu-item" *ngIf="event.status === 'draft' || event.status === 'changes_requested'" (click)="openEventDetails(event)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            <app-icon name="edit" [size]="2"></app-icon>
                             <span>Edit Event</span>
                           </button>
 
                           <button class="context-menu-item" *ngIf="event.status === 'published'" (click)="switchView('analytics')">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                            <app-icon name="bar-chart" [size]="2"></app-icon>
                             <span>View Analytics</span>
                           </button>
 
                           <button class="context-menu-item" *ngIf="event.status === 'draft'" (click)="submitDraftForReview(event.id)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            <app-icon name="check" [size]="2"></app-icon>
                             <span>Submit for Review</span>
                           </button>
 
                           <button class="context-menu-item" *ngIf="event.status === 'changes_requested'" (click)="openFeedbackModal(event)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <app-icon name="alert-circle" [size]="2"></app-icon>
                             <span>Review Feedback</span>
                           </button>
 
                           <div class="menu-divider" *ngIf="event.status === 'draft'"></div>
                           <button class="context-menu-item item-danger" *ngIf="event.status === 'draft'" (click)="deleteDraftEvent(event.id)">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <app-icon name="trash" [size]="2"></app-icon>
                             <span>Delete Draft</span>
                           </button>
                         </div>
@@ -850,7 +848,7 @@
 
             <!-- Empty State for Upcoming Events -->
             <div class="panel-empty-box" *ngIf="upcomingEvents().length === 0">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <app-icon name="calendar" strokeWidth="1.5" [size]="1.5"></app-icon>
               <p>No upcoming published events right now.</p>
               <button class="btn-small-link" (click)="openCreateWizard()">Publish an Event</button>
             </div>
@@ -869,7 +867,7 @@
                   </div>
                   <h4 class="upcoming-title">{{ up.title }}</h4>
                   <div class="upcoming-venue-text">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <app-icon name="map-pin" [size]="2"></app-icon>
                     <span>{{ up.venue }} • {{ up.date }}</span>
                   </div>
                   
@@ -900,7 +898,7 @@
             <!-- Empty State for Pending Actions -->
             <div class="panel-all-clear-box" *ngIf="pendingActions().length === 0">
               <div class="all-clear-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <app-icon name="check-circle" strokeWidth="2.5" [size]="2.5"></app-icon>
               </div>
               <h4>All caught up!</h4>
               <p>You have no pending curation actions or incomplete drafts at this time.</p>
@@ -915,8 +913,8 @@
                 <div class="action-top">
                   <span class="action-badge-pill">{{ act.badgeText }}</span>
                   <div class="action-icon">
-                    <svg *ngIf="act.severity === 'warning'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <svg *ngIf="act.severity === 'info'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <app-icon name="alert-circle" *ngIf="act.severity === 'warning'" [size]="2"></app-icon>
+                    <app-icon name="alert-circle" *ngIf="act.severity === 'info'" [size]="2"></app-icon>
                     <svg *ngIf="act.severity === 'notice'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
                   </div>
                 </div>
@@ -960,7 +958,7 @@
                 <p class="panel-sub">Real-time audit log and event milestones</p>
               </div>
               <button class="btn-refresh-activity" (click)="showToast('Activity log refreshed')" title="Refresh Activity">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                <app-icon name="refresh" [size]="2"></app-icon>
               </button>
             </div>
 
@@ -971,11 +969,11 @@
                 class="timeline-row-item">
                 <div class="timeline-left">
                   <div class="timeline-dot" [attr.data-type]="item.type">
-                    <svg *ngIf="item.type === 'approved'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                    <svg *ngIf="item.type === 'booking'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
-                    <svg *ngIf="item.type === 'submission'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    <svg *ngIf="item.type === 'feedback'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <svg *ngIf="item.type === 'team'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <app-icon name="check" *ngIf="item.type === 'approved'" [size]="2"></app-icon>
+                    <app-icon name="ticket-simple" *ngIf="item.type === 'booking'" [size]="2"></app-icon>
+                    <app-icon name="send" *ngIf="item.type === 'submission'" [size]="2"></app-icon>
+                    <app-icon name="alert-circle" *ngIf="item.type === 'feedback'" [size]="2"></app-icon>
+                    <app-icon name="user" *ngIf="item.type === 'team'" [size]="2"></app-icon>
                     <svg *ngIf="item.type === 'update'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </div>
                   <div class="timeline-line"></div>
@@ -1028,7 +1026,7 @@
                   <span>{{ ev.date }} • {{ ev.time }}</span>
                 </div>
                 <div class="meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <app-icon name="map-pin" [size]="2"></app-icon>
                   <span>{{ ev.venue }}, {{ ev.city }}</span>
                 </div>
               </div>
@@ -1079,7 +1077,7 @@
             <p class="view-sub">Track ticket orders, attendee passes, and check-in readiness</p>
           </div>
           <button class="btn-export-csv" (click)="showToast('Exported attendee roster to CSV')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <app-icon name="download" [size]="2"></app-icon>
             <span>Export CSV</span>
           </button>
         </div>
@@ -1240,7 +1238,7 @@
                 </div>
                 <span class="team-email">{{ mgr.userEmail }}</span>
                 <div class="responsibility-title-badge">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  <app-icon name="folder" [size]="13"></app-icon>
                   <span>{{ mgr.responsibilityTitle }}</span>
                 </div>
                 <div class="team-tags-row mt-2">
@@ -1477,10 +1475,10 @@
         <div class="notifications-full-list">
           <div *ngFor="let item of notifications()" class="notif-full-item" [class.unread]="item.unread">
             <div class="notif-full-icon" [attr.data-type]="item.type">
-              <svg *ngIf="item.type === 'approval'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              <svg *ngIf="item.type === 'action'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <svg *ngIf="item.type === 'booking'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
-              <svg *ngIf="item.type === 'system'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <app-icon name="check" *ngIf="item.type === 'approval'" [size]="2"></app-icon>
+              <app-icon name="alert-circle" *ngIf="item.type === 'action'" [size]="2"></app-icon>
+              <app-icon name="ticket-simple" *ngIf="item.type === 'booking'" [size]="2"></app-icon>
+              <app-icon name="shield" *ngIf="item.type === 'system'" [size]="2"></app-icon>
             </div>
             <div class="notif-full-content">
               <div class="notif-top">
@@ -1532,12 +1530,12 @@
           <div class="settings-card">
             <h3 class="settings-card-title">Payout & Bank Account (Simulated)</h3>
             <div class="payout-banner">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              <app-icon name="credit-card" [size]="2"></app-icon>
               <div>
                 <strong>HDFC Bank — Current Account</strong>
                 <small>•••• •••• •••• 4829 (Verified for Direct Payouts)</small>
               </div>
-              <span class="payout-verified-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Active</span>
+              <span class="payout-verified-tag"><app-icon name="check" strokeWidth="2.5" [size]="12"></app-icon> Active</span>
             </div>
           </div>
         </div>
@@ -1559,7 +1557,7 @@
           <h3 class="modal-title">Create New Event</h3>
         </div>
         <button class="modal-close-btn" (click)="showCreateEventModal.set(false)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <app-icon name="close" [size]="2"></app-icon>
         </button>
       </div>
 
@@ -1738,7 +1736,7 @@
           <h3 class="modal-title">{{ selectedEventForDetails()?.title }}</h3>
         </div>
         <button class="modal-close-btn" (click)="selectedEventForDetails.set(null)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <app-icon name="close" [size]="2"></app-icon>
         </button>
       </div>
 
@@ -1776,7 +1774,7 @@
         </div>
 
         <div class="feedback-alert-box" *ngIf="selectedEventForDetails()?.feedbackNotes">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <app-icon name="alert-circle" [size]="2"></app-icon>
           <div>
             <strong>Reviewer Feedback Note:</strong>
             <p>{{ selectedEventForDetails()?.feedbackNotes }}</p>
@@ -1812,13 +1810,13 @@
           <h3 class="modal-title">Review Feedback & Update</h3>
         </div>
         <button class="modal-close-btn" (click)="selectedEventForFeedback.set(null)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <app-icon name="close" [size]="2"></app-icon>
         </button>
       </div>
 
       <div class="modal-body">
         <div class="feedback-banner">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <app-icon name="alert-circle" [size]="2"></app-icon>
           <div>
             <strong>Feedback from Curation Team:</strong>
             <p>{{ selectedEventForFeedback()?.feedbackNotes || 'Please provide updated safety or sound permit clearance.' }}</p>
@@ -1857,7 +1855,7 @@
           <h3 class="modal-title">Invite Team or Participant</h3>
         </div>
         <button class="modal-close-btn" (click)="showInviteTeamModal.set(false)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <app-icon name="close" [size]="2"></app-icon>
         </button>
       </div>
 
@@ -1924,19 +1922,19 @@
             <span class="perms-label">Granted Operational Permissions:</span>
             <div class="perms-pills-list">
               <span class="perm-pill" [class.active]="hasInvitePermission('scan_tickets')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <app-icon name="check" [size]="2"></app-icon>
                 Gate Scanner Access
               </span>
               <span class="perm-pill" [class.active]="hasInvitePermission('view_attendees')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <app-icon name="check" [size]="2"></app-icon>
                 Attendee Roster
               </span>
               <span class="perm-pill" [class.active]="hasInvitePermission('log_incidents')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <app-icon name="check" [size]="2"></app-icon>
                 Incident Reporting
               </span>
               <span class="perm-pill" [class.active]="hasInvitePermission('view_duty')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <app-icon name="check" [size]="2"></app-icon>
                 Duty Briefing
               </span>
             </div>
@@ -1969,7 +1967,7 @@
 
         <!-- Delegation notice for Event Manager -->
         <div class="delegation-info-box" *ngIf="inviteForm.role === 'event_manager'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <app-icon name="info" [size]="2"></app-icon>
           <p><strong>Temporary Management Delegation:</strong> You are granting operational authority to coordinate venue logistics and staff without transferring event ownership.</p>
         </div>
 
@@ -1996,7 +1994,7 @@
           <h3 class="modal-title">Host Help Center</h3>
         </div>
         <button class="modal-close-btn" (click)="showHelpModal.set(false)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <app-icon name="close" [size]="2"></app-icon>
         </button>
       </div>
 
@@ -2032,7 +2030,7 @@
           <h3 class="modal-title">Allocate Co-Owner Stake</h3>
         </div>
         <button class="modal-close-btn" (click)="showAddOwnerModal.set(false)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <app-icon name="close" [size]="2"></app-icon>
         </button>
       </div>
 
@@ -2095,7 +2093,7 @@
           <h3 class="modal-title">Assign Event Manager</h3>
         </div>
         <button class="modal-close-btn" (click)="showAssignManagerModal.set(false)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <app-icon name="close" [size]="2"></app-icon>
         </button>
       </div>
 
@@ -2147,7 +2145,7 @@
           <h3 class="modal-title">Add Event Participant</h3>
         </div>
         <button class="modal-close-btn" (click)="showAddParticipantModal.set(false)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <app-icon name="close" [size]="2"></app-icon>
         </button>
       </div>
 

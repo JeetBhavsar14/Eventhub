@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/auth';
 import { HostApplicationService, AdminService, AdminHostApplication, AdminCurationEvent, AdminUser, AdminSettlement } from '@core/state';
+import { IconComponent } from '@shared/components';
 
 export type AdminView = 'overview' | 'host_applications' | 'event_curation' | 'users' | 'revenue' | 'system' | 'finance' | 'settings';
 
@@ -17,7 +18,7 @@ export interface AdminConfirmDialogData {
 @Component({
   selector: 'app-admin-layout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, IconComponent],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.css'
 })
