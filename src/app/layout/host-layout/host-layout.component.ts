@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { HostDashboardService } from '@core/state/host-dashboard.service';
 import { EventTeamService } from '@core/state/event-team.service';
 import { EventOwnershipService } from '@core/state/event-ownership.service';
+import { ToastService } from '@core/state';
 import { AuthService } from '@core/auth';
 import {
   HostEventItem,
@@ -34,6 +35,7 @@ export class HostLayoutComponent implements OnInit {
   readonly dashboardService = inject(HostDashboardService);
   readonly eventTeamService = inject(EventTeamService);
   readonly ownershipService = inject(EventOwnershipService);
+  private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
@@ -690,6 +692,7 @@ export class HostLayoutComponent implements OnInit {
   // Toast System
   showToast(msg: string) {
     this.toastMessage.set(msg);
+    this.toastService.info(msg);
     setTimeout(() => {
       this.toastMessage.set(null);
     }, 4000);

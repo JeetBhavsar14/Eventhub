@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/auth';
-import { HostApplicationService, AdminService, AdminHostApplication, AdminCurationEvent, AdminUser, AdminSettlement } from '@core/state';
+import { HostApplicationService, AdminService, AdminHostApplication, AdminCurationEvent, AdminUser, AdminSettlement, ToastService } from '@core/state';
 import { IconComponent } from '@shared/components';
 
 export type AdminView = 'overview' | 'host_applications' | 'event_curation' | 'users' | 'revenue' | 'system' | 'finance' | 'settings';
@@ -27,6 +27,7 @@ export class AdminLayoutComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly hostAppService = inject(HostApplicationService);
   readonly adminService = inject(AdminService);
+  private readonly toastService = inject(ToastService);
 
   // Layout Navigation State
   activeNav = signal<AdminView>('overview');
@@ -360,6 +361,7 @@ export class AdminLayoutComponent implements OnInit {
   // Toast System
   showToast(msg: string) {
     this.toastMessage.set(msg);
+    this.toastService.info(msg);
     setTimeout(() => {
       this.toastMessage.set(null);
     }, 3600);

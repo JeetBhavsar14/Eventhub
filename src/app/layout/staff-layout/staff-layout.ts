@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/auth';
-import { StaffService, StaffAttendee, StaffIncident, STAFF_DESIGNATION_PRESETS, StaffDesignationPreset } from '@core/state';
+import { StaffService, StaffAttendee, StaffIncident, STAFF_DESIGNATION_PRESETS, StaffDesignationPreset, ToastService } from '@core/state';
 
 export type StaffTab = 'today' | 'checkin' | 'attendees' | 'issues';
 export type ScanOutcome = 'idle' | 'valid' | 'invalid' | 'duplicate';
@@ -19,6 +19,7 @@ export class StaffLayoutComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   readonly staffService = inject(StaffService);
+  private readonly toastService = inject(ToastService);
 
   // Designation Presets for live demonstration & testing
   readonly rolePresets = STAFF_DESIGNATION_PRESETS;
@@ -198,6 +199,9 @@ export class StaffLayoutComponent implements OnInit {
   async checkInAttendee(attendeeId: string) {
     const nowTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     await this.staffService.checkInAttendee(attendeeId, nowTime);
+    const att = this.attendees().find(a => a.id === attendeeId);
+    const label = att ? `${att.ticketTier} Pass #${att.orderId || att.id}` : `Pass #${attendeeId}`;
+    this.toastService.success(`Check-in confirmed: ${label}`);
   }
 
   async undoCheckIn(attendeeId: string) {
@@ -223,6 +227,7 @@ export class StaffLayoutComponent implements OnInit {
   // Toast System
   showToast(msg: string) {
     this.toastMessage.set(msg);
+    this.toastService.info(msg);
     setTimeout(() => {
       this.toastMessage.set(null);
     }, 3200);

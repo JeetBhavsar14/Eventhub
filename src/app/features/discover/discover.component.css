@@ -475,27 +475,114 @@
   color: var(--primary-600);
 }
 
-.loading-state {
-  text-align: center;
-  padding: 4rem;
-  color: var(--gray-500);
+/* ── Skeleton Loading Shimmer System ───────────────────── */
+.skeleton-grid {
+  margin-bottom: 2rem;
+}
+
+.skeleton-card {
+  background: var(--surface);
+  border-radius: var(--radius-xl, 16px);
+  overflow: hidden;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-image-wrap {
+  position: relative;
+  height: 200px;
+  width: 100%;
+  background: var(--gray-100);
+  overflow: hidden;
+}
+
+.skeleton-image {
+  width: 100%;
+  height: 100%;
+}
+
+.skeleton-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 80px;
+  height: 24px;
+  border-radius: 1rem;
+}
+
+.skeleton-details {
+  padding: 1.5rem;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.skeleton-date {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 0.35rem;
+  min-width: 45px;
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--gray-200);
-  border-top-color: var(--primary-600);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+.skeleton-date-month {
+  width: 32px;
+  height: 12px;
+  border-radius: var(--radius-xs, 4px);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+.skeleton-date-day {
+  width: 36px;
+  height: 26px;
+  border-radius: var(--radius-xs, 4px);
+}
+
+.skeleton-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.skeleton-line {
+  border-radius: var(--radius-xs, 4px);
+}
+
+.skeleton-title-line {
+  width: 85%;
+  height: 20px;
+}
+
+.skeleton-sub-line {
+  width: 60%;
+  height: 14px;
+}
+
+.skeleton-price-line {
+  width: 40%;
+  height: 16px;
+  margin-top: 0.2rem;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--gray-200) 0%,
+    var(--gray-100) 50%,
+    var(--gray-200) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .empty-state {

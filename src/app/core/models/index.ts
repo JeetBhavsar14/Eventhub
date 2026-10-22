@@ -12,3 +12,4 @@ export * from './admin.model';
 export * from './management.model';
 export * from './staff.model';
 export * from './event-ownership.model';
+export * from './notification.model';

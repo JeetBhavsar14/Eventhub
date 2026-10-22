@@ -25,6 +25,7 @@ export class DiscoverComponent implements OnInit, OnDestroy {
   featuredEvents = signal<any[]>([]);
   promotionalEvents = signal<any[]>([]);
   isLoading = signal(true);
+  skeletonPlaceholders = [1, 2, 3, 4, 5, 6];
   
   currentSlideIndex = signal(0);
   private slideInterval: any;

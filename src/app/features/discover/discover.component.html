@@ -85,9 +85,25 @@
           <h2>{{ currentFilter.category === 'All' ? 'Events' : currentFilter.category + ' Events' }} In {{ locationService.selectedCity() }}</h2>
         </div>
 
-        <div class="loading-state" *ngIf="isLoading()">
-          <div class="spinner"></div>
-          <p>Finding the best experiences...</p>
+        <!-- Skeleton Loading Shimmers (High-Impact UI/UX) -->
+        <div class="events-grid skeleton-grid" *ngIf="isLoading()">
+          <div class="skeleton-card" *ngFor="let item of skeletonPlaceholders">
+            <div class="skeleton-image-wrap">
+              <div class="skeleton-shimmer skeleton-image"></div>
+              <div class="skeleton-badge skeleton-shimmer"></div>
+            </div>
+            <div class="skeleton-details">
+              <div class="skeleton-date">
+                <div class="skeleton-shimmer skeleton-date-month"></div>
+                <div class="skeleton-shimmer skeleton-date-day"></div>
+              </div>
+              <div class="skeleton-info">
+                <div class="skeleton-shimmer skeleton-line skeleton-title-line"></div>
+                <div class="skeleton-shimmer skeleton-line skeleton-sub-line"></div>
+                <div class="skeleton-shimmer skeleton-line skeleton-price-line"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="empty-state" *ngIf="!isLoading() && featuredEvents().length === 0">
