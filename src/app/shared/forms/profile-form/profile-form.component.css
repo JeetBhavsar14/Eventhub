@@ -19,4 +19,14 @@
   box-shadow: 0 0 0 3px var(--primary-100);
 }
 .form-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
-@media (max-width: 900px) { .form-row { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { 
+  .form-row { grid-template-columns: 1fr; gap: 1rem; }
+  .form-grid { gap: 1.25rem; }
+}
+
+@media (max-width: 640px) {
+  .form-actions { justify-content: stretch; }
+  .form-actions app-button { width: 100%; }
+  .form-actions app-button ::ng-deep .btn { width: 100%; justify-content: center; }
+  .custom-textarea { padding: 0.75rem; font-size: var(--text-sm); }
+}

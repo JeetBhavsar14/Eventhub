@@ -1,6 +1,6 @@
 import { Component, Input, inject, computed, signal, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '@core/auth';
@@ -32,6 +32,7 @@ export interface NavSecondaryLink {
 export class HeaderComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private apiClient = inject(ApiClient);
   private sanitizer = inject(DomSanitizer);
   private locationService = inject(LocationService);
@@ -56,9 +57,9 @@ export class HeaderComponent implements OnInit {
 
   @Input() secondaryLinks: NavSecondaryLink[] = [
     { label: 'Host an Event', route: '/host/apply' },
-    { label: 'Corporates',    route: '/corporate' },
     { label: 'Offers',        route: '/offers' },
     { label: 'Gift Cards',    route: '/gift-cards' },
+    { label: 'Corporates',    route: '/corporate' },
   ];
 
   isAuthenticated = this.authService.isAuthenticated;
@@ -140,6 +141,8 @@ export class HeaderComponent implements OnInit {
 
   showUserMenu = false;
   showCityMenu = false;
+  showCategoryMenu = signal(false);
+  selectedCategory = signal<string>('Categories');
   citySearchQuery = '';
 
   popularCities = [
@@ -157,8 +160,37 @@ export class HeaderComponent implements OnInit {
     );
   }
 
+  toggleCategoryMenu(event?: Event) {
+    if (event) event.stopPropagation();
+    this.showCategoryMenu.update(v => !v);
+    if (this.showCategoryMenu()) {
+      this.showUserMenu = false;
+      this.showCityMenu = false;
+      this.showNotifications.set(false);
+    }
+  }
+
+  selectCategory(cat: NavCategory, event?: Event) {
+    if (event) event.stopPropagation();
+    this.selectedCategory.set(cat.label === 'Events' ? 'Categories' : cat.label);
+    this.showCategoryMenu.set(false);
+    if (cat.label === 'Events') {
+      this.router.navigate(['/discover']);
+    } else {
+      this.router.navigate(['/discover'], { queryParams: { category: cat.label } });
+    }
+    this.scrollToEvents();
+  }
+
   ngOnInit() {
     this.loadEventsForSearch();
+    this.route.queryParams.subscribe(params => {
+      if (params['category']) {
+        this.selectedCategory.set(params['category']);
+      } else {
+        this.selectedCategory.set('Categories');
+      }
+    });
   }
 
   async loadEventsForSearch() {
@@ -175,10 +207,11 @@ export class HeaderComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.user-avatar-wrap') && !target.closest('.city-selector-wrap') && !target.closest('.notification-wrap')) {
+    if (!target.closest('.user-avatar-wrap') && !target.closest('.city-selector-wrap') && !target.closest('.notification-wrap') && !target.closest('.category-dropdown-wrap')) {
       this.showUserMenu = false;
       this.showCityMenu = false;
       this.showNotifications.set(false);
+      this.showCategoryMenu.set(false);
     }
     if (!target.closest('.search-container')) {
       this.searchFocused.set(false);
@@ -191,6 +224,7 @@ export class HeaderComponent implements OnInit {
     this.showNotifications.set(false);
     this.showUserMenu = false;
     this.showCityMenu = false;
+    this.showCategoryMenu.set(false);
   }
 
   onSearchFocus() {

@@ -169,14 +169,15 @@
   gap: 0.75rem;
   width: 100%;
   padding: 0.65rem 0.85rem;
-  border: none;
+  border: none !important;
   background: transparent;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--gray-600);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  transform: none !important;
   text-align: left;
   position: relative;
 }
@@ -196,6 +197,7 @@
 .nav-item-btn:hover {
   background: var(--gray-100);
   color: var(--gray-900);
+  transform: none !important;
 }
 
 .nav-item-btn:hover .nav-icon {
@@ -206,6 +208,9 @@
   background: #f0f7ff;
   color: var(--brand-deep-indigo);
   font-weight: 700;
+  border: none !important;
+  border-left: none !important;
+  transform: none !important;
 }
 
 .nav-item-btn.active .nav-icon {
@@ -213,13 +218,7 @@
 }
 
 .nav-active-pill {
-  position: absolute;
-  left: 0;
-  top: 6px;
-  bottom: 6px;
-  width: 3.5px;
-  background: var(--brand-deep-indigo);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  display: none !important;
 }
 
 .nav-badge {

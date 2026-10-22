@@ -356,9 +356,6 @@
           <div class="user-avatar-wrap" (click)="toggleUserMenu()">
             <div class="avatar">{{ getInitials() }}</div>
             <span class="user-name">{{ currentUser()?.firstName }}</span>
-            <svg class="caret-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
 
             <!-- Dropdown -->
             <div class="user-dropdown" *ngIf="showUserMenu">
@@ -385,6 +382,10 @@
               <a *ngIf="isApprovedHost()" routerLink="/host/dashboard" class="dropdown-item host-workspace-item" (click)="showUserMenu = false">
                 <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
                 Host Workspace
+              </a>
+              <a *ngIf="!isApprovedHost() && (hostStatus() === 'guest' || hostStatus() === 'not_applied')" routerLink="/host/apply" class="dropdown-item" (click)="showUserMenu = false">
+                <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
+                Host an Event
               </a>
               <a *ngIf="isAdmin()" routerLink="/admin" class="dropdown-item" (click)="showUserMenu = false">
                 <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -420,7 +421,7 @@
   <div class="bar-bottom">
     <div class="bar-inner">
 
-      <!-- Category pills -->
+      <!-- Category pills (Desktop >= 900px) -->
       <nav class="category-nav">
         <a
           *ngFor="let cat of categories"
@@ -435,9 +436,39 @@
         </a>
       </nav>
 
-      <!-- Secondary links -->
+      <!-- Category Dropdown List (Smaller screens < 900px) -->
+      <div class="category-dropdown-wrap" (click)="$event.stopPropagation()">
+        <button class="category-dropdown-btn" (click)="toggleCategoryMenu($event)" [class.active]="showCategoryMenu()">
+          <svg class="cat-dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="4" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+          </svg>
+          <span class="cat-dropdown-label">{{ selectedCategory() }}</span>
+          <svg class="caret-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="category-dropdown-menu" *ngIf="showCategoryMenu()">
+          <button 
+            *ngFor="let cat of categories" 
+            class="cat-dropdown-item" 
+            [class.active]="cat.label === selectedCategory()"
+            (click)="selectCategory(cat, $event)">
+            <span class="cat-icon" [innerHTML]="cat.icon"></span>
+            <span>{{ cat.label }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Secondary links (Clean text links without badge boxes) -->
       <nav class="secondary-nav">
-        <a *ngFor="let link of secondaryLinks" [routerLink]="link.route" class="secondary-link">
+        <a *ngFor="let link of secondaryLinks" 
+           [routerLink]="link.route" 
+           class="secondary-link">
           {{ link.label }}
         </a>
       </nav>

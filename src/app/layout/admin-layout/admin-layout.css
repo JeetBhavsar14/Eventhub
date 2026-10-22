@@ -135,9 +135,10 @@
   font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   width: 100%;
   text-align: left;
+  transform: none !important;
 }
 
 .admin-nav-btn svg {
@@ -150,13 +151,16 @@
 .admin-nav-btn:hover {
   background: rgba(200, 238, 255, 0.08);
   color: #FFFFFF;
+  transform: none !important;
 }
 
 .admin-nav-btn.active {
   background: linear-gradient(135deg, rgba(97, 112, 195, 0.4) 0%, rgba(45, 49, 165, 0.6) 100%);
   color: #FFFFFF;
   font-weight: 600;
-  border-left: 3px solid #C8EEFF;
+  border: none !important;
+  border-left: none !important;
+  transform: none !important;
 }
 
 .admin-nav-btn.active svg {

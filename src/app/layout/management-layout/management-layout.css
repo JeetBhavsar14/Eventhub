@@ -133,9 +133,10 @@
   font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   width: 100%;
   text-align: left;
+  transform: none !important;
 }
 
 .mgmt-nav-btn svg {
@@ -149,6 +150,7 @@
 .mgmt-nav-btn:hover {
   background: #F1F5FD;
   color: #2D31A5;
+  transform: none !important;
 }
 
 .mgmt-nav-btn:hover svg {
@@ -159,7 +161,9 @@
   background: #EEF2FF;
   color: #2D31A5;
   font-weight: 600;
-  border-left: 3px solid #2D31A5;
+  border: none !important;
+  border-left: none !important;
+  transform: none !important;
 }
 
 .mgmt-nav-btn.active svg {
