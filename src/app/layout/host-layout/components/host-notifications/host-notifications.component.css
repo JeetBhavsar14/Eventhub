@@ -1,0 +1,231 @@
+:host {
+  display: block;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.notifications-pane-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─────────────────────────────────────────────────────────
+   HEADER & ACTION BUTTON
+   ───────────────────────────────────────────────────────── */
+.view-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.view-title {
+  font-size: var(--text-2xl, 1.5rem);
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem 0;
+}
+
+.view-sub {
+  font-size: var(--text-sm, 0.875rem);
+  color: #64748B;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.btn-mark-read {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-md, 8px);
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 600;
+  color: #2D31A5;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-mark-read:hover {
+  background: #F8FAFC;
+  border-color: #2D31A5;
+}
+
+/* ─────────────────────────────────────────────────────────
+   NOTIFICATIONS LIST
+   ───────────────────────────────────────────────────────── */
+.notifications-full-list {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-xl, 16px);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.notif-full-item {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #F1F5F9;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.15rem;
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.notif-full-item:last-child {
+  border-bottom: none;
+}
+
+.notif-full-item:hover {
+  background: #F8FAFC;
+}
+
+.notif-full-item.unread {
+  background: #F0F7FF;
+}
+
+.notif-full-item.unread:hover {
+  background: #E8F2FE;
+}
+
+.notif-full-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  color: #2D31A5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.notif-full-icon[data-type="approval"] {
+  background: #ECFDF5;
+  color: #059669;
+  border-color: #A7F3D0;
+}
+
+.notif-full-icon[data-type="action"] {
+  background: #FFFBEB;
+  color: #D97706;
+  border-color: #FDE68A;
+}
+
+.notif-full-icon[data-type="booking"] {
+  background: #EEF2FF;
+  color: #4F46E5;
+  border-color: #C7D2FE;
+}
+
+.notif-full-icon[data-type="system"] {
+  background: #F1F5F9;
+  color: #475569;
+  border-color: #E2E8F0;
+}
+
+.notif-full-content {
+  flex: 1;
+}
+
+.notif-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+  gap: 1rem;
+}
+
+.notif-heading {
+  font-size: var(--text-base, 1rem);
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+}
+
+.notif-time-badge {
+  font-size: var(--text-xs, 0.75rem);
+  color: #94A3B8;
+  white-space: nowrap;
+}
+
+.notif-body-text {
+  font-size: var(--text-sm, 0.875rem);
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.unread-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #2D31A5;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.empty-notifs-state {
+  text-align: center;
+  padding: 4rem 1.5rem;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-xl, 16px);
+  color: #94A3B8;
+}
+
+.empty-notifs-state app-icon {
+  color: #CBD5E1;
+  margin-bottom: 1rem;
+}
+
+.empty-notifs-state h4 {
+  font-size: var(--text-lg, 1.125rem);
+  font-weight: 700;
+  color: #334155;
+  margin: 0 0 0.35rem 0;
+}
+
+.empty-notifs-state p {
+  font-size: var(--text-sm, 0.875rem);
+  color: #64748B;
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE DESIGN
+   ───────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .view-header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .btn-mark-read {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .notif-full-item {
+    padding: 1rem;
+  }
+
+  .notif-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+}

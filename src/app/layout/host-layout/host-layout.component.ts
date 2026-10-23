@@ -22,8 +22,14 @@ import {
   EventParticipantProfile,
   ManagerResponsibilityArea
 } from '@core/models';
-import { SelectComponent, SelectOption, IconComponent, PaginationBarComponent, ConfirmDialogComponent } from '@shared/components';
+import { SelectComponent, SelectOption, IconComponent, ConfirmDialogComponent } from '@shared/components';
 import { HostMyEventsComponent } from './components/host-my-events/host-my-events.component';
+import { HostBookingsComponent } from './components/host-bookings/host-bookings.component';
+import { HostOverviewComponent } from './components/host-overview/host-overview.component';
+import { HostTeamComponent } from './components/host-team/host-team.component';
+import { HostAnalyticsComponent } from './components/host-analytics/host-analytics.component';
+import { HostNotificationsComponent } from './components/host-notifications/host-notifications.component';
+import { HostSettingsComponent } from './components/host-settings/host-settings.component';
 
 @Component({
   selector: 'app-host-layout',
@@ -34,9 +40,14 @@ import { HostMyEventsComponent } from './components/host-my-events/host-my-event
     RouterLink, 
     SelectComponent, 
     IconComponent, 
-    PaginationBarComponent, 
     ConfirmDialogComponent,
-    HostMyEventsComponent
+    HostMyEventsComponent,
+    HostBookingsComponent,
+    HostOverviewComponent,
+    HostTeamComponent,
+    HostAnalyticsComponent,
+    HostNotificationsComponent,
+    HostSettingsComponent
   ],
   templateUrl: './host-layout.component.html',
   styleUrl: './host-layout.component.css'
@@ -381,15 +392,11 @@ export class HostLayoutComponent implements OnInit {
   onEventSearchChange(term: string) {
     this.eventSearchTerm.set(term);
     this.showSearchDropdown.set(term.trim().length > 0);
-    this.overviewPage.set(1);
-    this.portfolioPage.set(1);
   }
 
   clearSearch() {
     this.eventSearchTerm.set('');
     this.showSearchDropdown.set(false);
-    this.overviewPage.set(1);
-    this.portfolioPage.set(1);
   }
 
   selectSearchResult(event: HostEventItem) {
@@ -429,279 +436,8 @@ export class HostLayoutComponent implements OnInit {
     this.activeActionMenuId.set(null);
   }
 
-  // Overview Table Pagination
-  overviewPage = signal(1);
-  overviewPageSize = signal(5);
-
-  overviewTotalPages = computed(() => {
-    const total = this.filteredEvents().length;
-    return Math.max(1, Math.ceil(total / this.overviewPageSize()));
-  });
-
-  paginatedOverviewEvents = computed(() => {
-    const list = this.filteredEvents();
-    const size = this.overviewPageSize();
-    const maxPage = Math.max(1, Math.ceil(list.length / size));
-    const page = Math.min(this.overviewPage(), maxPage);
-    const start = (page - 1) * size;
-    return list.slice(start, start + size);
-  });
-
-  overviewPaginationInfo = computed(() => {
-    const total = this.filteredEvents().length;
-    if (total === 0) return { start: 0, end: 0, total: 0 };
-    const size = this.overviewPageSize();
-    const maxPage = Math.max(1, Math.ceil(total / size));
-    const page = Math.min(this.overviewPage(), maxPage);
-    const start = (page - 1) * size + 1;
-    const end = Math.min(page * size, total);
-    return { start, end, total };
-  });
-
-  overviewPageNumbers = computed(() => {
-    const total = this.overviewTotalPages();
-    const current = this.overviewPage();
-    const pages: number[] = [];
-    const startPage = Math.max(1, current - 2);
-    const endPage = Math.min(total, startPage + 4);
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    return pages;
-  });
-
-  setOverviewPage(p: number) {
-    if (p >= 1 && p <= this.overviewTotalPages()) {
-      this.overviewPage.set(p);
-      this.scrollToSection('host-recent-events-section');
-    }
-  }
-
-  prevOverviewPage() {
-    if (this.overviewPage() > 1) {
-      this.overviewPage.update(p => p - 1);
-      this.scrollToSection('host-recent-events-section');
-    }
-  }
-
-  nextOverviewPage() {
-    if (this.overviewPage() < this.overviewTotalPages()) {
-      this.overviewPage.update(p => p + 1);
-      this.scrollToSection('host-recent-events-section');
-    }
-  }
-
-  // Portfolio Grid Pagination
-  portfolioPage = signal(1);
-  portfolioPageSize = signal(6);
-
-  portfolioTotalPages = computed(() => {
-    const total = this.filteredEvents().length;
-    return Math.max(1, Math.ceil(total / this.portfolioPageSize()));
-  });
-
-  paginatedPortfolioEvents = computed(() => {
-    const list = this.filteredEvents();
-    const size = this.portfolioPageSize();
-    const maxPage = Math.max(1, Math.ceil(list.length / size));
-    const page = Math.min(this.portfolioPage(), maxPage);
-    const start = (page - 1) * size;
-    return list.slice(start, start + size);
-  });
-
-  portfolioPaginationInfo = computed(() => {
-    const total = this.filteredEvents().length;
-    if (total === 0) return { start: 0, end: 0, total: 0 };
-    const size = this.portfolioPageSize();
-    const maxPage = Math.max(1, Math.ceil(total / size));
-    const page = Math.min(this.portfolioPage(), maxPage);
-    const start = (page - 1) * size + 1;
-    const end = Math.min(page * size, total);
-    return { start, end, total };
-  });
-
-  portfolioPageNumbers = computed(() => {
-    const total = this.portfolioTotalPages();
-    const current = this.portfolioPage();
-    const pages: number[] = [];
-    const startPage = Math.max(1, current - 2);
-    const endPage = Math.min(total, startPage + 4);
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    return pages;
-  });
-
-  setPortfolioPage(p: number) {
-    if (p >= 1 && p <= this.portfolioTotalPages()) {
-      this.portfolioPage.set(p);
-      this.scrollToSection('host-portfolio-section');
-    }
-  }
-
-  prevPortfolioPage() {
-    if (this.portfolioPage() > 1) {
-      this.portfolioPage.update(p => p - 1);
-      this.scrollToSection('host-portfolio-section');
-    }
-  }
-
-  nextPortfolioPage() {
-    if (this.portfolioPage() < this.portfolioTotalPages()) {
-      this.portfolioPage.update(p => p + 1);
-      this.scrollToSection('host-portfolio-section');
-    }
-  }
-
-  setPortfolioPageSize(size: number) {
-    this.portfolioPageSize.set(size);
-    this.portfolioPage.set(1);
-    this.scrollToSection('host-portfolio-section');
-  }
-
-  // Upcoming Events Pagination
-  upcomingPage = signal(1);
-  upcomingPageSize = signal(3);
-
-  upcomingTotalPages = computed(() => {
-    const total = this.upcomingEvents().length;
-    return Math.max(1, Math.ceil(total / this.upcomingPageSize()));
-  });
-
-  paginatedUpcomingEvents = computed(() => {
-    const list = this.upcomingEvents();
-    const size = this.upcomingPageSize();
-    const maxPage = Math.max(1, Math.ceil(list.length / size));
-    const page = Math.min(this.upcomingPage(), maxPage);
-    const start = (page - 1) * size;
-    return list.slice(start, start + size);
-  });
-
-  upcomingPaginationInfo = computed(() => {
-    const total = this.upcomingEvents().length;
-    if (total === 0) return { start: 0, end: 0, total: 0 };
-    const size = this.upcomingPageSize();
-    const maxPage = Math.max(1, Math.ceil(total / size));
-    const page = Math.min(this.upcomingPage(), maxPage);
-    const start = (page - 1) * size + 1;
-    const end = Math.min(page * size, total);
-    return { start, end, total };
-  });
-
-  upcomingPageNumbers = computed(() => {
-    const total = this.upcomingTotalPages();
-    const current = this.upcomingPage();
-    const pages: number[] = [];
-    let startPage = Math.max(1, current - 2);
-    let endPage = Math.min(total, startPage + 4);
-    if (endPage - startPage < 4) {
-      startPage = Math.max(1, endPage - 4);
-    }
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    return pages;
-  });
-
-  setUpcomingPage(p: number) {
-    if (p >= 1 && p <= this.upcomingTotalPages()) {
-      this.upcomingPage.set(p);
-      this.scrollToSection('host-upcoming-events-section');
-    }
-  }
-
-  prevUpcomingPage() {
-    if (this.upcomingPage() > 1) {
-      this.upcomingPage.update(p => p - 1);
-      this.scrollToSection('host-upcoming-events-section');
-    }
-  }
-
-  nextUpcomingPage() {
-    if (this.upcomingPage() < this.upcomingTotalPages()) {
-      this.upcomingPage.update(p => p + 1);
-      this.scrollToSection('host-upcoming-events-section');
-    }
-  }
-
-  setUpcomingPageSize(size: number) {
-    this.upcomingPageSize.set(size);
-    this.upcomingPage.set(1);
-    this.scrollToSection('host-upcoming-events-section');
-  }
-
-  // Bookings & Attendees Pagination
-  bookingsPage = signal(1);
-  bookingsPageSize = signal(6);
-
-  bookingsTotalPages = computed(() => {
-    const total = this.attendees().length;
-    return Math.max(1, Math.ceil(total / this.bookingsPageSize()));
-  });
-
-  paginatedAttendees = computed(() => {
-    const list = this.attendees();
-    const size = this.bookingsPageSize();
-    const maxPage = Math.max(1, Math.ceil(list.length / size));
-    const page = Math.min(this.bookingsPage(), maxPage);
-    const start = (page - 1) * size;
-    return list.slice(start, start + size);
-  });
-
-  bookingsPaginationInfo = computed(() => {
-    const total = this.attendees().length;
-    if (total === 0) return { start: 0, end: 0, total: 0 };
-    const size = this.bookingsPageSize();
-    const maxPage = Math.max(1, Math.ceil(total / size));
-    const page = Math.min(this.bookingsPage(), maxPage);
-    const start = (page - 1) * size + 1;
-    const end = Math.min(page * size, total);
-    return { start, end, total };
-  });
-
-  bookingsPageNumbers = computed(() => {
-    const total = this.bookingsTotalPages();
-    const current = this.bookingsPage();
-    const pages: number[] = [];
-    const startPage = Math.max(1, current - 2);
-    const endPage = Math.min(total, startPage + 4);
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-    return pages;
-  });
-
-  setBookingsPage(p: number) {
-    if (p >= 1 && p <= this.bookingsTotalPages()) {
-      this.bookingsPage.set(p);
-      this.scrollToSection('host-bookings-section');
-    }
-  }
-
-  prevBookingsPage() {
-    if (this.bookingsPage() > 1) {
-      this.bookingsPage.update(p => p - 1);
-      this.scrollToSection('host-bookings-section');
-    }
-  }
-
-  nextBookingsPage() {
-    if (this.bookingsPage() < this.bookingsTotalPages()) {
-      this.bookingsPage.update(p => p + 1);
-      this.scrollToSection('host-bookings-section');
-    }
-  }
-
-  setBookingsPageSize(size: number) {
-    this.bookingsPageSize.set(size);
-    this.bookingsPage.set(1);
-    this.scrollToSection('host-bookings-section');
-  }
-
   setFilterStatus(status: 'all' | 'published' | 'pending' | 'draft' | 'action_required') {
     this.selectedStatusFilter.set(status);
-    this.overviewPage.set(1);
-    this.portfolioPage.set(1);
   }
 
   // Navigation Methods

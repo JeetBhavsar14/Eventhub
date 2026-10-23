@@ -1,0 +1,270 @@
+:host {
+  display: block;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.analytics-pane-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─────────────────────────────────────────────────────────
+   HEADER & PERIOD SELECTOR
+   ───────────────────────────────────────────────────────── */
+.view-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.view-title {
+  font-size: var(--text-2xl, 1.5rem);
+  font-weight: 800;
+  color: #0F172A;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.35rem 0;
+}
+
+.view-sub {
+  font-size: var(--text-sm, 0.875rem);
+  color: #64748B;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.analytics-period-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #F1F5F9;
+  padding: 0.3rem;
+  border-radius: var(--radius-full, 9999px);
+  border: 1px solid #E2E8F0;
+}
+
+.period-pill-btn {
+  background: transparent;
+  border: none;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 600;
+  color: #64748B;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.period-pill-btn:hover {
+  color: #0F172A;
+}
+
+.period-pill-btn.active {
+  background: #FFFFFF;
+  color: #2D31A5;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ─────────────────────────────────────────────────────────
+   METRICS SUMMARY GRID
+   ───────────────────────────────────────────────────────── */
+.analytics-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.ana-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-xl, 16px);
+  padding: 1.35rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ana-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.06);
+}
+
+.ana-label {
+  font-size: var(--text-sm, 0.875rem);
+  color: #64748B;
+  font-weight: 600;
+}
+
+.ana-val {
+  font-size: var(--text-3xl, 1.875rem);
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0.35rem 0;
+  letter-spacing: -0.02em;
+}
+
+.ana-sub {
+  font-size: var(--text-xs, 0.75rem);
+  color: #94A3B8;
+}
+
+.ana-sub.positive {
+  color: #10B981;
+  font-weight: 700;
+}
+
+/* ─────────────────────────────────────────────────────────
+   SPLIT DETAIL CARDS (TRAFFIC & TOP EVENTS)
+   ───────────────────────────────────────────────────────── */
+.analytics-split-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.ana-chart-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-xl, 16px);
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.ana-card-title {
+  font-size: var(--text-md, 1rem);
+  font-weight: 700;
+  color: #0F172A;
+  margin-bottom: 1.25rem;
+}
+
+.traffic-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.traffic-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.t-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-sm, 0.875rem);
+  color: #334155;
+  font-weight: 500;
+}
+
+.t-top strong {
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.t-track {
+  height: 8px;
+  background: #F1F5F9;
+  border-radius: var(--radius-full, 9999px);
+  overflow: hidden;
+}
+
+.t-fill {
+  height: 100%;
+  border-radius: var(--radius-full, 9999px);
+  transition: width 0.4s ease;
+}
+
+.top-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.top-ev-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-sm, 0.875rem);
+  padding: 0.85rem 1rem;
+  background: #F8FAFC;
+  border: 1px solid #F1F5F9;
+  border-radius: var(--radius-md, 8px);
+  transition: background 0.15s ease;
+}
+
+.top-ev-item:hover {
+  background: #F1F5F9;
+}
+
+.top-ev-item span {
+  color: #1E293B;
+  font-weight: 600;
+}
+
+.top-ev-item strong {
+  color: #2D31A5;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE DESIGN
+   ───────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .analytics-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .analytics-split-box {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .view-header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .analytics-period-selector {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .period-pill-btn {
+    flex: 1;
+    text-align: center;
+  }
+
+  .analytics-summary-grid {
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ana-val {
+    font-size: 1.5rem;
+  }
+
+  .top-ev-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+}

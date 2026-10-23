@@ -1,0 +1,90 @@
+<div class="analytics-pane-wrapper">
+  
+  <div class="view-header-bar">
+    <div>
+      <h2 class="view-title">Performance Analytics</h2>
+      <p class="view-sub">Comprehensive metrics on revenue, traffic channels, and attendance</p>
+    </div>
+    <div class="analytics-period-selector">
+      <button 
+        class="period-pill-btn" 
+        [class.active]="selectedPeriod() === '30d'"
+        (click)="setPeriod('30d')">
+        Last 30 Days
+      </button>
+      <button 
+        class="period-pill-btn" 
+        [class.active]="selectedPeriod() === 'all'"
+        (click)="setPeriod('all')">
+        All Time
+      </button>
+    </div>
+  </div>
+
+  <div class="analytics-summary-grid">
+    <div class="ana-card">
+      <span class="ana-label">Gross Ticket Sales</span>
+      <div class="ana-val">{{ selectedPeriod() === '30d' ? '₹3,48,500' : '₹8,92,000' }}</div>
+      <span class="ana-sub positive">↑ 24% vs previous period</span>
+    </div>
+    <div class="ana-card">
+      <span class="ana-label">Page Views on EventHub</span>
+      <div class="ana-val">{{ selectedPeriod() === '30d' ? '18,420' : '46,800' }}</div>
+      <span class="ana-sub positive">↑ 38% organic discovery</span>
+    </div>
+    <div class="ana-card">
+      <span class="ana-label">Avg. Check-in Rate</span>
+      <div class="ana-val">88.5%</div>
+      <span class="ana-sub">Across 5 live events</span>
+    </div>
+    <div class="ana-card">
+      <span class="ana-label">Host Rating</span>
+      <div class="ana-val">
+        4.92 
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="#E5A93C" stroke="none" style="vertical-align: -1px; margin-left: 2px;">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <span class="ana-sub">Top 5% organizer tier</span>
+    </div>
+  </div>
+
+  <div class="analytics-split-box">
+    <div class="ana-chart-card">
+      <h3 class="ana-card-title">Attendee Traffic Sources</h3>
+      <div class="traffic-bars-list">
+        <div class="traffic-item">
+          <div class="t-top"><span>EventHub Discover Feed</span><strong>58%</strong></div>
+          <div class="t-track"><div class="t-fill" style="width: 58%; background: var(--brand-deep-indigo, #2D31A5);"></div></div>
+        </div>
+        <div class="traffic-item">
+          <div class="t-top"><span>Direct & Social Links</span><strong>26%</strong></div>
+          <div class="t-track"><div class="t-fill" style="width: 26%; background: var(--brand-primary-periwinkle, #6170C3);"></div></div>
+        </div>
+        <div class="traffic-item">
+          <div class="t-top"><span>Email & Search</span><strong>16%</strong></div>
+          <div class="t-track"><div class="t-fill" style="width: 16%; background: var(--brand-secondary-blue, #3B82F6);"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ana-chart-card">
+      <h3 class="ana-card-title">Top Performing Events</h3>
+      <div class="top-events-list">
+        <div class="top-ev-item">
+          <span>Ahmedabad Music Festival 2026</span>
+          <strong>₹1,42,000 (142 tix)</strong>
+        </div>
+        <div class="top-ev-item">
+          <span>City Sunset Sports & Fitness Meetup</span>
+          <strong>₹43,000 (86 tix)</strong>
+        </div>
+        <div class="top-ev-item">
+          <span>Gastronomy Food Fair & Chef Tables</span>
+          <strong>₹4,000 (20 tix)</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

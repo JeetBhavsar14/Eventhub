@@ -1,0 +1,45 @@
+<div class="notifications-pane-wrapper">
+  
+  <div class="view-header-bar">
+    <div>
+      <h2 class="view-title">Notifications Center</h2>
+      <p class="view-sub">System updates, review alerts, and milestone announcements</p>
+    </div>
+    <button 
+      class="btn-mark-read" 
+      (click)="markAllRead.emit()" 
+      *ngIf="unreadCount > 0">
+      <app-icon name="check" [size]="14"></app-icon>
+      <span>Mark All as Read ({{ unreadCount }})</span>
+    </button>
+  </div>
+
+  <div class="notifications-full-list" *ngIf="notifications.length > 0">
+    <div 
+      *ngFor="let item of notifications" 
+      class="notif-full-item" 
+      [class.unread]="item.unread">
+      <div class="notif-full-icon" [attr.data-type]="item.type">
+        <app-icon name="check" *ngIf="item.type === 'approval'"></app-icon>
+        <app-icon name="alert-circle" *ngIf="item.type === 'action'"></app-icon>
+        <app-icon name="ticket-simple" *ngIf="item.type === 'booking'"></app-icon>
+        <app-icon name="shield" *ngIf="item.type === 'system'"></app-icon>
+      </div>
+      <div class="notif-full-content">
+        <div class="notif-top">
+          <h4 class="notif-heading">{{ item.title }}</h4>
+          <span class="notif-time-badge">{{ item.timestamp }}</span>
+        </div>
+        <p class="notif-body-text">{{ item.message }}</p>
+      </div>
+      <span class="unread-dot" *ngIf="item.unread" title="Unread notification"></span>
+    </div>
+  </div>
+
+  <div class="empty-notifs-state" *ngIf="notifications.length === 0">
+    <app-icon name="bell" [size]="40"></app-icon>
+    <h4>All Caught Up</h4>
+    <p>You have no notifications at this time.</p>
+  </div>
+
+</div>

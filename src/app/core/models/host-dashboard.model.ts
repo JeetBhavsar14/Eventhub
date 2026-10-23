@@ -104,3 +104,29 @@ export type DashboardPrototypeState =
   | 'no_upcoming'
   | 'no_pending_actions'
   | 'api_error';
+
+export interface HostWorkspaceInfo {
+  name: string;
+  organization: string;
+  email: string;
+  phone: string;
+  role: string;
+  avatar: string;
+  verificationBadge: string;
+  rating: number;
+  memberSince: string;
+}
+
+export interface HostDashboardStats {
+  totalEvents: number;
+  activeEventsCount: number;
+  publishedEvents: number;
+  pendingReview: number;
+  totalBookings: number;
+  totalRevenue: number;
+  draftCount: number;
+  changesRequestedCount: number;
+  approvedCount: number;
+  rejectedCount: number;
+}
+

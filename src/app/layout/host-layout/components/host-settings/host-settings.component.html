@@ -1,0 +1,53 @@
+<div class="settings-pane-wrapper">
+  
+  <div class="view-header-bar">
+    <div>
+      <h2 class="view-title">Host Workspace Settings</h2>
+      <p class="view-sub">Manage organization profile, payouts, and notification preferences</p>
+    </div>
+  </div>
+
+  <div class="settings-cards-grid">
+    <div class="settings-card">
+      <h3 class="settings-card-title">Organization Profile</h3>
+      <div class="settings-form-row">
+        <div class="form-group">
+          <label class="form-label">Host Name</label>
+          <input type="text" class="form-input" [ngModel]="hostInfo.name" readonly />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Organization</label>
+          <input type="text" class="form-input" [ngModel]="hostInfo.organization" readonly />
+        </div>
+      </div>
+      <div class="settings-form-row">
+        <div class="form-group">
+          <label class="form-label">Contact Email</label>
+          <input type="email" class="form-input" [ngModel]="hostInfo.email" readonly />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="text" class="form-input" [ngModel]="hostInfo.phone" readonly />
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <h3 class="settings-card-title">Payout & Bank Account (Simulated)</h3>
+      <div class="payout-banner">
+        <div class="payout-icon-wrap">
+          <app-icon name="credit-card" [size]="24"></app-icon>
+        </div>
+        <div class="payout-info">
+          <strong>HDFC Bank — Current Account</strong>
+          <small>•••• •••• •••• 4829 (Verified for Direct Payouts)</small>
+        </div>
+        <span class="payout-verified-tag">
+          <app-icon name="check" [strokeWidth]="2.5" [size]="12"></app-icon>
+          <span>Active</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+</div>

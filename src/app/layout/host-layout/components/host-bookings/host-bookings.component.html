@@ -1,0 +1,99 @@
+<div class="view-pane bookings-pane" id="host-bookings-section">
+  <!-- View Header Bar -->
+  <div class="view-header-bar">
+    <div>
+      <h2 class="view-title">Bookings & Attendee Management</h2>
+      <p class="view-sub">Track ticket orders, attendee passes, and check-in readiness</p>
+    </div>
+    <button class="btn-export-csv" (click)="exportCsv.emit()">
+      <app-icon name="download"></app-icon>
+      <span>Export CSV</span>
+    </button>
+  </div>
+
+  <!-- Desktop / Tablet Attendees Table -->
+  <div class="attendees-table-card">
+    <table class="attendees-table" aria-label="Attendees Table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Attendee</th>
+          <th>Event Title</th>
+          <th>Ticket Tier</th>
+          <th>Quantity</th>
+          <th>Amount</th>
+          <th>Booking Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let att of paginatedAttendees()">
+          <td><strong>#{{ att.orderId }}</strong></td>
+          <td>
+            <div class="att-name-cell">
+              <strong>{{ att.attendeeName }}</strong>
+              <small>{{ att.email }}</small>
+            </div>
+          </td>
+          <td>{{ att.eventTitle }}</td>
+          <td><span class="tier-badge">{{ att.tier }}</span></td>
+          <td>{{ att.ticketsCount }} Pass{{ att.ticketsCount > 1 ? 'es' : '' }}</td>
+          <td><strong>₹{{ att.totalAmount | number }}</strong></td>
+          <td><small>{{ att.bookingDate }}</small></td>
+          <td>
+            <span class="badge-status-confirmed">● Confirmed</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Attendees Cards List (< 768px) -->
+  <div class="attendees-mobile-cards-list" *ngIf="attendees.length > 0">
+    <div *ngFor="let att of paginatedAttendees()" class="attendee-mobile-card">
+      <div class="att-card-top-row">
+        <span class="att-order-id">#{{ att.orderId }}</span>
+        <span class="badge-status-confirmed">● Confirmed</span>
+      </div>
+      <div class="att-card-user-info">
+        <strong class="att-card-name">{{ att.attendeeName }}</strong>
+        <small class="att-card-email">{{ att.email }}</small>
+      </div>
+      <div class="att-card-event-title">{{ att.eventTitle }}</div>
+      <div class="att-card-meta-grid">
+        <div class="att-meta-item">
+          <span class="meta-k">Tier</span>
+          <span class="tier-badge">{{ att.tier }}</span>
+        </div>
+        <div class="att-meta-item">
+          <span class="meta-k">Quantity</span>
+          <span class="meta-v">{{ att.ticketsCount }} Pass{{ att.ticketsCount > 1 ? 'es' : '' }}</span>
+        </div>
+        <div class="att-meta-item">
+          <span class="meta-k">Amount</span>
+          <span class="meta-v"><strong>₹{{ att.totalAmount | number }}</strong></span>
+        </div>
+        <div class="att-meta-item">
+          <span class="meta-k">Date</span>
+          <span class="meta-v">{{ att.bookingDate }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bookings & Attendees Pagination Controls -->
+  <app-pagination-bar 
+    *ngIf="attendees.length > 0"
+    [currentPage]="bookingsPage()"
+    [totalPages]="bookingsTotalPages()"
+    [pageNumbers]="bookingsPageNumbers()"
+    [startItem]="bookingsPaginationInfo().start"
+    [endItem]="bookingsPaginationInfo().end"
+    [totalItems]="bookingsPaginationInfo().total"
+    itemLabel="bookings"
+    [pageSize]="bookingsPageSize()"
+    [pageSizeOptions]="[6, 12, 24]"
+    (pageChange)="setBookingsPage($event)"
+    (pageSizeChange)="setBookingsPageSize($event)">
+  </app-pagination-bar>
+</div>
