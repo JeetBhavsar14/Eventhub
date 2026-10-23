@@ -229,7 +229,7 @@
       "subcategory": "General",
       "format": "In-Person",
       "status": "published",
-      "isFeatured": false,
+      "isFeatured": true,
       "isPopular": false,
       "thumbnailUrl": "https://picsum.photos/seed/Mumbai4/600/400",
       "date": "2026-11-04",

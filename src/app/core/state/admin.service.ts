@@ -223,6 +223,37 @@ export class AdminService {
     return true;
   }
 
+  submitEventChangeRequest(eventId: string, updatedData: Partial<AdminCurationEvent>) {
+    this.curationEvents.update(list => {
+      const existing = list.find(e => e.id === eventId);
+      if (existing) {
+        return list.map(e => e.id === eventId ? {
+          ...e,
+          ...updatedData,
+          status: 'pending_review'
+        } : e);
+      } else {
+        const newCuration: AdminCurationEvent = {
+          id: eventId,
+          title: updatedData.title || 'Updated Event',
+          hostName: updatedData.hostName || 'Host Producer',
+          organization: updatedData.organization || 'Independent Production',
+          city: updatedData.city || 'Mumbai',
+          venue: updatedData.venue || 'Venue TBD',
+          date: updatedData.date || 'Upcoming 2026',
+          capacity: updatedData.capacity || 100,
+          ticketPrice: updatedData.ticketPrice ?? 0,
+          soundPermitUploaded: true,
+          venuePermitUploaded: true,
+          status: 'pending_review',
+          isFeatured: false,
+          imageUrl: updatedData.imageUrl || 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=800&q=80'
+        };
+        return [newCuration, ...list];
+      }
+    });
+  }
+
   async sendEventFeedback(eventId: string, feedback: string): Promise<boolean> {
     await this.api.patch(`/events/${eventId}`, {
       status: 'pending_review',

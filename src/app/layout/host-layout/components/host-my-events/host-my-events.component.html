@@ -1,0 +1,87 @@
+<div class="view-pane my-events-pane" id="host-portfolio-section">
+  <div class="view-header-bar">
+    <div>
+      <h2 class="view-title">My Events Portfolio</h2>
+      <p class="view-sub">Manage all active, draft, and in-review event experiences</p>
+    </div>
+    <button class="btn-create-event-primary" (click)="createEvent.emit()">
+      + Create New Event
+    </button>
+  </div>
+
+  <div class="events-grid-view">
+    <div *ngFor="let ev of paginatedPortfolioEvents()" class="event-portfolio-card" (click)="viewDetails.emit(ev)">
+      <div class="card-img-box">
+        <img [src]="ev.imageUrl" [alt]="ev.title" class="portfolio-img" />
+        <span class="status-badge" [ngClass]="getStatusBadgeClass(ev.status)">
+          {{ getStatusLabel(ev.status) }}
+        </span>
+        <span class="price-pill-tag">{{ ev.price > 0 ? '₹' + ev.price : 'Free' }}</span>
+      </div>
+      <div class="card-body">
+        <span class="card-category">{{ ev.category }}</span>
+        <h3 class="card-title">{{ ev.title }}</h3>
+        <p class="card-desc">{{ ev.description }}</p>
+        
+        <div class="card-meta-list">
+          <div class="meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+            <span>{{ ev.date }} • {{ ev.time }}</span>
+          </div>
+          <div class="meta-item">
+            <app-icon name="map-pin"></app-icon>
+            <span>{{ ev.venue }}, {{ ev.city }}</span>
+          </div>
+        </div>
+
+        <div class="card-capacity-box">
+          <div class="cap-header">
+            <span>Tickets Sold</span>
+            <strong>{{ ev.bookingsCount }} / {{ ev.capacity }}</strong>
+          </div>
+          <div class="cap-bar-track">
+            <div class="cap-bar-fill" [style.width.%]="(ev.bookingsCount / ev.capacity) * 100"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer" (click)="$event.stopPropagation()">
+        <button class="btn-card-details" (click)="viewDetails.emit(ev)">View Event Details</button>
+        <button 
+          *ngIf="ev.status === 'draft'" 
+          class="btn-card-action btn-indigo" 
+          (click)="submitForReview.emit(ev.id)">
+          Submit
+        </button>
+        <button 
+          *ngIf="ev.status === 'approved'" 
+          class="btn-card-action btn-emerald" 
+          (click)="publishEvent.emit(ev.id)">
+          Publish Live
+        </button>
+        <button 
+          *ngIf="ev.status === 'changes_requested'" 
+          class="btn-card-action btn-amber" 
+          (click)="reviewFeedback.emit(ev)">
+          Feedback
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Portfolio Grid Pagination Controls -->
+  <app-pagination-bar 
+    *ngIf="events.length > 0 && portfolioTotalPages() > 1"
+    [currentPage]="portfolioPage()"
+    [totalPages]="portfolioTotalPages()"
+    [pageNumbers]="portfolioPageNumbers()"
+    [startItem]="portfolioPaginationInfo().start"
+    [endItem]="portfolioPaginationInfo().end"
+    [totalItems]="portfolioPaginationInfo().total"
+    itemLabel="events"
+    [pageSize]="portfolioPageSize()"
+    [pageSizeOptions]="[6, 12, 24]"
+    (pageChange)="setPortfolioPage($event)"
+    (pageSizeChange)="setPortfolioPageSize($event)">
+  </app-pagination-bar>
+</div>

@@ -191,14 +191,72 @@
 
       <!-- Header Search & Actions -->
       <div class="header-right">
-        <!-- Quick Search -->
-        <div class="header-search-box">
+        <!-- Quick Search with Top 3 Live Matching Results -->
+        <div class="header-search-box" (click)="$event.stopPropagation()">
           <app-icon name="search" class="search-icon"></app-icon>
           <input 
             type="text" 
             placeholder="Search events, bookings, attendees..." 
-            [(ngModel)]="eventSearchTerm"
+            [ngModel]="eventSearchTerm()"
+            (ngModelChange)="onEventSearchChange($event)"
+            (focus)="onSearchFocus()"
             class="header-search-input" />
+          <button 
+            type="button"
+            class="btn-clear-search" 
+            *ngIf="eventSearchTerm().trim()" 
+            (click)="clearSearch()"
+            title="Clear search">
+            <app-icon name="close" [size]="13"></app-icon>
+          </button>
+
+          <!-- Top 3 Live Matching Results Dropdown -->
+          <div class="search-results-dropdown" *ngIf="showSearchDropdown() && eventSearchTerm().trim()">
+            <div class="dropdown-top-meta">
+              <span class="results-header-tag">Top Matches</span>
+              <span class="results-count-text">{{ topMatchingResults().length }} of {{ totalMatchesCount() }} found</span>
+            </div>
+
+            <!-- Results List -->
+            <div class="search-results-list" *ngIf="topMatchingResults().length > 0">
+              <div 
+                *ngFor="let item of topMatchingResults()" 
+                class="search-result-item" 
+                (click)="selectSearchResult(item)">
+                <img [src]="item.imageUrl" [alt]="item.title" class="result-thumb" />
+                <div class="result-info">
+                  <div class="result-title-row">
+                    <span class="result-title">{{ item.title }}</span>
+                    <span class="result-badge" [ngClass]="getStatusBadgeClass(item.status)">
+                      {{ getStatusLabel(item.status) }}
+                    </span>
+                  </div>
+                  <div class="result-meta-row">
+                    <span class="result-meta-date"><app-icon name="calendar" [size]="11"></app-icon> {{ item.date }}</span>
+                    <span class="result-meta-venue"><app-icon name="map-pin" [size]="11"></app-icon> {{ item.venue }}</span>
+                    <span class="result-price">{{ item.price > 0 ? '₹' + item.price : 'Free' }}</span>
+                  </div>
+                </div>
+                <div class="result-arrow">
+                  <app-icon name="chevron-right" [size]="14"></app-icon>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty Search State -->
+            <div class="search-no-results" *ngIf="topMatchingResults().length === 0">
+              <app-icon name="search" [size]="20"></app-icon>
+              <p>No matching events found for "<strong>{{ eventSearchTerm() }}</strong>"</p>
+            </div>
+
+            <!-- Dropdown Footer -->
+            <div class="search-dropdown-footer" *ngIf="topMatchingResults().length > 0">
+              <button class="btn-see-all-results" (click)="seeAllSearchResults()">
+                <span>See all results in Portfolio</span>
+                <app-icon name="arrow-right" [size]="13"></app-icon>
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Help Button -->
@@ -572,7 +630,7 @@
         </section>
 
         <!-- SECTION 7: MY RECENT EVENTS (Data Table / Mobile Cards) -->
-        <section class="recent-events-section">
+        <section class="recent-events-section" id="host-recent-events-section">
           <div class="section-title-bar">
             <div>
               <h2 class="section-title">My Recent Events</h2>
@@ -584,31 +642,31 @@
                 <button 
                   class="filter-pill" 
                   [class.active]="selectedStatusFilter() === 'all'" 
-                  (click)="selectedStatusFilter.set('all')">
+                  (click)="setFilterStatus('all')">
                   All ({{ events().length }})
                 </button>
                 <button 
                   class="filter-pill" 
                   [class.active]="selectedStatusFilter() === 'published'" 
-                  (click)="selectedStatusFilter.set('published')">
+                  (click)="setFilterStatus('published')">
                   Published
                 </button>
                 <button 
                   class="filter-pill" 
                   [class.active]="selectedStatusFilter() === 'pending'" 
-                  (click)="selectedStatusFilter.set('pending')">
+                  (click)="setFilterStatus('pending')">
                   Pending
                 </button>
                 <button 
                   class="filter-pill" 
                   [class.active]="selectedStatusFilter() === 'draft'" 
-                  (click)="selectedStatusFilter.set('draft')">
+                  (click)="setFilterStatus('draft')">
                   Drafts
                 </button>
                 <button 
                   class="filter-pill" 
                   [class.active]="selectedStatusFilter() === 'action_required'" 
-                  (click)="selectedStatusFilter.set('action_required')">
+                  (click)="setFilterStatus('action_required')">
                   Action Required
                 </button>
               </div>
@@ -644,7 +702,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let event of filteredEvents()" (click)="openEventDetails(event)" class="clickable-row">
+                <tr *ngFor="let event of paginatedOverviewEvents()" (click)="openEventDetails(event)" class="clickable-row">
                   
                   <!-- Event Details Column -->
                   <td class="col-event">
@@ -741,9 +799,9 @@
                             <span>View Details</span>
                           </button>
 
-                          <button class="context-menu-item" *ngIf="event.status === 'draft' || event.status === 'changes_requested'" (click)="openEventDetails(event)">
+                          <button class="context-menu-item" (click)="openEventDetails(event, true)">
                             <app-icon name="edit"></app-icon>
-                            <span>Edit Event</span>
+                            <span>{{ event.status === 'draft' ? 'Edit Draft' : 'Edit / Request Changes' }}</span>
                           </button>
 
                           <button class="context-menu-item" *ngIf="event.status === 'published'" (click)="switchView('analytics')">
@@ -779,7 +837,7 @@
           <!-- Mobile Cards Layout (< 768px) -->
           <div class="events-mobile-cards-list" *ngIf="filteredEvents().length > 0">
             <div 
-              *ngFor="let event of filteredEvents()" 
+              *ngFor="let event of paginatedOverviewEvents()" 
               class="event-mobile-card"
               (click)="openEventDetails(event)">
               <div class="mobile-card-header">
@@ -831,13 +889,26 @@
               </div>
             </div>
           </div>
+
+          <!-- Overview Events Table Pagination Controls -->
+          <app-pagination-bar 
+            *ngIf="filteredEvents().length > 0 && overviewTotalPages() > 1"
+            [currentPage]="overviewPage()"
+            [totalPages]="overviewTotalPages()"
+            [pageNumbers]="overviewPageNumbers()"
+            [startItem]="overviewPaginationInfo().start"
+            [endItem]="overviewPaginationInfo().end"
+            [totalItems]="overviewPaginationInfo().total"
+            itemLabel="events"
+            (pageChange)="setOverviewPage($event)">
+          </app-pagination-bar>
         </section>
 
         <!-- SECTION 8 & 9 & 10: BOTTOM THREE-COLUMN / SPLIT DASHBOARD GRID -->
         <section class="dashboard-bottom-grid">
 
           <!-- SECTION 8: UPCOMING EVENTS -->
-          <div class="dashboard-panel upcoming-events-panel">
+          <div class="dashboard-panel upcoming-events-panel" id="host-upcoming-events-section">
             <div class="panel-header">
               <div>
                 <h3 class="panel-title">Upcoming Events</h3>
@@ -856,7 +927,7 @@
             <!-- Horizontal Upcoming Cards -->
             <div class="upcoming-cards-list" *ngIf="upcomingEvents().length > 0">
               <div 
-                *ngFor="let up of upcomingEvents()" 
+                *ngFor="let up of paginatedUpcomingEvents()" 
                 class="upcoming-event-row-card"
                 (click)="openEventDetails(up)">
                 <img [src]="up.imageUrl" [alt]="up.title" class="upcoming-img" />
@@ -883,6 +954,19 @@
                 </div>
               </div>
             </div>
+
+            <!-- Upcoming Events Pagination -->
+            <app-pagination-bar 
+              *ngIf="upcomingEvents().length > 0"
+              variant="panel"
+              [currentPage]="upcomingPage()"
+              [totalPages]="upcomingTotalPages()"
+              [pageNumbers]="upcomingPageNumbers()"
+              [startItem]="upcomingPaginationInfo().start"
+              [endItem]="upcomingPaginationInfo().end"
+              [totalItems]="upcomingPaginationInfo().total"
+              (pageChange)="setUpcomingPage($event)">
+            </app-pagination-bar>
           </div>
 
           <!-- SECTION 9: PENDING ACTIONS (Needs Your Attention) -->
@@ -993,84 +1077,22 @@
       </div>
 
       <!-- ─────────────────────────────────────────────────────────
-           SUB-VIEW 2: MY EVENTS FULL VIEW
+           SUB-VIEW 2: MY EVENTS FULL VIEW (EXTRACTED COMPONENT)
            ───────────────────────────────────────────────────────── -->
-      <div class="view-pane my-events-pane" *ngIf="currentView() === 'my_events'">
-        <div class="view-header-bar">
-          <div>
-            <h2 class="view-title">My Events Portfolio</h2>
-            <p class="view-sub">Manage all active, draft, and in-review event experiences</p>
-          </div>
-          <button class="btn-create-event-primary" (click)="openCreateWizard()">
-            + Create New Event
-          </button>
-        </div>
-
-        <div class="events-grid-view">
-          <div *ngFor="let ev of filteredEvents()" class="event-portfolio-card" (click)="openEventDetails(ev)">
-            <div class="card-img-box">
-              <img [src]="ev.imageUrl" [alt]="ev.title" class="portfolio-img" />
-              <span class="status-badge" [ngClass]="getStatusBadgeClass(ev.status)">
-                {{ getStatusLabel(ev.status) }}
-              </span>
-              <span class="price-pill-tag">{{ ev.price > 0 ? '₹' + ev.price : 'Free' }}</span>
-            </div>
-            <div class="card-body">
-              <span class="card-category">{{ ev.category }}</span>
-              <h3 class="card-title">{{ ev.title }}</h3>
-              <p class="card-desc">{{ ev.description }}</p>
-              
-              <div class="card-meta-list">
-                <div class="meta-item">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
-                  <span>{{ ev.date }} • {{ ev.time }}</span>
-                </div>
-                <div class="meta-item">
-                  <app-icon name="map-pin"></app-icon>
-                  <span>{{ ev.venue }}, {{ ev.city }}</span>
-                </div>
-              </div>
-
-              <div class="card-capacity-box">
-                <div class="cap-header">
-                  <span>Tickets Sold</span>
-                  <strong>{{ ev.bookingsCount }} / {{ ev.capacity }}</strong>
-                </div>
-                <div class="cap-bar-track">
-                  <div class="cap-bar-fill" [style.width.%]="(ev.bookingsCount / ev.capacity) * 100"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card-footer" (click)="$event.stopPropagation()">
-              <button class="btn-card-details" (click)="openEventDetails(ev)">View Event Details</button>
-              <button 
-                *ngIf="ev.status === 'draft'" 
-                class="btn-card-action btn-indigo" 
-                (click)="submitDraftForReview(ev.id)">
-                Submit
-              </button>
-              <button 
-                *ngIf="ev.status === 'approved'" 
-                class="btn-card-action btn-emerald" 
-                (click)="publishApprovedEvent(ev.id)">
-                Publish Live
-              </button>
-              <button 
-                *ngIf="ev.status === 'changes_requested'" 
-                class="btn-card-action btn-amber" 
-                (click)="openFeedbackModal(ev)">
-                Feedback
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <app-host-my-events
+        *ngIf="currentView() === 'my_events'"
+        [events]="filteredEvents()"
+        (viewDetails)="openEventDetails($event)"
+        (createEvent)="openCreateWizard()"
+        (submitForReview)="submitDraftForReview($event)"
+        (publishEvent)="publishApprovedEvent($event)"
+        (reviewFeedback)="openFeedbackModal($event)">
+      </app-host-my-events>
 
       <!-- ─────────────────────────────────────────────────────────
            SUB-VIEW 3: BOOKINGS & ATTENDEES VIEW
            ───────────────────────────────────────────────────────── -->
-      <div class="view-pane bookings-pane" *ngIf="currentView() === 'bookings'">
+      <div class="view-pane bookings-pane" id="host-bookings-section" *ngIf="currentView() === 'bookings'">
         <div class="view-header-bar">
           <div>
             <h2 class="view-title">Bookings & Attendee Management</h2>
@@ -1082,6 +1104,7 @@
           </button>
         </div>
 
+        <!-- Desktop / Tablet Attendees Table -->
         <div class="attendees-table-card">
           <table class="attendees-table" aria-label="Attendees Table">
             <thead>
@@ -1097,7 +1120,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let att of attendees()">
+              <tr *ngFor="let att of paginatedAttendees()">
                 <td><strong>#{{ att.orderId }}</strong></td>
                 <td>
                   <div class="att-name-cell">
@@ -1117,6 +1140,55 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Mobile Attendees Cards List (< 768px) -->
+        <div class="attendees-mobile-cards-list" *ngIf="attendees().length > 0">
+          <div *ngFor="let att of paginatedAttendees()" class="attendee-mobile-card">
+            <div class="att-card-top-row">
+              <span class="att-order-id">#{{ att.orderId }}</span>
+              <span class="badge-status-confirmed">● Confirmed</span>
+            </div>
+            <div class="att-card-user-info">
+              <strong class="att-card-name">{{ att.attendeeName }}</strong>
+              <small class="att-card-email">{{ att.email }}</small>
+            </div>
+            <div class="att-card-event-title">{{ att.eventTitle }}</div>
+            <div class="att-card-meta-grid">
+              <div class="att-meta-item">
+                <span class="meta-k">Tier</span>
+                <span class="tier-badge">{{ att.tier }}</span>
+              </div>
+              <div class="att-meta-item">
+                <span class="meta-k">Quantity</span>
+                <span class="meta-v">{{ att.ticketsCount }} Pass{{ att.ticketsCount > 1 ? 'es' : '' }}</span>
+              </div>
+              <div class="att-meta-item">
+                <span class="meta-k">Amount</span>
+                <span class="meta-v"><strong>₹{{ att.totalAmount | number }}</strong></span>
+              </div>
+              <div class="att-meta-item">
+                <span class="meta-k">Date</span>
+                <span class="meta-v">{{ att.bookingDate }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bookings & Attendees Pagination Controls -->
+        <app-pagination-bar 
+          *ngIf="attendees().length > 0"
+          [currentPage]="bookingsPage()"
+          [totalPages]="bookingsTotalPages()"
+          [pageNumbers]="bookingsPageNumbers()"
+          [startItem]="bookingsPaginationInfo().start"
+          [endItem]="bookingsPaginationInfo().end"
+          [totalItems]="bookingsPaginationInfo().total"
+          itemLabel="bookings"
+          [pageSize]="bookingsPageSize()"
+          [pageSizeOptions]="[6, 12, 24]"
+          (pageChange)="setBookingsPage($event)"
+          (pageSizeChange)="setBookingsPageSize($event)">
+        </app-pagination-bar>
       </div>
 
       <!-- ─────────────────────────────────────────────────────────
@@ -1751,20 +1823,39 @@
     </div>
   </div>
 
-  <!-- MODAL 2: EVENT DETAILS DRAWER -->
+  <!-- MODAL 2: EVENT DETAILS DRAWER (VIEW & EDIT WITH ADMIN CHANGE REQUEST) -->
   <div class="modal-backdrop" *ngIf="selectedEventForDetails()" (click)="selectedEventForDetails.set(null)">
     <div class="modal-container event-details-drawer" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div>
-          <span class="modal-eyebrow">EVENT OVERVIEW</span>
-          <h3 class="modal-title">{{ selectedEventForDetails()?.title }}</h3>
+          <span class="modal-eyebrow">{{ isEditingEventDetails() ? 'EVENT MODIFICATION & CURATION REQUEST' : 'EVENT OVERVIEW' }}</span>
+          <h3 class="modal-title">{{ isEditingEventDetails() ? 'Edit: ' + selectedEventForDetails()?.title : selectedEventForDetails()?.title }}</h3>
         </div>
-        <button class="modal-close-btn" (click)="selectedEventForDetails.set(null)">
-          <app-icon name="close"></app-icon>
-        </button>
+        <div class="modal-header-actions">
+          <button 
+            *ngIf="!isEditingEventDetails()" 
+            type="button" 
+            class="btn-edit-toggle" 
+            (click)="startEditingEvent()"
+            title="Edit event details or submit modifications to admin">
+            <app-icon name="edit" [size]="14"></app-icon>
+            <span>{{ selectedEventForDetails()?.status === 'draft' ? 'Edit Draft' : 'Edit / Propose Changes' }}</span>
+          </button>
+          <button 
+            *ngIf="isEditingEventDetails()" 
+            type="button" 
+            class="btn-cancel-edit-toggle" 
+            (click)="cancelEditingEvent()">
+            <span>Switch to View</span>
+          </button>
+          <button class="modal-close-btn" (click)="selectedEventForDetails.set(null)">
+            <app-icon name="close"></app-icon>
+          </button>
+        </div>
       </div>
 
-      <div class="modal-body">
+      <!-- VIEW MODE -->
+      <div class="modal-body" *ngIf="!isEditingEventDetails()">
         <img [src]="selectedEventForDetails()?.imageUrl" [alt]="selectedEventForDetails()?.title" class="drawer-cover-img" />
         
         <div class="drawer-status-strip">
@@ -1800,27 +1891,130 @@
         <div class="feedback-alert-box" *ngIf="selectedEventForDetails()?.feedbackNotes">
           <app-icon name="alert-circle"></app-icon>
           <div>
-            <strong>Reviewer Feedback Note:</strong>
+            <strong>Reviewer Feedback / Note:</strong>
             <p>{{ selectedEventForDetails()?.feedbackNotes }}</p>
           </div>
         </div>
       </div>
 
+      <!-- EDIT & CHANGE REQUEST MODE -->
+      <div class="modal-body edit-event-body" *ngIf="isEditingEventDetails()">
+        <div class="curation-notice-banner" *ngIf="selectedEventForDetails()?.status !== 'draft'">
+          <app-icon name="shield" [size]="20"></app-icon>
+          <div>
+            <strong>Admin Approval Required for Active Event</strong>
+            <p>Because this event is active on EventHub, all modifications will be submitted as an official change request for Admin curation review before reflecting publicly.</p>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Event Title *</label>
+          <input type="text" class="form-input" [(ngModel)]="editEventForm.title" placeholder="Event title" />
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Category</label>
+          <app-select 
+            [options]="categoryOptions" 
+            [(ngModel)]="editEventForm.category">
+          </app-select>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Description</label>
+          <textarea rows="3" class="form-textarea" [(ngModel)]="editEventForm.description" placeholder="Describe your event..."></textarea>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="text" class="form-input" [(ngModel)]="editEventForm.date" placeholder="e.g. Dec 25, 2026" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time</label>
+            <input type="text" class="form-input" [(ngModel)]="editEventForm.time" placeholder="e.g. 7:00 PM – 10:00 PM" />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Venue Location</label>
+            <input type="text" class="form-input" [(ngModel)]="editEventForm.venue" placeholder="e.g. Grand Ballroom" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input type="text" class="form-input" [(ngModel)]="editEventForm.city" placeholder="e.g. Mumbai" />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label">Ticket Capacity</label>
+            <input type="number" class="form-input" [(ngModel)]="editEventForm.capacity" min="1" placeholder="100" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price per Ticket (₹)</label>
+            <input type="number" class="form-input" [(ngModel)]="editEventForm.price" min="0" placeholder="0 for Free" />
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Cover Image URL</label>
+          <input type="text" class="form-input" [(ngModel)]="editEventForm.imageUrl" placeholder="https://images.unsplash.com/..." />
+        </div>
+
+        <div class="form-group full-width" *ngIf="selectedEventForDetails()?.status !== 'draft'">
+          <label class="form-label">Reason for Modifications (Sent to Admin Reviewer) *</label>
+          <input type="text" class="form-input" [(ngModel)]="editEventForm.changeReason" placeholder="e.g. Upgraded venue sound system and increased total capacity" />
+        </div>
+      </div>
+
+      <!-- FOOTER -->
       <div class="modal-footer">
         <button class="btn-modal-cancel" (click)="selectedEventForDetails.set(null)">Close</button>
         <div class="footer-spacer"></div>
-        <button 
-          *ngIf="selectedEventForDetails()?.status === 'draft'" 
-          class="btn-modal-submit" 
-          (click)="submitDraftForReview(selectedEventForDetails()!.id); selectedEventForDetails.set(null)">
-          Submit Event for Review
-        </button>
-        <button 
-          *ngIf="selectedEventForDetails()?.status === 'approved'" 
-          class="btn-modal-submit" 
-          (click)="publishApprovedEvent(selectedEventForDetails()!.id); selectedEventForDetails.set(null)">
-          Publish Live Now
-        </button>
+
+        <!-- In View Mode Buttons -->
+        <ng-container *ngIf="!isEditingEventDetails()">
+          <button 
+            type="button" 
+            class="btn-modal-secondary" 
+            (click)="startEditingEvent()">
+            <app-icon name="edit" [size]="14"></app-icon>
+            <span>{{ selectedEventForDetails()?.status === 'draft' ? 'Edit Draft' : 'Edit / Request Changes' }}</span>
+          </button>
+          <button 
+            *ngIf="selectedEventForDetails()?.status === 'draft'" 
+            class="btn-modal-submit" 
+            (click)="submitDraftForReview(selectedEventForDetails()!.id); selectedEventForDetails.set(null)">
+            Submit for Review
+          </button>
+          <button 
+            *ngIf="selectedEventForDetails()?.status === 'approved'" 
+            class="btn-modal-submit" 
+            (click)="publishApprovedEvent(selectedEventForDetails()!.id); selectedEventForDetails.set(null)">
+            Publish Live Now
+          </button>
+        </ng-container>
+
+        <!-- In Edit Mode Buttons -->
+        <ng-container *ngIf="isEditingEventDetails()">
+          <button type="button" class="btn-modal-cancel" (click)="cancelEditingEvent()">Discard Edits</button>
+          <button 
+            *ngIf="selectedEventForDetails()?.status === 'draft'" 
+            type="button" 
+            class="btn-modal-secondary" 
+            (click)="saveEventChanges(false)">
+            Save Draft
+          </button>
+          <button 
+            type="button" 
+            class="btn-modal-submit btn-curation-submit" 
+            (click)="saveEventChanges(true)">
+            <app-icon name="shield" [size]="14"></app-icon>
+            <span>{{ selectedEventForDetails()?.status === 'draft' ? 'Save & Submit for Review' : 'Submit Changes for Admin Approval' }}</span>
+          </button>
+        </ng-container>
       </div>
     </div>
   </div>
@@ -2210,4 +2404,16 @@
     </div>
   </div>
 
+  <!-- Reusable Confirmation Dialog Modal -->
+  <app-confirm-dialog
+    [show]="showConfirmDialog()"
+    [title]="confirmDialogData().title"
+    [message]="confirmDialogData().message"
+    [actionBtnText]="confirmDialogData().actionBtnText"
+    [isDestructive]="confirmDialogData().isDestructive"
+    (confirm)="executeConfirm()"
+    (cancel)="cancelConfirm()">
+  </app-confirm-dialog>
+
 </div>
+

@@ -6,4 +6,6 @@ export * from './event-filter/event-filter.component';
 export * from './select/select.component';
 export * from './icon/icon.component';
 export * from './toast/toast-container.component';
+export * from './pagination-bar/pagination-bar.component';
+export * from './confirm-dialog/confirm-dialog.component';
 

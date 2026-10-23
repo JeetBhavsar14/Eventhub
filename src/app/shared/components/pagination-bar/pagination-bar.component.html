@@ -1,0 +1,107 @@
+<!-- Standard Full-Width Pagination Bar -->
+<div *ngIf="variant === 'standard'" class="pagination-bar">
+  <div class="pagination-info">
+    Showing <strong>{{ startItem }}–{{ endItem }}</strong> of <strong>{{ totalItems }}</strong> {{ itemLabel }}
+  </div>
+
+  <div class="pagination-actions">
+    <!-- Page Size Selector -->
+    <div class="page-size-selector" *ngIf="pageSizeOptions && pageSizeOptions.length > 0">
+      <span class="page-size-label">Per page:</span>
+      <button 
+        *ngFor="let opt of pageSizeOptions"
+        type="button"
+        class="size-pill-btn" 
+        [class.active]="pageSize === opt"
+        (click)="onSelectPageSize(opt)">
+        {{ opt }}
+      </button>
+    </div>
+
+    <!-- Prev button -->
+    <button 
+      type="button"
+      class="pagination-nav-btn" 
+      [disabled]="currentPage <= 1" 
+      (click)="onPrev()"
+      title="Previous page">
+      <app-icon name="chevron-left" [size]="14"></app-icon>
+      <span>Prev</span>
+    </button>
+
+    <!-- Page Number Buttons -->
+    <div class="pagination-pages">
+      <button 
+        *ngFor="let p of computedPageNumbers" 
+        type="button"
+        class="pagination-page-btn" 
+        [class.active]="currentPage === p"
+        (click)="onSelectPage(p)">
+        {{ p }}
+      </button>
+    </div>
+
+    <!-- Next button -->
+    <button 
+      type="button"
+      class="pagination-nav-btn" 
+      [disabled]="currentPage >= totalPages" 
+      (click)="onNext()"
+      title="Next page">
+      <span>Next</span>
+      <app-icon name="chevron-right" [size]="14"></app-icon>
+    </button>
+  </div>
+</div>
+
+<!-- Compact Panel Pagination Bar (e.g. Card Footer) -->
+<div *ngIf="variant === 'panel'" class="panel-pagination-bar">
+  <span class="panel-page-info">
+    Showing <strong>{{ startItem }}–{{ endItem }}</strong> of <strong>{{ totalItems }}</strong>
+  </span>
+
+  <div class="panel-page-actions" *ngIf="totalPages > 1">
+    <button 
+      type="button"
+      class="panel-page-btn" 
+      [disabled]="currentPage <= 1" 
+      (click)="onPrev()"
+      title="Previous page">
+      <app-icon name="chevron-left" [size]="12"></app-icon>
+    </button>
+
+    <div class="panel-page-numbers">
+      <button 
+        *ngIf="computedPageNumbers[0] > 1" 
+        type="button"
+        class="panel-num-btn" 
+        (click)="onSelectPage(1)">1</button>
+      <span *ngIf="computedPageNumbers[0] > 2" class="panel-ellipsis">…</span>
+
+      <button 
+        *ngFor="let p of computedPageNumbers"
+        type="button"
+        class="panel-num-btn"
+        [class.active]="currentPage === p"
+        (click)="onSelectPage(p)">
+        {{ p }}
+      </button>
+
+      <span *ngIf="computedPageNumbers[computedPageNumbers.length - 1] < totalPages - 1" class="panel-ellipsis">…</span>
+      <button 
+        *ngIf="computedPageNumbers[computedPageNumbers.length - 1] < totalPages" 
+        type="button"
+        class="panel-num-btn" 
+        (click)="onSelectPage(totalPages)">{{ totalPages }}</button>
+    </div>
+
+    <button 
+      type="button"
+      class="panel-page-btn" 
+      [disabled]="currentPage >= totalPages" 
+      (click)="onNext()"
+      title="Next page">
+      <app-icon name="chevron-right" [size]="12"></app-icon>
+    </button>
+  </div>
+</div>
