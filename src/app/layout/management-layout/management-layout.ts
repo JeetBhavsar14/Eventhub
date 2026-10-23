@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@core/auth';
-import { ManagementService } from '@core/state';
+import { ManagementService, ToastService } from '@core/state';
 
 export type ManagementView =
   | 'overview'
@@ -26,6 +26,7 @@ export class ManagementLayoutComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   readonly mgmtService = inject(ManagementService);
+  private readonly toastService = inject(ToastService);
 
   // Layout & Navigation State
   isSidebarCollapsed = signal(false);
@@ -150,6 +151,7 @@ export class ManagementLayoutComponent implements OnInit {
   // Toast System
   showToast(msg: string) {
     this.toastMessage.set(msg);
+    this.toastService.info(msg);
     setTimeout(() => {
       this.toastMessage.set(null);
     }, 3600);

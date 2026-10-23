@@ -1086,29 +1086,14 @@
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- CONFIRMATION DIALOG MODAL (POPUP VERIFICATION)               -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <div class="admin-modal-backdrop" *ngIf="showConfirmationDialog()" (click)="cancelConfirm()">
-    <div class="admin-confirm-card" (click)="$event.stopPropagation()">
-      <div class="confirm-head">
-        <div class="confirm-icon-box" [class.destructive]="confirmDialogData.isDestructive">
-          <app-icon name="shield" *ngIf="!confirmDialogData.isDestructive" [strokeWidth]="2.5"></app-icon>
-          <app-icon name="alert-circle" *ngIf="confirmDialogData.isDestructive" [strokeWidth]="2.5"></app-icon>
-        </div>
-        <div>
-          <h3>{{ confirmDialogData.title }}</h3>
-          <p class="confirm-desc">{{ confirmDialogData.message }}</p>
-        </div>
-      </div>
-
-      <div class="confirm-actions">
-        <button class="btn-confirm-cancel" (click)="cancelConfirm()">Cancel</button>
-        <button 
-          class="btn-confirm-proceed" 
-          [class.destructive]="confirmDialogData.isDestructive" 
-          (click)="executeConfirmAction()">
-          {{ confirmDialogData.actionBtnText }}
-        </button>
-      </div>
-    </div>
-  </div>
+  <app-confirm-dialog
+    [show]="showConfirmationDialog()"
+    [title]="confirmDialogData.title"
+    [message]="confirmDialogData.message"
+    [actionBtnText]="confirmDialogData.actionBtnText"
+    [isDestructive]="confirmDialogData.isDestructive"
+    (confirm)="executeConfirmAction()"
+    (cancel)="cancelConfirm()">
+  </app-confirm-dialog>
 
 </div>

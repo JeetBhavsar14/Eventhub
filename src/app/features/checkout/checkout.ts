@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiClient } from '@core/api';
 import { AuthService } from '@core/auth';
+import { NotificationService, ToastService } from '@core/state';
 import { Offer } from '@core/models';
 import { ButtonComponent, InputComponent } from '@shared/components';
 import { PaymentFormComponent } from '@shared/forms';
@@ -21,6 +22,8 @@ export class Checkout implements OnInit {
   private router = inject(Router);
   private apiClient = inject(ApiClient);
   private authService = inject(AuthService);
+  private notificationService = inject(NotificationService);
+  private toast = inject(ToastService);
 
   event = signal<any>(null);
   isLoading = signal(true);
@@ -221,6 +224,24 @@ export class Checkout implements OnInit {
         this.bookingResult.set(res.data);
         this.bookingSuccess.set(true);
         this.generateQrCode(res.data.bookingReference || res.data.id);
+        
+        // Dispatch real-time booking confirmation notification (Phase 8)
+        this.notificationService.dispatchBookingNotification({
+          userId: user.id,
+          userEmail: user.email,
+          eventTitle: this.event().title,
+          eventId: this.event().id,
+          bookingReference: res.data.bookingReference || payload.bookingReference,
+          ticketsCount: ticketsBooked.reduce((acc, t) => acc + t.quantity, 0),
+          totalAmount: this.grandTotal()
+        });
+
+        // Trigger global floating toast (High-Impact UI/UX)
+        this.toast.success(
+          `Your digital pass (${res.data.bookingReference || payload.bookingReference}) is ready in My Bookings!`,
+          'Booking Confirmed 🎉'
+        );
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         this.error.set('We could not confirm your payment. Please try again.');

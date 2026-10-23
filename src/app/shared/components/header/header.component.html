@@ -64,18 +64,95 @@
         </div>
       </div>
 
-      <!-- Search bar -->
-      <div class="search-wrapper">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
-          <path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <input
-          class="search-input"
-          type="text"
-          placeholder="Search for Events, Artists or Venues..."
-          [(ngModel)]="searchQuery"
-        />
+      <!-- Search Container with Quick Spotlight Autocomplete -->
+      <div class="search-container" (click)="$event.stopPropagation()">
+        <form class="search-wrapper" [class.focused]="searchFocused()" (submit)="onSearchSubmit($event)">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+            <path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input
+            class="search-input"
+            type="text"
+            placeholder="Search for Events, Artists or Venues..."
+            [(ngModel)]="searchQuery"
+            name="searchQuery"
+            (focus)="onSearchFocus()"
+            autocomplete="off"
+            id="global-search-input"
+          />
+          <button 
+            type="button" 
+            class="search-clear-btn" 
+            *ngIf="searchQuery" 
+            (click)="clearSearch()"
+            title="Clear search">
+            <app-icon name="close" [size]="14"></app-icon>
+          </button>
+        </form>
+
+        <!-- Floating Spotlight Panel (High-Impact UI/UX) -->
+        <div class="search-spotlight-dropdown" *ngIf="searchFocused()">
+          <!-- Popular & Recent Searches -->
+          <div class="spotlight-section" *ngIf="!searchQuery.trim() && recentSearches().length > 0">
+            <div class="spotlight-section-title">
+              <app-icon name="trending-up" [size]="13"></app-icon>
+              <span>Popular & Recent Searches</span>
+            </div>
+            <div class="recent-chips">
+              <button 
+                type="button" 
+                class="recent-chip" 
+                *ngFor="let term of recentSearches()" 
+                (click)="selectRecentSearch(term)">
+                {{ term }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Matching Events Section -->
+          <div class="spotlight-section">
+            <div class="spotlight-section-title">
+              <span>{{ searchQuery.trim() ? 'Matching Events' : 'Trending Now' }}</span>
+              <span class="spotlight-count" *ngIf="searchQuery.trim()">({{ spotlightEvents().length }})</span>
+            </div>
+
+            <div class="spotlight-list" *ngIf="spotlightEvents().length > 0">
+              <div 
+                *ngFor="let ev of spotlightEvents()" 
+                class="spotlight-item" 
+                (click)="selectSearchItem(ev.id)">
+                <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="spotlight-thumb">
+                <div class="spotlight-info">
+                  <div class="spotlight-title">{{ ev.title }}</div>
+                  <div class="spotlight-meta">
+                    <span class="spotlight-cat">{{ ev.category }}</span>
+                    <span>•</span>
+                    <span class="spotlight-date">{{ ev.date | date:'mediumDate' }}</span>
+                    <span>•</span>
+                    <span class="spotlight-venue">{{ ev.location?.city || 'India' }}</span>
+                  </div>
+                </div>
+                <div class="spotlight-price" *ngIf="ev.ticketTypes?.[0]?.price">
+                  ₹{{ ev.ticketTypes[0].price }}
+                </div>
+              </div>
+            </div>
+
+            <!-- No results -->
+            <div class="spotlight-empty" *ngIf="spotlightEvents().length === 0">
+              <app-icon name="search" [size]="20"></app-icon>
+              <p>No experiences found matching "{{ searchQuery }}"</p>
+            </div>
+          </div>
+
+          <!-- Spotlight Footer -->
+          <div class="spotlight-footer" *ngIf="searchQuery.trim()">
+            <button type="button" class="view-all-results-btn" (click)="onSearchSubmit()">
+              See all results for "<strong>{{ searchQuery }}</strong>" →
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Right side actions -->
@@ -89,22 +166,196 @@
 
         <!-- Authenticated actions -->
         <ng-container *ngIf="isAuthenticated()">
-          <!-- Notification bell -->
-          <button class="icon-btn" title="Notifications">
-            <svg class="bell-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span class="badge">3</span>
-          </button>
+          <!-- Notification Bell & Flyout -->
+          <div class="notification-wrap">
+            <button 
+              class="icon-btn" 
+              [class.active]="showNotifications()"
+              (click)="toggleNotifications($event)" 
+              title="Notifications"
+              id="header-notifications-btn">
+              <svg class="bell-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="badge" *ngIf="unreadCount() > 0">
+                {{ unreadCount() > 9 ? '9+' : unreadCount() }}
+              </span>
+            </button>
+
+            <!-- Notifications Flyout Drawer (Glassmorphic) -->
+            <div class="notifications-dropdown" *ngIf="showNotifications()" (click)="$event.stopPropagation()">
+              <div class="notif-header">
+                <div class="notif-title-wrap">
+                  <h4 class="notif-title">Notifications</h4>
+                  <span class="unread-pill" *ngIf="unreadCount() > 0">{{ unreadCount() }} New</span>
+                </div>
+                <button 
+                  class="mark-all-read-btn" 
+                  *ngIf="unreadCount() > 0"
+                  (click)="markAllNotificationsAsRead($event)"
+                  title="Mark all notifications as read">
+                  <app-icon name="check" [size]="13"></app-icon>
+                  <span>Mark all read</span>
+                </button>
+              </div>
+
+              <!-- Filter Tabs: Grouped by Action Required & Activity -->
+              <div class="notif-filter-tabs">
+                <button 
+                  class="notif-tab" 
+                  [class.active]="notificationFilter() === 'all'"
+                  (click)="setNotificationFilter('all', $event)">
+                  All <span class="tab-count">({{ notifications().length }})</span>
+                </button>
+                <button 
+                  class="notif-tab" 
+                  [class.active]="notificationFilter() === 'action_required'"
+                  (click)="setNotificationFilter('action_required', $event)">
+                  Action Required 
+                  <span class="tab-badge-pulse" *ngIf="actionRequiredNotifications().length > 0">{{ actionRequiredNotifications().length }}</span>
+                </button>
+                <button 
+                  class="notif-tab" 
+                  [class.active]="notificationFilter() === 'activity'"
+                  (click)="setNotificationFilter('activity', $event)">
+                  Activity <span class="tab-count">({{ activityNotifications().length }})</span>
+                </button>
+                <button 
+                  class="notif-tab" 
+                  [class.active]="notificationFilter() === 'unread'"
+                  (click)="setNotificationFilter('unread', $event)">
+                  Unread <span class="tab-count">({{ unreadCount() }})</span>
+                </button>
+              </div>
+
+              <!-- Notifications List with Grouped Sections -->
+              <div class="notif-list">
+                
+                <!-- Group 1: Action Required Section (When on 'all' or 'action_required') -->
+                <div class="notif-section-group" *ngIf="(notificationFilter() === 'all' || notificationFilter() === 'action_required') && actionRequiredNotifications().length > 0">
+                  <div class="notif-section-title">
+                    <span class="pulse-indicator"></span>
+                    <span>Action Required</span>
+                    <span class="section-tag">Pending RSVP</span>
+                  </div>
+
+                  <div 
+                    *ngFor="let notif of actionRequiredNotifications()" 
+                    class="notif-card action-card" 
+                    [class.unread]="!notif.read"
+                    (click)="onNotificationClick(notif)">
+                    
+                    <div class="notif-card-icon type-invitation">
+                      <app-icon name="mail" [size]="16"></app-icon>
+                    </div>
+
+                    <div class="notif-card-content">
+                      <div class="notif-card-top">
+                        <span class="notif-card-title">{{ notif.title }}</span>
+                        <span class="notif-time">{{ formatTimeAgo(notif.timestamp) }}</span>
+                      </div>
+                      <p class="notif-card-msg">{{ notif.message }}</p>
+
+                      <!-- Action Buttons -->
+                      <div class="notif-actions">
+                        <button 
+                          class="notif-action-btn primary"
+                          (click)="acceptInvitation(notif, $event)">
+                          <app-icon name="check" [size]="12"></app-icon>
+                          Accept & Join
+                        </button>
+                        <button 
+                          class="notif-action-btn ghost"
+                          (click)="declineInvitation(notif, $event)">
+                          Decline
+                        </button>
+                      </div>
+                    </div>
+
+                    <button 
+                      class="notif-dismiss-btn" 
+                      (click)="dismissNotification(notif.id, $event)"
+                      title="Dismiss notification">
+                      <app-icon name="close" [size]="12"></app-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Group 2: Recent Activity Section -->
+                <div class="notif-section-group" *ngIf="(notificationFilter() === 'all' || notificationFilter() === 'activity' || notificationFilter() === 'unread')">
+                  <div class="notif-section-title" *ngIf="notificationFilter() === 'all' && actionRequiredNotifications().length > 0">
+                    <span>Recent Activity</span>
+                  </div>
+
+                  <div 
+                    *ngFor="let notif of (notificationFilter() === 'all' ? activityNotifications() : filteredNotifications())" 
+                    class="notif-card" 
+                    [class.unread]="!notif.read"
+                    (click)="onNotificationClick(notif)">
+                    
+                    <div class="notif-card-icon" [ngClass]="'type-' + notif.type">
+                      <app-icon [name]="getNotificationIcon(notif.type)" [size]="16"></app-icon>
+                    </div>
+
+                    <div class="notif-card-content">
+                      <div class="notif-card-top">
+                        <span class="notif-card-title">{{ notif.title }}</span>
+                        <span class="notif-time">{{ formatTimeAgo(notif.timestamp) }}</span>
+                      </div>
+                      <p class="notif-card-msg">{{ notif.message }}</p>
+
+                      <!-- Status badges for responded invitations -->
+                      <div class="notif-actions" *ngIf="notif.type === 'invitation'">
+                        <div class="notif-status-badge accepted" *ngIf="notif.invitationStatus === 'accepted'">
+                          <app-icon name="check-circle" [size]="13"></app-icon>
+                          <span>Accepted</span>
+                          <button class="notif-workspace-link" (click)="goToWorkspace(notif, $event)">
+                            Open Workspace →
+                          </button>
+                        </div>
+                        <div class="notif-status-badge declined" *ngIf="notif.invitationStatus === 'declined'">
+                          <app-icon name="close" [size]="12"></app-icon>
+                          <span>Declined</span>
+                        </div>
+                      </div>
+
+                      <!-- General Navigational Action -->
+                      <div class="notif-actions" *ngIf="notif.type !== 'invitation' && notif.action">
+                        <button class="notif-action-btn link">
+                          {{ notif.action.label }} →
+                        </button>
+                      </div>
+                    </div>
+
+                    <button 
+                      class="notif-dismiss-btn" 
+                      (click)="dismissNotification(notif.id, $event)"
+                      title="Dismiss notification">
+                      <app-icon name="close" [size]="12"></app-icon>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="notif-empty" *ngIf="filteredNotifications().length === 0">
+                  <div class="empty-icon-circle">
+                    <app-icon name="bell" [size]="24"></app-icon>
+                  </div>
+                  <p class="empty-title">All caught up!</p>
+                  <p class="empty-sub" *ngIf="notificationFilter() === 'action_required'">No pending team or station invitations require action.</p>
+                  <p class="empty-sub" *ngIf="notificationFilter() === 'activity'">No recent activity recorded yet.</p>
+                  <p class="empty-sub" *ngIf="notificationFilter() === 'unread'">You have zero unread notifications.</p>
+                  <p class="empty-sub" *ngIf="notificationFilter() === 'all'">You have no notifications yet.</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- User avatar + dropdown -->
           <div class="user-avatar-wrap" (click)="toggleUserMenu()">
             <div class="avatar">{{ getInitials() }}</div>
             <span class="user-name">{{ currentUser()?.firstName }}</span>
-            <svg class="caret-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
 
             <!-- Dropdown -->
             <div class="user-dropdown" *ngIf="showUserMenu">
@@ -131,6 +382,10 @@
               <a *ngIf="isApprovedHost()" routerLink="/host/dashboard" class="dropdown-item host-workspace-item" (click)="showUserMenu = false">
                 <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
                 Host Workspace
+              </a>
+              <a *ngIf="!isApprovedHost() && (hostStatus() === 'guest' || hostStatus() === 'not_applied')" routerLink="/host/apply" class="dropdown-item" (click)="showUserMenu = false">
+                <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/></svg>
+                Host an Event
               </a>
               <a *ngIf="isAdmin()" routerLink="/admin" class="dropdown-item" (click)="showUserMenu = false">
                 <svg viewBox="0 0 24 24" fill="none" class="dropdown-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -166,7 +421,7 @@
   <div class="bar-bottom">
     <div class="bar-inner">
 
-      <!-- Category pills -->
+      <!-- Category pills (Desktop >= 900px) -->
       <nav class="category-nav">
         <a
           *ngFor="let cat of categories"
@@ -181,9 +436,39 @@
         </a>
       </nav>
 
-      <!-- Secondary links -->
+      <!-- Category Dropdown List (Smaller screens < 900px) -->
+      <div class="category-dropdown-wrap" (click)="$event.stopPropagation()">
+        <button class="category-dropdown-btn" (click)="toggleCategoryMenu($event)" [class.active]="showCategoryMenu()">
+          <svg class="cat-dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="4" width="7" height="7" rx="1.5"/>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+          </svg>
+          <span class="cat-dropdown-label">{{ selectedCategory() }}</span>
+          <svg class="caret-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="category-dropdown-menu" *ngIf="showCategoryMenu()">
+          <button 
+            *ngFor="let cat of categories" 
+            class="cat-dropdown-item" 
+            [class.active]="cat.label === selectedCategory()"
+            (click)="selectCategory(cat, $event)">
+            <span class="cat-icon" [innerHTML]="cat.icon"></span>
+            <span>{{ cat.label }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Secondary links (Clean text links without badge boxes) -->
       <nav class="secondary-nav">
-        <a *ngFor="let link of secondaryLinks" [routerLink]="link.route" class="secondary-link">
+        <a *ngFor="let link of secondaryLinks" 
+           [routerLink]="link.route" 
+           class="secondary-link">
           {{ link.label }}
         </a>
       </nav>

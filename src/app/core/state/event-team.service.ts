@@ -118,51 +118,141 @@ export class EventTeamService {
     const res = await this.api.post<EventInvitation>('/eventInvitations', newInvite);
     if (res.data) {
       this.invitations.update(list => [res.data!, ...list]);
+
+      // Automatically dispatch notification to recipient (Phase 8)
+      try {
+        await this.api.post('/notifications', {
+          id: `notif-${Date.now()}`,
+          userId: 'invited-user',
+          userEmail: inviteeEmail,
+          type: 'invitation',
+          title: 'New Team Invitation',
+          message: `You have been invited to join "${eventTitle}" as ${newInvite.designation || formatRoleLabel(role)}.`,
+          timestamp: new Date().toISOString(),
+          read: false,
+          priority: 'high',
+          icon: 'mail',
+          eventId,
+          eventTitle,
+          invitationId: newInvite.id,
+          action: {
+            label: 'Accept & Join',
+            actionType: 'accept_invitation',
+            invitationId: newInvite.id,
+            primary: true
+          }
+        });
+      } catch (e) {
+        console.warn('Could not post invitation notification:', e);
+      }
+
       return { success: true, message: `Invitation dispatched to ${inviteeEmail}.` };
     }
     return { success: false, message: res.error?.message || 'Failed to dispatch invitation.' };
   }
 
   /**
-   * Accept an invitation and activate the membership
+   * Accept an invitation and activate the membership with dynamic role-based routing
    */
-  async acceptInvitation(invitationId: string, user: { id: string; name: string; email: string }): Promise<boolean> {
-    const invite = this.invitations().find(i => i.id === invitationId);
-    if (!invite) return false;
+  async acceptInvitation(
+    invitationId: string, 
+    user: { id: string; name: string; email: string },
+    fallbackRole?: string,
+    fallbackEventId?: string
+  ): Promise<{ success: boolean; role: string; targetRoute: string }> {
+    let invite = this.invitations().find(i => i.id === invitationId);
+    
+    // If not in local signal, fetch from server
+    if (!invite && invitationId) {
+      try {
+        const res = await this.api.get<EventInvitation>(`/eventInvitations/${invitationId}`);
+        if (res.data) {
+          invite = res.data;
+        }
+      } catch {
+        // Fallback gracefully
+      }
+    }
 
-    // Patch invite status
-    await this.api.patch(`/eventInvitations/${invitationId}`, {
-      status: 'accepted',
-      respondedAt: new Date().toISOString()
-    });
+    const role = (invite?.role || fallbackRole || 'staff') as MembershipRole;
+    const eventId = invite?.eventId || fallbackEventId || 'evt-100';
+
+    // Determine target route strictly by role type
+    let targetRoute = '/staff';
+    if (role === 'event_owner') {
+      targetRoute = '/host/dashboard';
+    } else if (role === 'event_manager') {
+      targetRoute = '/management';
+    } else if (role === 'speaker' || role === 'sponsor' || role === 'attendee') {
+      targetRoute = `/events/${eventId}`;
+    }
+
+    // Patch invite status if present
+    if (invitationId) {
+      try {
+        await this.api.patch(`/eventInvitations/${invitationId}`, {
+          status: 'accepted',
+          respondedAt: new Date().toISOString()
+        });
+      } catch (e) {
+        console.warn('Could not patch invitation status:', e);
+      }
+    }
 
     // Create active membership
     const newMembership: EventMembership = {
       id: `mem-${Date.now()}`,
-      eventId: invite.eventId,
+      eventId,
       userId: user.id,
       email: user.email,
       name: user.name,
-      role: invite.role,
-      roleName: invite.customRoleName || invite.designation || formatRoleLabel(invite.role),
-      designation: invite.designation || invite.customRoleName || formatRoleLabel(invite.role),
-      responsibility: invite.responsibility,
-      permissions: invite.permissions || ['scan_tickets', 'view_attendees', 'view_duty'],
-      isOwner: invite.role === 'event_owner',
-      roleCategory: invite.roleCategory,
+      role,
+      roleName: invite?.customRoleName || invite?.designation || formatRoleLabel(role),
+      designation: invite?.designation || invite?.customRoleName || formatRoleLabel(role),
+      responsibility: invite?.responsibility || (role === 'staff' ? 'ticketing' : undefined),
+      permissions: invite?.permissions || (role === 'staff' ? ['scan_tickets', 'view_attendees', 'view_duty'] : ['all']),
+      isOwner: role === 'event_owner',
+      roleCategory: (role === 'speaker' || role === 'sponsor' || role === 'attendee') ? 'participant' : 'operational',
       status: 'active',
       joinedAt: new Date().toISOString()
     };
 
-    const memRes = await this.api.post<EventMembership>('/eventMemberships', newMembership);
-    if (memRes.data) {
-      this.memberships.update(list => [memRes.data!, ...list]);
+    try {
+      const memRes = await this.api.post<EventMembership>('/eventMemberships', newMembership);
+      if (memRes.data) {
+        this.memberships.update(list => [memRes.data!, ...list]);
+      }
+    } catch (e) {
+      console.warn('Could not post membership record:', e);
+    }
+
+    if (invitationId) {
       this.invitations.update(list =>
         list.map(i => i.id === invitationId ? { ...i, status: 'accepted' } : i)
       );
-      return true;
     }
-    return false;
+
+    return { success: true, role: String(role), targetRoute };
+  }
+
+  /**
+   * Decline / reject an invitation without destroying history
+   */
+  async declineInvitation(invitationId: string): Promise<boolean> {
+    if (!invitationId) return true;
+
+    try {
+      await this.api.patch(`/eventInvitations/${invitationId}`, {
+        status: 'rejected',
+        respondedAt: new Date().toISOString()
+      });
+      this.invitations.update(list =>
+        list.map(i => i.id === invitationId ? { ...i, status: 'rejected' } : i)
+      );
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**

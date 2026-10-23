@@ -30,10 +30,27 @@
 
 @media (max-width: 900px) {
   .checkout-layout {
-    grid-template-columns: 1fr;
-    flex-direction: column-reverse;
     display: flex;
-    gap: 1.5rem;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .checkout-main {
+    order: 1;
+    width: 100%;
+  }
+
+  .checkout-sidebar {
+    order: 2;
+    position: static;
+    top: auto;
+    width: 100%;
+  }
+
+  .summary-card {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1.5rem;
   }
 }
 

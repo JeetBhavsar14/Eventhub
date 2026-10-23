@@ -135,9 +135,10 @@
   font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   width: 100%;
   text-align: left;
+  transform: none !important;
 }
 
 .admin-nav-btn svg {
@@ -150,13 +151,16 @@
 .admin-nav-btn:hover {
   background: rgba(200, 238, 255, 0.08);
   color: #FFFFFF;
+  transform: none !important;
 }
 
 .admin-nav-btn.active {
   background: linear-gradient(135deg, rgba(97, 112, 195, 0.4) 0%, rgba(45, 49, 165, 0.6) 100%);
   color: #FFFFFF;
   font-weight: 600;
-  border-left: 3px solid #C8EEFF;
+  border: none !important;
+  border-left: none !important;
+  transform: none !important;
 }
 
 .admin-nav-btn.active svg {
@@ -1942,90 +1946,6 @@
   color: #FFFFFF;
 }
 
-/* Confirmation Dialog Card */
-.admin-confirm-card {
-  background: #FFFFFF;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 480px;
-  padding: 1.75rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: modalPop 0.18s ease-out;
-}
-.confirm-head {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-}
-.confirm-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: #EEF2FF;
-  color: #4F46E5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.confirm-icon-box svg {
-  width: 22px;
-  height: 22px;
-}
-.confirm-icon-box.destructive {
-  background: #FEE2E2;
-  color: #DC2626;
-}
-.confirm-head h3 {
-  margin: 0;
-  font-size: var(--text-lg);
-  font-weight: 700;
-  color: #0F172A;
-}
-.confirm-desc {
-  margin: 0.35rem 0 0;
-  font-size: var(--text-sm);
-  color: #64748B;
-  line-height: 1.5;
-}
-.confirm-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-  border-top: 1px solid #F1F5F9;
-  padding-top: 1rem;
-}
-.btn-confirm-cancel {
-  background: #F1F5F9;
-  border: 1px solid #CBD5E1;
-  color: #475569;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  cursor: pointer;
-}
-.btn-confirm-proceed {
-  background: #2D31A5;
-  border: none;
-  color: #FFFFFF;
-  padding: 0.5rem 1.125rem;
-  border-radius: 8px;
-  font-size: var(--text-sm);
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-.btn-confirm-proceed:hover {
-  background: #1E2270;
-}
-.btn-confirm-proceed.destructive {
-  background: #DC2626;
-}
-.btn-confirm-proceed.destructive:hover {
-  background: #B91C1C;
-}
 
 /* Settings */
 .admin-settings-card {

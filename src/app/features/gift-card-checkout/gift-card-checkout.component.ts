@@ -26,6 +26,30 @@ export class GiftCardCheckoutComponent implements OnInit {
     if (result.data) {
       this.giftCode.set(purchase.giftCode);
       this.purchaseSuccess.set(true);
+
+      // Dispatch gift card notification
+      try {
+        await this.apiClient.post('/notifications', {
+          id: `notif-${Date.now()}`,
+          userId: user.id,
+          userEmail: user.email,
+          type: 'booking',
+          title: 'Gift Card Purchased! 🎁',
+          message: `Your ${card.title} (₹${card.amount.toLocaleString()}) has been activated. Gift Code: ${purchase.giftCode}`,
+          timestamp: new Date().toISOString(),
+          read: false,
+          priority: 'normal',
+          icon: 'ticket',
+          action: {
+            label: 'View Gift Cards',
+            actionType: 'navigate',
+            route: '/my-gift-cards',
+            primary: true
+          }
+        });
+      } catch (e) {
+        console.warn('Could not post gift card notification:', e);
+      }
     } else {
       this.error.set('We could not confirm your payment. Please try again.');
     }

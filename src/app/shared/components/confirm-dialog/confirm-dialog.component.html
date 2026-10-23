@@ -1,0 +1,38 @@
+<div 
+  class="confirm-modal-backdrop" 
+  *ngIf="show" 
+  (click)="onBackdropClick($event)"
+  role="presentation">
+  <div 
+    class="confirm-card" 
+    (click)="$event.stopPropagation()" 
+    role="alertdialog" 
+    aria-modal="true" 
+    [attr.aria-label]="title">
+    <div class="confirm-head">
+      <div class="confirm-icon-box" [class.destructive]="isDestructive">
+        <app-icon [name]="resolvedIconName" [strokeWidth]="2.5" [size]="22"></app-icon>
+      </div>
+      <div class="confirm-content">
+        <h3 class="confirm-title">{{ title }}</h3>
+        <p class="confirm-desc">{{ message }}</p>
+      </div>
+    </div>
+
+    <div class="confirm-actions">
+      <button 
+        type="button" 
+        class="btn-confirm-cancel" 
+        (click)="onCancel()">
+        {{ cancelBtnText }}
+      </button>
+      <button 
+        type="button" 
+        class="btn-confirm-proceed" 
+        [class.destructive]="isDestructive" 
+        (click)="onConfirm()">
+        {{ actionBtnText }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -229,7 +229,7 @@
       "subcategory": "General",
       "format": "In-Person",
       "status": "published",
-      "isFeatured": false,
+      "isFeatured": true,
       "isPopular": false,
       "thumbnailUrl": "https://picsum.photos/seed/Mumbai4/600/400",
       "date": "2026-11-04",
@@ -2913,9 +2913,256 @@
       },
       "createdAt": "2026-10-16T09:42:45.788Z",
       "id": "9dYu-h4nVuo"
+    },
+    {
+      "bookingReference": "EH-MVAW3TJ9-68OY",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "eventDate": "2026-11-01",
+      "eventTime": "18:00",
+      "eventLocation": "Mumbai Grand Center",
+      "eventAddress": "Mumbai, State, India",
+      "eventThumbnail": "https://picsum.photos/seed/Mumbai1/600/400",
+      "attendee": {
+        "id": "user-002",
+        "name": "Admin EventHub",
+        "email": "admin@eventhub.com",
+        "phone": "+91 91234 56789"
+      },
+      "userId": "user-002",
+      "tickets": [
+        {
+          "ticketTypeId": "tt-101-1",
+          "name": "General",
+          "price": 500,
+          "quantity": 2
+        },
+        {
+          "ticketTypeId": "tt-101-2",
+          "name": "VIP",
+          "price": 1500,
+          "quantity": 2
+        }
+      ],
+      "subtotal": 4000,
+      "discount": 0,
+      "offerCode": null,
+      "tax": 720,
+      "totalAmount": 4720,
+      "status": "confirmed",
+      "payment": {
+        "method": "qr",
+        "label": "UPI QR",
+        "status": "paid",
+        "transactionReference": "TXN-MVAW3TJ9"
+      },
+      "createdAt": "2026-10-16T11:34:10.245Z",
+      "id": "htMDpTaqBTE"
+    },
+    {
+      "bookingReference": "EH-MVJ4FJQ9-V0BS",
+      "eventId": "evt-103",
+      "eventTitle": "Mumbai Activities Showcase 4",
+      "eventDate": "2026-11-04",
+      "eventTime": "18:00",
+      "eventLocation": "Mumbai Grand Center",
+      "eventAddress": "Mumbai, State, India",
+      "eventThumbnail": "https://picsum.photos/seed/Mumbai4/600/400",
+      "attendee": {
+        "id": "user-001",
+        "name": "Jeet Shah",
+        "email": "jeet@eventhub.com",
+        "phone": "+91 98765 43210"
+      },
+      "userId": "user-001",
+      "tickets": [
+        {
+          "ticketTypeId": "tt-104-1",
+          "name": "General",
+          "price": 2000,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 2000,
+      "discount": 0,
+      "offerCode": null,
+      "tax": 360,
+      "totalAmount": 2360,
+      "status": "confirmed",
+      "payment": {
+        "method": "qr",
+        "label": "UPI QR",
+        "status": "paid",
+        "transactionReference": "TXN-MVJ4FJQ9"
+      },
+      "createdAt": "2026-10-22T05:49:23.745Z",
+      "id": "EcWudZfrMcU"
     }
   ],
-  "notifications": [],
+  "notifications": [
+    {
+      "id": "notif-001",
+      "userId": "user-001",
+      "userEmail": "jeet@eventhub.com",
+      "type": "booking",
+      "title": "Booking Confirmed! 🎉",
+      "message": "Your booking for \"Mumbai Festivals Showcase 1\" (2 tickets • ₹3,000) is confirmed. Your digital QR pass is ready.",
+      "timestamp": "2026-10-22T08:30:00.000Z",
+      "read": true,
+      "priority": "high",
+      "icon": "ticket",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "bookingReference": "EH-MUM-2026-8492",
+      "action": {
+        "label": "View Digital Pass",
+        "actionType": "navigate",
+        "route": "/bookings",
+        "primary": true
+      }
+    },
+    {
+      "id": "notif-002",
+      "userId": "user-001",
+      "userEmail": "jeet@eventhub.com",
+      "type": "invitation",
+      "title": "Co-Owner Team Invitation",
+      "message": "Riya Mehta invited you to join \"Sunburn Arena Electronic Showcase\" as Co-Owner (20% equity stake).",
+      "timestamp": "2026-10-22T10:15:00.000Z",
+      "read": true,
+      "priority": "high",
+      "icon": "mail",
+      "eventId": "evt-101",
+      "eventTitle": "Sunburn Arena Electronic Showcase",
+      "invitationId": "inv-001",
+      "invitationStatus": "accepted",
+      "targetRole": "event_owner",
+      "targetRoute": "/host/dashboard",
+      "action": {
+        "label": "Accept & Join",
+        "actionType": "accept_invitation",
+        "invitationId": "inv-001",
+        "primary": true
+      }
+    },
+    {
+      "id": "notif-007",
+      "userId": "user-001",
+      "userEmail": "jeet@eventhub.com",
+      "type": "invitation",
+      "title": "Field & Gate Staff Assignment",
+      "message": "Operations Lead assigned you as Gate Scanner & Access Control at North Turnstiles for \"Mumbai Festivals Showcase 1\".",
+      "timestamp": "2026-10-22T10:30:00.000Z",
+      "read": true,
+      "priority": "high",
+      "icon": "mail",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "invitationId": "inv-002",
+      "invitationStatus": "accepted",
+      "targetRole": "staff",
+      "targetRoute": "/staff",
+      "action": {
+        "label": "Accept & Join",
+        "actionType": "accept_invitation",
+        "invitationId": "inv-002",
+        "primary": true
+      }
+    },
+    {
+      "id": "notif-003",
+      "userId": "user-001",
+      "userEmail": "jeet@eventhub.com",
+      "type": "reminder",
+      "title": "Event Starting in 24 Hours",
+      "message": "\"Mumbai Festivals Showcase 1\" starts tomorrow at 6:00 PM at Mumbai Grand Center. Gate check-in opens 1 hour prior.",
+      "timestamp": "2026-10-20T09:00:00.000Z",
+      "read": true,
+      "priority": "normal",
+      "icon": "calendar",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "action": {
+        "label": "Venue Details",
+        "actionType": "navigate",
+        "route": "/events/evt-100",
+        "primary": false
+      }
+    },
+    {
+      "id": "notif-004",
+      "userId": "user-003",
+      "userEmail": "host@eventhub.com",
+      "type": "event_status",
+      "title": "Event Approved & Live! 🚀",
+      "message": "Your event \"Sunburn Arena Electronic Showcase\" has been reviewed by the curation team and is now live on the public discovery portal.",
+      "timestamp": "2026-10-22T06:45:00.000Z",
+      "read": false,
+      "priority": "normal",
+      "icon": "check-circle",
+      "eventId": "evt-101",
+      "eventTitle": "Sunburn Arena Electronic Showcase",
+      "action": {
+        "label": "View Event Page",
+        "actionType": "navigate",
+        "route": "/events/evt-101",
+        "primary": true
+      }
+    },
+    {
+      "id": "notif-005",
+      "userId": "user-005",
+      "userEmail": "staff@eventhub.com",
+      "type": "invitation",
+      "title": "Assigned to Venue Station",
+      "message": "You have been assigned as Gate Scanner at North Turnstiles for \"Mumbai Festivals Showcase 1\".",
+      "timestamp": "2026-10-21T18:00:00.000Z",
+      "read": false,
+      "priority": "high",
+      "icon": "mail",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "invitationId": "inv-002",
+      "action": {
+        "label": "Open Staff Workspace",
+        "actionType": "navigate",
+        "route": "/staff",
+        "primary": true
+      }
+    },
+    {
+      "id": "notif-006",
+      "userId": "all",
+      "type": "system",
+      "title": "Welcome to EventHub 2.0",
+      "message": "Discover concerts, festivals, tech conferences, and live sports with instant QR ticket admission.",
+      "timestamp": "2026-10-18T10:00:00.000Z",
+      "read": true,
+      "priority": "low",
+      "icon": "bell"
+    },
+    {
+      "id": "YHeP7UmMPp4",
+      "userId": "user-001",
+      "userEmail": "jeet@eventhub.com",
+      "type": "booking",
+      "title": "Booking Confirmed!",
+      "message": "Your booking for \"Mumbai Activities Showcase 4\" (1 tickets • ₹2,360) has been confirmed. Pass: EH-MVJ4FJQ9-V0BS",
+      "priority": "high",
+      "icon": "ticket",
+      "eventId": "evt-103",
+      "eventTitle": "Mumbai Activities Showcase 4",
+      "bookingReference": "EH-MVJ4FJQ9-V0BS",
+      "action": {
+        "label": "View Tickets",
+        "actionType": "navigate",
+        "route": "/bookings",
+        "primary": true
+      },
+      "timestamp": "2026-10-22T05:49:23.799Z",
+      "read": true
+    }
+  ],
   "coupons": [
     {
       "id": "cpn-1",
@@ -3276,6 +3523,20 @@
       "body": "EventHub server cluster maintenance scheduled for Sunday 2:00 AM - 4:00 AM IST.",
       "audience": "all",
       "sentAt": "2026-10-09T06:00:00.000Z"
+    },
+    {
+      "id": "1EYUfg3P20o",
+      "title": "hi",
+      "body": "hello from brpadcast",
+      "audience": "all",
+      "sentAt": "2026-10-22T05:15:40.727Z"
+    },
+    {
+      "id": "qEL1ftUoqOE",
+      "title": "hi",
+      "body": "hi",
+      "audience": "all",
+      "sentAt": "2026-10-22T07:20:36.560Z"
     }
   ],
   "eventMemberships": [
@@ -3330,9 +3591,83 @@
       "status": "active",
       "delegationActive": true,
       "joinedAt": "2026-10-09T08:30:00.000Z"
+    },
+    {
+      "id": "M7IhocDnS7g",
+      "eventId": "evt-101",
+      "userId": "user-001",
+      "email": "jeet@eventhub.com",
+      "name": "Jeet Shah",
+      "role": "event_owner",
+      "roleName": "Co-Owner (20% Equity Stake)",
+      "designation": "Co-Owner (20% Equity Stake)",
+      "permissions": [
+        "all"
+      ],
+      "isOwner": true,
+      "roleCategory": "operational",
+      "status": "active",
+      "joinedAt": "2026-10-22T05:58:20.350Z"
+    },
+    {
+      "id": "W5YJBRqAdx8",
+      "eventId": "evt-100",
+      "userId": "user-001",
+      "email": "jeet@eventhub.com",
+      "name": "Jeet Shah",
+      "role": "staff",
+      "roleName": "Gate Scanner & Access Control",
+      "designation": "Gate Scanner & Access Control",
+      "responsibility": "ticketing",
+      "permissions": [
+        "scan_tickets",
+        "view_attendees",
+        "view_duty"
+      ],
+      "isOwner": false,
+      "roleCategory": "operational",
+      "status": "active",
+      "joinedAt": "2026-10-22T05:58:35.143Z"
     }
   ],
   "eventInvitations": [
+    {
+      "id": "inv-001",
+      "eventId": "evt-101",
+      "eventTitle": "Sunburn Arena Electronic Showcase",
+      "inviterId": "user-003",
+      "inviteeEmail": "jeet@eventhub.com",
+      "inviteeName": "Jeet Shah",
+      "role": "event_owner",
+      "roleCategory": "operational",
+      "designation": "Co-Owner (20% Equity Stake)",
+      "permissions": [
+        "all"
+      ],
+      "status": "accepted",
+      "sentAt": "2026-10-21T14:15:00.000Z",
+      "respondedAt": "2026-10-22T05:58:20.335Z"
+    },
+    {
+      "id": "inv-002",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "inviterId": "user-003",
+      "inviteeEmail": "jeet@eventhub.com",
+      "inviteeName": "Jeet Shah",
+      "role": "staff",
+      "roleCategory": "operational",
+      "designation": "Gate Scanner & Access Control",
+      "responsibility": "ticketing",
+      "permissions": [
+        "scan_tickets",
+        "view_attendees",
+        "view_duty"
+      ],
+      "status": "accepted",
+      "sentAt": "2026-10-22T09:00:00.000Z",
+      "respondedAt": "2026-10-22T05:58:35.120Z"
+    },
     {
       "id": "inv-1",
       "eventId": "evt-100",
@@ -3464,7 +3799,7 @@
       "userName": "Riya Mehta",
       "userEmail": "host@eventhub.com",
       "organizationName": "Starlight Live Experiences Pvt Ltd",
-      "percentage": 80,
+      "percentage": 75,
       "isPrimaryOwner": true,
       "status": "active",
       "assignedAt": "2026-01-10T10:00:00.000Z"
@@ -3476,7 +3811,7 @@
       "userName": "Aarav Soundworks",
       "userEmail": "aarav.sound@partners.com",
       "organizationName": "Sonic Soundworks India",
-      "percentage": 20,
+      "percentage": 25,
       "isPrimaryOwner": false,
       "status": "active",
       "assignedAt": "2026-02-01T09:00:00.000Z"

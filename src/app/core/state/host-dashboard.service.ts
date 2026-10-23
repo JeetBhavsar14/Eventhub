@@ -683,6 +683,68 @@ export class HostDashboardService {
     ]);
   }
 
+  updateEvent(eventId: string, changes: Partial<HostEventItem>, requestAdminApproval: boolean, changeReason?: string) {
+    const isRequestingReview = requestAdminApproval || changes.status === 'pending_review';
+    const targetStatus: HostEventStatus = isRequestingReview ? 'pending_review' : (changes.status || 'draft');
+
+    this.events.update(list =>
+      list.map(e => {
+        if (e.id === eventId) {
+          return {
+            ...e,
+            ...changes,
+            status: targetStatus,
+            feedbackNotes: isRequestingReview 
+              ? (changeReason ? `Host change request: ${changeReason}` : 'Host requested review of modifications.') 
+              : e.feedbackNotes
+          };
+        }
+        return e;
+      })
+    );
+
+    if (isRequestingReview) {
+      this.pendingActions.update(acts => [
+        {
+          id: `PA-CHANGE-${Date.now()}`,
+          eventId,
+          type: 'pending_review',
+          title: `Pending Admin Review: ${changes.title || 'Event Update'}`,
+          description: changeReason || 'Modifications submitted to Admin curation team for approval.',
+          severity: 'info',
+          actionLabel: 'View Details',
+          actionType: 'view_details',
+          badgeText: 'In Review'
+        },
+        ...acts.filter(a => a.eventId !== eventId)
+      ]);
+
+      this.recentActivities.update(acts => [
+        {
+          id: `ACT-${Date.now()}`,
+          title: 'Event Change Request Submitted',
+          description: `Modifications for "${changes.title || 'Event'}" sent to Admin for curation approval.`,
+          timestamp: 'Just now',
+          type: 'submission',
+          eventTitle: changes.title
+        },
+        ...acts
+      ]);
+    } else {
+      this.recentActivities.update(acts => [
+        {
+          id: `ACT-${Date.now()}`,
+          title: 'Event Details Updated',
+          description: `Changes saved for "${changes.title || 'Draft Event'}".`,
+          timestamp: 'Just now',
+          type: 'update',
+          eventTitle: changes.title
+        },
+        ...acts
+      ]);
+    }
+  }
+
   createNewEvent(eventData: Partial<HostEventItem>) {
     const newId = `EVT-${Math.floor(700 + Math.random() * 200)}`;
     const newEvent: HostEventItem = {

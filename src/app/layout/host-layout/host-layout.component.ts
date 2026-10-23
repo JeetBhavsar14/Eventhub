@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { HostDashboardService } from '@core/state/host-dashboard.service';
 import { EventTeamService } from '@core/state/event-team.service';
 import { EventOwnershipService } from '@core/state/event-ownership.service';
+import { ToastService, AdminService } from '@core/state';
 import { AuthService } from '@core/auth';
 import {
   HostEventItem,
@@ -21,12 +22,22 @@ import {
   EventParticipantProfile,
   ManagerResponsibilityArea
 } from '@core/models';
-import { SelectComponent, SelectOption, IconComponent } from '@shared/components';
+import { SelectComponent, SelectOption, IconComponent, PaginationBarComponent, ConfirmDialogComponent } from '@shared/components';
+import { HostMyEventsComponent } from './components/host-my-events/host-my-events.component';
 
 @Component({
   selector: 'app-host-layout',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, SelectComponent, IconComponent],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    RouterLink, 
+    SelectComponent, 
+    IconComponent, 
+    PaginationBarComponent, 
+    ConfirmDialogComponent,
+    HostMyEventsComponent
+  ],
   templateUrl: './host-layout.component.html',
   styleUrl: './host-layout.component.css'
 })
@@ -34,8 +45,10 @@ export class HostLayoutComponent implements OnInit {
   readonly dashboardService = inject(HostDashboardService);
   readonly eventTeamService = inject(EventTeamService);
   readonly ownershipService = inject(EventOwnershipService);
+  private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly adminService = inject(AdminService);
 
   // Phase 5: Event Ownership & Multi-Owner State (§ 11.0, § 12.0, § 14.0)
   readonly ownerStakes = this.ownershipService.ownerStakes;
@@ -322,6 +335,375 @@ export class HostLayoutComponent implements OnInit {
     });
   });
 
+  // Smooth scroll to top of target section on page change
+  scrollToSection(elementId: string) {
+    setTimeout(() => {
+      const el = document.getElementById(elementId);
+      if (el) {
+        const yOffset = -90; // offset for fixed header
+        const y = el.getBoundingClientRect().top + window.scrollY + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 50);
+  }
+
+  // Live Top 3 Search Matching State
+  showSearchDropdown = signal(false);
+
+  topMatchingResults = computed(() => {
+    const term = this.eventSearchTerm().toLowerCase().trim();
+    if (!term) return [];
+    return this.events().filter(e =>
+      e.title.toLowerCase().includes(term) ||
+      e.category.toLowerCase().includes(term) ||
+      e.venue.toLowerCase().includes(term) ||
+      e.city.toLowerCase().includes(term)
+    ).slice(0, 3);
+  });
+
+  totalMatchesCount = computed(() => {
+    const term = this.eventSearchTerm().toLowerCase().trim();
+    if (!term) return 0;
+    return this.events().filter(e =>
+      e.title.toLowerCase().includes(term) ||
+      e.category.toLowerCase().includes(term) ||
+      e.venue.toLowerCase().includes(term) ||
+      e.city.toLowerCase().includes(term)
+    ).length;
+  });
+
+  onSearchFocus() {
+    if (this.eventSearchTerm().trim()) {
+      this.showSearchDropdown.set(true);
+    }
+  }
+
+  onEventSearchChange(term: string) {
+    this.eventSearchTerm.set(term);
+    this.showSearchDropdown.set(term.trim().length > 0);
+    this.overviewPage.set(1);
+    this.portfolioPage.set(1);
+  }
+
+  clearSearch() {
+    this.eventSearchTerm.set('');
+    this.showSearchDropdown.set(false);
+    this.overviewPage.set(1);
+    this.portfolioPage.set(1);
+  }
+
+  selectSearchResult(event: HostEventItem) {
+    this.showSearchDropdown.set(false);
+    this.openEventDetails(event);
+  }
+
+  seeAllSearchResults() {
+    this.showSearchDropdown.set(false);
+    this.switchView('my_events');
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.header-search-box')) {
+      this.showSearchDropdown.set(false);
+    }
+    if (!target.closest('.dropdown-trigger') && !target.closest('.dropdown-menu-box')) {
+      this.showTopUserMenu.set(false);
+      this.showSidebarUserMenu.set(false);
+    }
+    if (!target.closest('.relative-dropdown-container')) {
+      this.showNotificationsDropdown.set(false);
+    }
+    if (!target.closest('.relative-action-menu')) {
+      this.activeActionMenuId.set(null);
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    this.showSearchDropdown.set(false);
+    this.showTopUserMenu.set(false);
+    this.showSidebarUserMenu.set(false);
+    this.showNotificationsDropdown.set(false);
+    this.activeActionMenuId.set(null);
+  }
+
+  // Overview Table Pagination
+  overviewPage = signal(1);
+  overviewPageSize = signal(5);
+
+  overviewTotalPages = computed(() => {
+    const total = this.filteredEvents().length;
+    return Math.max(1, Math.ceil(total / this.overviewPageSize()));
+  });
+
+  paginatedOverviewEvents = computed(() => {
+    const list = this.filteredEvents();
+    const size = this.overviewPageSize();
+    const maxPage = Math.max(1, Math.ceil(list.length / size));
+    const page = Math.min(this.overviewPage(), maxPage);
+    const start = (page - 1) * size;
+    return list.slice(start, start + size);
+  });
+
+  overviewPaginationInfo = computed(() => {
+    const total = this.filteredEvents().length;
+    if (total === 0) return { start: 0, end: 0, total: 0 };
+    const size = this.overviewPageSize();
+    const maxPage = Math.max(1, Math.ceil(total / size));
+    const page = Math.min(this.overviewPage(), maxPage);
+    const start = (page - 1) * size + 1;
+    const end = Math.min(page * size, total);
+    return { start, end, total };
+  });
+
+  overviewPageNumbers = computed(() => {
+    const total = this.overviewTotalPages();
+    const current = this.overviewPage();
+    const pages: number[] = [];
+    const startPage = Math.max(1, current - 2);
+    const endPage = Math.min(total, startPage + 4);
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  });
+
+  setOverviewPage(p: number) {
+    if (p >= 1 && p <= this.overviewTotalPages()) {
+      this.overviewPage.set(p);
+      this.scrollToSection('host-recent-events-section');
+    }
+  }
+
+  prevOverviewPage() {
+    if (this.overviewPage() > 1) {
+      this.overviewPage.update(p => p - 1);
+      this.scrollToSection('host-recent-events-section');
+    }
+  }
+
+  nextOverviewPage() {
+    if (this.overviewPage() < this.overviewTotalPages()) {
+      this.overviewPage.update(p => p + 1);
+      this.scrollToSection('host-recent-events-section');
+    }
+  }
+
+  // Portfolio Grid Pagination
+  portfolioPage = signal(1);
+  portfolioPageSize = signal(6);
+
+  portfolioTotalPages = computed(() => {
+    const total = this.filteredEvents().length;
+    return Math.max(1, Math.ceil(total / this.portfolioPageSize()));
+  });
+
+  paginatedPortfolioEvents = computed(() => {
+    const list = this.filteredEvents();
+    const size = this.portfolioPageSize();
+    const maxPage = Math.max(1, Math.ceil(list.length / size));
+    const page = Math.min(this.portfolioPage(), maxPage);
+    const start = (page - 1) * size;
+    return list.slice(start, start + size);
+  });
+
+  portfolioPaginationInfo = computed(() => {
+    const total = this.filteredEvents().length;
+    if (total === 0) return { start: 0, end: 0, total: 0 };
+    const size = this.portfolioPageSize();
+    const maxPage = Math.max(1, Math.ceil(total / size));
+    const page = Math.min(this.portfolioPage(), maxPage);
+    const start = (page - 1) * size + 1;
+    const end = Math.min(page * size, total);
+    return { start, end, total };
+  });
+
+  portfolioPageNumbers = computed(() => {
+    const total = this.portfolioTotalPages();
+    const current = this.portfolioPage();
+    const pages: number[] = [];
+    const startPage = Math.max(1, current - 2);
+    const endPage = Math.min(total, startPage + 4);
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  });
+
+  setPortfolioPage(p: number) {
+    if (p >= 1 && p <= this.portfolioTotalPages()) {
+      this.portfolioPage.set(p);
+      this.scrollToSection('host-portfolio-section');
+    }
+  }
+
+  prevPortfolioPage() {
+    if (this.portfolioPage() > 1) {
+      this.portfolioPage.update(p => p - 1);
+      this.scrollToSection('host-portfolio-section');
+    }
+  }
+
+  nextPortfolioPage() {
+    if (this.portfolioPage() < this.portfolioTotalPages()) {
+      this.portfolioPage.update(p => p + 1);
+      this.scrollToSection('host-portfolio-section');
+    }
+  }
+
+  setPortfolioPageSize(size: number) {
+    this.portfolioPageSize.set(size);
+    this.portfolioPage.set(1);
+    this.scrollToSection('host-portfolio-section');
+  }
+
+  // Upcoming Events Pagination
+  upcomingPage = signal(1);
+  upcomingPageSize = signal(3);
+
+  upcomingTotalPages = computed(() => {
+    const total = this.upcomingEvents().length;
+    return Math.max(1, Math.ceil(total / this.upcomingPageSize()));
+  });
+
+  paginatedUpcomingEvents = computed(() => {
+    const list = this.upcomingEvents();
+    const size = this.upcomingPageSize();
+    const maxPage = Math.max(1, Math.ceil(list.length / size));
+    const page = Math.min(this.upcomingPage(), maxPage);
+    const start = (page - 1) * size;
+    return list.slice(start, start + size);
+  });
+
+  upcomingPaginationInfo = computed(() => {
+    const total = this.upcomingEvents().length;
+    if (total === 0) return { start: 0, end: 0, total: 0 };
+    const size = this.upcomingPageSize();
+    const maxPage = Math.max(1, Math.ceil(total / size));
+    const page = Math.min(this.upcomingPage(), maxPage);
+    const start = (page - 1) * size + 1;
+    const end = Math.min(page * size, total);
+    return { start, end, total };
+  });
+
+  upcomingPageNumbers = computed(() => {
+    const total = this.upcomingTotalPages();
+    const current = this.upcomingPage();
+    const pages: number[] = [];
+    let startPage = Math.max(1, current - 2);
+    let endPage = Math.min(total, startPage + 4);
+    if (endPage - startPage < 4) {
+      startPage = Math.max(1, endPage - 4);
+    }
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  });
+
+  setUpcomingPage(p: number) {
+    if (p >= 1 && p <= this.upcomingTotalPages()) {
+      this.upcomingPage.set(p);
+      this.scrollToSection('host-upcoming-events-section');
+    }
+  }
+
+  prevUpcomingPage() {
+    if (this.upcomingPage() > 1) {
+      this.upcomingPage.update(p => p - 1);
+      this.scrollToSection('host-upcoming-events-section');
+    }
+  }
+
+  nextUpcomingPage() {
+    if (this.upcomingPage() < this.upcomingTotalPages()) {
+      this.upcomingPage.update(p => p + 1);
+      this.scrollToSection('host-upcoming-events-section');
+    }
+  }
+
+  setUpcomingPageSize(size: number) {
+    this.upcomingPageSize.set(size);
+    this.upcomingPage.set(1);
+    this.scrollToSection('host-upcoming-events-section');
+  }
+
+  // Bookings & Attendees Pagination
+  bookingsPage = signal(1);
+  bookingsPageSize = signal(6);
+
+  bookingsTotalPages = computed(() => {
+    const total = this.attendees().length;
+    return Math.max(1, Math.ceil(total / this.bookingsPageSize()));
+  });
+
+  paginatedAttendees = computed(() => {
+    const list = this.attendees();
+    const size = this.bookingsPageSize();
+    const maxPage = Math.max(1, Math.ceil(list.length / size));
+    const page = Math.min(this.bookingsPage(), maxPage);
+    const start = (page - 1) * size;
+    return list.slice(start, start + size);
+  });
+
+  bookingsPaginationInfo = computed(() => {
+    const total = this.attendees().length;
+    if (total === 0) return { start: 0, end: 0, total: 0 };
+    const size = this.bookingsPageSize();
+    const maxPage = Math.max(1, Math.ceil(total / size));
+    const page = Math.min(this.bookingsPage(), maxPage);
+    const start = (page - 1) * size + 1;
+    const end = Math.min(page * size, total);
+    return { start, end, total };
+  });
+
+  bookingsPageNumbers = computed(() => {
+    const total = this.bookingsTotalPages();
+    const current = this.bookingsPage();
+    const pages: number[] = [];
+    const startPage = Math.max(1, current - 2);
+    const endPage = Math.min(total, startPage + 4);
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  });
+
+  setBookingsPage(p: number) {
+    if (p >= 1 && p <= this.bookingsTotalPages()) {
+      this.bookingsPage.set(p);
+      this.scrollToSection('host-bookings-section');
+    }
+  }
+
+  prevBookingsPage() {
+    if (this.bookingsPage() > 1) {
+      this.bookingsPage.update(p => p - 1);
+      this.scrollToSection('host-bookings-section');
+    }
+  }
+
+  nextBookingsPage() {
+    if (this.bookingsPage() < this.bookingsTotalPages()) {
+      this.bookingsPage.update(p => p + 1);
+      this.scrollToSection('host-bookings-section');
+    }
+  }
+
+  setBookingsPageSize(size: number) {
+    this.bookingsPageSize.set(size);
+    this.bookingsPage.set(1);
+    this.scrollToSection('host-bookings-section');
+  }
+
+  setFilterStatus(status: 'all' | 'published' | 'pending' | 'draft' | 'action_required') {
+    this.selectedStatusFilter.set(status);
+    this.overviewPage.set(1);
+    this.portfolioPage.set(1);
+  }
+
   // Navigation Methods
   switchView(view: HostDashboardView) {
     this.dashboardService.currentView.set(view);
@@ -354,17 +736,6 @@ export class HostLayoutComponent implements OnInit {
     this.showNotificationsDropdown.set(false);
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.dropdown-trigger') && !target.closest('.dropdown-menu-box')) {
-      this.showTopUserMenu.set(false);
-      this.showSidebarUserMenu.set(false);
-      this.showNotificationsDropdown.set(false);
-      this.activeActionMenuId.set(null);
-    }
-  }
-
   toggleActionMenu(eventId: string, event: MouseEvent) {
     event.stopPropagation();
     if (this.activeActionMenuId() === eventId) {
@@ -388,10 +759,109 @@ export class HostLayoutComponent implements OnInit {
     this.dashboardService.selectedPeriod.set(period);
   }
 
+  // Event Details Drawer & Edit State
+  isEditingEventDetails = signal(false);
+  editEventForm = {
+    title: '',
+    category: 'Music & Concerts',
+    date: '',
+    time: '',
+    venue: '',
+    city: '',
+    capacity: 100,
+    price: 0,
+    description: '',
+    imageUrl: '',
+    changeReason: ''
+  };
+
   // Action Menu Commands
-  openEventDetails(event: HostEventItem) {
+  openEventDetails(event: HostEventItem, startInEditMode = false) {
     this.selectedEventForDetails.set(event);
     this.activeActionMenuId.set(null);
+    this.populateEditForm(event);
+    this.isEditingEventDetails.set(startInEditMode);
+  }
+
+  populateEditForm(event: HostEventItem) {
+    this.editEventForm = {
+      title: event.title,
+      category: event.category || 'Music & Concerts',
+      date: event.date,
+      time: event.time,
+      venue: event.venue,
+      city: event.city,
+      capacity: event.capacity,
+      price: event.price,
+      description: event.description || '',
+      imageUrl: event.imageUrl,
+      changeReason: ''
+    };
+  }
+
+  startEditingEvent() {
+    const current = this.selectedEventForDetails();
+    if (current) {
+      this.populateEditForm(current);
+      this.isEditingEventDetails.set(true);
+    }
+  }
+
+  cancelEditingEvent() {
+    this.isEditingEventDetails.set(false);
+  }
+
+  saveEventChanges(requestApproval: boolean) {
+    const current = this.selectedEventForDetails();
+    if (!current) return;
+
+    if (!this.editEventForm.title.trim()) {
+      this.showToast('Please enter an event title.');
+      return;
+    }
+
+    const changes: Partial<HostEventItem> = {
+      title: this.editEventForm.title.trim(),
+      category: this.editEventForm.category,
+      date: this.editEventForm.date,
+      time: this.editEventForm.time,
+      venue: this.editEventForm.venue,
+      city: this.editEventForm.city,
+      capacity: Number(this.editEventForm.capacity) || 100,
+      price: Number(this.editEventForm.price) || 0,
+      description: this.editEventForm.description,
+      imageUrl: this.editEventForm.imageUrl || current.imageUrl
+    };
+
+    // Update in Host Dashboard State
+    this.dashboardService.updateEvent(current.id, changes, requestApproval, this.editEventForm.changeReason);
+
+    // Sync with Admin Curation queue if requesting approval or non-draft
+    if (requestApproval || current.status !== 'draft') {
+      this.adminService.submitEventChangeRequest(current.id, {
+        title: changes.title,
+        venue: changes.venue,
+        city: changes.city,
+        date: changes.date,
+        capacity: changes.capacity,
+        ticketPrice: changes.price,
+        imageUrl: changes.imageUrl
+      });
+    }
+
+    // Refresh selected event drawer
+    const updated = this.dashboardService.events().find(e => e.id === current.id);
+    if (updated) {
+      this.selectedEventForDetails.set(updated);
+    }
+
+    this.isEditingEventDetails.set(false);
+
+    if (requestApproval || current.status !== 'draft') {
+      this.showToast('Changes submitted to Admin! Review request is pending curation approval.');
+    } else {
+      this.showToast('Draft event saved successfully.');
+    }
   }
 
   openFeedbackModal(event: HostEventItem) {
@@ -412,10 +882,52 @@ export class HostLayoutComponent implements OnInit {
     this.showToast('Event published live! Tickets are now available.');
   }
 
+  // Confirmation Dialog State
+  showConfirmDialog = signal(false);
+  confirmDialogData = signal<{
+    title: string;
+    message: string;
+    actionBtnText: string;
+    isDestructive: boolean;
+  }>({
+    title: '',
+    message: '',
+    actionBtnText: 'Confirm',
+    isDestructive: false
+  });
+  private pendingConfirmAction: (() => void) | null = null;
+
+  triggerConfirm(title: string, message: string, actionBtnText: string, isDestructive: boolean, action: () => void) {
+    this.confirmDialogData.set({ title, message, actionBtnText, isDestructive });
+    this.pendingConfirmAction = action;
+    this.showConfirmDialog.set(true);
+  }
+
+  executeConfirm() {
+    if (this.pendingConfirmAction) {
+      this.pendingConfirmAction();
+      this.pendingConfirmAction = null;
+    }
+    this.showConfirmDialog.set(false);
+  }
+
+  cancelConfirm() {
+    this.pendingConfirmAction = null;
+    this.showConfirmDialog.set(false);
+  }
+
   deleteDraftEvent(eventId: string) {
-    this.dashboardService.deleteDraft(eventId);
     this.activeActionMenuId.set(null);
-    this.showToast('Draft event removed.');
+    this.triggerConfirm(
+      'Discard Draft Event',
+      'Are you sure you want to delete this draft event? This action cannot be undone.',
+      'Delete Draft',
+      true,
+      () => {
+        this.dashboardService.deleteDraft(eventId);
+        this.showToast('Draft event removed.');
+      }
+    );
   }
 
   submitFeedbackClarification() {
@@ -690,6 +1202,7 @@ export class HostLayoutComponent implements OnInit {
   // Toast System
   showToast(msg: string) {
     this.toastMessage.set(msg);
+    this.toastService.info(msg);
     setTimeout(() => {
       this.toastMessage.set(null);
     }, 4000);
