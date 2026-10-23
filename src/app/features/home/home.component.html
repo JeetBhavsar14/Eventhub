@@ -1,0 +1,327 @@
+<div class="landing-page-root">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 1. HERO SECTION WITH SEARCH & SPOTLIGHT                     -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="landing-hero-section">
+    <!-- Ambient Backdrop Glows -->
+    <div class="hero-glow glow-1"></div>
+    <div class="hero-glow glow-2"></div>
+
+    <div class="hero-container">
+      
+      <!-- Eyebrow Badge -->
+      <div class="hero-eyebrow-badge">
+        <app-icon name="sparkles" [size]="14"></app-icon>
+        <span>DISCOVER, BOOK & ATTEND LIVE EXPERIENCES</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="hero-title">
+        Live Moments That <span class="gradient-text">Ignite Your Passion</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        From electrifying stadium concerts and weekend music festivals to high-impact tech summits — secure your verified QR ticket in <strong>{{ locationService.selectedCity() }}</strong> with zero hidden fees.
+      </p>
+
+      <!-- Interactive Global Search Box -->
+      <div class="hero-search-card">
+        <form class="hero-search-form" (submit)="$event.preventDefault(); executeSearch()">
+          
+          <!-- Search Input -->
+          <div class="search-input-field">
+            <app-icon name="search" class="field-icon" [size]="18"></app-icon>
+            <input 
+              type="text" 
+              placeholder="Search concerts, artists, festivals, or venues..." 
+              [(ngModel)]="searchQuery" 
+              name="searchQuery" 
+              class="hero-input" />
+          </div>
+
+          <!-- Category Select -->
+          <div class="search-divider"></div>
+          <div class="search-select-field">
+            <app-icon name="tag" class="field-icon" [size]="16"></app-icon>
+            <select [(ngModel)]="selectedCategory" name="selectedCategory" class="hero-select">
+              <option *ngFor="let cat of categoryOptions" [value]="cat">
+                {{ cat === 'All' ? 'All Categories' : cat }}
+              </option>
+            </select>
+          </div>
+
+          <!-- City Indicator Pill -->
+          <div class="search-divider"></div>
+          <div class="search-city-field" [routerLink]="['/discover']">
+            <app-icon name="map-pin" class="field-icon" [size]="16"></app-icon>
+            <span class="city-text">{{ locationService.selectedCity() }}</span>
+          </div>
+
+          <!-- Search CTA Button -->
+          <button type="button" class="btn-hero-search" (click)="executeSearch()">
+            <span>Find Events</span>
+            <app-icon name="arrow-right" [size]="16"></app-icon>
+          </button>
+        </form>
+
+        <!-- Quick Trending City Tags -->
+        <div class="hero-city-chips">
+          <span class="chip-label">Popular Cities:</span>
+          <button 
+            *ngFor="let c of popularCities" 
+            type="button" 
+            class="city-chip" 
+            [class.active]="c === locationService.selectedCity()" 
+            (click)="selectCity(c)">
+            {{ c }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 2. TRUST & IMPACT METRICS STRIP                             -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="trust-metrics-section">
+    <div class="metrics-grid">
+      <div class="metric-item">
+        <span class="metric-num">50,000+</span>
+        <span class="metric-label">Happy Attendees</span>
+      </div>
+      <div class="metric-sep"></div>
+      <div class="metric-item">
+        <span class="metric-num">1,200+</span>
+        <span class="metric-label">Live Experiences</span>
+      </div>
+      <div class="metric-sep"></div>
+      <div class="metric-item">
+        <span class="metric-num">15+</span>
+        <span class="metric-label">Metropolitan Cities</span>
+      </div>
+      <div class="metric-sep"></div>
+      <div class="metric-item">
+        <span class="metric-num">100%</span>
+        <span class="metric-label">Instant QR Admission</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 3. TRENDING & FEATURED EXPERIENCES                          -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="landing-section trending-section">
+    <div class="section-container">
+      
+      <div class="section-header-row">
+        <div>
+          <span class="section-eyebrow">CURATED SELECTION</span>
+          <h2 class="section-heading">Trending in {{ locationService.selectedCity() }}</h2>
+          <p class="section-subheading">High-demand concerts, weekend festivals, and premier live spectacles.</p>
+        </div>
+        <a routerLink="/discover" class="btn-see-all">
+          <span>View All Events</span>
+          <app-icon name="arrow-right" [size]="15"></app-icon>
+        </a>
+      </div>
+
+      <!-- Events Cards Grid -->
+      <div class="events-cards-grid" *ngIf="!isLoading() && trendingEvents().length > 0">
+        <div 
+          *ngFor="let ev of trendingEvents()" 
+          class="event-card-modern"
+          [routerLink]="['/events', ev.id]">
+          
+          <!-- Image with Category Badge & Date Pill -->
+          <div class="card-thumb-wrap">
+            <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="card-thumb" />
+            <div class="card-overlay-gradient"></div>
+            
+            <span class="card-category-tag">{{ ev.category }}</span>
+            <div class="card-date-badge">
+              <span class="date-month">{{ ev.date | date:'MMM' }}</span>
+              <span class="date-day">{{ ev.date | date:'dd' }}</span>
+            </div>
+          </div>
+
+          <!-- Card Content -->
+          <div class="card-body">
+            <h3 class="card-title">{{ ev.title }}</h3>
+            
+            <div class="card-meta-row">
+              <span class="card-venue">
+                <app-icon name="map-pin" [size]="13"></app-icon>
+                <span>{{ ev.location?.venue || ev.location?.city }}</span>
+              </span>
+              <span class="card-time">
+                <app-icon name="clock" [size]="13"></app-icon>
+                <span>{{ ev.time || '18:00' }}</span>
+              </span>
+            </div>
+
+            <p class="card-excerpt">{{ ev.description }}</p>
+
+            <!-- Card Footer: Price & CTA -->
+            <div class="card-footer">
+              <div class="price-block">
+                <span class="price-caption">Starting from</span>
+                <strong class="price-figure">
+                  {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free Entry' }}
+                </strong>
+              </div>
+              <button class="btn-book-card" [routerLink]="['/events', ev.id]">
+                <span>Book Now</span>
+                <app-icon name="chevron-right" [size]="14"></app-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading Shimmer Placeholder -->
+      <div class="events-cards-grid skeleton-grid" *ngIf="isLoading()">
+        <div class="skeleton-card" *ngFor="let n of [1,2,3]">
+          <div class="skeleton-thumb"></div>
+          <div class="skeleton-body">
+            <div class="skeleton-line line-title"></div>
+            <div class="skeleton-line line-sub"></div>
+            <div class="skeleton-line line-footer"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 4. CATEGORIES EXPLORER (Vibrant Grid)                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="landing-section categories-section">
+    <div class="section-container">
+      
+      <div class="section-header-center">
+        <span class="section-eyebrow">BROWSE BY INTEREST</span>
+        <h2 class="section-heading">Explore Live Categories</h2>
+        <p class="section-subheading">Choose your vibe and dive into hundreds of curated experiences.</p>
+      </div>
+
+      <div class="categories-tile-grid">
+        <div 
+          *ngFor="let cat of categories" 
+          class="category-tile" 
+          (click)="navigateToCategory(cat.slug)">
+          
+          <img [src]="cat.imageUrl" [alt]="cat.name" class="category-tile-bg" />
+          <div class="category-tile-overlay"></div>
+
+          <div class="category-tile-content">
+            <div class="tile-icon-bubble">
+              <app-icon [name]="cat.icon" [size]="20"></app-icon>
+            </div>
+            <h3 class="tile-title">{{ cat.name }}</h3>
+            <p class="tile-tagline">{{ cat.tagline }}</p>
+            <div class="tile-footer">
+              <span class="tile-count">{{ cat.eventsCount }}+ Events</span>
+              <span class="tile-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 5. PLATFORM VALUE PROPOSITION ("Why EventHub?")              -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="landing-section features-section">
+    <div class="section-container">
+      
+      <div class="section-header-center">
+        <span class="section-eyebrow">BUILT FOR FANS & CREATORS</span>
+        <h2 class="section-heading">Why Choose EventHub</h2>
+        <p class="section-subheading">A modern ticketing and event discovery ecosystem built with integrity and speed.</p>
+      </div>
+
+      <div class="features-quad-grid">
+        <div class="feature-card">
+          <div class="feature-icon-box indigo">
+            <app-icon name="qr-code" [size]="24"></app-icon>
+          </div>
+          <h3 class="feature-title">Instant Dynamic QR Tickets</h3>
+          <p class="feature-desc">Receive real-time anti-counterfeit QR passes directly in your account and digital wallet. Frictionless gate turnstile check-ins in under 2 seconds.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box emerald">
+            <app-icon name="shield-check" [size]="24"></app-icon>
+          </div>
+          <h3 class="feature-title">Verified Hosts & Venue Safety</h3>
+          <p class="feature-desc">Every event is thoroughly vetted by the EventHub curation panel for venue licensing, sound permits, and transparent ticketing integrity.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box periwinkle">
+            <app-icon name="percent" [size]="24"></app-icon>
+          </div>
+          <h3 class="feature-title">Zero Hidden Surcharges</h3>
+          <p class="feature-desc">What you see is what you pay. Transparent tier pricing, verified promo discounts, and instant gift card redemption at checkout.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box amber">
+            <app-icon name="gift" [size]="24"></app-icon>
+          </div>
+          <h3 class="feature-title">Shareable Digital Gift Cards</h3>
+          <p class="feature-desc">Send event gift passes instantly to friends and family with personalized notes and multi-event wallet balance top-ups.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 6. HOST & CREATOR ONBOARDING BANNER                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="host-cta-banner-section">
+    <div class="section-container">
+      <div class="host-banner-card">
+        <div class="host-banner-content">
+          <span class="banner-badge">FOR ORGANIZERS & PRODUCERS</span>
+          <h2 class="banner-title">Empower Your Live Events with EventHub SaaS</h2>
+          <p class="banner-desc">
+            Scale your ticket sales, manage field staff scanners with delegated permissions, allocate co-owner equity stakes, and receive automated 48-hour bank payouts.
+          </p>
+          <div class="banner-actions">
+            <a routerLink="/host/apply" class="btn-host-primary">
+              <app-icon name="plus" [size]="16" [strokeWidth]="2.5"></app-icon>
+              <span>Apply as Verified Host</span>
+            </a>
+            <a routerLink="/discover" class="btn-host-ghost">
+              <span>Explore Platform Catalog</span>
+            </a>
+          </div>
+        </div>
+        <div class="host-banner-graphic">
+          <div class="graphic-stat-card card-1">
+            <app-icon name="trending-up" [size]="18"></app-icon>
+            <div>
+              <strong>99.8%</strong>
+              <span>Gate Admission Speed</span>
+            </div>
+          </div>
+          <div class="graphic-stat-card card-2">
+            <app-icon name="check-circle" [size]="18"></app-icon>
+            <div>
+              <strong>Instant Payouts</strong>
+              <span>Direct Bank Settlement</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

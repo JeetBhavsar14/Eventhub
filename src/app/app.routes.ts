@@ -125,7 +125,7 @@ export const routes: Routes = [
           // Public Features (Lazy Loaded)
           { 
             path: '', 
-            loadComponent: () => import('./features/discover/discover.component').then(m => m.DiscoverComponent) 
+            loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent) 
           },
           { 
             path: 'discover', 
