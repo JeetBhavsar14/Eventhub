@@ -181,8 +181,19 @@ This tracker documents our progress against the architecture specifications in `
 - [x] **Phase 7 — Attendance & Staff Portal**: Field staff check-in portal (`/staff`), ticket validator scanner, and real-time attendance counter.
 - [x] **Phase 11 — Super Admin Governance**: Platform analytics, Host Approvals, Event Curation gatekeeper (hero showcase / delist), User Directory & Dossier management, and Financial Settlement queue (all views mobile-optimized with card layouts).
 - [x] **High-Resolution Typography**: Preconnected Google Fonts, subpixel font antialiasing (`-webkit-font-smoothing`, `-moz-osx-font-smoothing`), OpenType Inter glyphs (`cv02`, `cv03`, `cv04`, `cv11`), and tabular numerals (`tabular-nums`) for currency and stats.
+- [x] **Phase 8.1 — Global Toast Notification System**: Signal-driven reactive Toast service with dynamic queues, multi-severity styling (success, error, warning, info), auto-dismiss, and accessibility.
+- [x] **Shared UI Architecture & Layout Refactoring**:
+  - [x] **Reusable Pagination System**: `PaginationBarComponent` with dynamic page slicing, page-size selectors (`6 / 12 / 24`), item counting, and smooth scroll.
+  - [x] **Reusable Confirmation Modals**: `ConfirmDialogComponent` replacing ad-hoc modals across admin governance and host destructive actions.
+  - [x] **Event Edit & Admin Approval Workflow**: Full in-drawer event editing with change-request rationale submitted directly to Admin re-approval queue.
+  - [x] **Host Layout Decomposition (Phase 1)**: Extracted Sub-View 2 (`HostMyEventsComponent`) into a dedicated standalone component with isolated CSS grid and full mobile responsiveness (`1024px`, `768px`, `480px`).
 
 ### ⏳ Remaining Things To Do (Backlog)
+- [ ] **Layout Decomposition & Architecture (Ongoing)**:
+  - [ ] Step 2: `HostBookingsComponent` (attendee management table, mobile cards, CSV export, bookings pagination).
+  - [ ] Step 3: `HostOverviewComponent` (stats cards grid, performance charts, quick actions).
+  - [ ] Step 4: `HostTeamComponent` (ownership allocation, manager portfolios, delegations).
+  - [ ] Step 5: `HostAnalyticsComponent`, `HostNotificationsComponent`, and `HostSettingsComponent`.
 - [ ] **Phase 6 — Permission Management Center UI**:
   - [ ] Visual UI for inspecting and editing permission policies (Registration, Venue, Technical, Security).
   - [ ] Direct permission overrides per user.
@@ -199,5 +210,6 @@ This tracker documents our progress against the architecture specifications in `
   - [ ] Host/Management review and invoice approval queue.
 - [ ] **Phase 12 — Django REST Framework Backend Integration**:
   - [ ] Replace `json-server` (`db.json`) with Django REST API endpoints while preserving the current frontend `ApiClient` layer.
+
 
 
