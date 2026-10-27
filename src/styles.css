@@ -120,6 +120,9 @@ html {
   text-size-adjust: 100%;
   /* Optical font sizing — lets the browser tune stroke weights at small sizes */
   font-optical-sizing: auto;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 body {
@@ -135,6 +138,9 @@ body {
   text-rendering: optimizeLegibility;
   /* Inter's alternate digits + stylistic alternates for clean sans-serif reads */
   font-feature-settings: 'cv02' 1, 'cv03' 1, 'cv04' 1, 'cv11' 1, 'ss01' 1;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 /* ─────────────────────────────────────────────────────────

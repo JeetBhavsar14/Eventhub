@@ -5,6 +5,7 @@
     <button type="button" class="clear-btn" (click)="clearFilters()" [disabled]="!hasActiveFilters()">Clear all</button>
   </div>
 
+  <!-- Category Filter -->
   <div class="filter-group">
     <app-select
       label="Category"
@@ -16,6 +17,7 @@
     </app-select>
   </div>
 
+  <!-- Subcategory Filter -->
   <div class="filter-group" *ngIf="categoryTypes[currentFilter.category]">
     <app-select
       [label]="'Type of ' + currentFilter.category"
@@ -27,6 +29,7 @@
     </app-select>
   </div>
 
+  <!-- Date Selection -->
   <div class="filter-group">
     <app-select
       label="Date"
@@ -37,11 +40,143 @@
       id="event-date">
     </app-select>
     
-    <div class="custom-date-picker" *ngIf="currentFilter.date === 'Custom Date'">
-      <input type="date" class="modern-input" aria-label="Custom event date" [(ngModel)]="currentFilter.customDate" (change)="onDateChange()">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SPECIFIC DATE RANGE: STYLED START & END DATE INPUTS         -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="date-range-container" *ngIf="currentFilter.date === 'Specific Range'">
+      
+      <!-- Quick Range Presets Chips -->
+      <div class="calendar-presets">
+        <button type="button" class="preset-chip" (click)="applyPreset('today')">Today</button>
+        <button type="button" class="preset-chip" (click)="applyPreset('weekend')">Weekend</button>
+        <button type="button" class="preset-chip" (click)="applyPreset('next7')">Next 7d</button>
+        <button type="button" class="preset-chip" (click)="applyPreset('thisMonth')">Month</button>
+        <button *ngIf="currentFilter.startDate || currentFilter.endDate" type="button" class="btn-clear-date-link" (click)="clearDateRange()">Clear</button>
+      </div>
+
+      <!-- Styled Start & End Date Inputs (Single SVG icon, click to open calendar) -->
+      <div class="date-inputs-card">
+        <div class="date-input-col" (click)="toggleCalendar('start', $event)">
+          <label class="date-field-label">Start Date</label>
+          <div class="date-field-box" [class.is-active]="isCalendarOpen && activePickingField === 'start'">
+            <app-icon name="calendar" class="date-box-icon" [size]="15"></app-icon>
+            <span class="range-date-display" [class.is-placeholder]="!currentFilter.startDate">
+              {{ currentFilter.startDate || 'YYYY-MM-DD' }}
+            </span>
+            <button 
+              *ngIf="currentFilter.startDate" 
+              type="button" 
+              class="btn-field-clear" 
+              (click)="clearSingleDate('start', $event)" 
+              title="Clear start date">
+              <app-icon name="x" [size]="11"></app-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="date-range-arrow">
+          <app-icon name="arrow-right" [size]="14"></app-icon>
+        </div>
+
+        <div class="date-input-col" (click)="toggleCalendar('end', $event)">
+          <label class="date-field-label">End Date</label>
+          <div class="date-field-box" [class.is-active]="isCalendarOpen && activePickingField === 'end'">
+            <app-icon name="calendar" class="date-box-icon" [size]="15"></app-icon>
+            <span class="range-date-display" [class.is-placeholder]="!currentFilter.endDate">
+              {{ currentFilter.endDate || 'YYYY-MM-DD' }}
+            </span>
+            <button 
+              *ngIf="currentFilter.endDate" 
+              type="button" 
+              class="btn-field-clear" 
+              (click)="clearSingleDate('end', $event)" 
+              title="Clear end date">
+              <app-icon name="x" [size]="11"></app-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- STYLED CUSTOM CALENDAR POPUP / DROPDOWN                    -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="styled-calendar-popover" *ngIf="isCalendarOpen" (click)="$event.stopPropagation()">
+        
+        <!-- Field Selection Tabs -->
+        <div class="calendar-tabs-header">
+          <button 
+            type="button" 
+            class="cal-tab-btn" 
+            [class.active]="activePickingField === 'start'"
+            (click)="setPickingField('start', $event)">
+            <span class="tab-label">Start:</span>
+            <span class="tab-val">{{ currentFilter.startDate ? currentFilter.startDate : 'Select' }}</span>
+          </button>
+          <button 
+            type="button" 
+            class="cal-tab-btn" 
+            [class.active]="activePickingField === 'end'"
+            (click)="setPickingField('end', $event)">
+            <span class="tab-label">End:</span>
+            <span class="tab-val">{{ currentFilter.endDate ? currentFilter.endDate : 'Select' }}</span>
+          </button>
+        </div>
+
+        <!-- Month Navigation Header -->
+        <div class="calendar-nav-bar">
+          <button type="button" class="cal-nav-btn" (click)="prevMonth($event)" title="Previous Month">
+            <app-icon name="chevron-left" [size]="15"></app-icon>
+          </button>
+          <span class="cal-month-title">{{ currentMonthLabel }}</span>
+          <button type="button" class="cal-nav-btn" (click)="nextMonth($event)" title="Next Month">
+            <app-icon name="chevron-right" [size]="15"></app-icon>
+          </button>
+        </div>
+
+        <!-- Weekdays Header -->
+        <div class="calendar-weekdays-grid">
+          <span *ngFor="let dayName of weekdays" class="cal-weekday-header">{{ dayName }}</span>
+        </div>
+
+        <!-- Days Grid -->
+        <div class="calendar-days-grid">
+          <button 
+            *ngFor="let day of calendarDays" 
+            type="button"
+            class="cal-day-cell"
+            [class.not-current-month]="!day.isCurrentMonth"
+            [class.is-today]="day.isToday"
+            [class.is-selected-start]="day.isSelectedStart"
+            [class.is-selected-end]="day.isSelectedEnd"
+            [class.is-in-range]="day.isInRange"
+            (click)="onSelectDay(day)">
+            {{ day.dayNumber }}
+          </button>
+        </div>
+
+        <!-- Popover Action Footer -->
+        <div class="calendar-footer-bar">
+          <button type="button" class="cal-footer-clear-btn" (click)="clearDateRange()">Clear</button>
+          <div class="cal-footer-actions">
+            <button type="button" class="cal-footer-today-btn" (click)="applyPreset('today')">Today</button>
+            <button type="button" class="cal-footer-done-btn" (click)="closeCalendar()">Done</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Active Range Summary Info -->
+      <div class="range-summary-bar" *ngIf="currentFilter.startDate || currentFilter.endDate">
+        <app-icon name="check" [size]="13" class="summary-check-icon"></app-icon>
+        <span>
+          Filtering from <strong>{{ currentFilter.startDate || 'Any' }}</strong> to <strong>{{ currentFilter.endDate || 'Any' }}</strong>
+        </span>
+      </div>
+
     </div>
   </div>
 
+  <!-- Price Selection -->
   <div class="filter-group">
     <app-select
       label="Price range"
@@ -51,6 +186,57 @@
       (selectionChange)="onPriceChange($event)"
       id="event-price">
     </app-select>
+
+    <!-- Specific Price Range Inputs with Non-Overflowing Fields -->
+    <div class="custom-price-card" *ngIf="currentFilter.price === 'Custom Range'">
+      <div class="price-inputs-row">
+        <div class="price-input-col">
+          <label class="price-field-label">Min Price</label>
+          <div class="price-input-box">
+            <span class="currency-prefix">₹</span>
+            <input 
+              type="number" 
+              placeholder="0" 
+              [min]="minPriceLimit" 
+              [max]="maxPriceLimit" 
+              step="100"
+              [ngModel]="currentFilter.minPrice" 
+              (ngModelChange)="onMinPriceChange($event)" 
+              class="price-number-input" />
+          </div>
+        </div>
+
+        <span class="price-range-sep">–</span>
+
+        <div class="price-input-col">
+          <label class="price-field-label">Max Price</label>
+          <div class="price-input-box">
+            <span class="currency-prefix">₹</span>
+            <input 
+              type="number" 
+              placeholder="50000" 
+              [min]="minPriceLimit" 
+              [max]="maxPriceLimit" 
+              step="100"
+              [ngModel]="currentFilter.maxPrice" 
+              (ngModelChange)="onMaxPriceChange($event)" 
+              class="price-number-input" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Budget Presets -->
+      <div class="price-preset-chips">
+        <button type="button" class="price-chip" (click)="setPricePreset(0, 500)">Under ₹500</button>
+        <button type="button" class="price-chip" (click)="setPricePreset(500, 2000)">₹500 - ₹2k</button>
+        <button type="button" class="price-chip" (click)="setPricePreset(2000, 5000)">₹2k - ₹5k</button>
+        <button type="button" class="price-chip" (click)="setPricePreset(5000, 50000)">₹5k+</button>
+      </div>
+
+      <div class="price-limit-hint">
+        Min: ₹0 • Max: ₹50,000
+      </div>
+    </div>
   </div>
 
   <p id="filter-hint" class="filter-hint">Results update as you choose filters.</p>

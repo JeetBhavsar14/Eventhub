@@ -16,6 +16,9 @@ export interface SelectOption {
   imports: [CommonModule, FormsModule],
   templateUrl: './select.component.html',
   styleUrl: './select.component.css',
+  host: {
+    '[class.is-open]': 'isOpen()'
+  },
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -57,6 +60,7 @@ export class SelectComponent implements ControlValueAccessor {
   @Output() selectionChange = new EventEmitter<any>();
 
   isOpen = signal(false);
+  openUpward = signal(false);
   selectedValue: any = null;
 
   onChange: any = () => {};
@@ -80,9 +84,18 @@ export class SelectComponent implements ControlValueAccessor {
   toggleDropdown(event?: MouseEvent) {
     if (event) event.stopPropagation();
     if (this.disabled) return;
-    this.isOpen.update(open => !open);
-    if (this.isOpen()) {
+
+    if (!this.isOpen()) {
+      const triggerEl = this.elementRef.nativeElement.querySelector('.select-trigger');
+      if (triggerEl) {
+        const rect = triggerEl.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        this.openUpward.set(spaceBelow < 250 && rect.top > 200);
+      }
+      this.isOpen.set(true);
       this.onTouched();
+    } else {
+      this.isOpen.set(false);
     }
   }
 

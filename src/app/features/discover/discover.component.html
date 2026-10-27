@@ -82,11 +82,26 @@
       <!-- Right Main Content -->
       <main class="events-main">
         <div class="section-header">
-          <h2>{{ currentFilter.category === 'All' ? 'Events' : currentFilter.category + ' Events' }} In {{ locationService.selectedCity() }}</h2>
+          <h2>
+            <ng-container *ngIf="!searchQuery()">
+              {{ currentFilter.category === 'All' ? 'Events' : currentFilter.category + ' Events' }} In {{ locationService.selectedCity() }}
+            </ng-container>
+            <ng-container *ngIf="searchQuery()">
+              Search Results for "{{ searchQuery() }}" in {{ locationService.selectedCity() }}
+            </ng-container>
+          </h2>
+
+          <!-- Active search filter badge with clear button -->
+          <div class="active-search-chip" *ngIf="searchQuery()">
+            <span>Search: <strong>"{{ searchQuery() }}"</strong></span>
+            <button type="button" class="btn-clear-search-chip" (click)="clearActiveSearch()" title="Clear search">
+              <app-icon name="close" [size]="12"></app-icon>
+            </button>
+          </div>
         </div>
 
-        <!-- Skeleton Loading Shimmers (High-Impact UI/UX) -->
-        <div class="events-grid skeleton-grid" *ngIf="isLoading()">
+        <!-- Skeleton Loading Shimmers (Only shown on initial page load when no events exist yet) -->
+        <div class="events-cards-grid skeleton-grid" *ngIf="isLoading() && featuredEvents().length === 0">
           <div class="skeleton-card" *ngFor="let item of skeletonPlaceholders">
             <div class="skeleton-image-wrap">
               <div class="skeleton-shimmer skeleton-image"></div>
@@ -106,39 +121,127 @@
           </div>
         </div>
 
-        <div class="empty-state" *ngIf="!isLoading() && featuredEvents().length === 0">
-          <h3>No events found</h3>
-          <p>Try adjusting your filters.</p>
-          <app-button variant="secondary" (click)="handleFilterChange({category: 'All', date: 'Any Date', price: 'Any Price'})">Clear Filters</app-button>
+        <!-- Sleek Top Live Progress Bar when filtering in the background -->
+        <div class="filter-progress-bar" *ngIf="isFiltering()">
+          <div class="filter-progress-line"></div>
         </div>
 
-        <div class="events-grid" *ngIf="!isLoading()">
-          <!-- Event Card -->
-          <div class="event-card" *ngFor="let event of featuredEvents()" [routerLink]="['/events', event.id]">
-            <div class="event-image">
-              <img [src]="event.thumbnailUrl" [alt]="event.title">
-              <span class="category-tag">
-                <span class="icon" [innerHTML]="getCategorySvg(event.category)"></span>
-                {{ event.category }}
+        <!-- Empty State (Compact & Centered without extra scroll height) -->
+        <div class="empty-state" *ngIf="!isLoading() && !isFiltering() && featuredEvents().length === 0">
+          <div class="empty-state-icon">
+            <app-icon name="search" [size]="28"></app-icon>
+          </div>
+          <h3>No Events Found</h3>
+          <p *ngIf="!searchQuery()">No events match your selected filters in {{ locationService.selectedCity() }}. Try clearing or widening your search criteria.</p>
+          <p *ngIf="searchQuery()">No events match "<strong>{{ searchQuery() }}</strong>" in {{ locationService.selectedCity() }}.</p>
+          <button type="button" class="btn-clear-empty" (click)="clearActiveSearch(); handleFilterChange({category: 'All', date: 'Any Date', price: 'Any Price'})">
+            Reset All Filters
+          </button>
+        </div>
+
+        <!-- Events Grid (Modern Landing Page Style) -->
+        <div class="events-cards-grid" [class.is-updating]="isFiltering()" *ngIf="!(isLoading() && featuredEvents().length === 0) && featuredEvents().length > 0">
+          <div 
+            *ngFor="let ev of paginatedEvents()" 
+            class="event-card-modern"
+            [routerLink]="['/events', ev.id]">
+            
+            <!-- Image with Category Badge & Date Pill -->
+            <div class="card-thumb-wrap">
+              <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="card-thumb" />
+              <div class="card-overlay-gradient"></div>
+              
+              <span class="card-category-tag">{{ ev.category }}</span>
+              <span class="card-trending-tag" *ngIf="ev.isPopular">
+                <app-icon name="trending-up" [size]="12"></app-icon> Trending
               </span>
-              <span class="featured-trending-badge" *ngIf="event.isPopular">
-                <span class="icon" [innerHTML]="trendingSvg"></span> Trending
-              </span>
-            </div>
-            <div class="event-details">
-              <div class="event-date">
-                <span class="month">{{ event.date | date:'MMM' }}</span>
-                <span class="day">{{ event.date | date:'dd' }}</span>
-              </div>
-              <div class="event-info">
-                <h3>{{ event.title }}</h3>
-                <p class="location">
-                  <span class="icon" [innerHTML]="mapPinSvg"></span>
-                  {{ event.location.venue }}, {{ event.location.city }}
-                </p>
-                <p class="price">From ₹{{ event.ticketTypes?.[0]?.price || 500 }}</p>
+
+              <div class="card-date-badge">
+                <span class="date-month">{{ ev.date | date:'MMM' }}</span>
+                <span class="date-day">{{ ev.date | date:'dd' }}</span>
               </div>
             </div>
+
+            <!-- Card Content -->
+            <div class="card-body">
+              <h3 class="card-title">{{ ev.title }}</h3>
+              
+              <div class="card-meta-row">
+                <span class="card-venue">
+                  <app-icon name="map-pin" [size]="13"></app-icon>
+                  <span>{{ ev.location?.venue || ev.location?.city }}</span>
+                </span>
+                <span class="card-time">
+                  <app-icon name="clock" [size]="13"></app-icon>
+                  <span>{{ ev.time || '18:00' }}</span>
+                </span>
+              </div>
+
+              <p class="card-excerpt">{{ ev.description }}</p>
+
+              <!-- Card Footer: Price & CTA -->
+              <div class="card-footer">
+                <div class="price-block">
+                  <span class="price-caption">Starting from</span>
+                  <strong class="price-figure">
+                    {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free Entry' }}
+                  </strong>
+                </div>
+                <button class="btn-book-card" [routerLink]="['/events', ev.id]">
+                  <span>Book Now</span>
+                  <app-icon name="chevron-right" [size]="14"></app-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="discover-pagination" *ngIf="totalEvents() > pageSize()">
+          <div class="pagination-info">
+            Showing <strong>{{ startIndex() }}–{{ endIndex() }}</strong> of <strong>{{ totalEvents() }}</strong> events
+          </div>
+
+          <div class="pagination-nav">
+            <!-- Prev Button -->
+            <button 
+              type="button" 
+              class="pagination-btn pagination-arrow-btn" 
+              [disabled]="currentPage() === 1"
+              (click)="prevPage()"
+              aria-label="Previous page">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              <span>Prev</span>
+            </button>
+
+            <!-- Page Number Buttons -->
+            <div class="pagination-pages">
+              <button 
+                *ngFor="let page of pageNumbers()"
+                type="button" 
+                class="pagination-btn pagination-page-btn"
+                [class.active]="page === currentPage()"
+                [class.ellipsis]="page === '...'"
+                [disabled]="page === '...'"
+                (click)="goToPage(page)">
+                {{ page }}
+              </button>
+            </div>
+
+            <!-- Next Button -->
+            <button 
+              type="button" 
+              class="pagination-btn pagination-arrow-btn" 
+              [disabled]="currentPage() === totalPages()"
+              (click)="nextPage()"
+              aria-label="Next page">
+              <span>Next</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
           </div>
         </div>
       </main>

@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { AuthService } from '@core/auth';
 
 @Component({
   selector: 'app-footer',
@@ -12,7 +13,9 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 })
 export class FooterComponent {
   private sanitizer = inject(DomSanitizer);
+  private authService = inject(AuthService);
 
+  isAuthenticated = this.authService.isAuthenticated;
   currentYear = new Date().getFullYear();
 
   private svg(fullSvg: string): SafeHtml {

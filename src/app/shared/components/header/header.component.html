@@ -1,14 +1,28 @@
 <!-- ═══════════════════════════════════════════════════════ -->
 <!--  BAR 1 — Brand | City | Search | Notifications | User  -->
 <!-- ═══════════════════════════════════════════════════════ -->
-<header class="site-header">
+<header class="site-header" [class.is-scrolled]="isScrolled()">
   <div class="bar-top">
     <div class="bar-inner">
 
-      <!-- Logo -->
-      <a routerLink="/" class="logo">
+      <!-- Logo (Landing page for unauthenticated / admin, Discover page for regular users) -->
+      <a [routerLink]="homeRoute()" class="logo" title="EventHub">
         <img src="assets/images/eventhub-logo.svg" alt="EventHub Logo" class="logo-icon-img" width="34" height="34" />
         <span class="logo-text">EventHub</span>
+      </a>
+
+      <!-- Home Button (Beside Location) -->
+      <a [routerLink]="homeRoute()" 
+         class="header-home-btn"
+         [class.active]="isHomeSelected()"
+         title="Go to Home">
+        <span class="header-home-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house">
+            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+            <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          </svg>
+        </span>
+        <span class="header-home-text">Home</span>
       </a>
 
       <!-- City selector -->
@@ -75,7 +89,8 @@
             class="search-input"
             type="text"
             placeholder="Search for Events, Artists or Venues..."
-            [(ngModel)]="searchQuery"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="onSearchInputChange($event)"
             name="searchQuery"
             (focus)="onSearchFocus()"
             autocomplete="off"
@@ -84,7 +99,7 @@
           <button 
             type="button" 
             class="search-clear-btn" 
-            *ngIf="searchQuery" 
+            *ngIf="searchQuery()" 
             (click)="clearSearch()"
             title="Clear search">
             <app-icon name="close" [size]="14"></app-icon>
@@ -94,7 +109,7 @@
         <!-- Floating Spotlight Panel (High-Impact UI/UX) -->
         <div class="search-spotlight-dropdown" *ngIf="searchFocused()">
           <!-- Popular & Recent Searches -->
-          <div class="spotlight-section" *ngIf="!searchQuery.trim() && recentSearches().length > 0">
+          <div class="spotlight-section" *ngIf="!searchQuery().trim() && recentSearches().length > 0">
             <div class="spotlight-section-title">
               <app-icon name="trending-up" [size]="13"></app-icon>
               <span>Popular & Recent Searches</span>
@@ -104,6 +119,7 @@
                 type="button" 
                 class="recent-chip" 
                 *ngFor="let term of recentSearches()" 
+                (mousedown)="$event.preventDefault()"
                 (click)="selectRecentSearch(term)">
                 {{ term }}
               </button>
@@ -113,14 +129,15 @@
           <!-- Matching Events Section -->
           <div class="spotlight-section">
             <div class="spotlight-section-title">
-              <span>{{ searchQuery.trim() ? 'Matching Events' : 'Trending Now' }}</span>
-              <span class="spotlight-count" *ngIf="searchQuery.trim()">({{ spotlightEvents().length }})</span>
+              <span>{{ searchQuery().trim() ? 'Matching Events' : 'Trending Now' }}</span>
+              <span class="spotlight-count" *ngIf="searchQuery().trim()">({{ spotlightEvents().length }})</span>
             </div>
 
             <div class="spotlight-list" *ngIf="spotlightEvents().length > 0">
               <div 
                 *ngFor="let ev of spotlightEvents()" 
                 class="spotlight-item" 
+                (mousedown)="$event.preventDefault()"
                 (click)="selectSearchItem(ev.id)">
                 <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="spotlight-thumb">
                 <div class="spotlight-info">
@@ -142,14 +159,14 @@
             <!-- No results -->
             <div class="spotlight-empty" *ngIf="spotlightEvents().length === 0">
               <app-icon name="search" [size]="20"></app-icon>
-              <p>No experiences found matching "{{ searchQuery }}"</p>
+              <p>No experiences found matching "{{ searchQuery() }}"</p>
             </div>
           </div>
 
           <!-- Spotlight Footer -->
-          <div class="spotlight-footer" *ngIf="searchQuery.trim()">
-            <button type="button" class="view-all-results-btn" (click)="onSearchSubmit()">
-              See all results for "<strong>{{ searchQuery }}</strong>" →
+          <div class="spotlight-footer" *ngIf="searchQuery().trim()">
+            <button type="button" class="view-all-results-btn" (mousedown)="$event.preventDefault()" (click)="onSearchSubmit()">
+              See all results for "<strong>{{ searchQuery() }}</strong>" →
             </button>
           </div>
         </div>
@@ -423,17 +440,58 @@
 
       <!-- Category pills (Desktop >= 900px) -->
       <nav class="category-nav">
+        <!-- Primary category pills -->
         <a
-          *ngFor="let cat of categories"
+          *ngFor="let cat of primaryCategories"
           [routerLink]="['/discover']"
-          [queryParams]="cat.label === 'Events' ? {} : { category: cat.label }"
+          [queryParams]="{ category: cat.label }"
           class="cat-pill"
-          routerLinkActive="cat-pill--active"
-          [routerLinkActiveOptions]="{ exact: cat.label === 'Events' }"
-          (click)="scrollToEvents()">
+          [class.cat-pill--active]="isCategoryActive(cat.label)"
+          (click)="onCategoryPillClick(cat, $event)">
           <span class="cat-icon" [innerHTML]="cat.icon"></span>
           {{ cat.label }}
         </a>
+
+        <!-- Others Category Dropdown -->
+        <div class="others-dropdown-wrap" (click)="$event.stopPropagation()">
+          <button 
+            type="button"
+            class="cat-pill others-pill"
+            [class.cat-pill--active]="isOtherCategoryActive()"
+            [class.others-pill--open]="showOthersDropdown()"
+            (click)="toggleOthersDropdown($event)"
+            title="More Categories"
+            aria-haspopup="true"
+            [attr.aria-expanded]="showOthersDropdown()">
+            <span class="cat-icon" [innerHTML]="othersIcon"></span>
+            <span>Others</span>
+            <svg class="others-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+
+          <!-- Others Dropdown List -->
+          <div class="others-dropdown-menu" *ngIf="showOthersDropdown()">
+            <div class="others-dropdown-header">
+              <span>More Categories</span>
+              <span class="others-count-badge">{{ otherCategories.length }}</span>
+            </div>
+            <div class="others-dropdown-list">
+              <button 
+                type="button"
+                *ngFor="let otherCat of otherCategories" 
+                class="others-dropdown-item" 
+                [class.active]="isCategoryActive(otherCat.label)"
+                (click)="selectOtherCategory(otherCat, $event)">
+                <span class="others-item-icon" [innerHTML]="otherCat.icon"></span>
+                <span class="others-item-label">{{ otherCat.label }}</span>
+                <svg *ngIf="isCategoryActive(otherCat.label)" class="others-item-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
       </nav>
 
       <!-- Category Dropdown List (Smaller screens < 900px) -->
@@ -451,12 +509,22 @@
           </svg>
         </button>
 
-        <!-- Dropdown Menu -->
+        <!-- Mobile Dropdown Menu -->
         <div class="category-dropdown-menu" *ngIf="showCategoryMenu()">
+          <div class="cat-dropdown-header">Popular Categories</div>
           <button 
-            *ngFor="let cat of categories" 
+            *ngFor="let cat of primaryCategories" 
             class="cat-dropdown-item" 
-            [class.active]="cat.label === selectedCategory()"
+            [class.active]="isCategoryActive(cat.label)"
+            (click)="selectCategory(cat, $event)">
+            <span class="cat-icon" [innerHTML]="cat.icon"></span>
+            <span>{{ cat.label }}</span>
+          </button>
+          <div class="cat-dropdown-header">More Categories</div>
+          <button 
+            *ngFor="let cat of otherCategories" 
+            class="cat-dropdown-item" 
+            [class.active]="isCategoryActive(cat.label)"
             (click)="selectCategory(cat, $event)">
             <span class="cat-icon" [innerHTML]="cat.icon"></span>
             <span>{{ cat.label }}</span>
@@ -465,11 +533,13 @@
       </div>
 
       <!-- Secondary links (Clean text links without badge boxes) -->
-      <nav class="secondary-nav">
+      <nav class="secondary-nav" aria-label="Quick links">
         <a *ngFor="let link of secondaryLinks" 
            [routerLink]="link.route" 
-           class="secondary-link">
-          {{ link.label }}
+           class="secondary-link"
+           routerLinkActive="secondary-link--active">
+          <app-icon *ngIf="link.icon" [name]="link.icon" [size]="14" class="secondary-link-icon"></app-icon>
+          <span>{{ link.label }}</span>
         </a>
       </nav>
     </div>

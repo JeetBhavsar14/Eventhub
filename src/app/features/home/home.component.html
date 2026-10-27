@@ -1,20 +1,35 @@
 <div class="landing-page-root">
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- 1. HERO SECTION WITH SEARCH & SPOTLIGHT                     -->
+  <!-- 1. HERO SECTION WITH REACTIVE SEARCH & CITY SELECTOR        -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <section class="landing-hero-section">
-    <!-- Ambient Backdrop Glows -->
-    <div class="hero-glow glow-1"></div>
-    <div class="hero-glow glow-2"></div>
+    <!-- Ambient Backdrop Video & Glows (Contained in dedicated backdrop with overflow hidden) -->
+    <div class="hero-video-backdrop" aria-hidden="true">
+      <video
+        #bgVideo
+        class="hero-bg-video"
+        autoplay
+        [autoplay]="true"
+        [muted]="true"
+        muted
+        loop
+        [loop]="true"
+        playsinline
+        webkit-playsinline
+        preload="auto"
+        disablePictureInPicture
+        controlsList="nodownload noplaybackrate"
+        (contextmenu)="$event.preventDefault()">
+        <source src="assets/video/Crowd_dancing_at_concert_stage_1080p_20261027150307.mp4" type="video/mp4" />
+        <source src="/assets/video/Crowd_dancing_at_concert_stage_1080p_20261027150307.mp4" type="video/mp4" />
+      </video>
+      <div class="hero-video-overlay"></div>
+      <div class="hero-glow glow-1"></div>
+      <div class="hero-glow glow-2"></div>
+    </div>
 
     <div class="hero-container">
-      
-      <!-- Eyebrow Badge -->
-      <div class="hero-eyebrow-badge">
-        <app-icon name="sparkles" [size]="14"></app-icon>
-        <span>DISCOVER, BOOK & ATTEND LIVE EXPERIENCES</span>
-      </div>
 
       <!-- Main Headline -->
       <h1 class="hero-title">
@@ -27,55 +42,176 @@
 
       <!-- Interactive Global Search Box -->
       <div class="hero-search-card">
-        <form class="hero-search-form" (submit)="$event.preventDefault(); executeSearch()">
+        <form class="hero-search-form" (submit)="executeSearch($event)">
           
-          <!-- Search Input -->
-          <div class="search-input-field">
+          <!-- Search Input (Reactive Real-time with Header-style Spotlight Autocomplete) -->
+          <div class="search-input-field" (click)="$event.stopPropagation()">
             <app-icon name="search" class="field-icon" [size]="18"></app-icon>
             <input 
               type="text" 
-              placeholder="Search concerts, artists, festivals, or venues..." 
-              [(ngModel)]="searchQuery" 
+              placeholder="Search concerts, artists, festivals..." 
+              [ngModel]="searchQuery()" 
+              (ngModelChange)="onSearchInput($event)"
+              (focus)="onSearchFocus()"
+              (keydown.enter)="executeSearch($event)"
               name="searchQuery" 
-              class="hero-input" />
+              class="hero-input" 
+              autocomplete="off" />
+            <button 
+              *ngIf="searchQuery()" 
+              type="button" 
+              class="btn-clear-search" 
+              (click)="clearSearch()"
+              title="Clear search">
+              <app-icon name="close" [size]="14"></app-icon>
+            </button>
+
+            <!-- Floating Spotlight Panel (Matching Header Logic & Visuals) -->
+            <div class="search-spotlight-dropdown" *ngIf="searchFocused()">
+              <!-- Popular & Recent Searches -->
+              <div class="spotlight-section" *ngIf="!searchQuery().trim() && recentSearches().length > 0">
+                <div class="spotlight-section-title">
+                  <app-icon name="trending-up" [size]="13"></app-icon>
+                  <span>Popular & Recent Searches</span>
+                </div>
+                <div class="recent-chips">
+                  <button 
+                    type="button" 
+                    class="recent-chip" 
+                    *ngFor="let term of recentSearches()" 
+                    (mousedown)="$event.preventDefault()"
+                    (click)="selectRecentSearch(term)">
+                    {{ term }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Matching Events Section -->
+              <div class="spotlight-section">
+                <div class="spotlight-section-title">
+                  <span>{{ searchQuery().trim() ? 'Matching Events' : 'Trending Now' }}</span>
+                  <span class="spotlight-count" *ngIf="searchQuery().trim()">({{ spotlightEvents().length }})</span>
+                </div>
+
+                <div class="spotlight-list" *ngIf="spotlightEvents().length > 0">
+                  <div 
+                    *ngFor="let ev of spotlightEvents()" 
+                    class="spotlight-item" 
+                    (mousedown)="$event.preventDefault()"
+                    (click)="selectSearchItem(ev.id)">
+                    <img [src]="ev.thumbnailUrl || ev.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=300&q=80'" [alt]="ev.title" class="spotlight-thumb">
+                    <div class="spotlight-info">
+                      <div class="spotlight-title">{{ ev.title }}</div>
+                      <div class="spotlight-meta">
+                        <span class="spotlight-cat">{{ ev.category }}</span>
+                        <span>•</span>
+                        <span class="spotlight-date">{{ ev.date | date:'mediumDate' }}</span>
+                        <span>•</span>
+                        <span class="spotlight-venue">{{ ev.location?.city || 'India' }}</span>
+                      </div>
+                    </div>
+                    <div class="spotlight-price" *ngIf="getStartingPrice(ev) || ev.ticketTypes?.[0]?.price">
+                      ₹{{ getStartingPrice(ev) || ev.ticketTypes[0].price }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- No results -->
+                <div class="spotlight-empty" *ngIf="spotlightEvents().length === 0">
+                  <app-icon name="search" [size]="20"></app-icon>
+                  <p>No experiences found matching "{{ searchQuery() }}"</p>
+                </div>
+              </div>
+
+              <!-- Spotlight Footer -->
+              <div class="spotlight-footer" *ngIf="searchQuery().trim()">
+                <button type="button" class="view-all-results-btn" (mousedown)="$event.preventDefault()" (click)="executeSearch($event)">
+                  See all results for "<strong>{{ searchQuery() }}</strong>" →
+                </button>
+              </div>
+            </div>
           </div>
 
-          <!-- Category Select -->
+          <!-- Category Select Field with Custom Styled Droplist -->
           <div class="search-divider"></div>
-          <div class="search-select-field">
-            <app-icon name="tag" class="field-icon" [size]="16"></app-icon>
-            <select [(ngModel)]="selectedCategory" name="selectedCategory" class="hero-select">
-              <option *ngFor="let cat of categoryOptions" [value]="cat">
-                {{ cat === 'All' ? 'All Categories' : cat }}
-              </option>
-            </select>
+          <div class="search-field-wrapper category-field-wrapper" [class.active-dropdown]="showCategoryDropdown()" (click)="$event.stopPropagation()">
+            <button 
+              type="button" 
+              class="search-select-btn" 
+              (click)="toggleCategoryMenu($event)"
+              [class.open]="showCategoryDropdown()">
+              <app-icon name="tag" class="field-icon" [size]="16"></app-icon>
+              <span class="field-value-text">{{ selectedCategory() === 'All' ? 'Categories' : selectedCategory() }}</span>
+              <app-icon name="chevron-down" class="chevron-icon" [size]="13"></app-icon>
+            </button>
+            
+            <!-- Custom Styled Droplist Menu -->
+            <div class="custom-droplist-menu category-menu" *ngIf="showCategoryDropdown()">
+              <div class="droplist-header">Filter by Category</div>
+              <div class="droplist-scroll">
+                <button 
+                  *ngFor="let cat of categoryOptions" 
+                  type="button" 
+                  class="droplist-item" 
+                  [class.active]="selectedCategory() === cat" 
+                  (click)="onSelectCategory(cat, $event)">
+                  <span>{{ cat === 'All' ? 'All Categories' : cat }}</span>
+                  <app-icon *ngIf="selectedCategory() === cat" name="check" [size]="14"></app-icon>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <!-- City Indicator Pill -->
+          <!-- City Indicator & Selector with Custom Styled Droplist -->
           <div class="search-divider"></div>
-          <div class="search-city-field" [routerLink]="['/discover']">
-            <app-icon name="map-pin" class="field-icon" [size]="16"></app-icon>
-            <span class="city-text">{{ locationService.selectedCity() }}</span>
+          <div class="search-field-wrapper city-field-wrapper" [class.active-dropdown]="showCityDropdown()" (click)="$event.stopPropagation()">
+            <button 
+              type="button" 
+              class="search-city-btn" 
+              (click)="toggleCityMenu($event)"
+              [class.open]="showCityDropdown()">
+              <app-icon name="map-pin" class="field-icon" [size]="16"></app-icon>
+              <span class="city-text">{{ locationService.selectedCity() }}</span>
+              <app-icon name="chevron-down" class="chevron-icon" [size]="13"></app-icon>
+            </button>
+
+            <!-- Custom Styled Droplist Menu for Cities -->
+            <div class="custom-droplist-menu city-menu" *ngIf="showCityDropdown()">
+              <div class="droplist-header">Choose Your City</div>
+              <div class="droplist-scroll">
+                <button 
+                  *ngFor="let c of allCities" 
+                  type="button" 
+                  class="droplist-item" 
+                  [class.active]="isCityActive(c)" 
+                  (click)="selectCity(c)">
+                  <span>{{ c }}</span>
+                  <app-icon *ngIf="isCityActive(c)" name="check" [size]="14"></app-icon>
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- Search CTA Button -->
-          <button type="button" class="btn-hero-search" (click)="executeSearch()">
+          <button type="submit" class="btn-hero-search">
             <span>Find Events</span>
             <app-icon name="arrow-right" [size]="16"></app-icon>
           </button>
         </form>
 
-        <!-- Quick Trending City Tags -->
+        <!-- Quick Trending City Tags (Clicking updates city on landing page) -->
         <div class="hero-city-chips">
           <span class="chip-label">Popular Cities:</span>
-          <button 
-            *ngFor="let c of popularCities" 
-            type="button" 
-            class="city-chip" 
-            [class.active]="c === locationService.selectedCity()" 
-            (click)="selectCity(c)">
-            {{ c }}
-          </button>
+          <div class="chips-container">
+            <button 
+              *ngFor="let c of popularCities" 
+              type="button" 
+              class="city-chip" 
+              [class.active]="isCityActive(c)" 
+              (click)="selectCity(c)">
+              {{ c }}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -110,84 +246,137 @@
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- 3. TRENDING & FEATURED EXPERIENCES                          -->
+  <!-- 2.5 CURATED SELECTION DUAL-ROW FLOWING MARQUEE              -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <section class="landing-section trending-section">
+  <section class="landing-section curated-marquee-section" id="trending-events-anchor">
     <div class="section-container">
-      
       <div class="section-header-row">
         <div>
-          <span class="section-eyebrow">CURATED SELECTION</span>
+          <span class="section-eyebrow">
+            <span class="eyebrow-sparkle">✦</span>
+            CURATED SELECTION
+          </span>
           <h2 class="section-heading">Trending in {{ locationService.selectedCity() }}</h2>
-          <p class="section-subheading">High-demand concerts, weekend festivals, and premier live spectacles.</p>
+          <p class="section-subheading">High-demand concerts, weekend festivals, sports matches, and premier live spectacles in {{ locationService.selectedCity() }}.</p>
         </div>
         <a routerLink="/discover" class="btn-see-all">
           <span>View All Events</span>
           <app-icon name="arrow-right" [size]="15"></app-icon>
         </a>
       </div>
+    </div>
 
-      <!-- Events Cards Grid -->
-      <div class="events-cards-grid" *ngIf="!isLoading() && trendingEvents().length > 0">
-        <div 
-          *ngFor="let ev of trendingEvents()" 
-          class="event-card-modern"
-          [routerLink]="['/events', ev.id]">
-          
-          <!-- Image with Category Badge & Date Pill -->
-          <div class="card-thumb-wrap">
-            <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="card-thumb" />
-            <div class="card-overlay-gradient"></div>
-            
-            <span class="card-category-tag">{{ ev.category }}</span>
-            <div class="card-date-badge">
-              <span class="date-month">{{ ev.date | date:'MMM' }}</span>
-              <span class="date-day">{{ ev.date | date:'dd' }}</span>
+    <!-- Dual Infinite Flowing Rows -->
+    <div class="marquee-stream-wrapper" *ngIf="curatedRow1().length > 0">
+      
+      <!-- ROW 1: Floating Right to Left -->
+      <div class="marquee-row" title="Hover to pause">
+        <div class="marquee-track track-scroll-left">
+          <!-- Group 1 -->
+          <div class="marquee-group">
+            <div 
+              *ngFor="let ev of curatedRow1()" 
+              class="curated-flow-card"
+              [routerLink]="['/events', ev.id]">
+              <div class="card-flow-thumb-box">
+                <img [src]="ev.thumbnailUrl || ev.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="card-flow-thumb" loading="lazy" />
+                <span class="card-flow-date-tag">{{ ev.date | date:'MMM dd' }}</span>
+              </div>
+              <div class="card-flow-info">
+                <span class="card-flow-cat">{{ ev.category }}</span>
+                <h4 class="card-flow-title" [title]="ev.title">{{ ev.title }}</h4>
+                <div class="card-flow-meta">
+                  <span class="card-flow-city">
+                    <app-icon name="map-pin" [size]="14"></app-icon>
+                    <span>{{ ev.location?.city || 'India' }}</span>
+                  </span>
+                  <span class="card-flow-price">
+                    {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free' }}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-
-          <!-- Card Content -->
-          <div class="card-body">
-            <h3 class="card-title">{{ ev.title }}</h3>
-            
-            <div class="card-meta-row">
-              <span class="card-venue">
-                <app-icon name="map-pin" [size]="13"></app-icon>
-                <span>{{ ev.location?.venue || ev.location?.city }}</span>
-              </span>
-              <span class="card-time">
-                <app-icon name="clock" [size]="13"></app-icon>
-                <span>{{ ev.time || '18:00' }}</span>
-              </span>
-            </div>
-
-            <p class="card-excerpt">{{ ev.description }}</p>
-
-            <!-- Card Footer: Price & CTA -->
-            <div class="card-footer">
-              <div class="price-block">
-                <span class="price-caption">Starting from</span>
-                <strong class="price-figure">
-                  {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free Entry' }}
-                </strong>
+          <!-- Group 2 (Exact Duplicate for Infinite Seamless Loop) -->
+          <div class="marquee-group" aria-hidden="true">
+            <div 
+              *ngFor="let ev of curatedRow1()" 
+              class="curated-flow-card"
+              [routerLink]="['/events', ev.id]">
+              <div class="card-flow-thumb-box">
+                <img [src]="ev.thumbnailUrl || ev.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="card-flow-thumb" loading="lazy" />
+                <span class="card-flow-date-tag">{{ ev.date | date:'MMM dd' }}</span>
               </div>
-              <button class="btn-book-card" [routerLink]="['/events', ev.id]">
-                <span>Book Now</span>
-                <app-icon name="chevron-right" [size]="14"></app-icon>
-              </button>
+              <div class="card-flow-info">
+                <span class="card-flow-cat">{{ ev.category }}</span>
+                <h4 class="card-flow-title" [title]="ev.title">{{ ev.title }}</h4>
+                <div class="card-flow-meta">
+                  <span class="card-flow-city">
+                    <app-icon name="map-pin" [size]="14"></app-icon>
+                    <span>{{ ev.location?.city || 'India' }}</span>
+                  </span>
+                  <span class="card-flow-price">
+                    {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free' }}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Loading Shimmer Placeholder -->
-      <div class="events-cards-grid skeleton-grid" *ngIf="isLoading()">
-        <div class="skeleton-card" *ngFor="let n of [1,2,3]">
-          <div class="skeleton-thumb"></div>
-          <div class="skeleton-body">
-            <div class="skeleton-line line-title"></div>
-            <div class="skeleton-line line-sub"></div>
-            <div class="skeleton-line line-footer"></div>
+      <!-- ROW 2: Flowing Left to Right -->
+      <div class="marquee-row" title="Hover to pause">
+        <div class="marquee-track track-scroll-right">
+          <!-- Group 1 -->
+          <div class="marquee-group">
+            <div 
+              *ngFor="let ev of curatedRow2()" 
+              class="curated-flow-card"
+              [routerLink]="['/events', ev.id]">
+              <div class="card-flow-thumb-box">
+                <img [src]="ev.thumbnailUrl || ev.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="card-flow-thumb" loading="lazy" />
+                <span class="card-flow-date-tag">{{ ev.date | date:'MMM dd' }}</span>
+              </div>
+              <div class="card-flow-info">
+                <span class="card-flow-cat">{{ ev.category }}</span>
+                <h4 class="card-flow-title" [title]="ev.title">{{ ev.title }}</h4>
+                <div class="card-flow-meta">
+                  <span class="card-flow-city">
+                    <app-icon name="map-pin" [size]="14"></app-icon>
+                    <span>{{ ev.location?.city || 'India' }}</span>
+                  </span>
+                  <span class="card-flow-price">
+                    {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Group 2 (Exact Duplicate for Infinite Seamless Loop) -->
+          <div class="marquee-group" aria-hidden="true">
+            <div 
+              *ngFor="let ev of curatedRow2()" 
+              class="curated-flow-card"
+              [routerLink]="['/events', ev.id]">
+              <div class="card-flow-thumb-box">
+                <img [src]="ev.thumbnailUrl || ev.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="card-flow-thumb" loading="lazy" />
+                <span class="card-flow-date-tag">{{ ev.date | date:'MMM dd' }}</span>
+              </div>
+              <div class="card-flow-info">
+                <span class="card-flow-cat">{{ ev.category }}</span>
+                <h4 class="card-flow-title" [title]="ev.title">{{ ev.title }}</h4>
+                <div class="card-flow-meta">
+                  <span class="card-flow-city">
+                    <app-icon name="map-pin" [size]="14"></app-icon>
+                    <span>{{ ev.location?.city || 'India' }}</span>
+                  </span>
+                  <span class="card-flow-price">
+                    {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free' }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -196,7 +385,7 @@
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- 4. CATEGORIES EXPLORER (Vibrant Grid)                       -->
+  <!-- 4. CATEGORIES EXPLORER (With Crisp White SVGs)              -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <section class="landing-section categories-section">
     <div class="section-container">
@@ -218,7 +407,7 @@
 
           <div class="category-tile-content">
             <div class="tile-icon-bubble">
-              <app-icon [name]="cat.icon" [size]="20"></app-icon>
+              <app-icon [name]="cat.icon" [size]="22"></app-icon>
             </div>
             <h3 class="tile-title">{{ cat.name }}</h3>
             <p class="tile-tagline">{{ cat.tagline }}</p>
@@ -234,7 +423,7 @@
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- 5. PLATFORM VALUE PROPOSITION ("Why EventHub?")              -->
+  <!-- 5. PLATFORM VALUE PROPOSITION ("Why Choose EventHub")       -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <section class="landing-section features-section">
     <div class="section-container">
@@ -295,10 +484,10 @@
             Scale your ticket sales, manage field staff scanners with delegated permissions, allocate co-owner equity stakes, and receive automated 48-hour bank payouts.
           </p>
           <div class="banner-actions">
-            <a routerLink="/host/apply" class="btn-host-primary">
+            <button type="button" (click)="navigateToApply()" class="btn-host-primary">
               <app-icon name="plus" [size]="16" [strokeWidth]="2.5"></app-icon>
               <span>Apply as Verified Host</span>
-            </a>
+            </button>
             <a routerLink="/discover" class="btn-host-ghost">
               <span>Explore Platform Catalog</span>
             </a>

@@ -1,7 +1,42 @@
 <main class="gift-page fade-in">
-  <header class="gift-hero"><p class="eyebrow">GIVE MOMENTS, NOT THINGS</p><h1>EventHub Gift Cards</h1><p>Let someone you care about choose their next unforgettable experience.</p></header>
-  <section *ngIf="isLoading()" class="state"><div class="spinner"></div><p>Loading gift cards…</p></section>
-  <section *ngIf="error()" class="state"><h2>Unable to load gift cards</h2><p>{{ error() }}</p><app-button variant="outline" (onClick)="loadGiftCards()">Try again</app-button></section>
-  <section *ngIf="!isLoading() && !error()" class="gift-grid"><article *ngFor="let card of giftCards()" class="gift-card"><img [src]="card.imageUrl" [alt]="card.title"><div class="gift-copy"><h2>{{ card.title }}</h2><p>{{ card.description }}</p><strong>₹{{ card.amount }}</strong><app-button size="sm" (onClick)="selectCard(card)">Choose this card</app-button></div></article></section>
-  <div class="modal-backdrop" *ngIf="selectedCard()" (click)="closeModal()"><section class="gift-modal" (click)="$event.stopPropagation()"><button class="close" (click)="closeModal()" aria-label="Close">×</button><h2>{{ selectedCard()?.title }}</h2><p>{{ selectedCard()?.description }}</p><p class="amount">₹{{ selectedCard()?.amount }}</p><small>{{ selectedCard()?.terms }}</small><app-button [fullWidth]="true" (onClick)="purchase()">Continue to secure payment</app-button></section></div>
+  <header class="gift-hero">
+    <p class="eyebrow">GIVE MOMENTS, NOT THINGS</p>
+    <h1>EventHub Gift Cards</h1>
+    <p>Let someone you care about choose their next unforgettable experience.</p>
+  </header>
+
+  <section *ngIf="isLoading()" class="state">
+    <div class="spinner"></div>
+    <p>Loading gift cards…</p>
+  </section>
+
+  <section *ngIf="error()" class="state">
+    <h2>Unable to load gift cards</h2>
+    <p>{{ error() }}</p>
+    <app-button variant="outline" (onClick)="loadGiftCards()">Try again</app-button>
+  </section>
+
+  <section *ngIf="!isLoading() && !error()" class="gift-grid">
+    <article *ngFor="let card of giftCards()" class="gift-card">
+      <img [src]="card.imageUrl" [alt]="card.title">
+      <div class="gift-copy">
+        <h2>{{ card.title }}</h2>
+        <p>{{ card.description }}</p>
+        <strong>₹{{ card.amount }}</strong>
+        <app-button size="sm" (onClick)="selectCard(card)">Choose this card</app-button>
+      </div>
+    </article>
+  </section>
 </main>
+
+<!-- Fullscreen Modal Overlay (outside .gift-page container so it covers the entire viewport) -->
+<div class="modal-backdrop" *ngIf="selectedCard()" (click)="closeModal()">
+  <section class="gift-modal" (click)="$event.stopPropagation()">
+    <button class="close" (click)="closeModal()" aria-label="Close">×</button>
+    <h2>{{ selectedCard()?.title }}</h2>
+    <p>{{ selectedCard()?.description }}</p>
+    <p class="amount">₹{{ selectedCard()?.amount }}</p>
+    <small>{{ selectedCard()?.terms }}</small>
+    <app-button [fullWidth]="true" (onClick)="purchase()">Continue to secure payment</app-button>
+  </section>
+</div>

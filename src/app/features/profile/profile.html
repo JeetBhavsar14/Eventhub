@@ -4,37 +4,45 @@
   <!-- 1. PROFILE HEADER HERO & STATS BAR                          -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <header class="dashboard-hero-header">
-    <div class="hero-cover-gradient"></div>
+    <div class="hero-cover-gradient">
+      <div class="cover-overlay-pattern"></div>
+      <div class="cover-eyebrow">
+        <app-icon name="shield" [size]="14"></app-icon>
+        <span>EventHub Verified Identity</span>
+      </div>
+    </div>
 
     <div class="header-main-content">
       <div class="user-profile-identity">
         
-        <!-- Avatar -->
+        <!-- Avatar Ring with Status Dot -->
         <div class="avatar-ring-wrap">
           <div class="avatar-badge-initials">
             {{ (currentUser()?.firstName?.charAt(0) || '') + (currentUser()?.lastName?.charAt(0) || '') || 'EH' }}
           </div>
-          <span class="online-indicator-dot" title="Account Active"></span>
+          <span class="online-indicator-dot" title="Account Active & Verified"></span>
         </div>
 
-        <!-- Identity Meta -->
+        <!-- Identity Meta Block (Crisp High-Contrast Typography) -->
         <div class="identity-info-block">
           <div class="name-status-row">
             <h1 class="user-full-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</h1>
             
-            <!-- Verified Attendee Pill -->
-            <span class="user-tier-pill">
-              <app-icon name="check-circle" [size]="13"></app-icon>
-              <span>Verified Attendee</span>
+            <!-- Dynamic Primary Role Pill -->
+            <span class="role-pill" [ngClass]="roleBadgeClass()">
+              <app-icon [name]="roleBadgeIcon()" [size]="14"></app-icon>
+              <span>{{ roleTitle() }}</span>
             </span>
 
-            <!-- Host Status Pill -->
-            <span class="host-verified-pill" *ngIf="isApprovedHost()">
-              <app-icon name="shield-check" [size]="14"></app-icon>
-              <span>Verified Host</span>
+            <!-- Verified Attendee Secondary Pill if Host/Staff/Admin -->
+            <span class="user-tier-pill" *ngIf="isApprovedHost() || isStaffUser()">
+              <app-icon name="check-circle" [size]="13"></app-icon>
+              <span>Attendee</span>
             </span>
+
+            <!-- Host Application Pending/Review Pill -->
             <span class="host-pending-pill" *ngIf="isHostApplied() && !isApprovedHost()">
-              <app-icon name="clock" [size]="14"></app-icon>
+              <app-icon name="clock" [size]="13"></app-icon>
               <span>Host App: {{ hostStatus() === 'under_review' ? 'In Review' : (hostStatus() | titlecase) }}</span>
             </span>
           </div>
@@ -43,6 +51,11 @@
             <span class="meta-email">
               <app-icon name="mail" [size]="13"></app-icon>
               <span>{{ currentUser()?.email }}</span>
+            </span>
+            <span class="meta-dot" *ngIf="currentUser()?.phone">•</span>
+            <span class="meta-phone" *ngIf="currentUser()?.phone">
+              <app-icon name="map-pin" [size]="13"></app-icon>
+              <span>{{ currentUser()?.phone }}</span>
             </span>
             <span class="meta-dot">•</span>
             <span class="meta-joined">
@@ -54,20 +67,49 @@
 
       </div>
 
-      <!-- Quick Shortcuts (Host & Staff Workspaces) -->
+      <!-- Quick Role Action Launchers -->
       <div class="hero-role-actions">
-        <a *ngIf="isApprovedHost()" routerLink="/host/dashboard" class="btn-role-shortcut host">
-          <app-icon name="grid" [size]="15"></app-icon>
-          <span>Host Workspace</span>
+        <!-- Admin Shortcut -->
+        <a *ngIf="isAdminUser()" routerLink="/admin" class="btn-role-shortcut admin">
+          <app-icon name="shield" [size]="15"></app-icon>
+          <span>Admin Console</span>
         </a>
-        <a *ngIf="!isApprovedHost() && (hostStatus() === 'guest' || hostStatus() === 'not_applied')" routerLink="/host/apply" class="btn-role-shortcut host-apply">
-          <app-icon name="plus" [size]="15"></app-icon>
-          <span>Become a Host</span>
+
+        <!-- Management Shortcut -->
+        <a *ngIf="isManagementUser() && !isAdminUser()" routerLink="/management" class="btn-role-shortcut management">
+          <app-icon name="layers" [size]="15"></app-icon>
+          <span>Operations Hub</span>
         </a>
-        <a *ngIf="isStaffUser()" routerLink="/staff" class="btn-role-shortcut staff">
-          <app-icon name="users" [size]="15"></app-icon>
-          <span>Staff Portal</span>
+
+        <!-- Staff Shortcut -->
+        <a *ngIf="isStaffOnly()" routerLink="/staff/scanner" class="btn-role-shortcut staff">
+          <app-icon name="qr-code" [size]="15"></app-icon>
+          <span>Gate Scanner</span>
         </a>
+
+        <!-- Host Shortcuts -->
+        <ng-container *ngIf="isApprovedHost()">
+          <a routerLink="/host/dashboard" class="btn-role-shortcut host">
+            <app-icon name="grid" [size]="15"></app-icon>
+            <span>Host Workspace</span>
+          </a>
+          <a routerLink="/host/events/create" class="btn-role-shortcut host-create">
+            <app-icon name="plus" [size]="15"></app-icon>
+            <span>Create Event</span>
+          </a>
+        </ng-container>
+
+        <!-- Attendee Shortcuts -->
+        <ng-container *ngIf="!isApprovedHost() && !isStaffUser()">
+          <a *ngIf="hostStatus() === 'guest' || hostStatus() === 'not_applied'" routerLink="/host/apply" class="btn-role-shortcut host-apply">
+            <app-icon name="star" [size]="15"></app-icon>
+            <span>Become a Host</span>
+          </a>
+          <a routerLink="/discover" class="btn-role-shortcut discover">
+            <app-icon name="compass" [size]="15"></app-icon>
+            <span>Explore Events</span>
+          </a>
+        </ng-container>
       </div>
     </div>
 
@@ -129,7 +171,7 @@
           [class.active]="activeTab() === 'dashboard'" 
           (click)="setTab('dashboard')">
           <app-icon name="grid" [size]="18"></app-icon>
-          <span>Dashboard Overview</span>
+          <span>Overview</span>
         </button>
 
         <button 
@@ -137,7 +179,7 @@
           [class.active]="activeTab() === 'bookings'" 
           (click)="setTab('bookings')">
           <app-icon name="ticket" [size]="18"></app-icon>
-          <span>My Bookings & Passes</span>
+          <span>Bookings</span>
           <span class="tab-badge" *ngIf="activeTicketsCount() > 0">{{ activeTicketsCount() }}</span>
         </button>
 
@@ -146,7 +188,17 @@
           [class.active]="activeTab() === 'favorites'" 
           (click)="setTab('favorites')">
           <app-icon name="heart" [size]="18"></app-icon>
-          <span>Saved Favorites</span>
+          <span>Favorites</span>
+          <span class="tab-badge" *ngIf="savedEvents().length > 0">{{ savedEvents().length }}</span>
+        </button>
+
+        <button 
+          class="nav-tab-btn" 
+          [class.active]="activeTab() === 'roles'" 
+          (click)="setTab('roles')">
+          <app-icon name="shield-check" [size]="18"></app-icon>
+          <span>Permissions</span>
+          <span class="tab-badge-role" [ngClass]="roleBadgeClass()">{{ roleTitle() }}</span>
         </button>
 
         <button 
@@ -154,7 +206,7 @@
           [class.active]="activeTab() === 'personal'" 
           (click)="setTab('personal')">
           <app-icon name="user" [size]="18"></app-icon>
-          <span>Personal Information</span>
+          <span>Profile</span>
         </button>
 
         <button 
@@ -162,7 +214,7 @@
           [class.active]="activeTab() === 'preferences'" 
           (click)="setTab('preferences')">
           <app-icon name="sliders" [size]="18"></app-icon>
-          <span>Event Preferences</span>
+          <span>Preferences</span>
         </button>
 
         <button 
@@ -170,14 +222,14 @@
           [class.active]="activeTab() === 'payments'" 
           (click)="setTab('payments')">
           <app-icon name="credit-card" [size]="18"></app-icon>
-          <span>Payment Methods</span>
+          <span>Payments</span>
         </button>
 
         <div class="nav-divider"></div>
 
         <a routerLink="/discover" class="nav-tab-btn external-link">
           <app-icon name="compass" [size]="18"></app-icon>
-          <span>Explore All Events</span>
+          <span>Explore Events</span>
         </a>
       </nav>
     </aside>
@@ -209,6 +261,48 @@
               <app-icon name="qr-code" [size]="18"></app-icon>
               <span>View Live QR Pass</span>
             </button>
+          </div>
+        </div>
+
+        <!-- ACTIVE ROLE WORKSPACES & PERMISSIONS HUB -->
+        <div class="dashboard-card-box role-hub-box">
+          <div class="card-box-header">
+            <div class="role-hub-header-left">
+              <div class="role-icon-box" [ngClass]="roleBadgeClass()">
+                <app-icon [name]="roleBadgeIcon()" [size]="20"></app-icon>
+              </div>
+              <div class="role-hub-text-block">
+                <div class="role-badge-row">
+                  <span class="role-pill" [ngClass]="roleBadgeClass()">{{ roleTitle() }}</span>
+                  <span class="role-auth-status">
+                    <app-icon name="check-circle" [size]="13"></app-icon>
+                    <span>Active & Authorized</span>
+                  </span>
+                </div>
+                <p class="box-subtitle">{{ roleDescription() }}</p>
+              </div>
+            </div>
+            <button class="btn-box-link" (click)="setTab('roles')">
+              <span>All Permissions ({{ rolePermissions().length }})</span>
+              <app-icon name="arrow-right" [size]="14"></app-icon>
+            </button>
+          </div>
+
+          <!-- Quick Action Task Tiles -->
+          <div class="role-tasks-grid">
+            <div *ngFor="let task of roleWorkspaces()" class="role-task-tile" [routerLink]="[task.route]">
+              <div class="task-icon-wrap" [ngClass]="roleBadgeClass()">
+                <app-icon [name]="task.icon" [size]="18"></app-icon>
+              </div>
+              <div class="task-text-meta">
+                <h4 class="task-title">{{ task.title }}</h4>
+                <p class="task-desc">{{ task.description }}</p>
+              </div>
+              <div class="task-action-btn">
+                <span>{{ task.actionText }}</span>
+                <app-icon name="arrow-right" [size]="13"></app-icon>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -265,26 +359,26 @@
           </div>
         </div>
 
-        <!-- SAVED FAVORITES PREVIEW -->
+        <!-- SAVED FAVORITES PREVIEW (Clean Responsive Grid) -->
         <div class="dashboard-card-box" *ngIf="savedEvents().length > 0">
           <div class="card-box-header">
             <div>
               <h3 class="box-title">Saved Wishlist & Recommended</h3>
               <p class="box-subtitle">Experiences you have bookmarked for upcoming weekends.</p>
             </div>
-            <a routerLink="/discover" class="btn-box-link">
-              <span>Discover More</span>
+            <button class="btn-box-link" (click)="setTab('favorites')">
+              <span>View All Saved</span>
               <app-icon name="arrow-right" [size]="14"></app-icon>
-            </a>
+            </button>
           </div>
 
           <div class="favorites-mini-grid">
             <div *ngFor="let ev of savedEvents()" class="fav-mini-card" [routerLink]="['/events', ev.id]">
-              <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="fav-mini-thumb" />
+              <img [src]="ev.thumbnailUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="fav-mini-thumb" />
               <div class="fav-mini-info">
                 <span class="fav-cat">{{ ev.category }}</span>
                 <h4 class="fav-title">{{ ev.title }}</h4>
-                <span class="fav-date">{{ ev.date | date:'MMM dd' }} • {{ ev.location?.city }}</span>
+                <span class="fav-date">{{ ev.date | date:'MMM dd' }} • {{ ev.location?.city || 'India' }}</span>
               </div>
               <button class="btn-fav-book" [routerLink]="['/events', ev.id]">Book</button>
             </div>
@@ -363,9 +457,9 @@
           </div>
         </div>
 
-        <div class="favorites-full-grid">
+        <div class="favorites-full-grid" *ngIf="savedEvents().length > 0">
           <div *ngFor="let ev of savedEvents()" class="fav-card-modern" [routerLink]="['/events', ev.id]">
-            <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="fav-card-img" />
+            <img [src]="ev.thumbnailUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="fav-card-img" />
             <div class="fav-card-content">
               <span class="fav-pill">{{ ev.category }}</span>
               <h3 class="fav-h3">{{ ev.title }}</h3>
@@ -377,10 +471,113 @@
             </div>
           </div>
         </div>
+
+        <div class="empty-bookings-box" *ngIf="savedEvents().length === 0">
+          <app-icon name="heart" [size]="40"></app-icon>
+          <h4>No Favorites Saved Yet</h4>
+          <p>Click the bookmark or heart on any event to save it for later.</p>
+          <a routerLink="/discover" class="btn-empty-action">Browse Events</a>
+        </div>
       </section>
 
       <!-- ─────────────────────────────────────────────────────────
-           TAB 4: PERSONAL INFORMATION
+           TAB 4: ROLE & PERMISSIONS GOVERNANCE
+           ───────────────────────────────────────────────────────── -->
+      <section *ngIf="activeTab() === 'roles'" class="tab-pane-content fade-in">
+        <div class="pane-header-row">
+          <div>
+            <h2 class="pane-title">Role Authority & Platform Permissions</h2>
+            <p class="pane-desc">Your operational privileges, accessible workspaces, and credential governance.</p>
+          </div>
+          <span class="role-pill" [ngClass]="roleBadgeClass()">{{ roleTitle() }}</span>
+        </div>
+
+        <!-- Role Overview Banner Card -->
+        <div class="role-overview-banner-card" [ngClass]="roleBadgeClass()">
+          <div class="banner-icon-ring">
+            <app-icon [name]="roleBadgeIcon()" [size]="28"></app-icon>
+          </div>
+          <div class="banner-text-info">
+            <span class="banner-eyebrow">YOUR ACCREDITED ACCESS LEVEL</span>
+            <h3 class="banner-heading">{{ roleTitle() }}</h3>
+            <p class="banner-desc">{{ roleDescription() }}</p>
+            <div class="banner-meta-pills">
+              <span class="meta-pill"><app-icon name="check" [size]="13"></app-icon> Verified Identity</span>
+              <span class="meta-pill"><app-icon name="shield-check" [size]="13"></app-icon> Zero Trust Auth</span>
+              <span class="meta-pill" *ngIf="isApprovedHost()"><app-icon name="star" [size]="13"></app-icon> Approved Host</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Authorized Workspaces Grid -->
+        <div class="dashboard-card-box">
+          <div class="card-box-header">
+            <div>
+              <h3 class="box-title">Authorized Workspaces & Task Launchers</h3>
+              <p class="box-subtitle">Direct shortcuts to operational systems assigned to your role.</p>
+            </div>
+          </div>
+
+          <div class="workspaces-large-grid">
+            <div *ngFor="let ws of roleWorkspaces()" class="workspace-card" [routerLink]="[ws.route]">
+              <div class="ws-icon-bubble" [ngClass]="roleBadgeClass()">
+                <app-icon [name]="ws.icon" [size]="22"></app-icon>
+              </div>
+              <div class="ws-info">
+                <h4>{{ ws.title }}</h4>
+                <p>{{ ws.description }}</p>
+              </div>
+              <div class="ws-action-link">
+                <span>{{ ws.actionText }}</span>
+                <app-icon name="arrow-right" [size]="14"></app-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Permissions Checklist -->
+        <div class="dashboard-card-box">
+          <div class="card-box-header">
+            <div>
+              <h3 class="box-title">Platform Permissions Checklist</h3>
+              <p class="box-subtitle">Verified access rights granted to your account.</p>
+            </div>
+          </div>
+
+          <div class="permissions-checklist-grid">
+            <div *ngFor="let p of rolePermissions()" class="permission-item-row">
+              <div class="perm-check-icon granted">
+                <app-icon name="check-circle" [size]="18"></app-icon>
+              </div>
+              <div class="perm-info">
+                <strong>{{ p.name }}</strong>
+                <p>{{ p.description }}</p>
+              </div>
+              <span class="perm-status-tag">Granted</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Host Upgrade Promo for Regular Attendees -->
+        <div class="host-promo-card-box" *ngIf="!isApprovedHost() && !isAdminUser() && !isManagementUser() && !isStaffUser()">
+          <div class="promo-text-wrap">
+            <div class="promo-star-icon">
+              <app-icon name="star" [size]="26"></app-icon>
+            </div>
+            <div>
+              <h3>Want to organize and host your own live events?</h3>
+              <p>Apply for EventHub Host Accreditation to publish concerts, summits, and workshops, create custom ticket tiers, and reach thousands of verified attendees.</p>
+            </div>
+          </div>
+          <a routerLink="/host/apply" class="btn-apply-host-promo">
+            <span>Apply to Become a Host</span>
+            <app-icon name="arrow-right" [size]="16"></app-icon>
+          </a>
+        </div>
+      </section>
+
+      <!-- ─────────────────────────────────────────────────────────
+           TAB 5: PERSONAL INFORMATION
            ───────────────────────────────────────────────────────── -->
       <section *ngIf="activeTab() === 'personal'" class="tab-pane-content fade-in">
         <div class="pane-header-row">
@@ -397,7 +594,7 @@
       </section>
 
       <!-- ─────────────────────────────────────────────────────────
-           TAB 5: PREFERENCES
+           TAB 6: PREFERENCES
            ───────────────────────────────────────────────────────── -->
       <section *ngIf="activeTab() === 'preferences'" class="tab-pane-content fade-in">
         <div class="pane-header-row">
@@ -426,7 +623,7 @@
       </section>
 
       <!-- ─────────────────────────────────────────────────────────
-           TAB 6: PAYMENT METHODS & WALLET
+           TAB 7: PAYMENT METHODS & WALLET
            ───────────────────────────────────────────────────────── -->
       <section *ngIf="activeTab() === 'payments'" class="tab-pane-content fade-in">
         <div class="pane-header-row">
@@ -485,7 +682,7 @@
         <div class="qr-code-frame">
           <img *ngIf="qrModalUrl()" [src]="qrModalUrl()" alt="Event QR Ticket Code" class="qr-image" />
           <div class="qr-scan-guide">
-            <app-icon name="scan" [size]="16"></app-icon>
+            <app-icon name="qr-code" [size]="16"></app-icon>
             <span>Scan at turnstile gate for admission</span>
           </div>
         </div>

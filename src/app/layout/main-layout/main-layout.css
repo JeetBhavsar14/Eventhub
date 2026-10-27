@@ -1,4 +1,11 @@
 .page-content {
   background-color: var(--gray-50);
   min-height: calc(100vh - 112px); /* 64px top bar + 48px bottom bar */
+  min-height: calc(100dvh - 112px);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  position: relative;
 }
