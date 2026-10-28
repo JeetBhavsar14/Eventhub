@@ -1,16 +1,17 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApiClient } from '@core/api';
 import { AuthService } from '@core/auth';
-import { ButtonComponent, IconComponent } from '@shared/components';
-import { SVGS } from '@shared/assets';
+import { EventItem } from '@core/models';
+import { getStartingPrice } from '@core/utils';
+import { IconComponent, EventCardComponent } from '@shared/components';
 
 @Component({
   selector: 'app-event-details',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent, RouterLink],
+  imports: [CommonModule, IconComponent, RouterLink, EventCardComponent],
   templateUrl: './event-details.component.html',
   styleUrl: './event-details.component.css'
 })
@@ -21,29 +22,16 @@ export class EventDetailsComponent implements OnInit {
   private authService = inject(AuthService);
   private sanitizer = inject(DomSanitizer);
 
-  event = signal<any>(null);
-  similarEvents = signal<any[]>([]);
+  event = signal<EventItem | null>(null);
+  similarEvents = signal<EventItem[]>([]);
   isLoading = signal(true);
   error = signal<string | null>(null);
   
   isBookingModalOpen = signal(false);
   currentUser = this.authService.currentUser;
 
-  calendarSvg: SafeHtml;
-  mapPinSvg: SafeHtml;
-  ticketSvg: SafeHtml;
-
-  constructor() {
-    this.calendarSvg = this.sanitizer.bypassSecurityTrustHtml(SVGS.calendar);
-    this.mapPinSvg = this.sanitizer.bypassSecurityTrustHtml(SVGS.mapPin);
-    this.ticketSvg = this.sanitizer.bypassSecurityTrustHtml(SVGS.ticket);
-  }
-
   getStartingPrice(): number {
-    const ev = this.event();
-    if (!ev?.ticketTypes || ev.ticketTypes.length === 0) return 500;
-    const prices = ev.ticketTypes.map((t: any) => t.price || 0);
-    return Math.min(...prices);
+    return getStartingPrice(this.event(), 500);
   }
 
   get mapUrl(): SafeResourceUrl {
@@ -72,7 +60,7 @@ export class EventDetailsComponent implements OnInit {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      const res = await this.apiClient.get<any>(`/events/${id}`);
+      const res = await this.apiClient.get<EventItem>(`/events/${id}`);
       if (res.data) {
         this.event.set(res.data);
         await this.loadSimilarEvents(res.data.category, res.data.id, res.data.location?.city);
@@ -95,14 +83,14 @@ export class EventDetailsComponent implements OnInit {
       } else if (city) {
         query = `location.city=${encodeURIComponent(city)}`;
       }
-      const res = await this.apiClient.get<any[]>(`/events?${query}`);
+      const res = await this.apiClient.get<EventItem[]>(`/events?${query}`);
       let list = res.data || [];
-      list = list.filter((e: any) => e.id !== currentId);
+      list = list.filter(e => e.id !== currentId);
       
       // If fewer than 3 events found in same category, fetch more from the city
       if (list.length < 3 && city) {
-        const fallbackRes = await this.apiClient.get<any[]>(`/events?location.city=${encodeURIComponent(city)}`);
-        const fallbackList = (fallbackRes.data || []).filter((e: any) => e.id !== currentId && !list.some(l => l.id === e.id));
+        const fallbackRes = await this.apiClient.get<EventItem[]>(`/events?location.city=${encodeURIComponent(city)}`);
+        const fallbackList = (fallbackRes.data || []).filter(e => e.id !== currentId && !list.some(l => l.id === e.id));
         list = [...list, ...fallbackList];
       }
       
@@ -113,11 +101,6 @@ export class EventDetailsComponent implements OnInit {
     }
   }
 
-  getStartingPriceFor(ev: any): number {
-    if (!ev?.ticketTypes || ev.ticketTypes.length === 0) return 500;
-    const prices = ev.ticketTypes.map((t: any) => t.price || 0);
-    return Math.min(...prices);
-  }
 
   bookTicket() {
     if (!this.currentUser()) {
@@ -125,6 +108,9 @@ export class EventDetailsComponent implements OnInit {
       this.router.navigate(['/auth/login']);
       return;
     }
-    this.router.navigate(['/checkout', this.event().id]);
+    const currentEvent = this.event();
+    if (!currentEvent) return;
+    this.router.navigate(['/checkout', currentEvent.id]);
   }
+
 }

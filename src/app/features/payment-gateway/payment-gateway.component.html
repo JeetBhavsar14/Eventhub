@@ -1,0 +1,228 @@
+<div class="gateway-page fade-in" *ngIf="!isLoading() && order() && !paymentSuccess() && !isExpired()">
+  
+  <!-- Top Navigation & Timer Bar -->
+  <header class="gateway-header">
+    <div class="header-container">
+      <div class="brand-badge">
+        <app-icon name="shield-check" [size]="20"></app-icon>
+        <span>EventHub Secure Payment Gateway</span>
+      </div>
+
+      <!-- 2-Minute Live Countdown Timer -->
+      <div class="gateway-timer-card" [class.urgent]="timeRemaining() <= 30">
+        <div class="timer-icon-wrap">
+          <svg class="timer-svg" viewBox="0 0 36 36">
+            <path
+              class="timer-circle-bg"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <path
+              class="timer-circle-fill"
+              [style.strokeDasharray]="strokeDashoffset()"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+          </svg>
+          <app-icon name="clock" [size]="16" class="inner-clock-icon"></app-icon>
+        </div>
+        <div class="timer-text">
+          <span class="timer-label">Session expires in</span>
+          <strong class="timer-countdown">{{ formattedTime() }}</strong>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Gateway Content -->
+  <main class="gateway-layout">
+    
+    <!-- Left Column: Payment Options (Cut from checkout page) -->
+    <section class="gateway-methods-card">
+      <div class="methods-card-header">
+        <div class="step-indicator">
+          <span class="step-num">Step 2</span>
+          <h2>Select Payment Method</h2>
+        </div>
+      </div>
+
+      <p class="methods-sub">Choose your preferred payment method to complete ticket verification.</p>
+
+      <!-- Embedded Payment Form Cut from Booking/Checkout -->
+      <app-payment-form [amount]="order()!.totalAmount"></app-payment-form>
+
+      <div class="gateway-action-bar">
+        <button type="button" class="btn-cancel" (click)="cancelAndReturn()" [disabled]="isProcessing()">
+          <app-icon name="arrow-left" [size]="15"></app-icon>
+          <span>Cancel & Back</span>
+        </button>
+
+        <button 
+          type="button" 
+          class="btn-confirm-pay" 
+          (click)="confirmPayment()" 
+          [disabled]="isProcessing() || isExpired()">
+          <span *ngIf="!isProcessing()">Pay ₹{{ order()!.totalAmount }} Securely</span>
+          <span *ngIf="isProcessing()" class="btn-loading-flex">
+            <span class="spinner-small"></span> Authorizing Payment...
+          </span>
+          <app-icon *ngIf="!isProcessing()" name="chevron-right" [size]="16"></app-icon>
+        </button>
+      </div>
+
+      <div class="gateway-trust-banner">
+        <div class="trust-item">
+          <app-icon name="check-circle" [size]="15"></app-icon>
+          <span>Instant Ticket Generation</span>
+        </div>
+        <div class="trust-item">
+          <app-icon name="shield" [size]="15"></app-icon>
+          <span>RBI & PCI-DSS Compliant</span>
+        </div>
+        <div class="trust-item">
+          <app-icon name="refresh-cw" [size]="15"></app-icon>
+          <span>Auto-Refund on Failure</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Order & Ticket Breakdown -->
+    <aside class="gateway-summary-sidebar">
+      <div class="summary-card">
+        <div class="summary-card-head">
+          <h3>Order Details</h3>
+          <span class="badge-review">Verification</span>
+        </div>
+
+        <div class="event-mini-preview">
+          <img 
+            [src]="order()!.eventThumbnail || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=300'" 
+            [alt]="order()!.eventTitle" 
+            class="mini-thumb" />
+          <div class="mini-info">
+            <h4>{{ order()!.eventTitle }}</h4>
+            <p class="mini-meta">
+              <app-icon name="calendar" [size]="12"></app-icon>
+              <span>{{ order()!.eventDate | date:'EEE, dd MMM yyyy' }}</span>
+            </p>
+            <p class="mini-meta" *ngIf="order()!.eventLocation">
+              <app-icon name="map-pin" [size]="12"></app-icon>
+              <span>{{ order()!.eventLocation }}</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Ticket Line Items -->
+        <div class="ticket-line-items">
+          <div class="ticket-line" *ngFor="let t of order()!.tickets">
+            <div class="line-left">
+              <span class="t-qty">{{ t.quantity }}x</span>
+              <span class="t-name">{{ t.name }}</span>
+            </div>
+            <strong class="line-price">₹{{ t.price * t.quantity }}</strong>
+          </div>
+        </div>
+
+        <!-- Price Breakdown -->
+        <div class="summary-breakdown">
+          <div class="breakdown-row">
+            <span>Ticket Subtotal</span>
+            <span>₹{{ order()!.subtotal }}</span>
+          </div>
+          
+          <div class="breakdown-row discount-row" *ngIf="order()!.discount > 0">
+            <span>Promo Discount ({{ order()!.offerCode }})</span>
+            <span class="disc-val">-₹{{ order()!.discount }}</span>
+          </div>
+
+          <div class="breakdown-row">
+            <span>Taxes & GST (18%)</span>
+            <span>₹{{ order()!.tax }}</span>
+          </div>
+
+          <div class="breakdown-divider"></div>
+
+          <div class="breakdown-row total-row">
+            <span>Total Payable</span>
+            <span class="grand-price">₹{{ order()!.totalAmount }}</span>
+          </div>
+        </div>
+
+        <div class="user-chip">
+          <span class="user-chip-label">Billing to:</span>
+          <strong>{{ currentUser()?.firstName }} {{ currentUser()?.lastName }} ({{ currentUser()?.email }})</strong>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+</div>
+
+<!-- Success View upon payment completion -->
+<div class="success-container fade-in" *ngIf="paymentSuccess()">
+  <div class="success-card">
+    <div class="success-icon">
+      <svg width="68" height="68" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+      </svg>
+    </div>
+
+    <h2>Payment Successful!</h2>
+    <p class="message">
+      Your payment of <strong>₹{{ bookingResult()?.totalAmount }}</strong> has been verified. 
+      Your confirmed ticket pass is ready.
+    </p>
+    
+    <div class="ticket-preview">
+      <div class="ticket-qr" *ngIf="qrCodeUrl()">
+        <img [src]="qrCodeUrl()" alt="Ticket QR Code">
+      </div>
+      <div class="ticket-details">
+        <p><strong>Booking reference:</strong> {{ bookingResult()?.bookingReference || bookingResult()?.id }}</p>
+        <p><strong>Guest:</strong> {{ bookingResult()?.attendee?.name || currentUser()?.firstName }}</p>
+        <p><strong>Event:</strong> {{ bookingResult()?.eventTitle }}</p>
+        <p><strong>When:</strong> {{ bookingResult()?.eventDate | date:'EEE, d MMM y' }} · {{ bookingResult()?.eventTime }}</p>
+        <p><strong>Where:</strong> {{ bookingResult()?.eventLocation }}, {{ bookingResult()?.eventAddress }}</p>
+        <p><strong>Tickets:</strong> 
+          <span *ngFor="let ticket of bookingResult()?.tickets; let last = last">
+            {{ ticket.quantity }} × {{ ticket.name }}<span *ngIf="!last">, </span>
+          </span>
+        </p>
+        <p><strong>Paid:</strong> ₹{{ bookingResult()?.totalAmount }} via {{ bookingResult()?.payment?.label }}</p>
+      </div>
+    </div>
+
+    <div class="success-actions no-print">
+      <app-button variant="outline" (click)="printTicket()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect width="12" height="8" x="6" y="14"/>
+        </svg>
+        Save / Print PDF
+      </app-button>
+      <app-button variant="primary" (click)="goToBookings()">View in My Bookings</app-button>
+      <app-button variant="secondary" (click)="goHome()">Browse More Events</app-button>
+    </div>
+  </div>
+</div>
+
+<!-- Session Expired State -->
+<div class="expired-card-container fade-in" *ngIf="isExpired() && !paymentSuccess()">
+  <div class="expired-card">
+    <div class="expired-icon">
+      <app-icon name="alert-triangle" [size]="54"></app-icon>
+    </div>
+    <h2>Payment Session Expired</h2>
+    <p>The 2-minute booking window has elapsed. For inventory security, your selected tickets have been released.</p>
+    <div class="expired-actions">
+      <app-button variant="primary" size="lg" (click)="returnToEvent()">Select Tickets Again</app-button>
+      <app-button variant="outline" size="lg" (click)="goHome()">Back to Home</app-button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading state -->
+<div class="loading-state" *ngIf="isLoading()">
+  <div class="spinner"></div>
+  <p>Connecting to Secure Payment Gateway...</p>
+</div>

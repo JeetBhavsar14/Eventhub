@@ -5,14 +5,14 @@ import * as QRCode from 'qrcode';
 import { ApiClient } from '@core/api';
 import { AuthService } from '@core/auth';
 import { Booking } from '@core/models';
-import { ButtonComponent } from '@shared/components';
+import { ButtonComponent, PaginationBarComponent } from '@shared/components';
 
 type BookingFilter = 'upcoming' | 'past' | 'all';
 
 @Component({
   selector: 'app-bookings',
   standalone: true,
-  imports: [CommonModule, RouterLink, ButtonComponent],
+  imports: [CommonModule, RouterLink, ButtonComponent, PaginationBarComponent],
   templateUrl: './bookings.component.html',
   styleUrl: './bookings.component.css'
 })
@@ -27,6 +27,10 @@ export class BookingsComponent implements OnInit {
   expandedBookingId = signal<string | null>(null);
   qrCodeUrl = signal('');
 
+  // Pagination State
+  currentPage = signal(1);
+  pageSize = signal(4);
+
   currentUser = this.authService.currentUser;
   filteredBookings = computed(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -36,6 +40,48 @@ export class BookingsComponent implements OnInit {
       return filter === 'upcoming' ? booking.eventDate >= today : booking.eventDate < today;
     });
   });
+
+  totalPages = computed(() => {
+    return Math.max(1, Math.ceil(this.filteredBookings().length / this.pageSize()));
+  });
+
+  paginatedBookings = computed(() => {
+    const list = this.filteredBookings();
+    const size = this.pageSize();
+    const maxPage = Math.max(1, Math.ceil(list.length / size));
+    const page = Math.min(this.currentPage(), maxPage);
+    const start = (page - 1) * size;
+    return list.slice(start, start + size);
+  });
+
+  startItem = computed(() => {
+    const total = this.filteredBookings().length;
+    if (total === 0) return 0;
+    const size = this.pageSize();
+    const maxPage = Math.max(1, Math.ceil(total / size));
+    const page = Math.min(this.currentPage(), maxPage);
+    return (page - 1) * size + 1;
+  });
+
+  endItem = computed(() => {
+    const total = this.filteredBookings().length;
+    const size = this.pageSize();
+    const maxPage = Math.max(1, Math.ceil(total / size));
+    const page = Math.min(this.currentPage(), maxPage);
+    return Math.min(page * size, total);
+  });
+
+  setFilter(filter: BookingFilter) {
+    this.selectedFilter.set(filter);
+    this.currentPage.set(1);
+  }
+
+  setPage(page: number) {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 
   async ngOnInit() {
     await this.loadBookings();

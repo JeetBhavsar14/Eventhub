@@ -1,41 +1,41 @@
-<div class="event-details-wrapper fade-in" *ngIf="!isLoading() && event()">
+<div class="event-details-wrapper fade-in" *ngIf="!isLoading() && event() as ev">
 
   
   <!-- Hero Section with blurred background effect (BookMyShow Style) -->
   <section class="details-hero">
     <div class="hero-bg-blur">
-      <img [src]="event().thumbnailUrl" alt="Background">
+      <img [src]="ev.thumbnailUrl" alt="Background">
       <div class="hero-overlay-dark"></div>
     </div>
 
     <div class="hero-content">
       <!-- Poster Card on the Left (BookMyShow 2:3 vertical poster style) -->
       <div class="hero-poster-card">
-        <img [src]="event().thumbnailUrl" [alt]="event().title" class="poster-img">
+        <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="poster-img">
         <div class="poster-bottom-pill">
-          <span>{{ event().format || 'In-Person' }}</span>
+          <span>{{ ev.format || 'In-Person' }}</span>
         </div>
       </div>
 
       <!-- Right Details & Book Button (BookMyShow Style) -->
       <div class="hero-text-col">
-        <h1 class="event-main-title">{{ event().title }}</h1>
+        <h1 class="event-main-title">{{ ev.title }}</h1>
         
         <!-- Meta Row with Bullets -->
         <div class="hero-meta-row">
-          <span>{{ event().time || '18:00' }}</span>
+          <span>{{ ev.time || '18:00' }}</span>
           <span class="bullet-sep">•</span>
-          <span>{{ event().category }}</span>
+          <span>{{ ev.category }}</span>
           <span class="bullet-sep">•</span>
-          <span>{{ event().subcategory || 'All Ages' }}</span>
+          <span>{{ ev.subcategory || 'All Ages' }}</span>
           <span class="bullet-sep">•</span>
-          <span>{{ event().date | date:'dd MMM, yyyy' }}</span>
+          <span>{{ ev.date | date:'dd MMM, yyyy' }}</span>
         </div>
 
         <!-- Badges Row -->
         <div class="hero-badges-row">
-          <span class="hero-chip">{{ event().format || 'In-Person' }}</span>
-          <span class="hero-chip">{{ event().location?.city }}, India</span>
+          <span class="hero-chip">{{ ev.format || 'In-Person' }}</span>
+          <span class="hero-chip">{{ ev.location?.city || 'India' }}, India</span>
           <span class="hero-chip price-chip">From ₹{{ getStartingPrice() }}</span>
         </div>
 
@@ -57,23 +57,27 @@
       <main class="main-info">
         <div class="info-card">
           <h2>About this Event</h2>
-          <p class="description">{{ event().description }}</p>
+          <p class="description">{{ ev.description }}</p>
           
           <h3 class="mt-4">Date and Time</h3>
           <div class="detail-row">
-            <span class="icon" [innerHTML]="calendarSvg"></span>
+            <span class="icon">
+              <app-icon name="calendar" [size]="18"></app-icon>
+            </span>
             <div>
-              <p class="font-bold">{{ event().date | date:'EEEE, MMMM d, yyyy' }}</p>
-              <p class="text-gray">{{ event().time || '10:00 AM - 5:00 PM' }}</p>
+              <p class="font-bold">{{ ev.date | date:'EEEE, MMMM d, yyyy' }}</p>
+              <p class="text-gray">{{ ev.time || '10:00 AM - 5:00 PM' }}</p>
             </div>
           </div>
 
           <h3 class="mt-4">Location</h3>
           <div class="detail-row">
-            <span class="icon" [innerHTML]="mapPinSvg"></span>
+            <span class="icon">
+              <app-icon name="map-pin" [size]="18"></app-icon>
+            </span>
             <div>
-              <p class="font-bold">{{ event().location.venue }}</p>
-              <p class="text-gray">{{ event().location.address || event().location.city + ', ' + event().location.country }}</p>
+              <p class="font-bold">{{ ev.location?.venue || 'Venue to be announced' }}</p>
+              <p class="text-gray">{{ ev.location?.address || (ev.location?.city ? ev.location?.city + ', ' + (ev.location?.country || 'India') : 'Details available upon booking') }}</p>
             </div>
           </div>
           
@@ -92,7 +96,7 @@
             <div class="map-actions-bar">
               <span class="map-venue-label">
                 <app-icon name="map-pin" [size]="14"></app-icon>
-                <span>{{ event().location.venue }}, {{ event().location.city }}</span>
+                <span>{{ ev.location?.venue || 'Venue' }}, {{ ev.location?.city || 'India' }}</span>
               </span>
               <a [href]="googleMapsSearchUrl" target="_blank" rel="noopener noreferrer" class="btn-open-map-link">
                 <span>Open in Google Maps</span>
@@ -103,6 +107,7 @@
 
         </div>
       </main>
+
       
     </div>
   </section>
@@ -122,41 +127,7 @@
       </div>
 
       <div class="similar-cards-grid">
-        <div *ngFor="let ev of similarEvents()" class="event-card-modern" [routerLink]="['/events', ev.id]">
-          <div class="card-thumb-wrap">
-            <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="card-thumb" />
-            <div class="card-overlay-gradient"></div>
-            <span class="card-category-tag">{{ ev.category }}</span>
-            <div class="card-date-badge">
-              <span class="date-month">{{ ev.date | date:'MMM' }}</span>
-              <span class="date-day">{{ ev.date | date:'dd' }}</span>
-            </div>
-          </div>
-          <div class="card-body">
-            <h3 class="card-title">{{ ev.title }}</h3>
-            <div class="card-meta-row">
-              <span class="card-venue">
-                <app-icon name="map-pin" [size]="13"></app-icon>
-                <span>{{ ev.location?.venue || ev.location?.city }}</span>
-              </span>
-              <span class="card-time">
-                <app-icon name="clock" [size]="13"></app-icon>
-                <span>{{ ev.time || '18:00' }}</span>
-              </span>
-            </div>
-            <p class="card-excerpt">{{ ev.description }}</p>
-            <div class="card-footer">
-              <div class="price-block">
-                <span class="price-caption">Starting from</span>
-                <strong class="price-figure">{{ getStartingPriceFor(ev) > 0 ? '₹' + getStartingPriceFor(ev) : 'Free Entry' }}</strong>
-              </div>
-              <button class="btn-book-card" [routerLink]="['/events', ev.id]">
-                <span>Book Now</span>
-                <app-icon name="chevron-right" [size]="14"></app-icon>
-              </button>
-            </div>
-          </div>
-        </div>
+        <app-event-card *ngFor="let ev of similarEvents()" [event]="ev"></app-event-card>
       </div>
     </div>
   </section>

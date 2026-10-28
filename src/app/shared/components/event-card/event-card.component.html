@@ -1,0 +1,53 @@
+<div 
+  class="event-card-modern"
+  [routerLink]="['/events', event.id]">
+  
+  <!-- Image with Category Badge & Date Pill -->
+  <div class="card-thumb-wrap">
+    <img [src]="event.thumbnailUrl" [alt]="event.title" class="card-thumb" loading="lazy" />
+    <div class="card-overlay-gradient"></div>
+    
+    <span class="card-category-tag">{{ event.category }}</span>
+    <span class="card-trending-tag" *ngIf="event.isPopular">
+      <app-icon name="trending-up" [size]="12"></app-icon> Trending
+    </span>
+
+    <div class="card-date-badge" *ngIf="event.date">
+      <span class="date-month">{{ event.date | date:'MMM' }}</span>
+      <span class="date-day">{{ event.date | date:'dd' }}</span>
+    </div>
+  </div>
+
+  <!-- Card Content -->
+  <div class="card-body">
+    <h3 class="card-title">{{ event.title }}</h3>
+    
+    <div class="card-meta-row">
+      <span class="card-venue" [title]="event.location?.venue || event.location?.city">
+        <app-icon name="map-pin" [size]="13"></app-icon>
+        <span>{{ event.location?.venue || event.location?.city }}</span>
+      </span>
+      <span class="card-time" *ngIf="event.time">
+        <app-icon name="clock" [size]="13"></app-icon>
+        <span>{{ event.time }}</span>
+      </span>
+    </div>
+
+    <p class="card-excerpt" *ngIf="event.description">{{ event.description }}</p>
+
+    <!-- Card Footer: Price & CTA -->
+    <div class="card-footer">
+      <div class="price-block">
+        <span class="price-caption">Starting from</span>
+        <strong class="price-figure">
+          {{ formattedStartingPrice }}
+        </strong>
+      </div>
+      <button class="btn-book-card" [routerLink]="['/events', event.id]">
+        <span>Book Now</span>
+        <app-icon name="chevron-right" [size]="14"></app-icon>
+      </button>
+    </div>
+  </div>
+</div>
+

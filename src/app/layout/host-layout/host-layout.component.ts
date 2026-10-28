@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { HostDashboardService } from '@core/state/host-dashboard.service';
 import { EventTeamService } from '@core/state/event-team.service';
 import { EventOwnershipService } from '@core/state/event-ownership.service';
@@ -59,6 +59,7 @@ export class HostLayoutComponent implements OnInit {
   private readonly toastService = inject(ToastService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly adminService = inject(AdminService);
 
   // Phase 5: Event Ownership & Multi-Owner State (§ 11.0, § 12.0, § 14.0)
@@ -216,6 +217,17 @@ export class HostLayoutComponent implements OnInit {
     this.dashboardService.loadAll();
     this.eventTeamService.loadEventTeam('evt-100');
     this.ownershipService.loadEventGovernance('evt-100');
+
+    // Deep link support: map queryParams (e.g. ?view=team) to dashboard views
+    const initialView = this.route.snapshot.queryParams['view'];
+    if (initialView) {
+      this.switchView(initialView as HostDashboardView);
+    }
+    this.route.queryParams.subscribe(params => {
+      if (params['view']) {
+        this.switchView(params['view'] as HostDashboardView);
+      }
+    });
   }
 
   // Selected Reporting Period

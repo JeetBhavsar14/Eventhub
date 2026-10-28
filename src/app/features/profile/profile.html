@@ -60,7 +60,7 @@
             <span class="meta-dot">•</span>
             <span class="meta-joined">
               <app-icon name="calendar" [size]="13"></app-icon>
-              <span>Member since 2025</span>
+              <span>Member since {{ (currentUser()?.createdAt | date:'yyyy') || '2025' }}</span>
             </span>
           </div>
         </div>
@@ -93,10 +93,6 @@
             <app-icon name="grid" [size]="15"></app-icon>
             <span>Host Workspace</span>
           </a>
-          <a routerLink="/host/events/create" class="btn-role-shortcut host-create">
-            <app-icon name="plus" [size]="15"></app-icon>
-            <span>Create Event</span>
-          </a>
         </ng-container>
 
         <!-- Attendee Shortcuts -->
@@ -113,7 +109,7 @@
       </div>
     </div>
 
-    <!-- 4 Key Account Metrics Cards -->
+    <!-- Key Account Metrics Cards -->
     <div class="user-kpis-strip">
       <div class="kpi-card" (click)="setTab('bookings')">
         <div class="kpi-icon-bubble indigo">
@@ -135,23 +131,13 @@
         </div>
       </div>
 
-      <div class="kpi-card" (click)="setTab('favorites')">
-        <div class="kpi-icon-bubble periwinkle">
-          <app-icon name="heart" [size]="20"></app-icon>
-        </div>
-        <div class="kpi-meta">
-          <span class="kpi-label">Saved Favorites</span>
-          <strong class="kpi-number">{{ savedEvents().length }}</strong>
-        </div>
-      </div>
-
       <div class="kpi-card" [routerLink]="['/my-gift-cards']">
         <div class="kpi-icon-bubble amber">
           <app-icon name="gift" [size]="20"></app-icon>
         </div>
         <div class="kpi-meta">
           <span class="kpi-label">Gift Balance</span>
-          <strong class="kpi-number">₹1,500</strong>
+          <strong class="kpi-number">₹{{ totalGiftBalance().toLocaleString() }}</strong>
         </div>
       </div>
     </div>
@@ -185,36 +171,10 @@
 
         <button 
           class="nav-tab-btn" 
-          [class.active]="activeTab() === 'favorites'" 
-          (click)="setTab('favorites')">
-          <app-icon name="heart" [size]="18"></app-icon>
-          <span>Favorites</span>
-          <span class="tab-badge" *ngIf="savedEvents().length > 0">{{ savedEvents().length }}</span>
-        </button>
-
-        <button 
-          class="nav-tab-btn" 
           [class.active]="activeTab() === 'roles'" 
           (click)="setTab('roles')">
           <app-icon name="shield-check" [size]="18"></app-icon>
           <span>Permissions</span>
-          <span class="tab-badge-role" [ngClass]="roleBadgeClass()">{{ roleTitle() }}</span>
-        </button>
-
-        <button 
-          class="nav-tab-btn" 
-          [class.active]="activeTab() === 'personal'" 
-          (click)="setTab('personal')">
-          <app-icon name="user" [size]="18"></app-icon>
-          <span>Profile</span>
-        </button>
-
-        <button 
-          class="nav-tab-btn" 
-          [class.active]="activeTab() === 'preferences'" 
-          (click)="setTab('preferences')">
-          <app-icon name="sliders" [size]="18"></app-icon>
-          <span>Preferences</span>
         </button>
 
         <button 
@@ -290,7 +250,7 @@
 
           <!-- Quick Action Task Tiles -->
           <div class="role-tasks-grid">
-            <div *ngFor="let task of roleWorkspaces()" class="role-task-tile" [routerLink]="[task.route]">
+            <div *ngFor="let task of roleWorkspaces()" class="role-task-tile" [routerLink]="[task.route]" [queryParams]="task.queryParams || {}">
               <div class="task-icon-wrap" [ngClass]="roleBadgeClass()">
                 <app-icon [name]="task.icon" [size]="18"></app-icon>
               </div>
@@ -359,32 +319,6 @@
           </div>
         </div>
 
-        <!-- SAVED FAVORITES PREVIEW (Clean Responsive Grid) -->
-        <div class="dashboard-card-box" *ngIf="savedEvents().length > 0">
-          <div class="card-box-header">
-            <div>
-              <h3 class="box-title">Saved Wishlist & Recommended</h3>
-              <p class="box-subtitle">Experiences you have bookmarked for upcoming weekends.</p>
-            </div>
-            <button class="btn-box-link" (click)="setTab('favorites')">
-              <span>View All Saved</span>
-              <app-icon name="arrow-right" [size]="14"></app-icon>
-            </button>
-          </div>
-
-          <div class="favorites-mini-grid">
-            <div *ngFor="let ev of savedEvents()" class="fav-mini-card" [routerLink]="['/events', ev.id]">
-              <img [src]="ev.thumbnailUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="fav-mini-thumb" />
-              <div class="fav-mini-info">
-                <span class="fav-cat">{{ ev.category }}</span>
-                <h4 class="fav-title">{{ ev.title }}</h4>
-                <span class="fav-date">{{ ev.date | date:'MMM dd' }} • {{ ev.location?.city || 'India' }}</span>
-              </div>
-              <button class="btn-fav-book" [routerLink]="['/events', ev.id]">Book</button>
-            </div>
-          </div>
-        </div>
-
       </section>
 
       <!-- ─────────────────────────────────────────────────────────
@@ -400,7 +334,7 @@
         </div>
 
         <div class="bookings-full-grid" *ngIf="bookings().length > 0">
-          <div *ngFor="let b of bookings()" class="booking-ticket-card">
+          <div *ngFor="let b of paginatedBookings()" class="booking-ticket-card">
             <div class="ticket-top-banner">
               <div>
                 <span class="ticket-ref-tag">PASS #{{ b.id }}</span>
@@ -438,6 +372,18 @@
           </div>
         </div>
 
+        <!-- Bookings Pagination Bar -->
+        <app-pagination-bar
+          *ngIf="bookings().length > 0"
+          [currentPage]="bookingPage()"
+          [totalPages]="totalBookingPages()"
+          [startItem]="bookingStartItem()"
+          [endItem]="bookingEndItem()"
+          [totalItems]="bookings().length"
+          itemLabel="bookings"
+          (pageChange)="setBookingPage($event)">
+        </app-pagination-bar>
+
         <div class="empty-bookings-box" *ngIf="bookings().length === 0">
           <app-icon name="ticket" [size]="40"></app-icon>
           <h4>No Bookings Found</h4>
@@ -447,41 +393,7 @@
       </section>
 
       <!-- ─────────────────────────────────────────────────────────
-           TAB 3: SAVED FAVORITES
-           ───────────────────────────────────────────────────────── -->
-      <section *ngIf="activeTab() === 'favorites'" class="tab-pane-content fade-in">
-        <div class="pane-header-row">
-          <div>
-            <h2 class="pane-title">Saved Favorites</h2>
-            <p class="pane-desc">Events and experiences you're keeping an eye on.</p>
-          </div>
-        </div>
-
-        <div class="favorites-full-grid" *ngIf="savedEvents().length > 0">
-          <div *ngFor="let ev of savedEvents()" class="fav-card-modern" [routerLink]="['/events', ev.id]">
-            <img [src]="ev.thumbnailUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="fav-card-img" />
-            <div class="fav-card-content">
-              <span class="fav-pill">{{ ev.category }}</span>
-              <h3 class="fav-h3">{{ ev.title }}</h3>
-              <p class="fav-venue"><app-icon name="map-pin" [size]="13"></app-icon> {{ ev.location?.venue || ev.location?.city }}</p>
-              <div class="fav-card-bottom">
-                <span class="fav-date-badge">{{ ev.date | date:'MMM dd, yyyy' }}</span>
-                <button class="btn-book-fav" [routerLink]="['/events', ev.id]">Book Tickets</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="empty-bookings-box" *ngIf="savedEvents().length === 0">
-          <app-icon name="heart" [size]="40"></app-icon>
-          <h4>No Favorites Saved Yet</h4>
-          <p>Click the bookmark or heart on any event to save it for later.</p>
-          <a routerLink="/discover" class="btn-empty-action">Browse Events</a>
-        </div>
-      </section>
-
-      <!-- ─────────────────────────────────────────────────────────
-           TAB 4: ROLE & PERMISSIONS GOVERNANCE
+           TAB 3: ROLE & PERMISSIONS GOVERNANCE
            ───────────────────────────────────────────────────────── -->
       <section *ngIf="activeTab() === 'roles'" class="tab-pane-content fade-in">
         <div class="pane-header-row">
@@ -577,7 +489,7 @@
       </section>
 
       <!-- ─────────────────────────────────────────────────────────
-           TAB 5: PERSONAL INFORMATION
+           TAB 4: PERSONAL INFORMATION
            ───────────────────────────────────────────────────────── -->
       <section *ngIf="activeTab() === 'personal'" class="tab-pane-content fade-in">
         <div class="pane-header-row">
@@ -590,35 +502,6 @@
         <div class="form-container-card">
           <app-profile-form [user]="currentUser()" [isSaving]="isSaving()" (submitted)="saveProfile($event)"></app-profile-form>
           <p *ngIf="saveMessage()" class="save-status-msg" [class.error]="saveError()">{{ saveMessage() }}</p>
-        </div>
-      </section>
-
-      <!-- ─────────────────────────────────────────────────────────
-           TAB 6: PREFERENCES
-           ───────────────────────────────────────────────────────── -->
-      <section *ngIf="activeTab() === 'preferences'" class="tab-pane-content fade-in">
-        <div class="pane-header-row">
-          <div>
-            <h2 class="pane-title">Event Preferences</h2>
-            <p class="pane-desc">Select your favorite live entertainment categories for tailored recommendations.</p>
-          </div>
-        </div>
-
-        <div class="form-container-card">
-          <h4 class="pref-group-title">Favorite Experience Genres</h4>
-          <p class="pref-group-sub">Click genres to toggle your interest:</p>
-
-          <div class="genre-chips-wrap">
-            <button 
-              *ngFor="let g of availableGenres" 
-              type="button" 
-              class="genre-chip-btn" 
-              [class.selected]="selectedGenres().includes(g)"
-              (click)="toggleGenre(g)">
-              <app-icon name="check" [size]="14" *ngIf="selectedGenres().includes(g)"></app-icon>
-              <span>{{ g }}</span>
-            </button>
-          </div>
         </div>
       </section>
 
@@ -653,8 +536,55 @@
           <div class="wallet-promo-card">
             <app-icon name="gift" [size]="28"></app-icon>
             <h3>Digital Gift Cards Wallet</h3>
-            <p>You have <strong>₹1,500</strong> in active gift pass balances ready to redeem at event checkout.</p>
-            <a routerLink="/my-gift-cards" class="btn-wallet-link">Manage Gift Cards</a>
+            <p *ngIf="activeGiftCards().length > 0">
+              You have <strong>₹{{ totalGiftBalance().toLocaleString() }}</strong> in {{ activeGiftCards().length }} active gift {{ activeGiftCards().length === 1 ? 'card' : 'cards' }} ready to redeem at event checkout.
+            </p>
+            <p *ngIf="activeGiftCards().length === 0">
+              You have no active gift cards yet. Send or purchase digital gift vouchers with instant redemption.
+            </p>
+            <div class="wallet-card-actions">
+              <a routerLink="/my-gift-cards" class="btn-wallet-link">Manage Gift Cards</a>
+              <a routerLink="/gift-cards" class="btn-wallet-link secondary">Buy Gift Card</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic User Gift Cards Mini List in Payments Tab -->
+        <div class="dashboard-card-box" *ngIf="giftCards().length > 0" style="margin-top: 1.5rem;">
+          <div class="card-box-header">
+            <div>
+              <h3 class="box-title">Your Gift Cards</h3>
+              <p class="box-subtitle">Active and redeemed vouchers associated with your account.</p>
+            </div>
+            <a routerLink="/my-gift-cards" class="btn-box-link">
+              <span>View All ({{ giftCards().length }})</span>
+              <app-icon name="arrow-right" [size]="14"></app-icon>
+            </a>
+          </div>
+
+          <div class="profile-gift-cards-grid">
+            <div *ngFor="let card of giftCards().slice(0, 4)" class="profile-gift-card-row">
+              <div class="card-gift-icon" [class.redeemed]="card.status === 'redeemed'">
+                <app-icon name="gift" [size]="20"></app-icon>
+              </div>
+              <div class="card-gift-info">
+                <div class="gift-title-row">
+                  <h4 class="gift-title">{{ card.title }}</h4>
+                  <span class="gift-status-chip" [class.active]="card.status === 'active'" [class.redeemed]="card.status === 'redeemed'">
+                    {{ card.status | titlecase }}
+                  </span>
+                </div>
+                <div class="gift-code-row">
+                  <code>{{ card.giftCode }}</code>
+                  <span class="bullet" *ngIf="card.expiresAt">•</span>
+                  <span *ngIf="card.expiresAt">Expires {{ card.expiresAt | date:'mediumDate' }}</span>
+                </div>
+              </div>
+              <div class="card-gift-amount">
+                <strong class="gift-balance">₹{{ card.balance.toLocaleString() }}</strong>
+                <small *ngIf="card.balance !== card.amount" class="gift-orig-amount">of ₹{{ card.amount.toLocaleString() }}</small>
+              </div>
+            </div>
           </div>
         </div>
       </section>

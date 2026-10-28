@@ -25,18 +25,19 @@
               
               <div class="slide-meta">
                 <span class="meta-item">
-                  <span class="icon" [innerHTML]="calendarSvg"></span> 
+                  <app-icon name="calendar" [size]="14"></app-icon> 
                   {{ event.date | date:'MMMM dd, yyyy' }}
                 </span>
                 <span class="meta-item">
-                  <span class="icon" [innerHTML]="mapPinSvg"></span> 
-                  {{ event.location.venue }}
+                  <app-icon name="map-pin" [size]="14"></app-icon> 
+                  {{ event.location?.venue || 'Venue TBA' }}
                 </span>
                 <span class="meta-item category-badge">
-                  <span class="icon" [innerHTML]="getCategorySvg(event.category)"></span> 
+                  <app-icon [name]="getCategoryIcon(event.category)" [size]="14"></app-icon> 
                   {{ event.category }}
                 </span>
               </div>
+
 
               <p class="slide-desc">{{ event.description }}</p>
               
@@ -71,9 +72,91 @@
 
   <!-- Discover Layout (Sidebar + Main Content) -->
   <section class="discover-layout-section" id="discover-events-section">
+    
+    <!-- Mobile Only Sticky Filter Bar: Filters, Category, Price in one row -->
+    <div class="mobile-filter-bar-sticky-wrap">
+      <div class="mobile-filter-bar">
+        <!-- 1. Filters Button -->
+        <button 
+          type="button" 
+          class="mobile-filter-btn" 
+          (click)="toggleMobileFilterCard()"
+          [class.has-filter]="activeFiltersCount() > 0"
+          aria-label="Open filter options">
+          <app-icon name="sliders" [size]="15"></app-icon>
+          <span>Filters</span>
+          <span class="mobile-filter-pill-count" *ngIf="activeFiltersCount() > 0">{{ activeFiltersCount() }}</span>
+        </button>
+
+        <!-- 2. Category Dropdown Button with Custom Droplist -->
+        <div class="mobile-dropdown-btn-wrap" [class.is-open]="mobileDropdownOpen() === 'category'">
+          <button 
+            type="button" 
+            class="mobile-dropdown-trigger" 
+            [class.has-filter]="currentFilter.category && currentFilter.category !== 'All'"
+            (click)="toggleMobileDropdown('category', $event)"
+            aria-label="Filter by Category"
+            aria-haspopup="listbox">
+            <span class="mobile-btn-label">{{ currentFilter.category === 'All' ? 'Category' : currentFilter.category }}</span>
+            <span class="mobile-chevron-wrap" [class.open]="mobileDropdownOpen() === 'category'">
+              <app-icon name="chevron-down" [size]="14"></app-icon>
+            </span>
+          </button>
+
+          <!-- Floating Droplist Menu -->
+          <div class="mobile-dropdown-menu" *ngIf="mobileDropdownOpen() === 'category'" (click)="$event.stopPropagation()">
+            <div class="dropdown-options-scroll">
+              <div 
+                *ngFor="let cat of categories" 
+                class="dropdown-option-item"
+                [class.selected]="(currentFilter.category || 'All') === cat"
+                (click)="selectMobileCategory(cat, $event)">
+                <span class="option-label">{{ cat === 'All' ? 'All Categories' : cat }}</span>
+                <span *ngIf="(currentFilter.category || 'All') === cat" class="check-indicator">
+                  <app-icon name="check" [size]="14"></app-icon>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Price Dropdown Button with Custom Droplist -->
+        <div class="mobile-dropdown-btn-wrap" [class.is-open]="mobileDropdownOpen() === 'price'">
+          <button 
+            type="button" 
+            class="mobile-dropdown-trigger" 
+            [class.has-filter]="currentFilter.price && currentFilter.price !== 'Any Price' && currentFilter.price !== 'Any Range'"
+            (click)="toggleMobileDropdown('price', $event)"
+            aria-label="Filter by Price"
+            aria-haspopup="listbox">
+            <span class="mobile-btn-label">{{ (!currentFilter.price || currentFilter.price === 'Any Price' || currentFilter.price === 'Any Range') ? 'Price' : currentFilter.price }}</span>
+            <span class="mobile-chevron-wrap" [class.open]="mobileDropdownOpen() === 'price'">
+              <app-icon name="chevron-down" [size]="14"></app-icon>
+            </span>
+          </button>
+
+          <!-- Floating Droplist Menu -->
+          <div class="mobile-dropdown-menu" *ngIf="mobileDropdownOpen() === 'price'" (click)="$event.stopPropagation()">
+            <div class="dropdown-options-scroll">
+              <div 
+                *ngFor="let pr of priceOptions" 
+                class="dropdown-option-item"
+                [class.selected]="(!currentFilter.price || currentFilter.price === 'Any Price' || currentFilter.price === 'Any Range') ? pr === 'Any Range' : currentFilter.price === pr"
+                (click)="selectMobilePrice(pr, $event)">
+                <span class="option-label">{{ pr }}</span>
+                <span *ngIf="(!currentFilter.price || currentFilter.price === 'Any Price' || currentFilter.price === 'Any Range') ? pr === 'Any Range' : currentFilter.price === pr" class="check-indicator">
+                  <app-icon name="check" [size]="14"></app-icon>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="discover-container">
-      
-      <!-- Left Sidebar (Filters) -->
+
+      <!-- Left Sidebar (Desktop Filters) -->
       <aside class="filters-sidebar">
         <h3>Filters</h3>
         <app-event-filter [currentFilter]="currentFilter" (filterChange)="handleFilterChange($event)"></app-event-filter>
@@ -141,112 +224,63 @@
 
         <!-- Events Grid (Modern Landing Page Style) -->
         <div class="events-cards-grid" [class.is-updating]="isFiltering()" *ngIf="!(isLoading() && featuredEvents().length === 0) && featuredEvents().length > 0">
-          <div 
-            *ngFor="let ev of paginatedEvents()" 
-            class="event-card-modern"
-            [routerLink]="['/events', ev.id]">
-            
-            <!-- Image with Category Badge & Date Pill -->
-            <div class="card-thumb-wrap">
-              <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="card-thumb" />
-              <div class="card-overlay-gradient"></div>
-              
-              <span class="card-category-tag">{{ ev.category }}</span>
-              <span class="card-trending-tag" *ngIf="ev.isPopular">
-                <app-icon name="trending-up" [size]="12"></app-icon> Trending
-              </span>
-
-              <div class="card-date-badge">
-                <span class="date-month">{{ ev.date | date:'MMM' }}</span>
-                <span class="date-day">{{ ev.date | date:'dd' }}</span>
-              </div>
-            </div>
-
-            <!-- Card Content -->
-            <div class="card-body">
-              <h3 class="card-title">{{ ev.title }}</h3>
-              
-              <div class="card-meta-row">
-                <span class="card-venue">
-                  <app-icon name="map-pin" [size]="13"></app-icon>
-                  <span>{{ ev.location?.venue || ev.location?.city }}</span>
-                </span>
-                <span class="card-time">
-                  <app-icon name="clock" [size]="13"></app-icon>
-                  <span>{{ ev.time || '18:00' }}</span>
-                </span>
-              </div>
-
-              <p class="card-excerpt">{{ ev.description }}</p>
-
-              <!-- Card Footer: Price & CTA -->
-              <div class="card-footer">
-                <div class="price-block">
-                  <span class="price-caption">Starting from</span>
-                  <strong class="price-figure">
-                    {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free Entry' }}
-                  </strong>
-                </div>
-                <button class="btn-book-card" [routerLink]="['/events', ev.id]">
-                  <span>Book Now</span>
-                  <app-icon name="chevron-right" [size]="14"></app-icon>
-                </button>
-              </div>
-            </div>
-          </div>
+          <app-event-card *ngFor="let ev of paginatedEvents()" [event]="ev"></app-event-card>
         </div>
 
         <!-- Pagination Controls -->
-        <div class="discover-pagination" *ngIf="totalEvents() > pageSize()">
-          <div class="pagination-info">
-            Showing <strong>{{ startIndex() }}–{{ endIndex() }}</strong> of <strong>{{ totalEvents() }}</strong> events
-          </div>
-
-          <div class="pagination-nav">
-            <!-- Prev Button -->
-            <button 
-              type="button" 
-              class="pagination-btn pagination-arrow-btn" 
-              [disabled]="currentPage() === 1"
-              (click)="prevPage()"
-              aria-label="Previous page">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-              <span>Prev</span>
-            </button>
-
-            <!-- Page Number Buttons -->
-            <div class="pagination-pages">
-              <button 
-                *ngFor="let page of pageNumbers()"
-                type="button" 
-                class="pagination-btn pagination-page-btn"
-                [class.active]="page === currentPage()"
-                [class.ellipsis]="page === '...'"
-                [disabled]="page === '...'"
-                (click)="goToPage(page)">
-                {{ page }}
-              </button>
-            </div>
-
-            <!-- Next Button -->
-            <button 
-              type="button" 
-              class="pagination-btn pagination-arrow-btn" 
-              [disabled]="currentPage() === totalPages()"
-              (click)="nextPage()"
-              aria-label="Next page">
-              <span>Next</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </button>
-          </div>
-        </div>
+        <app-pagination-bar
+          *ngIf="totalEvents() > pageSize()"
+          [currentPage]="currentPage()"
+          [totalPages]="totalPages()"
+          [startItem]="startIndex()"
+          [endItem]="endIndex()"
+          [totalItems]="totalEvents()"
+          itemLabel="events"
+          (pageChange)="goToPage($event)">
+        </app-pagination-bar>
       </main>
+
       
     </div>
   </section>
+
+  <!-- Mobile Filter Pop-up Window (Centered Floating Modal) -->
+  <div 
+    class="mobile-filter-popup-overlay" 
+    *ngIf="showMobileFilterCard()" 
+    (click)="closeMobileFilterCard()">
+    
+    <div class="mobile-filter-popup-window" (click)="$event.stopPropagation()">
+      <!-- Pop-up Header -->
+      <div class="popup-window-header">
+        <div class="popup-title-wrap">
+          <app-icon name="sliders" [size]="18"></app-icon>
+          <h3>Filters</h3>
+          <span class="active-badge" *ngIf="activeFiltersCount() > 0">{{ activeFiltersCount() }} active</span>
+        </div>
+        <button type="button" class="popup-close-btn" (click)="closeMobileFilterCard()" aria-label="Close filters">
+          <app-icon name="close" [size]="18"></app-icon>
+        </button>
+      </div>
+
+      <!-- Pop-up Body with custom scroll -->
+      <div class="popup-window-body">
+        <app-event-filter 
+          [currentFilter]="currentFilter" 
+          (filterChange)="handleFilterChange($event)">
+        </app-event-filter>
+      </div>
+
+      <!-- Pop-up Footer -->
+      <div class="popup-window-footer">
+        <button type="button" class="btn-popup-reset" (click)="resetAllFilters()">
+          Reset
+        </button>
+        <button type="button" class="btn-popup-apply" (click)="closeMobileFilterCard()">
+          Show {{ totalEvents() }} Events
+        </button>
+      </div>
+    </div>
+  </div>
 
 </div>

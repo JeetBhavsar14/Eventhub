@@ -110,9 +110,10 @@
                         <span class="spotlight-venue">{{ ev.location?.city || 'India' }}</span>
                       </div>
                     </div>
-                    <div class="spotlight-price" *ngIf="getStartingPrice(ev) || ev.ticketTypes?.[0]?.price">
+                    <div class="spotlight-price" *ngIf="getStartingPrice(ev) || ev.ticketTypes[0]?.price">
                       ₹{{ getStartingPrice(ev) || ev.ticketTypes[0].price }}
                     </div>
+
                   </div>
                 </div>
 

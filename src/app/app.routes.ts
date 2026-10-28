@@ -206,6 +206,11 @@ export const routes: Routes = [
             loadComponent: () => import('./features/checkout/checkout').then(m => m.Checkout), 
             canActivate: [authGuard] 
           },
+          {
+            path: 'payment-gateway',
+            loadComponent: () => import('./features/payment-gateway/payment-gateway.component').then(m => m.PaymentGatewayComponent),
+            canActivate: [authGuard]
+          },
           { 
             path: 'gift-card-checkout/:id', 
             loadComponent: () => import('./features/gift-card-checkout/gift-card-checkout.component').then(m => m.GiftCardCheckoutComponent), 

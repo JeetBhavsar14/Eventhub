@@ -5,6 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { ApiClient } from '@core/api';
 import { LocationService } from '@core/state';
 import { AuthService } from '@core/auth';
+import { EventItem } from '@core/models';
+import { POPULAR_CITIES, DEFAULT_RECENT_SEARCHES } from '@core/constants';
+import { getStartingPrice } from '@core/utils';
 import { IconComponent } from '@shared/components';
 
 export interface CategoryCard {
@@ -36,14 +39,14 @@ export class HomeComponent implements OnInit, AfterViewInit {
   searchQuery = signal('');
   selectedCategory = signal('All');
   searchFocused = signal(false);
-  recentSearches = signal<string[]>(['Festivals', 'Concerts', 'Mumbai', 'Comedy', 'Workshop']);
+  recentSearches = signal<string[]>([...DEFAULT_RECENT_SEARCHES]);
 
   // Custom Dropdown State
   showCityDropdown = signal(false);
   showCategoryDropdown = signal(false);
 
   // Events Data
-  allEvents = signal<any[]>([]);
+  allEvents = signal<EventItem[]>([]);
   isLoading = signal(true);
 
   // Spotlight Autocomplete Filtered Events (Matching Header Search Bar Logic)
@@ -141,14 +144,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   ];
 
   // Popular Quick-Pill Cities
-  readonly popularCities = [
-    'Mumbai',
-    'Delhi-NCR',
-    'Bengaluru',
-    'Ahmedabad',
-    'Pune',
-    'Hyderabad'
-  ];
+  readonly popularCities = POPULAR_CITIES;
 
   // Complete list of searchable/selectable cities
   readonly allCities = [
@@ -298,7 +294,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   async loadEvents(): Promise<void> {
     this.isLoading.set(true);
     try {
-      const res = await this.api.get<any[]>('/events');
+      const res = await this.api.get<EventItem[]>('/events');
       if (res.data) {
         this.allEvents.set(res.data);
       }
@@ -410,8 +406,6 @@ export class HomeComponent implements OnInit, AfterViewInit {
   }
 
   getStartingPrice(event: any): number {
-    if (!event.ticketTypes || event.ticketTypes.length === 0) return 0;
-    const prices = event.ticketTypes.map((t: any) => t.price || 0);
-    return Math.min(...prices);
+    return getStartingPrice(event, 0);
   }
 }

@@ -8,3 +8,4 @@ export * from './event-team.service';
 export * from './event-ownership.service';
 export * from './notification.service';
 export * from './toast.service';
+export * from './booking-state.service';

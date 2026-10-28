@@ -7,14 +7,15 @@ import { ProfileFormComponent } from '@shared/forms';
 import { AuthService } from '@core/auth';
 import { HostApplicationService, ToastService } from '@core/state';
 import { ApiClient } from '@core/api';
-import { UserProfileUpdate, Booking } from '@core/models';
-import { IconComponent } from '@shared/components';
+import { UserProfileUpdate, Booking, GiftCardPurchase } from '@core/models';
+import { IconComponent, PaginationBarComponent } from '@shared/components';
 
-export type ProfileTab = 'dashboard' | 'bookings' | 'personal' | 'preferences' | 'payments' | 'favorites' | 'roles';
+export type ProfileTab = 'dashboard' | 'bookings' | 'personal' | 'payments' | 'roles';
 
 export interface RoleWorkspaceTask {
   title: string;
   route: string;
+  queryParams?: Record<string, any>;
   icon: string;
   description: string;
   badge?: string;
@@ -30,7 +31,7 @@ export interface RolePermissionItem {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ProfileFormComponent, IconComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ProfileFormComponent, IconComponent, PaginationBarComponent],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
@@ -203,15 +204,9 @@ export class Profile implements OnInit {
           actionText: 'Open Host Workspace'
         },
         {
-          title: 'Create New Experience',
-          route: '/host/events/create',
-          icon: 'plus',
-          description: 'Publish a concert, festival, conference, or workshop on EventHub',
-          actionText: 'Create Experience'
-        },
-        {
           title: 'Event Team Dispatch',
           route: '/host/dashboard',
+          queryParams: { view: 'team' },
           icon: 'users',
           description: 'Dispatch event staff, assign gate scanners, and view attendee lists',
           actionText: 'Manage Teams'
@@ -291,7 +286,7 @@ export class Profile implements OnInit {
     return [
       { name: 'Event Ticket Reservations', description: 'Book verified QR admissions with zero hidden convenience fees', granted: true },
       { name: 'Live Digital QR Entry Passes', description: 'Access scan-ready mobile passes with offline fallback', granted: true },
-      { name: 'Saved Wishlist & Favorites', description: 'Bookmark trending experiences for upcoming weekends', granted: true },
+      { name: 'Digital Passes & Admissions', description: 'Store, view, and print live QR turnstile admission passes', granted: true },
       { name: 'Digital Gift Cards Wallet', description: 'Store and redeem prepaid gift cards at checkout', granted: true },
       { name: 'Host Accreditation Application', description: 'Eligible to apply to organize and host events on EventHub', granted: true },
     ];
@@ -301,24 +296,65 @@ export class Profile implements OnInit {
   readonly bookings = signal<Booking[]>([]);
   readonly isLoadingBookings = signal(false);
 
-  // Favorites / Saved Events
-  readonly savedEvents = signal<any[]>([]);
+  // Pagination for Bookings
+  readonly bookingPage = signal(1);
+  readonly bookingPageSize = signal(4);
+
+  readonly totalBookingPages = computed(() => {
+    return Math.max(1, Math.ceil(this.bookings().length / this.bookingPageSize()));
+  });
+
+  readonly paginatedBookings = computed(() => {
+    const list = this.bookings();
+    const size = this.bookingPageSize();
+    const maxPage = Math.max(1, Math.ceil(list.length / size));
+    const page = Math.min(this.bookingPage(), maxPage);
+    const start = (page - 1) * size;
+    return list.slice(start, start + size);
+  });
+
+  readonly bookingStartItem = computed(() => {
+    const total = this.bookings().length;
+    if (total === 0) return 0;
+    const size = this.bookingPageSize();
+    const maxPage = Math.max(1, Math.ceil(total / size));
+    const page = Math.min(this.bookingPage(), maxPage);
+    return (page - 1) * size + 1;
+  });
+
+  readonly bookingEndItem = computed(() => {
+    const total = this.bookings().length;
+    const size = this.bookingPageSize();
+    const maxPage = Math.max(1, Math.ceil(total / size));
+    const page = Math.min(this.bookingPage(), maxPage);
+    return Math.min(page * size, total);
+  });
+
+  setBookingPage(page: number) {
+    if (page >= 1 && page <= this.totalBookingPages()) {
+      this.bookingPage.set(page);
+    }
+  }
+
+  // Gift Cards Data (Dynamic wallet balance)
+  readonly giftCards = signal<GiftCardPurchase[]>([]);
+  readonly isLoadingGiftCards = signal(false);
+
+  readonly activeGiftCards = computed(() => {
+    return this.giftCards().filter(c => c.status === 'active');
+  });
+
+  readonly totalGiftBalance = computed(() => {
+    return this.activeGiftCards().reduce((sum, c) => sum + (c.balance ?? c.amount ?? 0), 0);
+  });
+
+  readonly totalSpent = computed(() => {
+    return this.bookings().reduce((sum, b) => b.status === 'confirmed' ? sum + (b.totalAmount || 0) : sum, 0);
+  });
 
   // QR Modal State
   readonly selectedBookingForQr = signal<Booking | null>(null);
   readonly qrModalUrl = signal<string>('');
-
-  // Preference selections
-  selectedGenres = signal<string[]>(['Festivals', 'Concerts', 'Conferences']);
-  readonly availableGenres = [
-    'Festivals',
-    'Concerts',
-    'Conferences',
-    'Shows & Entertainment',
-    'Sports',
-    'Workshops',
-    'Movies & Cinema'
-  ];
 
   // Upcoming Bookings Filter
   readonly upcomingBookings = computed(() => {
@@ -354,7 +390,7 @@ export class Profile implements OnInit {
   async ngOnInit(): Promise<void> {
     await Promise.all([
       this.loadUserBookings(),
-      this.loadSavedEvents()
+      this.loadUserGiftCards()
     ]);
   }
 
@@ -380,15 +416,20 @@ export class Profile implements OnInit {
     }
   }
 
-  async loadSavedEvents(): Promise<void> {
+  async loadUserGiftCards(): Promise<void> {
+    const user = this.currentUser();
+    if (!user) return;
+    this.isLoadingGiftCards.set(true);
+
     try {
-      const res = await this.apiClient.get<any[]>('/events');
-      if (res.data && res.data.length > 0) {
-        // Take top 3 events as sample favorites
-        this.savedEvents.set(res.data.slice(0, 3));
+      const res = await this.apiClient.get<GiftCardPurchase[]>('/giftCardPurchases', { userId: user.id });
+      if (res.data) {
+        this.giftCards.set([...res.data].sort((a, b) => (b.purchasedAt || '').localeCompare(a.purchasedAt || '')));
       }
     } catch (e) {
-      console.error('Failed to load saved events', e);
+      console.error('Failed to load gift cards', e);
+    } finally {
+      this.isLoadingGiftCards.set(false);
     }
   }
 
@@ -411,16 +452,6 @@ export class Profile implements OnInit {
 
   getBookingTicketsCount(booking: Booking): number {
     return booking.tickets.reduce((acc, t) => acc + t.quantity, 0);
-  }
-
-  toggleGenre(genre: string): void {
-    const current = this.selectedGenres();
-    if (current.includes(genre)) {
-      this.selectedGenres.set(current.filter(g => g !== genre));
-    } else {
-      this.selectedGenres.set([...current, genre]);
-    }
-    this.toastService.success(`Updated favorite genres`);
   }
 
   async saveProfile(changes: UserProfileUpdate): Promise<void> {

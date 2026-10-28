@@ -4,6 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { SelectComponent } from '../select/select.component';
 import { IconComponent } from '../icon/icon.component';
 import { EventFilter } from '@core/models/event-membership.model';
+import {
+  EVENT_CATEGORIES,
+  CATEGORY_TYPES,
+  DATE_FILTER_OPTIONS,
+  PRICE_FILTER_OPTIONS
+} from '@core/constants';
 
 export interface CalendarDay {
   date: Date;
@@ -26,41 +32,11 @@ export interface CalendarDay {
 export class EventFilterComponent implements OnInit, OnDestroy {
   @Output() filterChange = new EventEmitter<EventFilter>();
 
-  categories = [
-    'All',
-    'Concerts',
-    'Festivals',
-    'Sports',
-    'Conferences',
-    'Workshops',
-    'Shows & Entertainment',
-    'Activities',
-    'Technology',
-    'Arts & Culture',
-    'Food & Lifestyle',
-    'Comedy & Theater',
-    'Health & Wellness',
-    'Parties & Nightlife'
-  ];
-  
-  categoryTypes: Record<string, string[]> = {
-    'Sports': ['All Sports', 'Cricket', 'Football', 'Basketball', 'Tennis', 'Marathon'],
-    'Concerts': ['All Concerts', 'Rock', 'Pop', 'Classical', 'Jazz', 'EDM', 'Indie'],
-    'Workshops': ['All Workshops', 'Design', 'Coding', 'Photography', 'Cooking', 'Business'],
-    'Technology': ['All Tech', 'AI & ML', 'Web Dev', 'Cybersecurity', 'Blockchain', 'Cloud Computing'],
-    'Shows & Entertainment': ['All Shows', 'Standup Comedy', 'Magic Show', 'Live Drama', 'Circus'],
-    'Activities': ['All Activities', 'Trekking', 'Escape Room', 'Camping', 'Paintball', 'Gaming'],
-    'Arts & Culture': ['All Arts', 'Art Exhibition', 'Museum Tour', 'Pottery', 'Painting Workshop'],
-    'Food & Lifestyle': ['All Food', 'Food Fest', 'Wine Tasting', 'Baking', 'Coffee Brewing'],
-    'Comedy & Theater': ['All Comedy', 'Stand-up', 'Improv', 'Musical Theater', 'Open Mic'],
-    'Health & Wellness': ['All Wellness', 'Yoga', 'Meditation', 'Fitness Bootcamp', 'Zumba'],
-    'Parties & Nightlife': ['All Parties', 'Club Night', 'DJ Night', 'Rooftop Party', 'Pool Party'],
-    'Festivals': ['All Festivals', 'Music Fest', 'Cultural Fest', 'Film Fest', 'Food Fest'],
-    'Conferences': ['All Conferences', 'Tech Summit', 'Business Expo', 'Medical Conf', 'Leadership']
-  };
+  readonly categories: string[] = [...EVENT_CATEGORIES];
+  readonly categoryTypes = CATEGORY_TYPES;
+  readonly dateOptions: string[] = [...DATE_FILTER_OPTIONS];
+  readonly priceOptions: string[] = [...PRICE_FILTER_OPTIONS];
 
-  dateOptions = ['Any Date', 'Today', 'Tomorrow', 'This Weekend', 'Next Week', 'Specific Range'];
-  priceOptions = ['Any Price', 'Free', 'Under ₹500', '₹500 - ₹1500', '₹1500 - ₹3000', '₹3000+', 'Custom Range'];
 
   @Input() currentFilter: EventFilter = {
     category: 'All',

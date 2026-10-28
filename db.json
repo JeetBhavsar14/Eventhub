@@ -122,6 +122,19 @@
       "platformRole": "user",
       "createdAt": "2026-10-27T10:00:00.664Z",
       "id": "bjzZpzstEdg"
+    },
+    {
+      "email": "user3@eventhub.com",
+      "password": "123456",
+      "phone": "9313097040",
+      "firstName": "user",
+      "lastName": "3",
+      "isEmailVerified": false,
+      "isPhoneVerified": false,
+      "isHost": false,
+      "platformRole": "user",
+      "createdAt": "2026-10-28T07:39:16.446Z",
+      "id": "IbaGXzEBHO8"
     }
   ],
   "events": [
@@ -3411,6 +3424,45 @@
       },
       "createdAt": "2026-10-24T08:47:13.811Z",
       "id": "WxpyJt7D13A"
+    },
+    {
+      "bookingReference": "EH-MVRR2YOB-Q0AF",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "eventDate": "2026-11-01",
+      "eventTime": "18:00",
+      "eventLocation": "Mumbai Grand Center",
+      "eventAddress": "Mumbai, State, India",
+      "eventThumbnail": "https://picsum.photos/seed/Mumbai1/600/400",
+      "attendee": {
+        "id": "user-001",
+        "name": "Jeet Shah",
+        "email": "jeet@eventhub.com",
+        "phone": "+91 98765 43210"
+      },
+      "userId": "user-001",
+      "tickets": [
+        {
+          "ticketTypeId": "tt-101-1",
+          "name": "General",
+          "price": 500,
+          "quantity": 1
+        }
+      ],
+      "subtotal": 500,
+      "discount": 0,
+      "offerCode": null,
+      "tax": 90,
+      "totalAmount": 590,
+      "status": "confirmed",
+      "payment": {
+        "method": "qr",
+        "label": "UPI QR",
+        "status": "paid",
+        "transactionReference": "TXN-MVRR2YOB"
+      },
+      "createdAt": "2026-10-28T06:45:37.163Z",
+      "id": "WxpvZHMC-20"
     }
   ],
   "notifications": [
@@ -3563,6 +3615,27 @@
         "primary": true
       },
       "timestamp": "2026-10-22T05:49:23.799Z",
+      "read": true
+    },
+    {
+      "id": "RSKeSWyDgvo",
+      "userId": "user-001",
+      "userEmail": "jeet@eventhub.com",
+      "type": "booking",
+      "title": "Booking Confirmed!",
+      "message": "Your booking for \"Mumbai Festivals Showcase 1\" (1 tickets • ₹590) has been confirmed. Pass: EH-MVRR2YOB-Q0AF",
+      "priority": "high",
+      "icon": "ticket",
+      "eventId": "evt-100",
+      "eventTitle": "Mumbai Festivals Showcase 1",
+      "bookingReference": "EH-MVRR2YOB-Q0AF",
+      "action": {
+        "label": "View Tickets",
+        "actionType": "navigate",
+        "route": "/bookings",
+        "primary": true
+      },
+      "timestamp": "2026-10-28T06:45:37.366Z",
       "read": true
     }
   ],
@@ -3841,6 +3914,30 @@
       "status": "changes_requested",
       "submittedDate": "2026-10-09",
       "submittedAt": "2026-10-09T08:15:00.000Z"
+    },
+    {
+      "id": "aS120XmRLVs",
+      "applicantName": "user 3",
+      "email": "user3@eventhub.com",
+      "phone": "9313097040",
+      "organizationName": "Starlight Live Experiences",
+      "organizationType": "agency",
+      "city": "Mumbai",
+      "scale": "500 - 2,500 attendees",
+      "expectedScale": "500 - 2,500 attendees",
+      "primaryCategories": [
+        "Music and Festivals",
+        "Conferences",
+        "Music & Festivals"
+      ],
+      "experience": "Organized Indie Vibe Fest 2025 and annual UX Design Summit.",
+      "pastExperience": "Organized Indie Vibe Fest 2025 and annual UX Design Summit.",
+      "docStatus": "verified",
+      "idDocName": "identity_doc_verified_sample.pdf",
+      "assignedReviewer": "Operations Lead (You)",
+      "status": "under_review",
+      "submittedDate": "2026-10-28",
+      "submittedAt": "2026-10-28T07:49:11.876Z"
     }
   ],
   "eventApprovals": [

@@ -2,17 +2,16 @@ import { Component, Input, inject, computed, signal, HostListener, OnInit } from
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '@core/auth';
 import { ApiClient } from '@core/api';
 import { LocationService, HostApplicationService, NotificationService, EventTeamService, ToastService } from '@core/state';
 import { AppNotification } from '@core/models';
-import { SVGS } from '@shared/assets';
+import { POPULAR_CITIES, DEFAULT_RECENT_SEARCHES } from '@core/constants';
 import { IconComponent } from '../icon/icon.component';
 
 export interface NavCategory {
   label: string;
-  icon: SafeHtml;
+  iconName: string;
   route: string;
   active?: boolean;
 }
@@ -35,37 +34,30 @@ export class HeaderComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private apiClient = inject(ApiClient);
-  private sanitizer = inject(DomSanitizer);
   private locationService = inject(LocationService);
   private hostAppService = inject(HostApplicationService);
   private notificationService = inject(NotificationService);
   private eventTeamService = inject(EventTeamService);
   private toast = inject(ToastService);
 
-  private svg(fullSvg: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(fullSvg);
-  }
-
-  othersIcon: SafeHtml = this.svg(SVGS.others);
-
   primaryCategories: NavCategory[] = [
-    { label: 'All', icon: this.svg(SVGS.events), route: '/discover' },
-    { label: 'Concerts', icon: this.svg(SVGS.concerts), route: '/discover?category=Concerts' },
-    { label: 'Sports', icon: this.svg(SVGS.sports), route: '/discover?category=Sports' },
-    { label: 'Conferences', icon: this.svg(SVGS.conferences), route: '/discover?category=Conferences' },
-    { label: 'Workshops', icon: this.svg(SVGS.workshops), route: '/discover?category=Workshops' },
-    { label: 'Festivals', icon: this.svg(SVGS.festivals), route: '/discover?category=Festivals' },
+    { label: 'All', iconName: 'events', route: '/discover' },
+    { label: 'Concerts', iconName: 'concerts', route: '/discover?category=Concerts' },
+    { label: 'Sports', iconName: 'sports', route: '/discover?category=Sports' },
+    { label: 'Conferences', iconName: 'conferences', route: '/discover?category=Conferences' },
+    { label: 'Workshops', iconName: 'workshops', route: '/discover?category=Workshops' },
+    { label: 'Festivals', iconName: 'festivals', route: '/discover?category=Festivals' },
   ];
 
   otherCategories: NavCategory[] = [
-    { label: 'Shows & Entertainment', icon: this.svg(SVGS.shows), route: '/discover?category=Shows%20%26%20Entertainment' },
-    { label: 'Activities', icon: this.svg(SVGS.activities), route: '/discover?category=Activities' },
-    { label: 'Technology', icon: this.svg(SVGS.technology), route: '/discover?category=Technology' },
-    { label: 'Arts & Culture', icon: this.svg(SVGS.arts), route: '/discover?category=Arts%20%26%20Culture' },
-    { label: 'Food & Lifestyle', icon: this.svg(SVGS.food), route: '/discover?category=Food%20%26%20Lifestyle' },
-    { label: 'Comedy & Theater', icon: this.svg(SVGS.comedy), route: '/discover?category=Comedy%20%26%20Theater' },
-    { label: 'Health & Wellness', icon: this.svg(SVGS.wellness), route: '/discover?category=Health%20%26%20Wellness' },
-    { label: 'Parties & Nightlife', icon: this.svg(SVGS.parties), route: '/discover?category=Parties%20%26%20Nightlife' },
+    { label: 'Shows & Entertainment', iconName: 'shows', route: '/discover?category=Shows%20%26%20Entertainment' },
+    { label: 'Activities', iconName: 'activities', route: '/discover?category=Activities' },
+    { label: 'Technology', iconName: 'technology', route: '/discover?category=Technology' },
+    { label: 'Arts & Culture', iconName: 'arts', route: '/discover?category=Arts%20%26%20Culture' },
+    { label: 'Food & Lifestyle', iconName: 'food', route: '/discover?category=Food%20%26%20Lifestyle' },
+    { label: 'Comedy & Theater', iconName: 'comedy', route: '/discover?category=Comedy%20%26%20Theater' },
+    { label: 'Health & Wellness', iconName: 'wellness', route: '/discover?category=Health%20%26%20Wellness' },
+    { label: 'Parties & Nightlife', iconName: 'parties', route: '/discover?category=Parties%20%26%20Nightlife' },
   ];
 
   @Input() categories: NavCategory[] = [
@@ -117,7 +109,7 @@ export class HeaderComponent implements OnInit {
   searchQuery      = signal<string>('');
   searchFocused    = signal(false);
   allEvents        = signal<any[]>([]);
-  recentSearches   = signal<string[]>(['Festivals', 'Concerts', 'Mumbai', 'Comedy', 'Workshop']);
+  recentSearches   = signal<string[]>([...DEFAULT_RECENT_SEARCHES]);
 
   readonly spotlightEvents = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
@@ -191,8 +183,9 @@ export class HeaderComponent implements OnInit {
   citySearchQuery = '';
 
   popularCities = [
-    'Mumbai', 'Ahmedabad', 'Delhi-NCR', 'Bengaluru', 'Pune', 
-    'Hyderabad', 'Chennai', 'Kolkata', 'Chandigarh', 'Jaipur'
+    ...POPULAR_CITIES,
+    'Chandigarh',
+    'Jaipur'
   ];
   
   get filteredCities(): string[] {

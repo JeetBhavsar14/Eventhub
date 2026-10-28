@@ -9,9 +9,9 @@
   </header>
 
   <nav class="booking-tabs" aria-label="Booking filters">
-    <button type="button" [class.active]="selectedFilter() === 'upcoming'" (click)="selectedFilter.set('upcoming')">Upcoming</button>
-    <button type="button" [class.active]="selectedFilter() === 'past'" (click)="selectedFilter.set('past')">Past events</button>
-    <button type="button" [class.active]="selectedFilter() === 'all'" (click)="selectedFilter.set('all')">All bookings</button>
+    <button type="button" [class.active]="selectedFilter() === 'upcoming'" (click)="setFilter('upcoming')">Upcoming</button>
+    <button type="button" [class.active]="selectedFilter() === 'past'" (click)="setFilter('past')">Past events</button>
+    <button type="button" [class.active]="selectedFilter() === 'all'" (click)="setFilter('all')">All bookings</button>
   </nav>
 
   <section *ngIf="isLoading()" class="state-card loading-state">
@@ -36,7 +36,7 @@
   </section>
 
   <section *ngIf="!isLoading() && !error() && filteredBookings().length" class="booking-list">
-    <article class="booking-card" *ngFor="let booking of filteredBookings()" [class.expanded]="expandedBookingId() === booking.id">
+    <article class="booking-card" *ngFor="let booking of paginatedBookings()" [class.expanded]="expandedBookingId() === booking.id">
       <img class="event-image" [src]="booking.eventThumbnail || 'https://picsum.photos/seed/' + booking.eventId + '/360/240'" [alt]="booking.eventTitle">
       <div class="booking-date"><span>{{ booking.eventDate | date:'MMM' }}</span><strong>{{ booking.eventDate | date:'d' }}</strong><small>{{ booking.eventDate | date:'y' }}</small></div>
       <div class="booking-summary">
@@ -66,4 +66,16 @@
       </section>
     </article>
   </section>
+
+  <!-- Bookings Pagination Bar -->
+  <app-pagination-bar
+    *ngIf="!isLoading() && !error() && filteredBookings().length > 0"
+    [currentPage]="currentPage()"
+    [totalPages]="totalPages()"
+    [startItem]="startItem()"
+    [endItem]="endItem()"
+    [totalItems]="filteredBookings().length"
+    itemLabel="bookings"
+    (pageChange)="setPage($event)">
+  </app-pagination-bar>
 </main>

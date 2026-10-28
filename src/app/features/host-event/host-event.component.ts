@@ -5,6 +5,7 @@ import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '@core/auth';
 import { LocationService, HostApplicationService } from '@core/state';
 import { HostApplicationData, HostApplicationStatus } from '@core/models';
+import { POPULAR_CITIES } from '@core/constants';
 import { SelectComponent } from '@shared/components';
 
 interface BenefitItem {
@@ -76,9 +77,7 @@ export class HostEventComponent implements OnInit {
     { label: 'Massive Festival (2,500+ attendees)', value: '2,500+ festival scale' }
   ];
 
-  readonly cityOptions = [
-    'Mumbai', 'Ahmedabad', 'Delhi-NCR', 'Bengaluru', 'Pune', 'Hyderabad', 'Chennai', 'Kolkata'
-  ];
+  readonly cityOptions: string[] = [...POPULAR_CITIES];
 
   readonly idTypeOptions = [
     { label: 'Government Photo ID (Passport / National ID)', value: 'national_id' },
