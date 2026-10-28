@@ -196,6 +196,11 @@ This tracker documents our progress against the architecture specifications in `
     - [x] `HostSettingsComponent`: Host organizer profile, business credentials, and bank payout verification banner.
 
 ### ⏳ Remaining Things To Do (Backlog)
+- [ ] **Layout Decomposition & Architecture (Ongoing)**:
+  - [ ] Step 2: `HostBookingsComponent` (attendee management table, mobile cards, CSV export, bookings pagination).
+  - [ ] Step 3: `HostOverviewComponent` (stats cards grid, performance charts, quick actions).
+  - [ ] Step 4: `HostTeamComponent` (ownership allocation, manager portfolios, delegations).
+  - [ ] Step 5: `HostAnalyticsComponent`, `HostNotificationsComponent`, and `HostSettingsComponent`.
 - [ ] **Phase 6 — Permission Management Center UI**:
   - [ ] Visual UI for inspecting and editing permission policies (Registration, Venue, Technical, Security).
   - [ ] Direct permission overrides per user.
