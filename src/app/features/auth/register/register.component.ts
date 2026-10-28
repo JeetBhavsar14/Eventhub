@@ -51,7 +51,7 @@ export class RegisterComponent {
     );
     
     if (result.success) {
-      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/discover';
       this.router.navigateByUrl(returnUrl);
     } else {
       this.errorMessage.set(result.message);

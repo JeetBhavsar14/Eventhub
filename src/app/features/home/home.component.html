@@ -1,0 +1,517 @@
+<div class="landing-page-root">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 1. HERO SECTION WITH REACTIVE SEARCH & CITY SELECTOR        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="landing-hero-section">
+    <!-- Ambient Backdrop Video & Glows (Contained in dedicated backdrop with overflow hidden) -->
+    <div class="hero-video-backdrop" aria-hidden="true">
+      <video
+        #bgVideo
+        class="hero-bg-video"
+        autoplay
+        [autoplay]="true"
+        [muted]="true"
+        muted
+        loop
+        [loop]="true"
+        playsinline
+        webkit-playsinline
+        preload="auto"
+        disablePictureInPicture
+        controlsList="nodownload noplaybackrate"
+        (contextmenu)="$event.preventDefault()">
+        <source src="assets/video/Crowd_dancing_at_concert_stage_1080p_20261027150307.mp4" type="video/mp4" />
+        <source src="/assets/video/Crowd_dancing_at_concert_stage_1080p_20261027150307.mp4" type="video/mp4" />
+      </video>
+      <div class="hero-video-overlay"></div>
+      <div class="hero-glow glow-1"></div>
+      <div class="hero-glow glow-2"></div>
+    </div>
+
+    <div class="hero-container">
+
+      <!-- Main Headline -->
+      <h1 class="hero-title">
+        Live Moments That <span class="gradient-text">Ignite Your Passion</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        From electrifying stadium concerts and weekend music festivals to high-impact tech summits — secure your verified QR ticket in <strong>{{ locationService.selectedCity() }}</strong> with zero hidden fees.
+      </p>
+
+      <!-- Interactive Global Search Box -->
+      <div class="hero-search-card">
+        <form class="hero-search-form" (submit)="executeSearch($event)">
+          
+          <!-- Search Input (Reactive Real-time with Header-style Spotlight Autocomplete) -->
+          <div class="search-input-field" (click)="$event.stopPropagation()">
+            <app-icon name="search" class="field-icon" [size]="18"></app-icon>
+            <input 
+              type="text" 
+              placeholder="Search concerts, artists, festivals..." 
+              [ngModel]="searchQuery()" 
+              (ngModelChange)="onSearchInput($event)"
+              (focus)="onSearchFocus()"
+              (keydown.enter)="executeSearch($event)"
+              name="searchQuery" 
+              class="hero-input" 
+              autocomplete="off" />
+            <button 
+              *ngIf="searchQuery()" 
+              type="button" 
+              class="btn-clear-search" 
+              (click)="clearSearch()"
+              title="Clear search">
+              <app-icon name="close" [size]="14"></app-icon>
+            </button>
+
+            <!-- Floating Spotlight Panel (Matching Header Logic & Visuals) -->
+            <div class="search-spotlight-dropdown" *ngIf="searchFocused()">
+              <!-- Popular & Recent Searches -->
+              <div class="spotlight-section" *ngIf="!searchQuery().trim() && recentSearches().length > 0">
+                <div class="spotlight-section-title">
+                  <app-icon name="trending-up" [size]="13"></app-icon>
+                  <span>Popular & Recent Searches</span>
+                </div>
+                <div class="recent-chips">
+                  <button 
+                    type="button" 
+                    class="recent-chip" 
+                    *ngFor="let term of recentSearches()" 
+                    (mousedown)="$event.preventDefault()"
+                    (click)="selectRecentSearch(term)">
+                    {{ term }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Matching Events Section -->
+              <div class="spotlight-section">
+                <div class="spotlight-section-title">
+                  <span>{{ searchQuery().trim() ? 'Matching Events' : 'Trending Now' }}</span>
+                  <span class="spotlight-count" *ngIf="searchQuery().trim()">({{ spotlightEvents().length }})</span>
+                </div>
+
+                <div class="spotlight-list" *ngIf="spotlightEvents().length > 0">
+                  <div 
+                    *ngFor="let ev of spotlightEvents()" 
+                    class="spotlight-item" 
+                    (mousedown)="$event.preventDefault()"
+                    (click)="selectSearchItem(ev.id)">
+                    <img [src]="ev.thumbnailUrl || ev.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=300&q=80'" [alt]="ev.title" class="spotlight-thumb">
+                    <div class="spotlight-info">
+                      <div class="spotlight-title">{{ ev.title }}</div>
+                      <div class="spotlight-meta">
+                        <span class="spotlight-cat">{{ ev.category }}</span>
+                        <span>•</span>
+                        <span class="spotlight-date">{{ ev.date | date:'mediumDate' }}</span>
+                        <span>•</span>
+                        <span class="spotlight-venue">{{ ev.location?.city || 'India' }}</span>
+                      </div>
+                    </div>
+                    <div class="spotlight-price" *ngIf="getStartingPrice(ev) || ev.ticketTypes[0]?.price">
+                      ₹{{ getStartingPrice(ev) || ev.ticketTypes[0].price }}
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- No results -->
+                <div class="spotlight-empty" *ngIf="spotlightEvents().length === 0">
+                  <app-icon name="search" [size]="20"></app-icon>
+                  <p>No experiences found matching "{{ searchQuery() }}"</p>
+                </div>
+              </div>
+
+              <!-- Spotlight Footer -->
+              <div class="spotlight-footer" *ngIf="searchQuery().trim()">
+                <button type="button" class="view-all-results-btn" (mousedown)="$event.preventDefault()" (click)="executeSearch($event)">
+                  See all results for "<strong>{{ searchQuery() }}</strong>" →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Select Field with Custom Styled Droplist -->
+          <div class="search-divider"></div>
+          <div class="search-field-wrapper category-field-wrapper" [class.active-dropdown]="showCategoryDropdown()" (click)="$event.stopPropagation()">
+            <button 
+              type="button" 
+              class="search-select-btn" 
+              (click)="toggleCategoryMenu($event)"
+              [class.open]="showCategoryDropdown()">
+              <app-icon name="tag" class="field-icon" [size]="16"></app-icon>
+              <span class="field-value-text">{{ selectedCategory() === 'All' ? 'Categories' : selectedCategory() }}</span>
+              <app-icon name="chevron-down" class="chevron-icon" [size]="13"></app-icon>
+            </button>
+            
+            <!-- Custom Styled Droplist Menu -->
+            <div class="custom-droplist-menu category-menu" *ngIf="showCategoryDropdown()">
+              <div class="droplist-header">Filter by Category</div>
+              <div class="droplist-scroll">
+                <button 
+                  *ngFor="let cat of categoryOptions" 
+                  type="button" 
+                  class="droplist-item" 
+                  [class.active]="selectedCategory() === cat" 
+                  (click)="onSelectCategory(cat, $event)">
+                  <span>{{ cat === 'All' ? 'All Categories' : cat }}</span>
+                  <app-icon *ngIf="selectedCategory() === cat" name="check" [size]="14"></app-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- City Indicator & Selector with Custom Styled Droplist -->
+          <div class="search-divider"></div>
+          <div class="search-field-wrapper city-field-wrapper" [class.active-dropdown]="showCityDropdown()" (click)="$event.stopPropagation()">
+            <button 
+              type="button" 
+              class="search-city-btn" 
+              (click)="toggleCityMenu($event)"
+              [class.open]="showCityDropdown()">
+              <app-icon name="map-pin" class="field-icon" [size]="16"></app-icon>
+              <span class="city-text">{{ locationService.selectedCity() }}</span>
+              <app-icon name="chevron-down" class="chevron-icon" [size]="13"></app-icon>
+            </button>
+
+            <!-- Custom Styled Droplist Menu for Cities -->
+            <div class="custom-droplist-menu city-menu" *ngIf="showCityDropdown()">
+              <div class="droplist-header">Choose Your City</div>
+              <div class="droplist-scroll">
+                <button 
+                  *ngFor="let c of allCities" 
+                  type="button" 
+                  class="droplist-item" 
+                  [class.active]="isCityActive(c)" 
+                  (click)="selectCity(c)">
+                  <span>{{ c }}</span>
+                  <app-icon *ngIf="isCityActive(c)" name="check" [size]="14"></app-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search CTA Button -->
+          <button type="submit" class="btn-hero-search">
+            <span>Find Events</span>
+            <app-icon name="arrow-right" [size]="16"></app-icon>
+          </button>
+        </form>
+
+        <!-- Quick Trending City Tags (Clicking updates city on landing page) -->
+        <div class="hero-city-chips">
+          <span class="chip-label">Popular Cities:</span>
+          <div class="chips-container">
+            <button 
+              *ngFor="let c of popularCities" 
+              type="button" 
+              class="city-chip" 
+              [class.active]="isCityActive(c)" 
+              (click)="selectCity(c)">
+              {{ c }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 2. TRUST & IMPACT METRICS STRIP                             -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="trust-metrics-section">
+    <div class="metrics-grid">
+      <div class="metric-item">
+        <span class="metric-num">50,000+</span>
+        <span class="metric-label">Happy Attendees</span>
+      </div>
+      <div class="metric-sep"></div>
+      <div class="metric-item">
+        <span class="metric-num">1,200+</span>
+        <span class="metric-label">Live Experiences</span>
+      </div>
+      <div class="metric-sep"></div>
+      <div class="metric-item">
+        <span class="metric-num">15+</span>
+        <span class="metric-label">Metropolitan Cities</span>
+      </div>
+      <div class="metric-sep"></div>
+      <div class="metric-item">
+        <span class="metric-num">100%</span>
+        <span class="metric-label">Instant QR Admission</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 2.5 CURATED SELECTION DUAL-ROW FLOWING MARQUEE              -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="landing-section curated-marquee-section" id="trending-events-anchor">
+    <div class="section-container">
+      <div class="section-header-row">
+        <div>
+          <span class="section-eyebrow">
+            <span class="eyebrow-sparkle">✦</span>
+            CURATED SELECTION
+          </span>
+          <h2 class="section-heading">Trending in {{ locationService.selectedCity() }}</h2>
+          <p class="section-subheading">High-demand concerts, weekend festivals, sports matches, and premier live spectacles in {{ locationService.selectedCity() }}.</p>
+        </div>
+        <a routerLink="/discover" class="btn-see-all">
+          <span>View All Events</span>
+          <app-icon name="arrow-right" [size]="15"></app-icon>
+        </a>
+      </div>
+    </div>
+
+    <!-- Dual Infinite Flowing Rows -->
+    <div class="marquee-stream-wrapper" *ngIf="curatedRow1().length > 0">
+      
+      <!-- ROW 1: Floating Right to Left -->
+      <div class="marquee-row" title="Hover to pause">
+        <div class="marquee-track track-scroll-left">
+          <!-- Group 1 -->
+          <div class="marquee-group">
+            <div 
+              *ngFor="let ev of curatedRow1()" 
+              class="curated-flow-card"
+              [routerLink]="['/events', ev.id]">
+              <div class="card-flow-thumb-box">
+                <img [src]="ev.thumbnailUrl || ev.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="card-flow-thumb" loading="lazy" />
+                <span class="card-flow-date-tag">{{ ev.date | date:'MMM dd' }}</span>
+              </div>
+              <div class="card-flow-info">
+                <span class="card-flow-cat">{{ ev.category }}</span>
+                <h4 class="card-flow-title" [title]="ev.title">{{ ev.title }}</h4>
+                <div class="card-flow-meta">
+                  <span class="card-flow-city">
+                    <app-icon name="map-pin" [size]="14"></app-icon>
+                    <span>{{ ev.location?.city || 'India' }}</span>
+                  </span>
+                  <span class="card-flow-price">
+                    {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Group 2 (Exact Duplicate for Infinite Seamless Loop) -->
+          <div class="marquee-group" aria-hidden="true">
+            <div 
+              *ngFor="let ev of curatedRow1()" 
+              class="curated-flow-card"
+              [routerLink]="['/events', ev.id]">
+              <div class="card-flow-thumb-box">
+                <img [src]="ev.thumbnailUrl || ev.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="card-flow-thumb" loading="lazy" />
+                <span class="card-flow-date-tag">{{ ev.date | date:'MMM dd' }}</span>
+              </div>
+              <div class="card-flow-info">
+                <span class="card-flow-cat">{{ ev.category }}</span>
+                <h4 class="card-flow-title" [title]="ev.title">{{ ev.title }}</h4>
+                <div class="card-flow-meta">
+                  <span class="card-flow-city">
+                    <app-icon name="map-pin" [size]="14"></app-icon>
+                    <span>{{ ev.location?.city || 'India' }}</span>
+                  </span>
+                  <span class="card-flow-price">
+                    {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 2: Flowing Left to Right -->
+      <div class="marquee-row" title="Hover to pause">
+        <div class="marquee-track track-scroll-right">
+          <!-- Group 1 -->
+          <div class="marquee-group">
+            <div 
+              *ngFor="let ev of curatedRow2()" 
+              class="curated-flow-card"
+              [routerLink]="['/events', ev.id]">
+              <div class="card-flow-thumb-box">
+                <img [src]="ev.thumbnailUrl || ev.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="card-flow-thumb" loading="lazy" />
+                <span class="card-flow-date-tag">{{ ev.date | date:'MMM dd' }}</span>
+              </div>
+              <div class="card-flow-info">
+                <span class="card-flow-cat">{{ ev.category }}</span>
+                <h4 class="card-flow-title" [title]="ev.title">{{ ev.title }}</h4>
+                <div class="card-flow-meta">
+                  <span class="card-flow-city">
+                    <app-icon name="map-pin" [size]="14"></app-icon>
+                    <span>{{ ev.location?.city || 'India' }}</span>
+                  </span>
+                  <span class="card-flow-price">
+                    {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Group 2 (Exact Duplicate for Infinite Seamless Loop) -->
+          <div class="marquee-group" aria-hidden="true">
+            <div 
+              *ngFor="let ev of curatedRow2()" 
+              class="curated-flow-card"
+              [routerLink]="['/events', ev.id]">
+              <div class="card-flow-thumb-box">
+                <img [src]="ev.thumbnailUrl || ev.imageUrl || 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=400&q=80'" [alt]="ev.title" class="card-flow-thumb" loading="lazy" />
+                <span class="card-flow-date-tag">{{ ev.date | date:'MMM dd' }}</span>
+              </div>
+              <div class="card-flow-info">
+                <span class="card-flow-cat">{{ ev.category }}</span>
+                <h4 class="card-flow-title" [title]="ev.title">{{ ev.title }}</h4>
+                <div class="card-flow-meta">
+                  <span class="card-flow-city">
+                    <app-icon name="map-pin" [size]="14"></app-icon>
+                    <span>{{ ev.location?.city || 'India' }}</span>
+                  </span>
+                  <span class="card-flow-price">
+                    {{ getStartingPrice(ev) > 0 ? '₹' + getStartingPrice(ev) : 'Free' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 4. CATEGORIES EXPLORER (With Crisp White SVGs)              -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="landing-section categories-section">
+    <div class="section-container">
+      
+      <div class="section-header-center">
+        <span class="section-eyebrow">BROWSE BY INTEREST</span>
+        <h2 class="section-heading">Explore Live Categories</h2>
+        <p class="section-subheading">Choose your vibe and dive into hundreds of curated experiences.</p>
+      </div>
+
+      <div class="categories-tile-grid">
+        <div 
+          *ngFor="let cat of categories" 
+          class="category-tile" 
+          (click)="navigateToCategory(cat.slug)">
+          
+          <img [src]="cat.imageUrl" [alt]="cat.name" class="category-tile-bg" />
+          <div class="category-tile-overlay"></div>
+
+          <div class="category-tile-content">
+            <div class="tile-icon-bubble">
+              <app-icon [name]="cat.icon" [size]="22"></app-icon>
+            </div>
+            <h3 class="tile-title">{{ cat.name }}</h3>
+            <p class="tile-tagline">{{ cat.tagline }}</p>
+            <div class="tile-footer">
+              <span class="tile-count">{{ cat.eventsCount }}+ Events</span>
+              <span class="tile-arrow">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 5. PLATFORM VALUE PROPOSITION ("Why Choose EventHub")       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="landing-section features-section">
+    <div class="section-container">
+      
+      <div class="section-header-center">
+        <span class="section-eyebrow">BUILT FOR FANS & CREATORS</span>
+        <h2 class="section-heading">Why Choose EventHub</h2>
+        <p class="section-subheading">A modern ticketing and event discovery ecosystem built with integrity and speed.</p>
+      </div>
+
+      <div class="features-quad-grid">
+        <div class="feature-card">
+          <div class="feature-icon-box indigo">
+            <app-icon name="qr-code" [size]="24"></app-icon>
+          </div>
+          <h3 class="feature-title">Instant Dynamic QR Tickets</h3>
+          <p class="feature-desc">Receive real-time anti-counterfeit QR passes directly in your account and digital wallet. Frictionless gate turnstile check-ins in under 2 seconds.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box emerald">
+            <app-icon name="shield-check" [size]="24"></app-icon>
+          </div>
+          <h3 class="feature-title">Verified Hosts & Venue Safety</h3>
+          <p class="feature-desc">Every event is thoroughly vetted by the EventHub curation panel for venue licensing, sound permits, and transparent ticketing integrity.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box periwinkle">
+            <app-icon name="percent" [size]="24"></app-icon>
+          </div>
+          <h3 class="feature-title">Zero Hidden Surcharges</h3>
+          <p class="feature-desc">What you see is what you pay. Transparent tier pricing, verified promo discounts, and instant gift card redemption at checkout.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-box amber">
+            <app-icon name="gift" [size]="24"></app-icon>
+          </div>
+          <h3 class="feature-title">Shareable Digital Gift Cards</h3>
+          <p class="feature-desc">Send event gift passes instantly to friends and family with personalized notes and multi-event wallet balance top-ups.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 6. HOST & CREATOR ONBOARDING BANNER                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <section class="host-cta-banner-section">
+    <div class="section-container">
+      <div class="host-banner-card">
+        <div class="host-banner-content">
+          <span class="banner-badge">FOR ORGANIZERS & PRODUCERS</span>
+          <h2 class="banner-title">Empower Your Live Events with EventHub SaaS</h2>
+          <p class="banner-desc">
+            Scale your ticket sales, manage field staff scanners with delegated permissions, allocate co-owner equity stakes, and receive automated 48-hour bank payouts.
+          </p>
+          <div class="banner-actions">
+            <button type="button" (click)="navigateToApply()" class="btn-host-primary">
+              <app-icon name="plus" [size]="16" [strokeWidth]="2.5"></app-icon>
+              <span>Apply as Verified Host</span>
+            </button>
+            <a routerLink="/discover" class="btn-host-ghost">
+              <span>Explore Platform Catalog</span>
+            </a>
+          </div>
+        </div>
+        <div class="host-banner-graphic">
+          <div class="graphic-stat-card card-1">
+            <app-icon name="trending-up" [size]="18"></app-icon>
+            <div>
+              <strong>99.8%</strong>
+              <span>Gate Admission Speed</span>
+            </div>
+          </div>
+          <div class="graphic-stat-card card-2">
+            <app-icon name="check-circle" [size]="18"></app-icon>
+            <div>
+              <strong>Instant Payouts</strong>
+              <span>Direct Bank Settlement</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

@@ -2831,3 +2831,108 @@
     font-size: var(--text-2xl);
   }
 }
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE WIZARD & APPLICATION MODAL (§ 4.0 Host Apply)
+   ───────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .modal-container.wizard-modal {
+    max-width: 95vw;
+    margin: 0.75rem auto;
+    border-radius: var(--radius-lg);
+  }
+
+  .wizard-stepper {
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+  }
+
+  .step-indicator {
+    gap: 0.35rem;
+  }
+
+  .step-circle {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .step-text {
+    font-size: var(--text-xs);
+  }
+
+  /* On screens under 640px, show label only for current active step to prevent text collision */
+  .step-indicator:not(.current) .step-text {
+    display: none;
+  }
+
+  .step-line {
+    margin: 0 0.35rem;
+    min-width: 14px;
+  }
+
+  .modal-body.wizard-body {
+    padding: 1.25rem 1rem;
+  }
+
+  .modal-footer {
+    padding: 1rem;
+  }
+
+  .btn-modal-cancel,
+  .btn-modal-back {
+    padding: 0.55rem 0.9rem;
+  }
+
+  .btn-modal-next,
+  .btn-modal-submit {
+    padding: 0.55rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .wizard-stepper {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .step-text {
+    font-size: 11px;
+  }
+
+  .category-chips-grid {
+    gap: 0.35rem;
+  }
+
+  .chip-btn {
+    padding: 0.35rem 0.65rem;
+    font-size: var(--text-xs);
+  }
+
+  .modal-header {
+    padding: 1rem;
+  }
+
+  .modal-title {
+    font-size: var(--text-lg);
+  }
+
+  .modal-footer {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .modal-footer .footer-spacer {
+    display: none;
+  }
+
+  .btn-modal-cancel,
+  .btn-modal-back,
+  .btn-modal-next,
+  .btn-modal-submit {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+  }
+}
+

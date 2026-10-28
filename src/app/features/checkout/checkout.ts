@@ -1,19 +1,17 @@
-import { Component, OnInit, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiClient } from '@core/api';
 import { AuthService } from '@core/auth';
-import { NotificationService, ToastService } from '@core/state';
-import { Offer } from '@core/models';
-import { ButtonComponent, InputComponent } from '@shared/components';
-import { PaymentFormComponent } from '@shared/forms';
-import * as QRCode from 'qrcode';
+import { BookingStateService } from '@core/state/booking-state.service';
+import { Offer, EventItem, EventTicketType } from '@core/models';
+import { ButtonComponent, IconComponent } from '@shared/components';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, PaymentFormComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent],
   templateUrl: './checkout.html',
   styleUrl: './checkout.css'
 })
@@ -22,10 +20,9 @@ export class Checkout implements OnInit {
   private router = inject(Router);
   private apiClient = inject(ApiClient);
   private authService = inject(AuthService);
-  private notificationService = inject(NotificationService);
-  private toast = inject(ToastService);
+  private bookingState = inject(BookingStateService);
 
-  event = signal<any>(null);
+  event = signal<EventItem | null>(null);
   isLoading = signal(true);
   error = signal<string | null>(null);
 
@@ -34,12 +31,8 @@ export class Checkout implements OnInit {
   appliedCoupon = signal<Offer | null>(null);
   couponError = signal('');
 
-  isProcessing = signal(false);
+  showProceedModal = signal(false);
   bookingSuccess = signal(false);
-  bookingResult = signal<any>(null);
-  qrCodeUrl = signal<string>('');
-
-  @ViewChild(PaymentFormComponent) paymentForm!: PaymentFormComponent;
 
   currentUser = this.authService.currentUser;
 
@@ -51,8 +44,9 @@ export class Checkout implements OnInit {
   subtotal = computed(() => {
     let total = 0;
     const selections = this.selectedTickets();
-    if (this.event()?.ticketTypes) {
-      for (const tt of this.event().ticketTypes) {
+    const ev = this.event();
+    if (ev?.ticketTypes) {
+      for (const tt of ev.ticketTypes) {
         if (selections[tt.id]) {
           total += tt.price * selections[tt.id];
         }
@@ -60,6 +54,7 @@ export class Checkout implements OnInit {
     }
     return total;
   });
+
 
   discount = computed(() => {
     const coupon = this.appliedCoupon();
@@ -98,7 +93,7 @@ export class Checkout implements OnInit {
   async loadEvent(id: string) {
     this.isLoading.set(true);
     try {
-      const res = await this.apiClient.get<any>(`/events/${id}`);
+      const res = await this.apiClient.get<EventItem>(`/events/${id}`);
       if (res.data) {
         this.event.set(res.data);
       } else {
@@ -114,7 +109,7 @@ export class Checkout implements OnInit {
   updateQuantity(ticketTypeId: string, change: number) {
     const current = this.selectedTickets()[ticketTypeId] || 0;
     const next = Math.max(0, current + change);
-    const ticketType = this.event()?.ticketTypes?.find((ticket: any) => ticket.id === ticketTypeId);
+    const ticketType = this.event()?.ticketTypes?.find(ticket => ticket.id === ticketTypeId);
     const max = this.event()?.maxTicketsPerBooking || 10;
     const currentTotal = this.totalQuantity();
     
@@ -162,14 +157,9 @@ export class Checkout implements OnInit {
     this.couponCode.set('');
   }
 
-  async processPayment() {
+  openProceedModal() {
     if (this.totalQuantity() === 0) {
       alert('Please select at least one ticket.');
-      return;
-    }
-
-    if (!this.paymentForm.validate()) {
-      alert('Please complete the payment details correctly.');
       return;
     }
 
@@ -178,93 +168,63 @@ export class Checkout implements OnInit {
       this.router.navigate(['/auth/login']);
       return;
     }
-    this.isProcessing.set(true);
-    this.error.set(null);
+
+    this.showProceedModal.set(true);
+  }
+
+  closeProceedModal() {
+    this.showProceedModal.set(false);
+  }
+
+  confirmAndRedirectToGateway() {
+    if (this.totalQuantity() === 0) return;
+
+    const user = this.currentUser();
+    if (!user) {
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    const currentEvent = this.event();
+    if (!currentEvent) {
+      alert('Event details not loaded');
+      return;
+    }
 
     const selections = this.selectedTickets();
     const ticketsBooked = [];
-    for (const tt of this.event().ticketTypes) {
-       if (selections[tt.id] > 0) {
-         ticketsBooked.push({
-            ticketTypeId: tt.id,
-            name: tt.name,
-            price: tt.price,
-            quantity: selections[tt.id]
-         });
-       }
+    for (const tt of currentEvent.ticketTypes || []) {
+      if (selections[tt.id] > 0) {
+        ticketsBooked.push({
+          ticketTypeId: tt.id,
+          name: tt.name,
+          price: tt.price,
+          quantity: selections[tt.id]
+        });
+      }
     }
 
-    const payment = this.paymentForm.getPaymentSelection();
-    const bookingReference = `EH-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-    const payload = {
-      bookingReference,
-      eventId: this.event().id,
-      eventTitle: this.event().title,
-      eventDate: this.event().date,
-      eventTime: this.event().time,
-      eventLocation: this.event().location?.venue,
-      eventAddress: [this.event().location?.city, this.event().location?.state, this.event().location?.country].filter(Boolean).join(', '),
-      eventThumbnail: this.event().thumbnailUrl,
-      attendee: { id: user.id, name: `${user.firstName} ${user.lastName}`.trim(), email: user.email, phone: user.phone },
-      userId: user.id,
+    // Set order in state with 2-minute expiration
+    this.bookingState.setPendingOrder({
+      eventId: currentEvent.id,
+      eventTitle: currentEvent.title,
+      eventDate: currentEvent.date,
+      eventTime: currentEvent.time,
+      eventLocation: currentEvent.location?.venue,
+      eventAddress: [currentEvent.location?.city, currentEvent.location?.state, currentEvent.location?.country].filter(Boolean).join(', '),
+      eventThumbnail: currentEvent.thumbnailUrl,
       tickets: ticketsBooked,
       subtotal: this.subtotal(),
       discount: this.discount(),
       offerCode: this.appliedCoupon()?.code || null,
       tax: this.taxAmount(),
-      totalAmount: this.grandTotal(),
-      status: 'confirmed',
-      payment: { ...payment, status: 'paid', transactionReference: `TXN-${Date.now().toString(36).toUpperCase()}` },
-      createdAt: new Date().toISOString()
-    };
+      totalAmount: this.grandTotal()
+    });
 
-    try {
-      const res = await this.apiClient.post<any>('/bookings', payload);
-      if (!res.error && res.data) {
-        this.bookingResult.set(res.data);
-        this.bookingSuccess.set(true);
-        this.generateQrCode(res.data.bookingReference || res.data.id);
-        
-        // Dispatch real-time booking confirmation notification (Phase 8)
-        this.notificationService.dispatchBookingNotification({
-          userId: user.id,
-          userEmail: user.email,
-          eventTitle: this.event().title,
-          eventId: this.event().id,
-          bookingReference: res.data.bookingReference || payload.bookingReference,
-          ticketsCount: ticketsBooked.reduce((acc, t) => acc + t.quantity, 0),
-          totalAmount: this.grandTotal()
-        });
-
-        // Trigger global floating toast (High-Impact UI/UX)
-        this.toast.success(
-          `Your digital pass (${res.data.bookingReference || payload.bookingReference}) is ready in My Bookings!`,
-          'Booking Confirmed 🎉'
-        );
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        this.error.set('We could not confirm your payment. Please try again.');
-      }
-    } catch (err) {
-      this.error.set('An unexpected error occurred while confirming payment.');
-    } finally {
-      this.isProcessing.set(false);
-    }
+    this.showProceedModal.set(false);
+    this.router.navigate(['/payment-gateway']);
   }
 
-  async generateQrCode(bookingId: string) {
-    try {
-      const url = await QRCode.toDataURL(bookingId, { width: 200, margin: 1 });
-      this.qrCodeUrl.set(url);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  printTicket() {
-    window.print();
-  }
 
   goHome() {
     this.router.navigate(['/']);

@@ -31,7 +31,7 @@
     </button>
 
     <!-- Floating Droplist Menu -->
-    <div class="select-dropdown-menu" *ngIf="isOpen()" role="listbox" tabindex="-1">
+    <div class="select-dropdown-menu" [class.open-upward]="openUpward()" *ngIf="isOpen()" role="listbox" tabindex="-1">
       <div class="dropdown-options-scroll">
         <div
           *ngFor="let opt of normalizedOptions"

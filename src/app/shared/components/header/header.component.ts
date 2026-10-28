@@ -1,18 +1,17 @@
 import { Component, Input, inject, computed, signal, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive, Router, ActivatedRoute } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '@core/auth';
 import { ApiClient } from '@core/api';
 import { LocationService, HostApplicationService, NotificationService, EventTeamService, ToastService } from '@core/state';
 import { AppNotification } from '@core/models';
-import { SVGS } from '@shared/assets';
+import { POPULAR_CITIES, DEFAULT_RECENT_SEARCHES } from '@core/constants';
 import { IconComponent } from '../icon/icon.component';
 
 export interface NavCategory {
   label: string;
-  icon: SafeHtml;
+  iconName: string;
   route: string;
   active?: boolean;
 }
@@ -20,6 +19,7 @@ export interface NavCategory {
 export interface NavSecondaryLink {
   label: string;
   route: string;
+  icon?: string;
 }
 
 @Component({
@@ -34,25 +34,35 @@ export class HeaderComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private apiClient = inject(ApiClient);
-  private sanitizer = inject(DomSanitizer);
   private locationService = inject(LocationService);
   private hostAppService = inject(HostApplicationService);
   private notificationService = inject(NotificationService);
   private eventTeamService = inject(EventTeamService);
   private toast = inject(ToastService);
 
-  private svg(fullSvg: string): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(fullSvg);
-  }
+  primaryCategories: NavCategory[] = [
+    { label: 'All', iconName: 'events', route: '/discover' },
+    { label: 'Concerts', iconName: 'concerts', route: '/discover?category=Concerts' },
+    { label: 'Sports', iconName: 'sports', route: '/discover?category=Sports' },
+    { label: 'Conferences', iconName: 'conferences', route: '/discover?category=Conferences' },
+    { label: 'Workshops', iconName: 'workshops', route: '/discover?category=Workshops' },
+    { label: 'Festivals', iconName: 'festivals', route: '/discover?category=Festivals' },
+  ];
+
+  otherCategories: NavCategory[] = [
+    { label: 'Shows & Entertainment', iconName: 'shows', route: '/discover?category=Shows%20%26%20Entertainment' },
+    { label: 'Activities', iconName: 'activities', route: '/discover?category=Activities' },
+    { label: 'Technology', iconName: 'technology', route: '/discover?category=Technology' },
+    { label: 'Arts & Culture', iconName: 'arts', route: '/discover?category=Arts%20%26%20Culture' },
+    { label: 'Food & Lifestyle', iconName: 'food', route: '/discover?category=Food%20%26%20Lifestyle' },
+    { label: 'Comedy & Theater', iconName: 'comedy', route: '/discover?category=Comedy%20%26%20Theater' },
+    { label: 'Health & Wellness', iconName: 'wellness', route: '/discover?category=Health%20%26%20Wellness' },
+    { label: 'Parties & Nightlife', iconName: 'parties', route: '/discover?category=Parties%20%26%20Nightlife' },
+  ];
 
   @Input() categories: NavCategory[] = [
-    { label: 'Events', icon: this.svg(SVGS.events), route: '/discover' },
-    { label: 'Concerts', icon: this.svg(SVGS.concerts), route: '/discover?category=Concerts' },
-    { label: 'Sports', icon: this.svg(SVGS.sports), route: '/discover?category=Sports' },
-    { label: 'Conferences', icon: this.svg(SVGS.conferences), route: '/discover?category=Conferences' },
-    { label: 'Workshops', icon: this.svg(SVGS.workshops), route: '/discover?category=Workshops' },
-    { label: 'Festivals', icon: this.svg(SVGS.festivals), route: '/discover?category=Festivals' },
-    { label: 'Others', icon: this.svg(SVGS.others), route: '/discover?category=Others' },
+    ...this.primaryCategories,
+    ...this.otherCategories
   ];
 
   @Input() secondaryLinks: NavSecondaryLink[] = [
@@ -96,13 +106,13 @@ export class HeaderComponent implements OnInit {
   });
 
   // ── Search & Spotlight State ───────────────────────────────
-  searchQuery      = '';
+  searchQuery      = signal<string>('');
   searchFocused    = signal(false);
   allEvents        = signal<any[]>([]);
-  recentSearches   = signal<string[]>(['Festivals', 'Concerts', 'Mumbai', 'Comedy', 'Workshop']);
+  recentSearches   = signal<string[]>([...DEFAULT_RECENT_SEARCHES]);
 
   readonly spotlightEvents = computed(() => {
-    const query = this.searchQuery.trim().toLowerCase();
+    const query = this.searchQuery().trim().toLowerCase();
     const events = this.allEvents();
 
     if (!query) {
@@ -116,7 +126,7 @@ export class HeaderComponent implements OnInit {
       (e.location?.venue && e.location.venue.toLowerCase().includes(query)) ||
       (e.location?.city && e.location.city.toLowerCase().includes(query)) ||
       (e.description && e.description.toLowerCase().includes(query))
-    ).slice(0, 5);
+    ).slice(0, 6);
   });
 
   isApprovedHost = computed(() => {
@@ -129,6 +139,23 @@ export class HeaderComponent implements OnInit {
     return role === 'admin' || role === 'super_admin';
   });
 
+  homeRoute = computed(() => {
+    // Admin and unauthenticated guests go to the Landing page ('/')
+    // Other authenticated users go to the Discover events page ('/discover')
+    if (!this.isAuthenticated() || this.isAdmin()) {
+      return '/';
+    }
+    return '/discover';
+  });
+
+  isHomeSelected = computed(() => {
+    const url = this.currentUrl() || this.router.url;
+    const [path] = url.split('?');
+    if (path === '/') return true;
+    if (this.isAuthenticated() && path === '/discover') return true;
+    return false;
+  });
+
   isManagement = computed(() => {
     const role = this.currentUser()?.platformRole;
     return role === 'management' || role === 'admin' || role === 'super_admin';
@@ -139,15 +166,26 @@ export class HeaderComponent implements OnInit {
     return role === 'staff' || role === 'management' || role === 'admin' || role === 'super_admin';
   });
 
+  currentUrl = signal<string>(this.router.url);
+  isScrolled = signal(false);
   showUserMenu = false;
   showCityMenu = false;
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    const scrollY = typeof window !== 'undefined' ? (window.scrollY || document.documentElement.scrollTop || 0) : 0;
+    this.isScrolled.set(scrollY > 10);
+  }
   showCategoryMenu = signal(false);
+  showOthersDropdown = signal(false);
   selectedCategory = signal<string>('Categories');
+  activeCategory = signal<string>('');
   citySearchQuery = '';
 
   popularCities = [
-    'Mumbai', 'Ahmedabad', 'Delhi-NCR', 'Bengaluru', 'Pune', 
-    'Hyderabad', 'Chennai', 'Kolkata', 'Chandigarh', 'Jaipur'
+    ...POPULAR_CITIES,
+    'Chandigarh',
+    'Jaipur'
   ];
   
   get filteredCities(): string[] {
@@ -160,6 +198,51 @@ export class HeaderComponent implements OnInit {
     );
   }
 
+  isCategoryActive(label: string): boolean {
+    const url = this.currentUrl() || this.router.url;
+    const [path, query] = url.split('?');
+    const isDiscover = path === '/discover';
+    if (!isDiscover) return false;
+
+    const params = new URLSearchParams(query || '');
+    const active = params.get('category');
+    if (!active) return false;
+
+    return active.toLowerCase() === label.toLowerCase();
+  }
+
+  isOtherCategoryActive(): boolean {
+    const url = this.currentUrl() || this.router.url;
+    const [path, query] = url.split('?');
+    if (path !== '/discover') return false;
+
+    const params = new URLSearchParams(query || '');
+    const active = params.get('category');
+    if (!active || active.toLowerCase() === 'all') return false;
+    return this.otherCategories.some(cat => cat.label.toLowerCase() === active.toLowerCase());
+  }
+
+  getActiveOtherCategoryLabel(): string {
+    const url = this.currentUrl() || this.router.url;
+    const [, query] = url.split('?');
+    const params = new URLSearchParams(query || '');
+    const active = params.get('category');
+    if (!active) return 'Others';
+    const matched = this.otherCategories.find(cat => cat.label.toLowerCase() === active.toLowerCase());
+    return matched ? matched.label : 'Others';
+  }
+
+  toggleOthersDropdown(event?: Event) {
+    if (event) event.stopPropagation();
+    this.showOthersDropdown.update(v => !v);
+    if (this.showOthersDropdown()) {
+      this.showUserMenu = false;
+      this.showCityMenu = false;
+      this.showNotifications.set(false);
+      this.showCategoryMenu.set(false);
+    }
+  }
+
   toggleCategoryMenu(event?: Event) {
     if (event) event.stopPropagation();
     this.showCategoryMenu.update(v => !v);
@@ -167,28 +250,99 @@ export class HeaderComponent implements OnInit {
       this.showUserMenu = false;
       this.showCityMenu = false;
       this.showNotifications.set(false);
+      this.showOthersDropdown.set(false);
     }
+  }
+
+  private prevNavPath = '';
+
+  onCategoryPillClick(cat: NavCategory, event?: Event) {
+    if (event) event.preventDefault();
+    this.showOthersDropdown.set(false);
+    this.showCategoryMenu.set(false);
+
+    this.selectedCategory.set(cat.label);
+    this.activeCategory.set(cat.label);
+    const targetUrl = `/discover?category=${encodeURIComponent(cat.label)}`;
+    this.currentUrl.set(targetUrl);
+    this.router.navigate(['/discover'], { queryParams: { category: cat.label } }).then(() => {
+      this.scrollToEvents();
+    });
+    this.scrollToEvents();
+  }
+
+  selectOtherCategory(cat: NavCategory, event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    this.showOthersDropdown.set(false);
+    this.showCategoryMenu.set(false);
+    this.selectedCategory.set(cat.label);
+    this.activeCategory.set(cat.label);
+    const targetUrl = `/discover?category=${encodeURIComponent(cat.label)}`;
+    this.currentUrl.set(targetUrl);
+    this.router.navigate(['/discover'], { queryParams: { category: cat.label } }).then(() => {
+      this.scrollToEvents();
+    });
+    this.scrollToEvents();
   }
 
   selectCategory(cat: NavCategory, event?: Event) {
     if (event) event.stopPropagation();
-    this.selectedCategory.set(cat.label === 'Events' ? 'Categories' : cat.label);
     this.showCategoryMenu.set(false);
-    if (cat.label === 'Events') {
-      this.router.navigate(['/discover']);
-    } else {
-      this.router.navigate(['/discover'], { queryParams: { category: cat.label } });
-    }
+    this.showOthersDropdown.set(false);
+    this.selectedCategory.set(cat.label);
+    this.activeCategory.set(cat.label);
+    const targetUrl = `/discover?category=${encodeURIComponent(cat.label)}`;
+    this.currentUrl.set(targetUrl);
+    this.router.navigate(['/discover'], { queryParams: { category: cat.label } }).then(() => {
+      this.scrollToEvents();
+    });
     this.scrollToEvents();
   }
 
+  private updateCategoryFromUrl(url: string) {
+    this.currentUrl.set(url);
+    const [, query] = url.split('?');
+    const params = new URLSearchParams(query || '');
+    const cat = params.get('category') || '';
+    this.activeCategory.set(cat);
+
+    if (cat) {
+      this.selectedCategory.set(cat);
+    } else {
+      this.selectedCategory.set('Categories');
+    }
+
+    if (params.has('search')) {
+      this.searchQuery.set(params.get('search') || '');
+    }
+  }
+
   ngOnInit() {
+    this.prevNavPath = (this.router.url || '').split('?')[0];
+    this.updateCategoryFromUrl(this.router.url);
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        const fullUrl = event.urlAfterRedirects || event.url;
+        const currentPath = fullUrl.split('?')[0];
+        if (this.prevNavPath && this.prevNavPath !== currentPath) {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
+        this.prevNavPath = currentPath;
+        this.updateCategoryFromUrl(fullUrl);
+      }
+    });
+
     this.loadEventsForSearch();
     this.route.queryParams.subscribe(params => {
-      if (params['category']) {
-        this.selectedCategory.set(params['category']);
-      } else {
-        this.selectedCategory.set('Categories');
+      const cat = params['category'];
+      if (cat !== undefined) {
+        this.activeCategory.set(cat || '');
+      }
+      if (params['search'] !== undefined) {
+        this.searchQuery.set(params['search'] || '');
       }
     });
   }
@@ -207,11 +361,16 @@ export class HeaderComponent implements OnInit {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.user-avatar-wrap') && !target.closest('.city-selector-wrap') && !target.closest('.notification-wrap') && !target.closest('.category-dropdown-wrap')) {
+    if (!target.closest('.user-avatar-wrap') && 
+        !target.closest('.city-selector-wrap') && 
+        !target.closest('.notification-wrap') && 
+        !target.closest('.category-dropdown-wrap') &&
+        !target.closest('.others-dropdown-wrap')) {
       this.showUserMenu = false;
       this.showCityMenu = false;
       this.showNotifications.set(false);
       this.showCategoryMenu.set(false);
+      this.showOthersDropdown.set(false);
     }
     if (!target.closest('.search-container')) {
       this.searchFocused.set(false);
@@ -225,6 +384,14 @@ export class HeaderComponent implements OnInit {
     this.showUserMenu = false;
     this.showCityMenu = false;
     this.showCategoryMenu.set(false);
+    this.showOthersDropdown.set(false);
+  }
+
+  onSearchInputChange(val: string) {
+    this.searchQuery.set(val || '');
+    if (this.allEvents().length === 0) {
+      this.loadEventsForSearch();
+    }
   }
 
   onSearchFocus() {
@@ -236,10 +403,10 @@ export class HeaderComponent implements OnInit {
 
   onSearchSubmit(event?: Event) {
     if (event) event.preventDefault();
-    if (!this.searchQuery.trim()) return;
+    const q = this.searchQuery().trim();
+    if (!q) return;
 
     // Add to recent searches
-    const q = this.searchQuery.trim();
     this.recentSearches.update(list => [q, ...list.filter(item => item.toLowerCase() !== q.toLowerCase())].slice(0, 5));
 
     this.searchFocused.set(false);
@@ -249,15 +416,16 @@ export class HeaderComponent implements OnInit {
   selectSearchItem(eventId: string) {
     this.searchFocused.set(false);
     this.router.navigate(['/events', eventId]);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   selectRecentSearch(term: string) {
-    this.searchQuery = term;
+    this.searchQuery.set(term);
     this.onSearchSubmit();
   }
 
   clearSearch() {
-    this.searchQuery = '';
+    this.searchQuery.set('');
   }
 
   toggleUserMenu(event?: MouseEvent) {
@@ -399,13 +567,28 @@ export class HeaderComponent implements OnInit {
   }
 
   scrollToEvents() {
-    setTimeout(() => {
+    const doScroll = () => {
       const el = document.getElementById('discover-events-section');
       if (el) {
-        const y = el.getBoundingClientRect().top + window.scrollY - 120;
-        window.scrollTo({ top: y, behavior: 'smooth' });
+        try {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } catch {
+          const y = el.getBoundingClientRect().top + window.scrollY - 120;
+          window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+        }
+        return true;
       }
-    }, 100);
+      return false;
+    };
+
+    if (!doScroll()) {
+      setTimeout(doScroll, 80);
+      setTimeout(doScroll, 200);
+      setTimeout(doScroll, 400);
+      setTimeout(doScroll, 700);
+    } else {
+      setTimeout(doScroll, 100);
+    }
   }
 
   formatTimeAgo(isoString: string): string {

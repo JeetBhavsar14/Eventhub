@@ -1,1 +1,194 @@
-.gift-page { max-width: 1120px; padding: 3rem 1.5rem 5rem; margin: auto; }.gift-hero { text-align: center; padding: 3rem 1rem 2.5rem; }.gift-hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); margin: .4rem 0 .7rem; }.gift-hero > p:last-child { color: var(--gray-700); font-size: var(--text-md); }.eyebrow { color: var(--primary-700); font-size: .75rem; font-weight: 800; letter-spacing: .1em; }.gift-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }.gift-card { overflow: hidden; background: white; border: 1px solid var(--gray-200); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }.gift-card img { width: 100%; height: 150px; object-fit: cover; }.gift-copy { padding: 1.25rem; }.gift-copy h2 { font-size: var(--text-lg); }.gift-copy p { color: var(--gray-700); line-height: 1.5; min-height: 48px; margin: .5rem 0 1rem; }.gift-copy strong { display: block; color: var(--primary-700); font-size: var(--text-xl); margin-bottom: 1rem; }.state { text-align: center; padding: 4rem; color: var(--gray-700); }.spinner { width: 36px; height: 36px; margin: auto auto 1rem; border: 3px solid var(--gray-200); border-top-color: var(--primary-700); border-radius: 50%; animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }.modal-backdrop { position: fixed; inset: 0; z-index: 100; padding: 1rem; display: grid; place-items: center; background: rgb(15 23 42 / .6); }.gift-modal { position: relative; max-width: 430px; width: 100%; padding: 2rem; border-radius: var(--radius-lg); background: white; box-shadow: var(--shadow-lg); }.gift-modal h2 { margin-bottom: .75rem; }.gift-modal > p { color: var(--gray-700); line-height: 1.5; }.gift-modal .amount { color: var(--primary-700); font-size: var(--text-3xl); font-weight: 800; margin: 1.25rem 0 .5rem; }.gift-modal small { display: block; color: var(--gray-400); margin-bottom: 1.5rem; }.close { position: absolute; top: .7rem; right: .9rem; border: 0; background: none; font-size: 1.7rem; cursor: pointer; color: var(--gray-700); }.modal-message { color: var(--success) !important; font-size: .9rem; margin-bottom: 1rem; }
+:host {
+  display: block;
+  width: 100%;
+}
+
+.gift-page {
+  max-width: 1120px;
+  padding: 3rem 1.5rem 5rem;
+  margin: auto;
+}
+
+.gift-hero {
+  text-align: center;
+  padding: 3rem 1rem 2.5rem;
+}
+
+.gift-hero h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  margin: 0.4rem 0 0.7rem;
+}
+
+.gift-hero > p:last-child {
+  color: var(--gray-700);
+  font-size: var(--text-md);
+}
+
+.eyebrow {
+  color: var(--primary-700);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.gift-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.gift-card {
+  overflow: hidden;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gift-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.gift-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.gift-copy {
+  padding: 1.25rem;
+}
+
+.gift-copy h2 {
+  font-size: var(--text-lg);
+}
+
+.gift-copy p {
+  color: var(--gray-700);
+  line-height: 1.5;
+  min-height: 48px;
+  margin: 0.5rem 0 1rem;
+}
+
+.gift-copy strong {
+  display: block;
+  color: var(--primary-700);
+  font-size: var(--text-xl);
+  margin-bottom: 1rem;
+}
+
+.state {
+  text-align: center;
+  padding: 4rem;
+  color: var(--gray-700);
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  margin: auto auto 1rem;
+  border: 3px solid var(--gray-200);
+  border-top-color: var(--primary-700);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Fullscreen Modal Backdrop */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  padding: 1rem;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: backdropFade 0.2s ease-out;
+}
+
+@keyframes backdropFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.gift-modal {
+  position: relative;
+  max-width: 440px;
+  width: 100%;
+  padding: 2.25rem 2rem;
+  border-radius: var(--radius-xl, 16px);
+  background: white;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalScale 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScale {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.gift-modal h2 {
+  margin-bottom: 0.75rem;
+  font-size: var(--text-xl);
+  color: var(--gray-900);
+}
+
+.gift-modal > p {
+  color: var(--gray-700);
+  line-height: 1.5;
+}
+
+.gift-modal .amount {
+  color: var(--primary-700);
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.gift-modal small {
+  display: block;
+  color: var(--gray-500);
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+
+.close {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  border: 0;
+  background: none;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--gray-500);
+  transition: color var(--transition-fast);
+}
+
+.close:hover {
+  color: var(--gray-900);
+}

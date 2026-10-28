@@ -1,19 +1,50 @@
-<div class="event-details-wrapper fade-in" *ngIf="!isLoading() && event()">
+<div class="event-details-wrapper fade-in" *ngIf="!isLoading() && event() as ev">
 
   
-  <!-- Hero Section with blurred background effect -->
+  <!-- Hero Section with blurred background effect (BookMyShow Style) -->
   <section class="details-hero">
     <div class="hero-bg-blur">
-      <img [src]="event().thumbnailUrl" alt="Background">
+      <img [src]="ev.thumbnailUrl" alt="Background">
+      <div class="hero-overlay-dark"></div>
     </div>
+
     <div class="hero-content">
-      <div class="hero-image">
-        <img [src]="event().thumbnailUrl" [alt]="event().title">
+      <!-- Poster Card on the Left (BookMyShow 2:3 vertical poster style) -->
+      <div class="hero-poster-card">
+        <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="poster-img">
+        <div class="poster-bottom-pill">
+          <span>{{ ev.format || 'In-Person' }}</span>
+        </div>
       </div>
-      <div class="hero-text">
-        <span class="category-badge">{{ event().category }}</span>
-        <h1>{{ event().title }}</h1>
-        <p class="tagline">{{ event().description | slice:0:100 }}...</p>
+
+      <!-- Right Details & Book Button (BookMyShow Style) -->
+      <div class="hero-text-col">
+        <h1 class="event-main-title">{{ ev.title }}</h1>
+        
+        <!-- Meta Row with Bullets -->
+        <div class="hero-meta-row">
+          <span>{{ ev.time || '18:00' }}</span>
+          <span class="bullet-sep">•</span>
+          <span>{{ ev.category }}</span>
+          <span class="bullet-sep">•</span>
+          <span>{{ ev.subcategory || 'All Ages' }}</span>
+          <span class="bullet-sep">•</span>
+          <span>{{ ev.date | date:'dd MMM, yyyy' }}</span>
+        </div>
+
+        <!-- Badges Row -->
+        <div class="hero-badges-row">
+          <span class="hero-chip">{{ ev.format || 'In-Person' }}</span>
+          <span class="hero-chip">{{ ev.location?.city || 'India' }}, India</span>
+          <span class="hero-chip price-chip">From ₹{{ getStartingPrice() }}</span>
+        </div>
+
+        <!-- Book Tickets Button (BookMyShow style vibrant coral/crimson button) -->
+        <div class="hero-cta-wrap">
+          <button type="button" class="btn-hero-book" (click)="bookTicket()">
+            <span>Book tickets</span>
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -22,70 +53,82 @@
   <section class="content-section">
     <div class="content-container">
       
-      <!-- Left side: Details -->
+      <!-- Left side: Details & Map -->
       <main class="main-info">
         <div class="info-card">
           <h2>About this Event</h2>
-          <p class="description">{{ event().description }}</p>
+          <p class="description">{{ ev.description }}</p>
           
           <h3 class="mt-4">Date and Time</h3>
           <div class="detail-row">
-            <span class="icon" [innerHTML]="calendarSvg"></span>
+            <span class="icon">
+              <app-icon name="calendar" [size]="18"></app-icon>
+            </span>
             <div>
-              <p class="font-bold">{{ event().date | date:'EEEE, MMMM d, yyyy' }}</p>
-              <p class="text-gray">{{ event().time || '10:00 AM - 5:00 PM' }}</p>
+              <p class="font-bold">{{ ev.date | date:'EEEE, MMMM d, yyyy' }}</p>
+              <p class="text-gray">{{ ev.time || '10:00 AM - 5:00 PM' }}</p>
             </div>
           </div>
 
           <h3 class="mt-4">Location</h3>
           <div class="detail-row">
-            <span class="icon" [innerHTML]="mapPinSvg"></span>
+            <span class="icon">
+              <app-icon name="map-pin" [size]="18"></app-icon>
+            </span>
             <div>
-              <p class="font-bold">{{ event().location.venue }}</p>
-              <p class="text-gray">{{ event().location.address || event().location.city + ', ' + event().location.country }}</p>
+              <p class="font-bold">{{ ev.location?.venue || 'Venue to be announced' }}</p>
+              <p class="text-gray">{{ ev.location?.address || (ev.location?.city ? ev.location?.city + ', ' + (ev.location?.country || 'India') : 'Details available upon booking') }}</p>
             </div>
           </div>
           
-          <div class="map-placeholder mt-2">
-            <span class="icon" [innerHTML]="mapPinSvg"></span>
-            <p>Interactive Map coming soon</p>
+          <!-- Live Embedded Interactive Map -->
+          <div class="map-embed-wrapper mt-3">
+            <iframe 
+              class="map-iframe"
+              [src]="mapUrl" 
+              width="100%" 
+              height="280" 
+              style="border:0;" 
+              loading="lazy" 
+              referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+            
+            <div class="map-actions-bar">
+              <span class="map-venue-label">
+                <app-icon name="map-pin" [size]="14"></app-icon>
+                <span>{{ ev.location?.venue || 'Venue' }}, {{ ev.location?.city || 'India' }}</span>
+              </span>
+              <a [href]="googleMapsSearchUrl" target="_blank" rel="noopener noreferrer" class="btn-open-map-link">
+                <span>Open in Google Maps</span>
+                <app-icon name="external-link" [size]="13"></app-icon>
+              </a>
+            </div>
           </div>
+
         </div>
       </main>
 
-      <!-- Right side: Sticky Booking Widget -->
-      <aside class="booking-sidebar">
-        <div class="booking-widget">
-          <div class="price-header">
-            <h3>Tickets</h3>
-            <p class="price-tag">From ₹{{ event().ticketTypes?.[0]?.price || 500 }}</p>
-          </div>
-          
-          <div class="ticket-types" *ngIf="event().ticketTypes?.length">
-            <div class="ticket-type" *ngFor="let ticket of event().ticketTypes">
-              <div class="ticket-info">
-                <h4>{{ ticket.name }}</h4>
-                <p>₹{{ ticket.price }}</p>
-              </div>
-              <p class="capacity">{{ ticket.availableCount }} remaining</p>
-            </div>
-          </div>
-          <div class="ticket-types" *ngIf="!event().ticketTypes?.length">
-             <div class="ticket-type">
-              <div class="ticket-info">
-                <h4>General Admission</h4>
-                <p>₹500</p>
-              </div>
-              <p class="capacity">Available</p>
-            </div>
-          </div>
-
-          <app-button variant="primary" size="lg" [fullWidth]="true" (onClick)="bookTicket()">
-            Book Tickets Now
-          </app-button>
-        </div>
-      </aside>
       
+    </div>
+  </section>
+
+  <!-- You Might Also Like Section -->
+  <section class="similar-events-section" *ngIf="similarEvents().length > 0">
+    <div class="similar-events-container">
+      <div class="similar-header-row">
+        <div>
+          <span class="similar-eyebrow">RECOMMENDED FOR YOU</span>
+          <h2 class="similar-title">You Might Also Like</h2>
+        </div>
+        <a routerLink="/discover" class="similar-see-all">
+          <span>Explore More Events</span>
+          <app-icon name="arrow-right" [size]="14"></app-icon>
+        </a>
+      </div>
+
+      <div class="similar-cards-grid">
+        <app-event-card *ngFor="let ev of similarEvents()" [event]="ev"></app-event-card>
+      </div>
     </div>
   </section>
 

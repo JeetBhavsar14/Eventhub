@@ -1,0 +1,291 @@
+<div class="team-pane-wrapper">
+  
+  <!-- View Header -->
+  <div class="view-header-bar">
+    <div>
+      <h2 class="view-title">Event Governance, Equity & Team Operations</h2>
+      <p class="view-sub">Manage 100% equity allocation among co-owners, assign managers with specific responsibilities, and invite artists/sponsors.</p>
+    </div>
+    <div class="header-actions-group">
+      <button class="btn-team-secondary" (click)="addOwner.emit()">
+        <app-icon name="plus" [size]="14"></app-icon>
+        <span>Add Co-Owner</span>
+      </button>
+      <button class="btn-team-secondary" (click)="assignManager.emit()">
+        <app-icon name="user" [size]="14"></app-icon>
+        <span>Assign Manager</span>
+      </button>
+      <button class="btn-team-primary" (click)="inviteTeam.emit()">
+        <app-icon name="user-plus" [size]="14"></app-icon>
+        <span>Invite Staff / Role</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: 100% OWNERSHIP & EQUITY ALLOCATION (§ 11.0)       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="team-section-container">
+    <div class="section-title-row">
+      <div>
+        <h3>Event Co-Ownership & Equity Split</h3>
+        <p>Total equity must sum to exactly 100%. Ownership is event-specific and distinct from management responsibilities.</p>
+      </div>
+      <div class="equity-status-pill" [class.valid]="isEquityValid" [class.invalid]="!isEquityValid">
+        <span *ngIf="isEquityValid">● 100% Equity Allocated (Compliant)</span>
+        <span *ngIf="!isEquityValid">⚠️ {{ totalAllocatedEquity }}% Allocated ({{ remainingEquityPool }}% Remaining)</span>
+      </div>
+    </div>
+
+    <!-- Multi-Color Visual Equity Progress Bar -->
+    <div class="equity-progress-card">
+      <div class="equity-progress-track">
+        <div 
+          *ngFor="let stake of ownerStakes; let i = index"
+          class="equity-progress-bar"
+          [attr.data-index]="i % 4"
+          [style.width.%]="stake.percentage"
+          [title]="stake.userName + ' (' + stake.percentage + '%)'">
+          <span class="bar-tag" *ngIf="stake.percentage >= 15">{{ stake.userName }} • {{ stake.percentage }}%</span>
+        </div>
+      </div>
+      <div class="equity-legend-row">
+        <div *ngFor="let stake of ownerStakes; let i = index" class="legend-item">
+          <span class="legend-dot" [attr.data-index]="i % 4"></span>
+          <strong>{{ stake.userName }}</strong>
+          <span class="text-muted">({{ stake.percentage }}%)</span>
+          <small *ngIf="stake.isPrimaryOwner" class="primary-tag">Primary Host</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Co-Owners Grid -->
+    <div class="team-members-grid mt-4">
+      <div *ngFor="let stake of ownerStakes" class="team-member-card owner-card">
+        <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + stake.userEmail" [alt]="stake.userName" class="team-avatar" />
+        <div class="team-meta">
+          <div class="member-name-row">
+            <h3 class="team-name">{{ stake.userName }}</h3>
+            <span class="owner-tag-pill" *ngIf="stake.isPrimaryOwner">Primary Owner</span>
+          </div>
+          <span class="team-email">{{ stake.userEmail }}</span>
+          <span class="team-org" *ngIf="stake.organizationName">{{ stake.organizationName }}</span>
+          
+          <div class="stake-slider-row">
+            <div class="stake-display">
+              <span class="stake-label">Equity Share:</span>
+              <strong class="stake-val">{{ stake.percentage }}%</strong>
+            </div>
+            <!-- For Co-Owners: interactive range slider bounded by primary owner's available stake -->
+            <input 
+              *ngIf="!stake.isPrimaryOwner"
+              type="range" 
+              min="1" 
+              [max]="maxCoOwnerCanHold(stake.id)" 
+              [ngModel]="stake.percentage" 
+              (change)="onUpdateStake(stake.id, $any($event.target).value)" 
+              class="stake-range-slider" />
+            
+            <!-- For Primary Host: balance display -->
+            <div *ngIf="stake.isPrimaryOwner" class="primary-owner-equity-indicator">
+              <small class="equity-owner-role-desc" *ngIf="ownerStakes.length === 1">
+                Sole Event Host — Holds 100% equity by default (no co-founders)
+              </small>
+              <small class="equity-owner-role-desc" *ngIf="ownerStakes.length > 1">
+                Primary Host balance (100% minus co-founders' shares)
+              </small>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-actions-footer" *ngIf="!stake.isPrimaryOwner">
+          <button class="btn-remove-member" (click)="removeStake.emit(stake)">
+            Remove Co-Owner
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Banner when no co-founders exist -->
+    <div class="no-coowners-banner" *ngIf="ownerStakes.length === 1">
+      <app-icon name="info" [size]="18"></app-icon>
+      <div>
+        <strong>100% Sole Host Equity Active</strong>
+        <p>No co-founders currently assigned. 100% of event equity belongs to the primary host. Click <strong>"Add Co-Owner"</strong> to allocate equity. If any co-founder is removed, their stake returns to the owner directly.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: EVENT MANAGERS & RESPONSIBILITIES (§ 12.0)       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="team-section-container">
+    <div class="section-title-row">
+      <div>
+        <h3>Event Managers & Functional Portfolios</h3>
+        <p>Managers handle distinct operational domains (Logistics, Technical AV, Safety, Sponsorships). Temporary delegation can be paused anytime.</p>
+      </div>
+      <span class="team-count-badge">{{ eventManagers.length }} Managers</span>
+    </div>
+
+    <div class="team-members-grid">
+      <div *ngFor="let mgr of eventManagers" class="team-member-card manager-card">
+        <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + mgr.userEmail" [alt]="mgr.userName" class="team-avatar" />
+        <div class="team-meta">
+          <div class="member-name-row">
+            <h3 class="team-name">{{ mgr.userName }}</h3>
+            <span class="role-pill manager-pill">Event Manager</span>
+          </div>
+          <span class="team-email">{{ mgr.userEmail }}</span>
+          <div class="responsibility-title-badge">
+            <app-icon name="folder" [size]="13"></app-icon>
+            <span>{{ mgr.responsibilityTitle }}</span>
+          </div>
+          <div class="team-tags-row mt-2">
+            <span class="delegation-badge" [class.active]="mgr.delegationActive">
+              {{ mgr.delegationActive ? '● Operational Authority Active' : '○ Delegation Paused' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="team-actions-footer">
+          <button 
+            class="btn-delegation-toggle" 
+            [class.active]="mgr.delegationActive"
+            (click)="toggleManagerDelegation.emit(mgr)">
+            {{ mgr.delegationActive ? 'Pause Delegation' : 'Resume Authority' }}
+          </button>
+          <button class="btn-remove-member" (click)="removeManager.emit(mgr)">
+            Unassign
+          </button>
+        </div>
+      </div>
+      <div class="empty-state-notice" *ngIf="eventManagers.length === 0">
+        <p>No event managers assigned. Click <strong>"Assign Manager"</strong> to delegate operational portfolios.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: OPERATIONAL STAFF ROLES (§ 13.0)                 -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="team-section-container">
+    <div class="section-title-row">
+      <div>
+        <h3>Field & Gate Staff Roster</h3>
+        <p>Field staff assigned to gate check-in, safety, and info desks with duty-specific permissions.</p>
+      </div>
+      <span class="team-count-badge">{{ operationalTeam.length }} Active Staff</span>
+    </div>
+
+    <div class="team-members-grid">
+      <div *ngFor="let member of operationalTeam" class="team-member-card">
+        <img [src]="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + member.email" [alt]="member.name" class="team-avatar" />
+        <div class="team-meta">
+          <h3 class="team-name">{{ member.name }}</h3>
+          <span class="team-email">{{ member.email }}</span>
+          <div class="team-tags-row">
+            <span class="role-pill">{{ member.roleName || member.role }}</span>
+            <small class="text-muted">{{ member.responsibility || 'General Staff' }}</small>
+          </div>
+        </div>
+
+        <div class="team-actions-footer">
+          <button class="btn-remove-member" (click)="removeStaffMember.emit({ memberId: member.id, memberName: member.name })">
+            Remove
+          </button>
+        </div>
+      </div>
+      <div class="empty-state-notice" *ngIf="operationalTeam.length === 0">
+        <p>No operational staff members on roster. Click <strong>"Invite Staff / Role"</strong> to send invitations.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 4: EVENT PARTICIPANTS (Artists, Speakers, Sponsors) § 14.0 -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="team-section-container">
+    <div class="section-title-row">
+      <div>
+        <h3>Event Participants & Brand Sponsors</h3>
+        <p>Keynote speakers, performing artists, and corporate sponsors associated with this event.</p>
+      </div>
+      <div class="header-actions-group">
+        <button class="btn-small-link" (click)="addParticipant.emit('artist')">+ Add Artist</button>
+        <button class="btn-small-link" (click)="addParticipant.emit('speaker')">+ Add Speaker</button>
+        <button class="btn-small-link" (click)="addParticipant.emit('sponsor')">+ Add Sponsor</button>
+      </div>
+    </div>
+
+    <div class="team-members-grid">
+      <div *ngFor="let part of eventParticipants" class="team-member-card participant-card">
+        <img [src]="part.avatarUrl" [alt]="part.name" class="team-avatar" />
+        <div class="team-meta">
+          <div class="member-name-row">
+            <h3 class="team-name">{{ part.name }}</h3>
+            <span class="role-pill participant-pill" [attr.data-cat]="part.category">
+              {{ part.category | uppercase }}
+            </span>
+          </div>
+          <span class="team-org font-semibold">{{ part.designationOrCompany }}</span>
+          <p class="participant-bio-snippet">{{ part.bio }}</p>
+        </div>
+
+        <div class="team-actions-footer">
+          <button class="btn-remove-member" (click)="removeParticipant.emit(part)">
+            Remove
+          </button>
+        </div>
+      </div>
+      <div class="empty-state-notice" *ngIf="eventParticipants.length === 0">
+        <p>No event participants or sponsors added yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 5: DISPATCHED INVITATIONS TRACKER (§ 16.0)          -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="team-section-container">
+    <div class="section-title-row">
+      <div>
+        <h3>Dispatched Invitations Tracker</h3>
+        <p>Invitations become active event relationships upon acceptance by the recipient.</p>
+      </div>
+      <span class="team-count-badge warning">{{ pendingInvitations.length }} Pending</span>
+    </div>
+
+    <div class="invitations-table-card">
+      <table class="invitations-table" aria-label="Invitations Table">
+        <thead>
+          <tr>
+            <th>Invitee</th>
+            <th>Assigned Role</th>
+            <th>Category</th>
+            <th>Sent At</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inv of pendingInvitations">
+            <td>
+              <div class="inv-invitee-cell">
+                <strong>{{ inv.inviteeName }}</strong>
+                <small>{{ inv.inviteeEmail }}</small>
+              </div>
+            </td>
+            <td><span class="role-pill">{{ inv.role }}</span></td>
+            <td>{{ inv.roleCategory === 'operational' ? 'Operational Team' : 'Event Participant' }}</td>
+            <td><small>{{ inv.sentAt | date:'mediumDate' }}</small></td>
+            <td><span class="status-indicator-pending">● Awaiting Acceptance</span></td>
+          </tr>
+          <tr *ngIf="pendingInvitations.length === 0">
+            <td colspan="5" class="empty-table-cell">No pending invitations. All dispatched invitations have been accepted.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

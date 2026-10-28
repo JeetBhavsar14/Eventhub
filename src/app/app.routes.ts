@@ -125,7 +125,7 @@ export const routes: Routes = [
           // Public Features (Lazy Loaded)
           { 
             path: '', 
-            loadComponent: () => import('./features/discover/discover.component').then(m => m.DiscoverComponent) 
+            loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent) 
           },
           { 
             path: 'discover', 
@@ -205,6 +205,11 @@ export const routes: Routes = [
             path: 'checkout/:eventId', 
             loadComponent: () => import('./features/checkout/checkout').then(m => m.Checkout), 
             canActivate: [authGuard] 
+          },
+          {
+            path: 'payment-gateway',
+            loadComponent: () => import('./features/payment-gateway/payment-gateway.component').then(m => m.PaymentGatewayComponent),
+            canActivate: [authGuard]
           },
           { 
             path: 'gift-card-checkout/:id', 

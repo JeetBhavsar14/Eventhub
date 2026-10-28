@@ -25,18 +25,19 @@
               
               <div class="slide-meta">
                 <span class="meta-item">
-                  <span class="icon" [innerHTML]="calendarSvg"></span> 
+                  <app-icon name="calendar" [size]="14"></app-icon> 
                   {{ event.date | date:'MMMM dd, yyyy' }}
                 </span>
                 <span class="meta-item">
-                  <span class="icon" [innerHTML]="mapPinSvg"></span> 
-                  {{ event.location.venue }}
+                  <app-icon name="map-pin" [size]="14"></app-icon> 
+                  {{ event.location?.venue || 'Venue TBA' }}
                 </span>
                 <span class="meta-item category-badge">
-                  <span class="icon" [innerHTML]="getCategorySvg(event.category)"></span> 
+                  <app-icon [name]="getCategoryIcon(event.category)" [size]="14"></app-icon> 
                   {{ event.category }}
                 </span>
               </div>
+
 
               <p class="slide-desc">{{ event.description }}</p>
               
@@ -71,9 +72,91 @@
 
   <!-- Discover Layout (Sidebar + Main Content) -->
   <section class="discover-layout-section" id="discover-events-section">
+    
+    <!-- Mobile Only Sticky Filter Bar: Filters, Category, Price in one row -->
+    <div class="mobile-filter-bar-sticky-wrap">
+      <div class="mobile-filter-bar">
+        <!-- 1. Filters Button -->
+        <button 
+          type="button" 
+          class="mobile-filter-btn" 
+          (click)="toggleMobileFilterCard()"
+          [class.has-filter]="activeFiltersCount() > 0"
+          aria-label="Open filter options">
+          <app-icon name="sliders" [size]="15"></app-icon>
+          <span>Filters</span>
+          <span class="mobile-filter-pill-count" *ngIf="activeFiltersCount() > 0">{{ activeFiltersCount() }}</span>
+        </button>
+
+        <!-- 2. Category Dropdown Button with Custom Droplist -->
+        <div class="mobile-dropdown-btn-wrap" [class.is-open]="mobileDropdownOpen() === 'category'">
+          <button 
+            type="button" 
+            class="mobile-dropdown-trigger" 
+            [class.has-filter]="currentFilter.category && currentFilter.category !== 'All'"
+            (click)="toggleMobileDropdown('category', $event)"
+            aria-label="Filter by Category"
+            aria-haspopup="listbox">
+            <span class="mobile-btn-label">{{ currentFilter.category === 'All' ? 'Category' : currentFilter.category }}</span>
+            <span class="mobile-chevron-wrap" [class.open]="mobileDropdownOpen() === 'category'">
+              <app-icon name="chevron-down" [size]="14"></app-icon>
+            </span>
+          </button>
+
+          <!-- Floating Droplist Menu -->
+          <div class="mobile-dropdown-menu" *ngIf="mobileDropdownOpen() === 'category'" (click)="$event.stopPropagation()">
+            <div class="dropdown-options-scroll">
+              <div 
+                *ngFor="let cat of categories" 
+                class="dropdown-option-item"
+                [class.selected]="(currentFilter.category || 'All') === cat"
+                (click)="selectMobileCategory(cat, $event)">
+                <span class="option-label">{{ cat === 'All' ? 'All Categories' : cat }}</span>
+                <span *ngIf="(currentFilter.category || 'All') === cat" class="check-indicator">
+                  <app-icon name="check" [size]="14"></app-icon>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Price Dropdown Button with Custom Droplist -->
+        <div class="mobile-dropdown-btn-wrap" [class.is-open]="mobileDropdownOpen() === 'price'">
+          <button 
+            type="button" 
+            class="mobile-dropdown-trigger" 
+            [class.has-filter]="currentFilter.price && currentFilter.price !== 'Any Price' && currentFilter.price !== 'Any Range'"
+            (click)="toggleMobileDropdown('price', $event)"
+            aria-label="Filter by Price"
+            aria-haspopup="listbox">
+            <span class="mobile-btn-label">{{ (!currentFilter.price || currentFilter.price === 'Any Price' || currentFilter.price === 'Any Range') ? 'Price' : currentFilter.price }}</span>
+            <span class="mobile-chevron-wrap" [class.open]="mobileDropdownOpen() === 'price'">
+              <app-icon name="chevron-down" [size]="14"></app-icon>
+            </span>
+          </button>
+
+          <!-- Floating Droplist Menu -->
+          <div class="mobile-dropdown-menu" *ngIf="mobileDropdownOpen() === 'price'" (click)="$event.stopPropagation()">
+            <div class="dropdown-options-scroll">
+              <div 
+                *ngFor="let pr of priceOptions" 
+                class="dropdown-option-item"
+                [class.selected]="(!currentFilter.price || currentFilter.price === 'Any Price' || currentFilter.price === 'Any Range') ? pr === 'Any Range' : currentFilter.price === pr"
+                (click)="selectMobilePrice(pr, $event)">
+                <span class="option-label">{{ pr }}</span>
+                <span *ngIf="(!currentFilter.price || currentFilter.price === 'Any Price' || currentFilter.price === 'Any Range') ? pr === 'Any Range' : currentFilter.price === pr" class="check-indicator">
+                  <app-icon name="check" [size]="14"></app-icon>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="discover-container">
-      
-      <!-- Left Sidebar (Filters) -->
+
+      <!-- Left Sidebar (Desktop Filters) -->
       <aside class="filters-sidebar">
         <h3>Filters</h3>
         <app-event-filter [currentFilter]="currentFilter" (filterChange)="handleFilterChange($event)"></app-event-filter>
@@ -82,11 +165,26 @@
       <!-- Right Main Content -->
       <main class="events-main">
         <div class="section-header">
-          <h2>{{ currentFilter.category === 'All' ? 'Events' : currentFilter.category + ' Events' }} In {{ locationService.selectedCity() }}</h2>
+          <h2>
+            <ng-container *ngIf="!searchQuery()">
+              {{ currentFilter.category === 'All' ? 'Events' : currentFilter.category + ' Events' }} In {{ locationService.selectedCity() }}
+            </ng-container>
+            <ng-container *ngIf="searchQuery()">
+              Search Results for "{{ searchQuery() }}" in {{ locationService.selectedCity() }}
+            </ng-container>
+          </h2>
+
+          <!-- Active search filter badge with clear button -->
+          <div class="active-search-chip" *ngIf="searchQuery()">
+            <span>Search: <strong>"{{ searchQuery() }}"</strong></span>
+            <button type="button" class="btn-clear-search-chip" (click)="clearActiveSearch()" title="Clear search">
+              <app-icon name="close" [size]="12"></app-icon>
+            </button>
+          </div>
         </div>
 
-        <!-- Skeleton Loading Shimmers (High-Impact UI/UX) -->
-        <div class="events-grid skeleton-grid" *ngIf="isLoading()">
+        <!-- Skeleton Loading Shimmers (Only shown on initial page load when no events exist yet) -->
+        <div class="events-cards-grid skeleton-grid" *ngIf="isLoading() && featuredEvents().length === 0">
           <div class="skeleton-card" *ngFor="let item of skeletonPlaceholders">
             <div class="skeleton-image-wrap">
               <div class="skeleton-shimmer skeleton-image"></div>
@@ -106,44 +204,83 @@
           </div>
         </div>
 
-        <div class="empty-state" *ngIf="!isLoading() && featuredEvents().length === 0">
-          <h3>No events found</h3>
-          <p>Try adjusting your filters.</p>
-          <app-button variant="secondary" (click)="handleFilterChange({category: 'All', date: 'Any Date', price: 'Any Price'})">Clear Filters</app-button>
+        <!-- Sleek Top Live Progress Bar when filtering in the background -->
+        <div class="filter-progress-bar" *ngIf="isFiltering()">
+          <div class="filter-progress-line"></div>
         </div>
 
-        <div class="events-grid" *ngIf="!isLoading()">
-          <!-- Event Card -->
-          <div class="event-card" *ngFor="let event of featuredEvents()" [routerLink]="['/events', event.id]">
-            <div class="event-image">
-              <img [src]="event.thumbnailUrl" [alt]="event.title">
-              <span class="category-tag">
-                <span class="icon" [innerHTML]="getCategorySvg(event.category)"></span>
-                {{ event.category }}
-              </span>
-              <span class="featured-trending-badge" *ngIf="event.isPopular">
-                <span class="icon" [innerHTML]="trendingSvg"></span> Trending
-              </span>
-            </div>
-            <div class="event-details">
-              <div class="event-date">
-                <span class="month">{{ event.date | date:'MMM' }}</span>
-                <span class="day">{{ event.date | date:'dd' }}</span>
-              </div>
-              <div class="event-info">
-                <h3>{{ event.title }}</h3>
-                <p class="location">
-                  <span class="icon" [innerHTML]="mapPinSvg"></span>
-                  {{ event.location.venue }}, {{ event.location.city }}
-                </p>
-                <p class="price">From ₹{{ event.ticketTypes?.[0]?.price || 500 }}</p>
-              </div>
-            </div>
+        <!-- Empty State (Compact & Centered without extra scroll height) -->
+        <div class="empty-state" *ngIf="!isLoading() && !isFiltering() && featuredEvents().length === 0">
+          <div class="empty-state-icon">
+            <app-icon name="search" [size]="28"></app-icon>
           </div>
+          <h3>No Events Found</h3>
+          <p *ngIf="!searchQuery()">No events match your selected filters in {{ locationService.selectedCity() }}. Try clearing or widening your search criteria.</p>
+          <p *ngIf="searchQuery()">No events match "<strong>{{ searchQuery() }}</strong>" in {{ locationService.selectedCity() }}.</p>
+          <button type="button" class="btn-clear-empty" (click)="clearActiveSearch(); handleFilterChange({category: 'All', date: 'Any Date', price: 'Any Price'})">
+            Reset All Filters
+          </button>
         </div>
+
+        <!-- Events Grid (Modern Landing Page Style) -->
+        <div class="events-cards-grid" [class.is-updating]="isFiltering()" *ngIf="!(isLoading() && featuredEvents().length === 0) && featuredEvents().length > 0">
+          <app-event-card *ngFor="let ev of paginatedEvents()" [event]="ev"></app-event-card>
+        </div>
+
+        <!-- Pagination Controls -->
+        <app-pagination-bar
+          *ngIf="totalEvents() > pageSize()"
+          [currentPage]="currentPage()"
+          [totalPages]="totalPages()"
+          [startItem]="startIndex()"
+          [endItem]="endIndex()"
+          [totalItems]="totalEvents()"
+          itemLabel="events"
+          (pageChange)="goToPage($event)">
+        </app-pagination-bar>
       </main>
+
       
     </div>
   </section>
+
+  <!-- Mobile Filter Pop-up Window (Centered Floating Modal) -->
+  <div 
+    class="mobile-filter-popup-overlay" 
+    *ngIf="showMobileFilterCard()" 
+    (click)="closeMobileFilterCard()">
+    
+    <div class="mobile-filter-popup-window" (click)="$event.stopPropagation()">
+      <!-- Pop-up Header -->
+      <div class="popup-window-header">
+        <div class="popup-title-wrap">
+          <app-icon name="sliders" [size]="18"></app-icon>
+          <h3>Filters</h3>
+          <span class="active-badge" *ngIf="activeFiltersCount() > 0">{{ activeFiltersCount() }} active</span>
+        </div>
+        <button type="button" class="popup-close-btn" (click)="closeMobileFilterCard()" aria-label="Close filters">
+          <app-icon name="close" [size]="18"></app-icon>
+        </button>
+      </div>
+
+      <!-- Pop-up Body with custom scroll -->
+      <div class="popup-window-body">
+        <app-event-filter 
+          [currentFilter]="currentFilter" 
+          (filterChange)="handleFilterChange($event)">
+        </app-event-filter>
+      </div>
+
+      <!-- Pop-up Footer -->
+      <div class="popup-window-footer">
+        <button type="button" class="btn-popup-reset" (click)="resetAllFilters()">
+          Reset
+        </button>
+        <button type="button" class="btn-popup-apply" (click)="closeMobileFilterCard()">
+          Show {{ totalEvents() }} Events
+        </button>
+      </div>
+    </div>
+  </div>
 
 </div>

@@ -1,67 +1,169 @@
-import { Component, inject, OnInit, OnDestroy, signal, effect } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, effect, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ApiClient } from '@core/api';
 import { LocationService } from '@core/state';
-import { ButtonComponent, InputComponent, EventFilterComponent } from '@shared/components';
-import { SVGS } from '@shared/assets';
-import { EventFilter } from '@core/models/event-membership.model';
+import { ButtonComponent, EventFilterComponent, IconComponent, EventCardComponent, PaginationBarComponent } from '@shared/components';
+import { EventItem, EventFilter } from '@core/models';
+import { EVENT_CATEGORIES, MOBILE_PRICE_FILTER_OPTIONS } from '@core/constants';
+import { getStartingPrice, filterEvents } from '@core/utils';
 
 @Component({
   selector: 'app-discover',
   standalone: true,
-  imports: [CommonModule, RouterLink, ButtonComponent, EventFilterComponent],
+  imports: [CommonModule, RouterLink, ButtonComponent, EventFilterComponent, IconComponent, EventCardComponent, PaginationBarComponent],
   templateUrl: './discover.component.html',
   styleUrl: './discover.component.css'
 })
 export class DiscoverComponent implements OnInit, OnDestroy {
   private apiClient = inject(ApiClient);
   public locationService = inject(LocationService);
-  private sanitizer = inject(DomSanitizer);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   
-  featuredEvents = signal<any[]>([]);
-  promotionalEvents = signal<any[]>([]);
+  featuredEvents = signal<EventItem[]>([]);
+  promotionalEvents = signal<EventItem[]>([]);
   isLoading = signal(true);
+  isFiltering = signal(false);
   skeletonPlaceholders = [1, 2, 3, 4, 5, 6];
+
+  // ── Pagination State (6 events per page) ─────────────────────
+  readonly pageSize = signal<number>(6);
+  readonly currentPage = signal<number>(1);
+
+  readonly totalEvents = computed(() => this.featuredEvents().length);
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalEvents() / this.pageSize())));
+
+  readonly paginatedEvents = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.featuredEvents().slice(start, start + this.pageSize());
+  });
+
+  readonly startIndex = computed(() => {
+    if (this.totalEvents() === 0) return 0;
+    return (this.currentPage() - 1) * this.pageSize() + 1;
+  });
+
+  readonly endIndex = computed(() => {
+    return Math.min(this.currentPage() * this.pageSize(), this.totalEvents());
+  });
   
+  searchQuery = signal<string>('');
   currentSlideIndex = signal(0);
   private slideInterval: any;
+  private filterDebounceTimer: any;
 
-  calendarSvg: SafeHtml;
-  mapPinSvg: SafeHtml;
-  ticketSvg: SafeHtml;
-  trendingSvg: SafeHtml;
-
-  categorySvgs: Record<string, SafeHtml> = {};
 
   currentFilter: EventFilter = {
-  category: 'All',
-  type: undefined,
-  date: 'Any Date',
-  customDate: undefined,
-  price: 'Any Price'
-};
+    category: 'All',
+    type: undefined,
+    date: 'Any Date',
+    customDate: undefined,
+    price: 'Any Price'
+  };
+
+  // ── Mobile Filters Row & Drawer State ────────────────────────
+  readonly categories = EVENT_CATEGORIES;
+  readonly priceOptions = MOBILE_PRICE_FILTER_OPTIONS;
+
+  showMobileFilterCard = signal(false);
+
+  readonly activeFiltersCount = computed(() => {
+    let count = 0;
+    const f = this.currentFilter;
+    if (f.category && f.category !== 'All') count++;
+    if (f.type) count++;
+    if (f.date && f.date !== 'Any Date') count++;
+    if (f.customDate || f.startDate) count++;
+    if (f.price && f.price !== 'Any Price' && f.price !== 'Any Range') count++;
+    if (f.minPrice !== undefined || f.maxPrice !== undefined) count++;
+    return count;
+  });
+
+  toggleMobileFilterCard() {
+    this.showMobileFilterCard.update(v => !v);
+  }
+
+  closeMobileFilterCard() {
+    this.showMobileFilterCard.set(false);
+  }
+
+  onMobileCategorySelect(category: string) {
+    this.handleFilterChange({
+      ...this.currentFilter,
+      category,
+      type: undefined
+    });
+  }
+
+  onMobilePriceSelect(price: string) {
+    const normalizedPrice = (price === 'Any Range' || price === 'Any Price') ? 'Any Price' : price;
+    this.handleFilterChange({
+      ...this.currentFilter,
+      price: normalizedPrice,
+      minPrice: normalizedPrice === 'Custom Range' ? this.currentFilter.minPrice : undefined,
+      maxPrice: normalizedPrice === 'Custom Range' ? this.currentFilter.maxPrice : undefined
+    });
+  }
+
+  mobileDropdownOpen = signal<'category' | 'price' | null>(null);
+
+  toggleMobileDropdown(type: 'category' | 'price', event?: MouseEvent) {
+    if (event) event.stopPropagation();
+    this.mobileDropdownOpen.update(curr => curr === type ? null : type);
+  }
+
+  closeMobileDropdowns() {
+    this.mobileDropdownOpen.set(null);
+  }
+
+  selectMobileCategory(cat: string, event?: MouseEvent) {
+    if (event) event.stopPropagation();
+    this.onMobileCategorySelect(cat);
+    this.closeMobileDropdowns();
+  }
+
+  selectMobilePrice(pr: string, event?: MouseEvent) {
+    if (event) event.stopPropagation();
+    this.closeMobileDropdowns();
+    if (pr === 'Custom Range') {
+      this.handleFilterChange({
+        ...this.currentFilter,
+        price: 'Custom Range'
+      });
+      this.showMobileFilterCard.set(true);
+    } else {
+      this.onMobilePriceSelect(pr);
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (this.mobileDropdownOpen()) {
+      this.closeMobileDropdowns();
+    }
+  }
+
+  resetAllFilters() {
+    this.handleFilterChange({
+      category: 'All',
+      type: undefined,
+      date: 'Any Date',
+      customDate: undefined,
+      startDate: undefined,
+      endDate: undefined,
+      price: 'Any Price',
+      minPrice: undefined,
+      maxPrice: undefined
+    });
+    this.closeMobileFilterCard();
+  }
 
   constructor() {
-    this.calendarSvg = this.sanitizer.bypassSecurityTrustHtml(SVGS.calendar);
-    this.mapPinSvg = this.sanitizer.bypassSecurityTrustHtml(SVGS.mapPin);
-    this.ticketSvg = this.sanitizer.bypassSecurityTrustHtml(SVGS.ticket);
-    this.trendingSvg = this.sanitizer.bypassSecurityTrustHtml(SVGS.trending);
-
-    this.categorySvgs['Concerts'] = this.sanitizer.bypassSecurityTrustHtml(SVGS.concerts);
-    this.categorySvgs['Sports'] = this.sanitizer.bypassSecurityTrustHtml(SVGS.sports);
-    this.categorySvgs['Conferences'] = this.sanitizer.bypassSecurityTrustHtml(SVGS.conferences);
-    this.categorySvgs['Workshops'] = this.sanitizer.bypassSecurityTrustHtml(SVGS.workshops);
-    this.categorySvgs['Festivals'] = this.sanitizer.bypassSecurityTrustHtml(SVGS.festivals);
-    this.categorySvgs['Others'] = this.sanitizer.bypassSecurityTrustHtml(SVGS.others);
-
     effect(() => {
       const city = this.locationService.selectedCity();
       this.loadPromotionalEvents(city);
-      this.loadEvents(city, this.currentFilter);
+      this.loadEvents(city, this.currentFilter, true);
     });
   }
 
@@ -69,49 +171,58 @@ export class DiscoverComponent implements OnInit, OnDestroy {
     this.startCarousel();
     
     this.route.queryParams.subscribe((params: any) => {
+      this.searchQuery.set(params['search'] || '');
       this.currentFilter = {
-        category: params['category'] || this.currentFilter.category,
+        category: params['category'] || 'All',
         type: params['type'] || undefined,
-        date: params['date'] || this.currentFilter.date,
+        date: params['date'] || 'Any Date',
         customDate: params['customDate'] || undefined,
-        price: params['price'] || this.currentFilter.price
+        startDate: params['startDate'] || undefined,
+        endDate: params['endDate'] || undefined,
+        price: params['price'] || 'Any Price',
+        minPrice: params['minPrice'] ? Number(params['minPrice']) : undefined,
+        maxPrice: params['maxPrice'] ? Number(params['maxPrice']) : undefined
       };
       
+      this.currentPage.set(1);
       const city = this.locationService.selectedCity();
-      this.loadEvents(city, this.currentFilter);
+      this.loadEvents(city, this.currentFilter, true);
     });
   }
 
   ngOnDestroy() {
     this.stopCarousel();
+    if (this.filterDebounceTimer) {
+      clearTimeout(this.filterDebounceTimer);
+    }
   }
 
-  handleFilterChange(filter: any) {
+  handleFilterChange(filter: EventFilter) {
     this.currentFilter = filter;
+    this.currentPage.set(1);
     
-    const queryParams: any = {};
-    if (filter.category !== 'All') queryParams.category = filter.category;
-    if (filter.type) queryParams.type = filter.type;
-    if (filter.date !== 'Any Date') queryParams.date = filter.date;
-    if (filter.customDate) queryParams.customDate = filter.customDate;
-    if (filter.price !== 'Any Price') queryParams.price = filter.price;
+    const queryParams: Record<string, string> = {};
+    if (filter.category && filter.category !== 'All') queryParams['category'] = filter.category;
+    if (filter.type) queryParams['type'] = filter.type;
+    if (filter.date && filter.date !== 'Any Date') queryParams['date'] = filter.date;
+    if (filter.customDate) queryParams['customDate'] = filter.customDate;
+    if (filter.startDate) queryParams['startDate'] = filter.startDate;
+    if (filter.endDate) queryParams['endDate'] = filter.endDate;
+    if (filter.price && filter.price !== 'Any Price') queryParams['price'] = filter.price;
+    if (filter.minPrice !== undefined && filter.minPrice !== null) queryParams['minPrice'] = String(filter.minPrice);
+    if (filter.maxPrice !== undefined && filter.maxPrice !== null) queryParams['maxPrice'] = String(filter.maxPrice);
     
-    const scrollY = window.scrollY;
-
-this.router.navigate([], {
-  relativeTo: this.route,
-  queryParams,
-  queryParamsHandling: 'merge',
-  replaceUrl: true
-}).then(() => {
-  window.scrollTo({
-    top: scrollY,
-    behavior: 'instant'
-  });
-});
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      replaceUrl: true
+    });
     
-    const city = this.locationService.selectedCity();
-    this.loadEvents(city, this.currentFilter);
+    clearTimeout(this.filterDebounceTimer);
+    this.filterDebounceTimer = setTimeout(() => {
+      const city = this.locationService.selectedCity();
+      this.loadEvents(city, this.currentFilter, false);
+    }, 180);
   }
 
   private startCarousel() {
@@ -134,52 +245,25 @@ this.router.navigate([], {
     this.startCarousel();
   }
 
-  getCategorySvg(category: string): SafeHtml {
-    return this.categorySvgs[category] || this.ticketSvg;
+  getStartingPrice(event: any): number {
+    return getStartingPrice(event, 0);
   }
 
-  private async loadEvents(city: string, filter: any) {
-    this.isLoading.set(true);
+  private async loadEvents(city: string, filter: any, isInitial: boolean = false) {
+    if (isInitial || this.featuredEvents().length === 0) {
+      this.isLoading.set(true);
+    } else {
+      this.isFiltering.set(true);
+    }
     try {
       let query = `location.city=${city}`;
       if (filter.category && filter.category !== 'All') {
         query += `&category=${encodeURIComponent(filter.category)}`;
       }
       
-      const response = await this.apiClient.get<any[]>(`/events?${query}`);
-      let fetchedEvents = response.data || [];
-
-      // Client-side Type filter
-      if (filter.type && !filter.type.startsWith('All')) {
-        // Here we'd ideally query the backend, but since mock db only has category we can do text matching
-        fetchedEvents = fetchedEvents.filter(e => e.title.includes(filter.type) || e.description.includes(filter.type) || e.category === filter.type);
-      }
-
-      // Client-side Price filter
-      if (filter.price && filter.price !== 'Any Price') {
-        fetchedEvents = fetchedEvents.filter(e => {
-          const price = e.ticketTypes?.[0]?.price || 500;
-          if (filter.price === 'Free') return price === 0;
-          if (filter.price === 'Under ₹500') return price > 0 && price < 500;
-          if (filter.price === '₹500 - ₹1500') return price >= 500 && price <= 1500;
-          if (filter.price === '₹1500 - ₹3000') return price > 1500 && price <= 3000;
-          if (filter.price === '₹3000+') return price > 3000;
-          return true;
-        });
-      }
-
-      // Client-side Date filter (using our mock 2026 dates)
-      if (filter.date === 'Today') {
-        fetchedEvents = fetchedEvents.filter(e => e.date === '2026-11-01');
-      } else if (filter.date === 'Tomorrow') {
-        fetchedEvents = fetchedEvents.filter(e => e.date === '2026-11-02');
-      } else if (filter.date === 'This Weekend') {
-        fetchedEvents = fetchedEvents.filter(e => e.date === '2026-11-03' || e.date === '2026-11-04');
-      } else if (filter.date === 'Next Week') {
-        fetchedEvents = fetchedEvents.filter(e => e.date === '2026-11-05' || e.date === '2026-11-06');
-      } else if (filter.date === 'Custom Date' && filter.customDate) {
-        fetchedEvents = fetchedEvents.filter(e => e.date === filter.customDate);
-      }
+      const response = await this.apiClient.get<EventItem[]>(`/events?${query}`);
+      const rawEvents: EventItem[] = response.data || [];
+      const fetchedEvents = filterEvents(rawEvents, this.searchQuery(), filter);
 
       this.featuredEvents.set(fetchedEvents);
     } catch (err) {
@@ -187,12 +271,13 @@ this.router.navigate([], {
       this.featuredEvents.set([]);
     } finally {
       this.isLoading.set(false);
+      this.isFiltering.set(false);
     }
   }
 
   private async loadPromotionalEvents(city: string) {
     try {
-      const response = await this.apiClient.get<any[]>('/events', { 
+      const response = await this.apiClient.get<EventItem[]>('/events', { 
         isPopular: true,
         'location.city': city
       });
@@ -206,4 +291,51 @@ this.router.navigate([], {
       this.promotionalEvents.set([]);
     }
   }
+
+  clearActiveSearch() {
+    this.searchQuery.set('');
+    this.currentPage.set(1);
+    const params: any = { ...this.route.snapshot.queryParams };
+    delete params['search'];
+    this.router.navigate(['/discover'], { queryParams: params });
+  }
+
+  // ── Pagination Actions ───────────────────────────────────────
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
+    this.scrollToEventsTop();
+  }
+
+
+  scrollToEventsTop() {
+    setTimeout(() => {
+      const el = document.getElementById('discover-events-section') || document.querySelector('.events-main');
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - 90;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+    }, 40);
+  }
+
+  getCategoryIcon(category?: string): string {
+    if (!category) return 'others';
+    const c = category.toLowerCase();
+    if (c.includes('concert')) return 'concerts';
+    if (c.includes('sport')) return 'sports';
+    if (c.includes('conf')) return 'conferences';
+    if (c.includes('workshop')) return 'workshops';
+    if (c.includes('fest')) return 'festivals';
+    if (c.includes('show') || c.includes('entertainment')) return 'shows';
+    if (c.includes('activit')) return 'activities';
+    if (c.includes('tech')) return 'technology';
+    if (c.includes('art') || c.includes('culture')) return 'arts';
+    if (c.includes('food') || c.includes('life')) return 'food';
+    if (c.includes('comedy') || c.includes('theater')) return 'comedy';
+    if (c.includes('wellness') || c.includes('health')) return 'wellness';
+    if (c.includes('part') || c.includes('night')) return 'parties';
+    return 'others';
+  }
 }
+
+

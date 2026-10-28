@@ -8,4 +8,5 @@ export * from './icon/icon.component';
 export * from './toast/toast-container.component';
 export * from './pagination-bar/pagination-bar.component';
 export * from './confirm-dialog/confirm-dialog.component';
+export * from './event-card/event-card.component';
 

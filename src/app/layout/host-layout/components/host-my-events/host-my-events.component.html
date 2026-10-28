@@ -71,7 +71,7 @@
 
   <!-- Portfolio Grid Pagination Controls -->
   <app-pagination-bar 
-    *ngIf="events.length > 0 && portfolioTotalPages() > 1"
+    *ngIf="events.length > 0"
     [currentPage]="portfolioPage()"
     [totalPages]="portfolioTotalPages()"
     [pageNumbers]="portfolioPageNumbers()"

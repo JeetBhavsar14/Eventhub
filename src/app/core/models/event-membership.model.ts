@@ -72,5 +72,9 @@ export interface EventFilter {
   type?: string;
   date: string;
   customDate?: string;
+  startDate?: string;
+  endDate?: string;
   price: string;
+  minPrice?: number;
+  maxPrice?: number;
 }
