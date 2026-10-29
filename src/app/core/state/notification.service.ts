@@ -67,9 +67,8 @@ export class NotificationService {
 
         this.notifications.set(userNotifs);
       }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load notifications';
-      this.error.set(message);
+    } catch (err: any) {
+      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
     } finally {
       this.isLoading.set(false);
     }

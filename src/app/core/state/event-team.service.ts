@@ -45,7 +45,7 @@ export class EventTeamService {
         this.invitations.set(invRes.data);
       }
     } catch (err: any) {
-      this.error.set(err?.message || 'Failed to load event team and invitations');
+      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
     } finally {
       this.isLoading.set(false);
     }

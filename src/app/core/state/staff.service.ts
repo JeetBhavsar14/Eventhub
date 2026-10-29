@@ -140,7 +140,7 @@ export class StaffService {
         }
       }
     } catch (err: any) {
-      this.error.set(err?.message || 'Failed to load staff roster data');
+      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
     } finally {
       this.isLoading.set(false);
     }

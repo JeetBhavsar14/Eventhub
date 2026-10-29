@@ -46,7 +46,7 @@ export class HostDashboardService {
         this.api.get<any[]>('/bookings')
       ]);
 
-      const firstError = eventsRes.error || actsRes.error || notifsRes.error || bookingsRes.error;
+      const firstError = eventsRes?.error || actsRes?.error || notifsRes?.error || bookingsRes?.error;
       if (firstError) {
         this.error.set(firstError.userMessage);
       }
@@ -96,7 +96,7 @@ export class HostDashboardService {
         this.attendees.set(mappedAttendees);
       }
     } catch (err: any) {
-      this.error.set(err?.userMessage || err?.message || 'Failed to load host workspace data');
+      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
       console.warn('Could not connect to mock server, using cached default signals', err);
     } finally {
       this.isLoading.set(false);

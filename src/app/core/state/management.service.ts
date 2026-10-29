@@ -86,7 +86,7 @@ export class ManagementService {
         this.staffRoster.set(staffRes.data);
       }
     } catch (err: any) {
-      this.error.set(err?.message || 'Failed to load management workspace data');
+      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
     } finally {
       this.isLoading.set(false);
     }

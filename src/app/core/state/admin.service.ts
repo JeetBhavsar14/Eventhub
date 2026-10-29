@@ -147,7 +147,7 @@ export class AdminService {
         this.broadcasts.set(bcRes.data);
       }
     } catch (err: any) {
-      this.error.set(err?.message || 'Failed to load admin workspace data');
+      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
     } finally {
       this.isLoading.set(false);
     }

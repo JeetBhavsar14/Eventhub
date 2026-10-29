@@ -82,6 +82,28 @@ describe('handleApiError', () => {
     expect(result.userMessage).toBe('An internal server error occurred. Please try again later.');
   });
 
+  it('should mask server-side 5xx messages and retain backend diagnostics separately', () => {
+    const err = createAxiosError(500, {
+      message: 'FATAL: database query execution failed: syntax error at or near "SELECT * FROM secrets"'
+    });
+    const result = handleApiError(err);
+    expect(result.code).toBe('SERVER_ERROR');
+    expect(result.status).toBe(500);
+    expect(result.userMessage).toBe('An internal server error occurred. Please try again later.');
+    expect(result.userMessage).not.toContain('secrets');
+    expect(result.userMessage).not.toContain('syntax error');
+    expect(result.diagnosticMessage).toBe('FATAL: database query execution failed: syntax error at or near "SELECT * FROM secrets"');
+  });
+
+  it('should mask 502/503 server errors with safe fallback and retain string diagnostics', () => {
+    const err = createAxiosError(503, 'Upstream upstream_db_pool timed out at 10.0.0.1');
+    const result = handleApiError(err);
+    expect(result.code).toBe('SERVER_ERROR');
+    expect(result.status).toBe(503);
+    expect(result.userMessage).toBe('The service is temporarily unavailable. Please try again later.');
+    expect(result.diagnosticMessage).toBe('Upstream upstream_db_pool timed out at 10.0.0.1');
+  });
+
   it('should map network failure when no response is received', () => {
     const err = new AxiosError('Network Error');
     err.request = {}; // request initiated, no response

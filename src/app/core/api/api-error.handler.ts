@@ -129,17 +129,25 @@ export function handleApiError(error: unknown): ApiError {
       STATUS_CODE_MAP[status] ??
       (status >= 400 && status < 500 ? 'VALIDATION_ERROR' : 'SERVER_ERROR');
 
-    const userMessage =
-      extractServerMessage(data) ??
-      DEFAULT_STATUS_MESSAGES[status] ??
-      'An unexpected server error occurred. Please try again.';
+    const isServerError = status >= 500;
+    const serverMsg = extractServerMessage(data);
+
+    // For 5xx server errors, mask internal backend messages (e.g. database exceptions, stack traces)
+    // and prefer safe generic fallback message, retaining diagnostics separately.
+    const userMessage = isServerError
+      ? (DEFAULT_STATUS_MESSAGES[status] ?? 'An internal server error occurred. Please try again later.')
+      : (serverMsg ?? DEFAULT_STATUS_MESSAGES[status] ?? 'The request was invalid. Please check your submission.');
+
+    const diagnosticMessage = isServerError
+      ? (serverMsg || (typeof data === 'string' ? data : (data && typeof data === 'object' ? JSON.stringify(data) : undefined)))
+      : (typeof data === 'string' ? data : undefined);
 
     return {
       code,
       userMessage,
       status,
       fieldErrors: extractFieldErrors(data),
-      diagnosticMessage: typeof data === 'string' ? data : undefined,
+      diagnosticMessage,
     };
   }
 

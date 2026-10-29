@@ -106,7 +106,7 @@ export class EventOwnershipService {
         this.participants.set(partRes.data);
       }
     } catch (err: any) {
-      this.error.set(err?.message || 'Failed to load event ownership and governance data');
+      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
     } finally {
       this.isLoading.set(false);
     }
