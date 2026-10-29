@@ -7,11 +7,16 @@ import { ApiClient } from '@core/api';
 const AUTH_USER_KEY = 'eventhub_user';
 const AUTH_TOKEN_KEY = 'eventhub_token';
 
-// Server response contract for authentication endpoints
+// Server response contracts
 interface AuthResponse {
   success: boolean;
   message: string;
   token?: string;
+  user?: User;
+}
+
+interface VerifyResponse {
+  success: boolean;
   user?: User;
 }
 
@@ -33,19 +38,55 @@ export class AuthService {
     this.restoreSession();
   }
 
-  private restoreSession(): void {
-    const user  = this.localStorage.get<User>(AUTH_USER_KEY);
+  /**
+   * Cryptographically verifies the session token against the backend on startup.
+   * Prevents client-side tampering: if localStorage was altered or the token signature
+   * is invalid, the session is rejected and purged immediately.
+   */
+  private async restoreSession(): Promise<void> {
     const token = this.localStorage.get<string>(AUTH_TOKEN_KEY);
+    if (!token) {
+      this.logout(false);
+      return;
+    }
 
-    if (user && token) {
-      this._authState.set({ user, token, isAuthenticated: true, isLoading: false });
+    // Optimistically set cached state while verification completes in background
+    const cachedUser = this.localStorage.get<User>(AUTH_USER_KEY);
+    if (cachedUser) {
+      this._authState.set({ user: cachedUser, token, isAuthenticated: true, isLoading: true });
+    } else {
+      this._authState.update(s => ({ ...s, isLoading: true }));
+    }
+
+    try {
+      // Backend cryptographically validates HMAC-SHA256 signature and returns genuine user record
+      const result = await this.apiClient.get<VerifyResponse>('/auth/me');
+
+      if (result.data && result.data.success && result.data.user) {
+        const verifiedUser = result.data.user;
+        // Overwrite any potentially modified localStorage user with the verified server truth
+        this.localStorage.set(AUTH_USER_KEY, verifiedUser);
+        this._authState.set({
+          user: verifiedUser,
+          token,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      } else {
+        // Token was tampered with, forged, expired, or rejected by the server
+        console.warn('[AuthService] Stored session failed cryptographic verification. Revoking session.');
+        this.logout(false);
+      }
+    } catch {
+      // Network/server error during initial verification
+      this.logout(false);
     }
   }
 
   async login(email: string, password: string): Promise<{ success: boolean; message: string }> {
     this._authState.update(s => ({ ...s, isLoading: true }));
 
-    // Send credentials to mock authentication endpoint (never compare passwords client-side)
+    // Send credentials to mock authentication endpoint (validated server-side)
     const result = await this.apiClient.post<AuthResponse>('/auth/login', {
       email,
       password
@@ -60,19 +101,18 @@ export class AuthService {
     }
 
     const { user, token } = result.data;
-    if (!user) {
+    if (!user || !token) {
       this._authState.update(s => ({ ...s, isLoading: false }));
       return { success: false, message: 'Invalid response from authentication server.' };
     }
 
-    const sessionToken = token || generateMockJwt(user);
-
+    // Persist verified user profile and cryptographically signed JWT
     this.localStorage.set(AUTH_USER_KEY, user);
-    this.localStorage.set(AUTH_TOKEN_KEY, sessionToken);
+    this.localStorage.set(AUTH_TOKEN_KEY, token);
 
     this._authState.set({
       user,
-      token: sessionToken,
+      token,
       isAuthenticated: true,
       isLoading: false,
     });
@@ -107,19 +147,17 @@ export class AuthService {
     }
 
     const { user, token } = result.data;
-    if (!user) {
+    if (!user || !token) {
       this._authState.update(s => ({ ...s, isLoading: false }));
       return { success: false, message: 'Invalid response from registration server.' };
     }
 
-    const sessionToken = token || generateMockJwt(user);
-
     this.localStorage.set(AUTH_USER_KEY, user);
-    this.localStorage.set(AUTH_TOKEN_KEY, sessionToken);
+    this.localStorage.set(AUTH_TOKEN_KEY, token);
 
     this._authState.set({
       user,
-      token: sessionToken,
+      token,
       isAuthenticated: true,
       isLoading: false,
     });
@@ -149,27 +187,12 @@ export class AuthService {
     return { success: true, message: 'Profile updated successfully.' };
   }
 
-  logout(): void {
+  logout(navigate: boolean = true): void {
     this.localStorage.remove(AUTH_USER_KEY);
     this.localStorage.remove(AUTH_TOKEN_KEY);
     this._authState.set(INITIAL_AUTH_STATE);
-    this.router.navigate(['/']);
+    if (navigate) {
+      this.router.navigate(['/']);
+    }
   }
-}
-
-// Helper function to create a realistic JWT string
-function generateMockJwt(user: User): string {
-  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  
-  const payload = btoa(JSON.stringify({ 
-    sub: user.id, 
-    email: user.email, 
-    role: user.platformRole,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 86400 // Expires in 1 day
-  }));
-  
-  const signature = btoa('mock-signature-for-development');
-  
-  return `${header}.${payload}.${signature}`;
 }

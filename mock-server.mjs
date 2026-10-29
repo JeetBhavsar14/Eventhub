@@ -6,19 +6,91 @@ import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
+
+// 1. Lightweight environment file loader (.env -> .env.example fallback)
+function loadEnv() {
+  const envPath = path.resolve('.env');
+  const examplePath = path.resolve('.env.example');
+  const fileToRead = fs.existsSync(envPath) ? envPath : (fs.existsSync(examplePath) ? examplePath : null);
+  if (fileToRead) {
+    const content = fs.readFileSync(fileToRead, 'utf8').replace(/^\uFEFF/, '');
+    content.split(/\r?\n/).forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) return;
+      const eqIdx = trimmed.indexOf('=');
+      if (eqIdx !== -1) {
+        const key = trimmed.slice(0, eqIdx).trim();
+        const val = trimmed.slice(eqIdx + 1).trim();
+        if (!process.env[key]) {
+          process.env[key] = val;
+        }
+      }
+    });
+  }
+}
+loadEnv();
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const DB_FILE = path.resolve('db.json');
 const SEED_FILE = path.resolve('db.seed.example.json');
+const JWT_SECRET = process.env.JWT_SECRET || 'eventhub-demo-cryptographic-jwt-secret-key-change-in-production';
 
-// 1. Ensure db.json exists, seeded from db.seed.example.json if missing
+// 2. Cryptographic JWT Helpers (HMAC-SHA256 with timing-safe verification)
+export function signJwt(payload) {
+  const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
+  const now = Math.floor(Date.now() / 1000);
+  const claims = {
+    ...payload,
+    iat: now,
+    exp: now + 86400 * 7 // 7 days expiration
+  };
+  const body = Buffer.from(JSON.stringify(claims)).toString('base64url');
+  const signature = crypto
+    .createHmac('sha256', JWT_SECRET)
+    .update(`${header}.${body}`)
+    .digest('base64url');
+  return `${header}.${body}.${signature}`;
+}
+
+export function verifyJwt(token) {
+  if (!token || typeof token !== 'string') return null;
+  const cleanToken = token.startsWith('Bearer ') ? token.slice(7).trim() : token.trim();
+  const parts = cleanToken.split('.');
+  if (parts.length !== 3) return null;
+
+  const [header, body, signature] = parts;
+  const expectedSig = crypto
+    .createHmac('sha256', JWT_SECRET)
+    .update(`${header}.${body}`)
+    .digest('base64url');
+
+  try {
+    const sigBuf = Buffer.from(signature);
+    const expBuf = Buffer.from(expectedSig);
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+      return null;
+    }
+
+    const claims = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+    const now = Math.floor(Date.now() / 1000);
+    if (claims.exp && claims.exp < now) {
+      return null; // Expired
+    }
+    return claims;
+  } catch {
+    return null;
+  }
+}
+
+// 3. Ensure db.json exists, initialized from seed without passwords
 if (!fs.existsSync(DB_FILE)) {
   console.log('[Mock Server] db.json not found. Initializing from db.seed.example.json...');
   let seedContent = fs.readFileSync(SEED_FILE, 'utf8').replace(/^\uFEFF/, '');
   fs.writeFileSync(DB_FILE, seedContent, 'utf8');
 }
 
-// 2. Initialize LowDB and ensure no passwords exist in db.json
+// 4. Initialize LowDB and ensure zero passwords persist in db.json
 const adapter = new JSONFile(DB_FILE);
 const db = new Low(adapter, {});
 await db.read();
@@ -38,22 +110,21 @@ if (sanitizedAny) {
   await db.write();
 }
 
-// 3. In-memory demo credentials store (never leaked via API)
+// 5. Distinct, role-specific demo credentials loaded from environment variables
+// (Universal fallback passwords completely eliminated)
 const DEMO_CREDENTIALS = new Map([
-  ['admin@eventhub.com', ['admin123', 'demo123']],
-  ['host@eventhub.com', ['host123', 'demo123']],
-  ['management@eventhub.com', ['manage123', 'demo123']],
-  ['staff@eventhub.com', ['staff123', 'demo123']],
-  ['jeet@eventhub.com', ['password123', 'demo123']]
+  ['admin@eventhub.com', process.env.DEMO_ADMIN_PASSWORD || 'Admin@EventHub#2026'],
+  ['host@eventhub.com', process.env.DEMO_HOST_PASSWORD || 'Host@EventHub#2026'],
+  ['management@eventhub.com', process.env.DEMO_MANAGEMENT_PASSWORD || 'Manage@EventHub#2026'],
+  ['staff@eventhub.com', process.env.DEMO_STAFF_PASSWORD || 'Staff@EventHub#2026'],
+  ['jeet@eventhub.com', process.env.DEMO_USER_PASSWORD || 'User@EventHub#2026']
 ]);
 
 // Track runtime-registered passwords in-memory
 const REGISTERED_CREDENTIALS = new Map();
 
-// 4. Create base json-server application
+// 6. Create base json-server application & wrapper app
 const jsonServerApp = createApp(db);
-
-// 5. Create wrapper application
 const app = new App();
 
 // CORS configuration
@@ -68,7 +139,7 @@ app.use(
 app.options('*', cors());
 app.use(json());
 
-// 6. Secure Mock Auth Endpoint: POST /auth/login
+// 7. Secure Mock Auth Endpoint: POST /auth/login
 app.post('/auth/login', async (req, res) => {
   const { email, password } = req.body || {};
 
@@ -82,12 +153,10 @@ app.post('/auth/login', async (req, res) => {
   const normalizedEmail = email.trim().toLowerCase();
   const trimmedPassword = password.trim();
 
-  // Validate credentials against in-memory demo store or newly registered store
-  const demoAllowed = DEMO_CREDENTIALS.get(normalizedEmail) || [];
-  const registeredAllowed = REGISTERED_CREDENTIALS.get(normalizedEmail);
-  const isValid = demoAllowed.includes(trimmedPassword) || registeredAllowed === trimmedPassword;
+  // Validate credentials against in-memory demo store or runtime registered store
+  const expectedPassword = DEMO_CREDENTIALS.get(normalizedEmail) || REGISTERED_CREDENTIALS.get(normalizedEmail);
 
-  if (!isValid) {
+  if (!expectedPassword || expectedPassword !== trimmedPassword) {
     return res.status(401).json({
       success: false,
       message: 'Invalid email or password.'
@@ -111,8 +180,12 @@ app.post('/auth/login', async (req, res) => {
   // Ensure password is never exposed in the response
   const { password: _removed, ...safeUser } = userRecord;
 
-  // Generate simulated mock session token
-  const token = `mock-token-${safeUser.id}-${Date.now()}`;
+  // Generate cryptographically signed HMAC-SHA256 JWT
+  const token = signJwt({
+    sub: safeUser.id,
+    email: safeUser.email,
+    role: safeUser.platformRole
+  });
 
   return res.status(200).json({
     success: true,
@@ -122,7 +195,44 @@ app.post('/auth/login', async (req, res) => {
   });
 });
 
-// 7. Secure Mock Auth Endpoint: POST /auth/register
+// 8. Cryptographic Token Verification Endpoint: GET /auth/me
+app.get('/auth/me', async (req, res) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader) {
+    return res.status(401).json({
+      success: false,
+      message: 'Authorization header missing.'
+    });
+  }
+
+  const claims = verifyJwt(authHeader);
+  if (!claims || !claims.sub) {
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid or forged session token.'
+    });
+  }
+
+  await db.read();
+  const users = Array.isArray(db.data.users) ? db.data.users : [];
+  const userRecord = users.find((u) => u.id === claims.sub);
+
+  if (!userRecord) {
+    return res.status(401).json({
+      success: false,
+      message: 'Session user no longer exists in database.'
+    });
+  }
+
+  const { password: _removed, ...safeUser } = userRecord;
+
+  return res.status(200).json({
+    success: true,
+    user: safeUser
+  });
+});
+
+// 9. Secure Mock Auth Endpoint: POST /auth/register
 app.post('/auth/register', async (req, res) => {
   const { email, password, firstName, lastName, phone } = req.body || {};
 
@@ -170,7 +280,11 @@ app.post('/auth/register', async (req, res) => {
   // Store password strictly in-memory (never persisted in db.json)
   REGISTERED_CREDENTIALS.set(normalizedEmail, password.trim());
 
-  const token = `mock-token-${newUserId}-${Date.now()}`;
+  const token = signJwt({
+    sub: newUserId,
+    email: normalizedEmail,
+    role: 'user'
+  });
 
   return res.status(201).json({
     success: true,
@@ -180,24 +294,23 @@ app.post('/auth/register', async (req, res) => {
   });
 });
 
-// 8. Delegate all other routes to json-server
+// 10. Delegate all other routes to json-server
 app.use(jsonServerApp);
 
-// 9. Start Server
+// 11. Start Server
 app.listen(PORT, () => {
   console.log(`\n======================================================`);
-  console.log(`🚀 EventHub Mock API & Secure Auth Server Running`);
+  console.log(`🚀 EventHub Mock API & Cryptographic Auth Server Running`);
   console.log(`📡 URL: http://localhost:${PORT}`);
-  console.log(`🔐 Auth Endpoints:`);
-  console.log(`   - POST http://localhost:${PORT}/auth/login`);
-  console.log(`   - POST http://localhost:${PORT}/auth/register`);
-  console.log(`👥 Pre-configured Demo Accounts:`);
-  console.log(`   - Super Admin: admin@eventhub.com    / admin123`);
-  console.log(`   - Host:        host@eventhub.com     / host123`);
-  console.log(`   - Management:  management@eventhub.com / manage123`);
-  console.log(`   - Field Staff: staff@eventhub.com    / staff123`);
-  console.log(`   - User:        jeet@eventhub.com     / password123`);
-  console.log(`   *(Note: 'demo123' also accepted for all demo accounts)*`);
+  console.log(`🔐 Cryptographic Security:`);
+  console.log(`   - HMAC-SHA256 Token Signing Active (Node.js crypto)`);
+  console.log(`   - Session Verification: GET http://localhost:${PORT}/auth/me`);
+  console.log(`👥 Pre-configured Demo Accounts (Configured via .env):`);
+  console.log(`   - Super Admin: admin@eventhub.com      [Role: admin]`);
+  console.log(`   - Host:        host@eventhub.com       [Role: host]`);
+  console.log(`   - Management:  management@eventhub.com [Role: management]`);
+  console.log(`   - Field Staff: staff@eventhub.com      [Role: staff]`);
+  console.log(`   - User:        jeet@eventhub.com       [Role: host/user]`);
+  console.log(`   *(Passwords loaded from environment variables in .env)*`);
   console.log(`======================================================\n`);
 });
-

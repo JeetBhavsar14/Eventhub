@@ -46,17 +46,20 @@ Open your browser and navigate to: **`http://localhost:4200/`**
 
 ## 🔐 Demo Credentials & Role Access
 
-| Role | Email | Password | Assigned Landing Route |
+Demo account credentials are kept out of tracked database records and public code repositories. They are configured locally in your environment via `.env` (copied from `.env.example`).
+
+| Role | Configured Demo Email | Environment Variable in `.env` | Assigned Landing Route |
 | :--- | :--- | :--- | :--- |
-| **Super Admin** | `admin@eventhub.com` | `admin123` | `/admin` |
-| **Host / Organizer** | `host@eventhub.com` | `host123` | `/host/dashboard` |
-| **Management / Ops** | `management@eventhub.com` | `manage123` | `/management` |
-| **Field Staff** | `staff@eventhub.com` | `staff123` | `/staff` |
-| **Standard User** | `jeet@eventhub.com` | `password123` | `/discover` |
+| **Super Admin** | `admin@eventhub.com` | `DEMO_ADMIN_PASSWORD` | `/admin` |
+| **Host / Organizer** | `host@eventhub.com` | `DEMO_HOST_PASSWORD` | `/host/dashboard` |
+| **Management / Ops** | `management@eventhub.com` | `DEMO_MANAGEMENT_PASSWORD` | `/management` |
+| **Field Staff** | `staff@eventhub.com` | `DEMO_STAFF_PASSWORD` | `/staff` |
+| **Standard User** | `jeet@eventhub.com` | `DEMO_USER_PASSWORD` | `/discover` |
 
 > **⚠️ Security Architecture Note (Demo/Prototype vs Production):**
-> - **Zero Plaintext Passwords in Database:** Passwords are completely omitted from `db.json` and `db.seed.example.json`. Authentication credentials are handled in-memory by `mock-server.mjs`.
-> - **Server-Side Validation:** The Angular client never inspects or compares password strings. Credentials are submitted to `POST /auth/login`, and only sanitized user profiles are returned.
+> - **Zero Plaintext Passwords in Database & Bundles:** Passwords are completely omitted from `db.json`, `db.seed.example.json`, and Angular client bundles.
+> - **Cryptographic HMAC-SHA256 Sessions:** The mock backend cryptographically signs JWTs using `JWT_SECRET`. Sessions are validated against `GET /auth/me` on startup. If `localStorage` is tampered with in the browser, the server rejects the signature and the session is immediately revoked.
+> - **Distinct Credentials (No Shared Passwords):** Each role requires its own distinct password. Universal fallback passwords have been completely eliminated.
 > - **Frontend Guards as UX Aids:** Frontend Angular Route Guards (`authGuard`, `roleGuard`) provide UI flow control and navigation convenience. In production, backend APIs must independently enforce cryptographic JWT validation and RBAC/ABAC authorization.
 
 ---

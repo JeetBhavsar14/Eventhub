@@ -10,7 +10,6 @@ export type ForgotStep = 'email' | 'otp' | 'password' | 'success';
 export interface DemoAccount {
   role: string;
   email: string;
-  pass: string;
   badge: string;
 }
 
@@ -51,12 +50,13 @@ export class LoginComponent {
   // Pre-configured demonstration OTP code (avoids accepting arbitrary OTPs)
   readonly DEMO_OTP = '1234';
 
+  // Demo account identifiers only — passwords are kept out of client bundles
   readonly demoAccounts: DemoAccount[] = [
-    { role: 'Super Admin', email: 'admin@eventhub.com', pass: 'admin123', badge: 'admin' },
-    { role: 'Host / Organizer', email: 'host@eventhub.com', pass: 'host123', badge: 'host' },
-    { role: 'Management & Operations', email: 'management@eventhub.com', pass: 'manage123', badge: 'management' },
-    { role: 'Event Staff', email: 'staff@eventhub.com', pass: 'staff123', badge: 'staff' },
-    { role: 'Standard Attendee', email: 'jeet@eventhub.com', pass: 'password123', badge: 'user' }
+    { role: 'Super Admin', email: 'admin@eventhub.com', badge: 'admin' },
+    { role: 'Host / Organizer', email: 'host@eventhub.com', badge: 'host' },
+    { role: 'Management & Operations', email: 'management@eventhub.com', badge: 'management' },
+    { role: 'Event Staff', email: 'staff@eventhub.com', badge: 'staff' },
+    { role: 'Standard Attendee', email: 'jeet@eventhub.com', badge: 'user' }
   ];
 
   async onSubmit() {
@@ -315,7 +315,7 @@ export class LoginComponent {
 
   selectDemoAccount(account: DemoAccount) {
     this.email = account.email;
-    this.password = account.pass;
+    this.password = '';
     this.errorMessage.set('');
     this.closeForgotPassword();
   }

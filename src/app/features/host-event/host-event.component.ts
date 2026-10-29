@@ -570,12 +570,7 @@ export class HostEventComponent implements OnInit {
 
   // Fast mock login for guests inside modal
   quickMockLogin() {
-    this.authService.login('jeet@eventhub.com', 'password123').then(res => {
-      if (res.success) {
-        this.showGuestAuthModal.set(false);
-        this.handleApplyClick();
-      }
-    });
+    this.navigateToLogin();
   }
 
   // Navigate to login with returnUrl
