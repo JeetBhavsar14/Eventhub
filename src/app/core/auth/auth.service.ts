@@ -96,7 +96,7 @@ export class AuthService {
       this._authState.update(s => ({ ...s, isLoading: false }));
       return {
         success: false,
-        message: result.error.message || 'Invalid email or password.'
+        message: result.error.userMessage || 'Invalid email or password.'
       };
     }
 
@@ -142,7 +142,7 @@ export class AuthService {
       this._authState.update(s => ({ ...s, isLoading: false }));
       return {
         success: false,
-        message: result.error.message || 'Registration failed.'
+        message: result.error.userMessage || 'Registration failed.'
       };
     }
 
@@ -177,7 +177,7 @@ export class AuthService {
 
     const result = await this.apiClient.patch<User>(`/users/${user.id}`, changes);
     if (result.error) {
-      return { success: false, message: result.error?.message || 'Could not save your profile. Is the server running?' };
+      return { success: false, message: result.error?.userMessage || 'Could not save your profile. Is the server running?' };
     }
 
     const updatedUser = result.data;

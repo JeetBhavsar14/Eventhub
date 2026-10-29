@@ -148,7 +148,7 @@ export class EventTeamService {
 
       return { success: true, message: `Invitation dispatched to ${inviteeEmail}.` };
     }
-    return { success: false, message: res.error?.message || 'Failed to dispatch invitation.' };
+    return { success: false, message: res.error?.userMessage || 'Failed to dispatch invitation.' };
   }
 
   /**

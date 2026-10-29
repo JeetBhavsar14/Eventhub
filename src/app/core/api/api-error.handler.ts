@@ -129,16 +129,17 @@ export function handleApiError(error: unknown): ApiError {
       STATUS_CODE_MAP[status] ??
       (status >= 400 && status < 500 ? 'VALIDATION_ERROR' : 'SERVER_ERROR');
 
-    const message =
+    const userMessage =
       extractServerMessage(data) ??
       DEFAULT_STATUS_MESSAGES[status] ??
-      'An unexpected server error occurred.';
+      'An unexpected server error occurred. Please try again.';
 
     return {
       code,
-      message,
+      userMessage,
       status,
       fieldErrors: extractFieldErrors(data),
+      diagnosticMessage: typeof data === 'string' ? data : undefined,
     };
   }
 
@@ -148,7 +149,8 @@ export function handleApiError(error: unknown): ApiError {
     if (error.code === 'ECONNABORTED' || error.message?.toLowerCase().includes('timeout')) {
       return {
         code: 'TIMEOUT_ERROR',
-        message: 'Request timed out. The server took too long to respond. Please try again.',
+        userMessage: 'Request timed out. The server took too long to respond. Please try again.',
+        diagnosticMessage: error.message,
       };
     }
 
@@ -156,7 +158,8 @@ export function handleApiError(error: unknown): ApiError {
     if (axios.isCancel(error)) {
       return {
         code: 'UNKNOWN_ERROR',
-        message: 'Request was canceled.',
+        userMessage: 'Request was canceled.',
+        diagnosticMessage: error.message,
       };
     }
 
@@ -164,22 +167,31 @@ export function handleApiError(error: unknown): ApiError {
     if (error.request || error.message?.toLowerCase().includes('network')) {
       return {
         code: 'NETWORK_ERROR',
-        message: 'Network connection failed. Please check your internet connection and try again.',
+        userMessage: 'Network connection failed. Please check your internet connection and try again.',
+        diagnosticMessage: error.message,
       };
     }
+
+    return {
+      code: 'NETWORK_ERROR',
+      userMessage: 'Network connection failed. Please check your internet connection and try again.',
+      diagnosticMessage: error.message,
+    };
   }
 
-  // Case 3: Standard JavaScript Error
+  // Case 3: Standard JavaScript Error (mask internal error.message from userMessage)
   if (error instanceof Error) {
     return {
       code: 'UNKNOWN_ERROR',
-      message: error.message || 'An unexpected error occurred.',
+      userMessage: 'An unexpected error occurred. Please try again.',
+      diagnosticMessage: error.message,
     };
   }
 
   // Case 4: Completely unexpected non-error throw
   return {
     code: 'UNKNOWN_ERROR',
-    message: 'An unexpected error occurred.',
+    userMessage: 'An unexpected error occurred. Please try again.',
+    diagnosticMessage: error != null ? String(error) : undefined,
   };
 }

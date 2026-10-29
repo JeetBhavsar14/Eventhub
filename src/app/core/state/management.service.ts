@@ -61,7 +61,7 @@ export class ManagementService {
 
       const firstError = eventsRes.error || staffRes.error;
       if (firstError) {
-        this.error.set(firstError.message);
+        this.error.set(firstError.userMessage);
       }
 
       if (eventsRes.data) {
@@ -96,7 +96,10 @@ export class ManagementService {
    * Operations duty assignment for on-ground staff
    */
   async updateStaffAssignment(staffId: string, assignedGate: string, status: 'on_duty' | 'break' | 'off_duty'): Promise<boolean> {
-    await this.api.patch(`/staffRoster/${staffId}`, { assignedGate, status });
+    const res = await this.api.patch<ManagementStaffMember>(`/staffRoster/${staffId}`, { assignedGate, status });
+    if (res.error) {
+      return false;
+    }
     this.staffRoster.update(list =>
       list.map(s => s.id === staffId ? { ...s, assignedGate, status } : s)
     );

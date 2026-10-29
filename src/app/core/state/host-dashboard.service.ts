@@ -24,6 +24,7 @@ export class HostDashboardService {
   private hostAppService = inject(HostApplicationService);
 
   readonly isLoading = signal<boolean>(false);
+  readonly error = signal<string | null>(null);
 
   // Prototype State Controller
   prototypeState = signal<DashboardPrototypeState>('populated');
@@ -36,6 +37,7 @@ export class HostDashboardService {
 
   async loadAll(): Promise<void> {
     this.isLoading.set(true);
+    this.error.set(null);
     try {
       const [eventsRes, actsRes, notifsRes, bookingsRes] = await Promise.all([
         this.api.get<any[]>('/events'),
@@ -43,6 +45,11 @@ export class HostDashboardService {
         this.api.get<HostNotificationItem[]>('/hostNotifications'),
         this.api.get<any[]>('/bookings')
       ]);
+
+      const firstError = eventsRes.error || actsRes.error || notifsRes.error || bookingsRes.error;
+      if (firstError) {
+        this.error.set(firstError.userMessage);
+      }
 
       if (eventsRes.data && eventsRes.data.length > 0) {
         const mappedEvents: HostEventItem[] = eventsRes.data.map((e: any) => ({
@@ -88,7 +95,8 @@ export class HostDashboardService {
         }));
         this.attendees.set(mappedAttendees);
       }
-    } catch (err) {
+    } catch (err: any) {
+      this.error.set(err?.userMessage || err?.message || 'Failed to load host workspace data');
       console.warn('Could not connect to mock server, using cached default signals', err);
     } finally {
       this.isLoading.set(false);

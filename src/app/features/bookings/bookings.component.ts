@@ -94,7 +94,7 @@ export class BookingsComponent implements OnInit {
     this.error.set(null);
     const result = await this.apiClient.get<Booking[]>('/bookings', { userId: user.id });
     if (result.error || !result.data) {
-      this.error.set(result.error?.message || 'We could not load your bookings. Please try again.');
+      this.error.set(result.error?.userMessage || 'We could not load your bookings. Please try again.');
       this.bookings.set([]);
     } else {
       this.bookings.set([...result.data].sort((a, b) => b.createdAt.localeCompare(a.createdAt)));

@@ -117,7 +117,7 @@ export class StaffService {
 
       const firstError = attendeesRes.error || incidentsRes.error;
       if (firstError) {
-        this.error.set(firstError.message);
+        this.error.set(firstError.userMessage);
       }
 
       if (attendeesRes.data) {
@@ -147,10 +147,13 @@ export class StaffService {
   }
 
   async checkInAttendee(attendeeId: string, checkInTime: string): Promise<boolean> {
-    await this.api.patch(`/attendees/${attendeeId}`, {
+    const res = await this.api.patch(`/attendees/${attendeeId}`, {
       checkInStatus: 'checked_in',
       checkInTime
     });
+    if (res.error) {
+      return false;
+    }
     this.attendees.update(list =>
       list.map(a => a.id === attendeeId ? { ...a, checkInStatus: 'checked_in', checkInTime } : a)
     );
@@ -158,10 +161,13 @@ export class StaffService {
   }
 
   async undoCheckIn(attendeeId: string): Promise<boolean> {
-    await this.api.patch(`/attendees/${attendeeId}`, {
+    const res = await this.api.patch(`/attendees/${attendeeId}`, {
       checkInStatus: 'pending',
       checkInTime: null
     });
+    if (res.error) {
+      return false;
+    }
     this.attendees.update(list =>
       list.map(a => a.id === attendeeId ? { ...a, checkInStatus: 'pending', checkInTime: null } : a)
     );

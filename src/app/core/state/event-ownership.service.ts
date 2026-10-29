@@ -182,7 +182,7 @@ export class EventOwnershipService {
         message: `Successfully added ${userName} (${requested}% equity allocated). Primary host equity is now ${newPrimaryPercentage}%.`
       };
     }
-    return { success: false, message: res.error?.message || 'Failed to save co-owner stake.' };
+    return { success: false, message: res.error?.userMessage || 'Failed to save co-owner stake.' };
   }
 
   /**
@@ -224,9 +224,12 @@ export class EventOwnershipService {
 
     const newPrimaryPercentage = 100 - (otherCoOwnersTotal + requested);
 
-    await this.api.patch<EventOwnerStake>(`/eventOwnerStakes/${stakeId}`, {
+    const patchRes1 = await this.api.patch<EventOwnerStake>(`/eventOwnerStakes/${stakeId}`, {
       percentage: requested
     });
+    if (patchRes1.error) {
+      return { success: false, message: patchRes1.error?.userMessage || 'Failed to update co-owner stake.' };
+    }
 
     await this.api.patch<EventOwnerStake>(`/eventOwnerStakes/${primaryOwner.id}`, {
       percentage: newPrimaryPercentage
@@ -259,7 +262,8 @@ export class EventOwnershipService {
       return false; // Cannot remove primary creator
     }
 
-    await this.api.delete(`/eventOwnerStakes/${stakeId}`);
+    const delRes = await this.api.delete(`/eventOwnerStakes/${stakeId}`);
+    if (delRes.error) return false;
     
     const remainingCoOwners = this.ownerStakes().filter(s => s.id !== stakeId && !s.isPrimaryOwner);
     const primaryOwner = this.ownerStakes().find(s => s.isPrimaryOwner);
@@ -325,11 +329,12 @@ export class EventOwnershipService {
       this.managers.update(list => [...list, res.data!]);
       return { success: true, message: `Manager assigned: ${userName} for ${newMgr.responsibilityTitle}.` };
     }
-    return { success: false, message: res.error?.message || 'Failed to assign manager.' };
+    return { success: false, message: res.error?.userMessage || 'Failed to assign manager.' };
   }
 
   async toggleManagerDelegation(mgrId: string, active: boolean): Promise<boolean> {
-    await this.api.patch(`/eventManagerAssignments/${mgrId}`, { delegationActive: active });
+    const res = await this.api.patch(`/eventManagerAssignments/${mgrId}`, { delegationActive: active });
+    if (res.error) return false;
     this.managers.update(list =>
       list.map(m => (m.id === mgrId ? { ...m, delegationActive: active } : m))
     );
@@ -337,7 +342,8 @@ export class EventOwnershipService {
   }
 
   async removeManager(mgrId: string): Promise<boolean> {
-    await this.api.delete(`/eventManagerAssignments/${mgrId}`);
+    const res = await this.api.delete(`/eventManagerAssignments/${mgrId}`);
+    if (res.error) return false;
     this.managers.update(list => list.filter(m => m.id !== mgrId));
     return true;
   }
@@ -376,11 +382,12 @@ export class EventOwnershipService {
       this.participants.update(list => [...list, res.data!]);
       return { success: true, message: `Added ${name} as confirmed ${category}.` };
     }
-    return { success: false, message: 'Failed to add participant.' };
+    return { success: false, message: res.error?.userMessage || 'Failed to add participant.' };
   }
 
   async removeParticipant(partId: string): Promise<boolean> {
-    await this.api.delete(`/eventParticipants/${partId}`);
+    const res = await this.api.delete(`/eventParticipants/${partId}`);
+    if (res.error) return false;
     this.participants.update(list => list.filter(p => p.id !== partId));
     return true;
   }

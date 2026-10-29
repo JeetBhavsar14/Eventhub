@@ -13,7 +13,7 @@ export class GiftCardCheckoutComponent implements OnInit {
   @ViewChild(PaymentFormComponent) paymentForm!: PaymentFormComponent;
   giftCard = signal<GiftCard | null>(null); isLoading = signal(true); isProcessing = signal(false); error = signal<string | null>(null);
   purchaseSuccess = signal(false); giftCode = signal('');
-  async ngOnInit() { const id = this.route.snapshot.paramMap.get('id'); if (!id) { this.router.navigate(['/gift-cards']); return; } const result = await this.apiClient.get<GiftCard>(`/giftCards/${id}`); if (result.data?.isActive) this.giftCard.set(result.data); else this.error.set(result.error?.message || 'This gift card is no longer available.'); this.isLoading.set(false); }
+  async ngOnInit() { const id = this.route.snapshot.paramMap.get('id'); if (!id) { this.router.navigate(['/gift-cards']); return; } const result = await this.apiClient.get<GiftCard>(`/giftCards/${id}`); if (result.data?.isActive) this.giftCard.set(result.data); else this.error.set(result.error?.userMessage || 'This gift card is no longer available.'); this.isLoading.set(false); }
   async pay() {
     const card = this.giftCard(); const user = this.authService.currentUser();
     if (!card || !user || !this.paymentForm.validate()) { this.error.set('Please complete valid payment details to continue.'); return; }
@@ -23,6 +23,10 @@ export class GiftCardCheckoutComponent implements OnInit {
     const purchase: Omit<GiftCardPurchase, 'id'> = { giftCardId: card.id, userId: user.id, recipientName: `${user.firstName} ${user.lastName}`.trim(), recipientEmail: user.email, title: card.title, amount: card.amount, balance: card.amount, imageUrl: card.imageUrl, giftCode: `EHGC-${Math.random().toString(36).slice(2, 10).toUpperCase()}`, status: 'active', purchasedAt: now.toISOString(), expiresAt: expiresAt.toISOString() };
     const result = await this.apiClient.post<GiftCardPurchase>('/giftCardPurchases', { ...purchase, payment: { ...payment, status: 'paid', transactionReference: `TXN-${Date.now().toString(36).toUpperCase()}` } });
     this.isProcessing.set(false);
+    if (!result.data || result.error) {
+      this.error.set(result.error?.userMessage || 'Failed to complete gift card purchase.');
+      return;
+    }
     if (result.data) {
       this.giftCode.set(purchase.giftCode);
       this.purchaseSuccess.set(true);

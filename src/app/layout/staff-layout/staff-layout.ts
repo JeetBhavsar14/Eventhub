@@ -198,14 +198,22 @@ export class StaffLayoutComponent implements OnInit {
 
   async checkInAttendee(attendeeId: string) {
     const nowTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    await this.staffService.checkInAttendee(attendeeId, nowTime);
+    const success = await this.staffService.checkInAttendee(attendeeId, nowTime);
+    if (!success) {
+      this.toastService.error('Failed to confirm check-in. Please try again.');
+      return;
+    }
     const att = this.attendees().find(a => a.id === attendeeId);
     const label = att ? `${att.ticketTier} Pass #${att.orderId || att.id}` : `Pass #${attendeeId}`;
     this.toastService.success(`Check-in confirmed: ${label}`);
   }
 
   async undoCheckIn(attendeeId: string) {
-    await this.staffService.undoCheckIn(attendeeId);
+    const success = await this.staffService.undoCheckIn(attendeeId);
+    if (!success) {
+      this.toastService.error('Failed to reverse check-in. Please try again.');
+      return;
+    }
     this.showToast('Check-in reversed to pending.');
   }
 
@@ -217,7 +225,11 @@ export class StaffLayoutComponent implements OnInit {
   // Incident Logging Actions
   async submitIncidentReport() {
     if (this.newIncidentNote().trim()) {
-      await this.staffService.reportIncident(this.newIncidentCategory(), this.newIncidentNote().trim());
+      const success = await this.staffService.reportIncident(this.newIncidentCategory(), this.newIncidentNote().trim());
+      if (!success) {
+        this.toastService.error('Failed to log incident. Please try again.');
+        return;
+      }
       this.newIncidentNote.set('');
       this.showIncidentForm.set(false);
       this.showToast('Incident logged and dispatched to Operations Lead.');

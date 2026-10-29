@@ -11,7 +11,8 @@ export type ApiErrorCode =
 
 export interface ApiError {
   code: ApiErrorCode;
-  message: string;
+  userMessage: string;
   status?: number;
   fieldErrors?: Record<string, string[]>;
+  diagnosticMessage?: string;
 }

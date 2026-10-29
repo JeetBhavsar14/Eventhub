@@ -124,7 +124,11 @@ export class ManagementLayoutComponent implements OnInit {
   }
 
   async reassignStaffGate(staffId: string, newGate: string) {
-    await this.mgmtService.updateStaffAssignment(staffId, newGate, 'on_duty');
+    const success = await this.mgmtService.updateStaffAssignment(staffId, newGate, 'on_duty');
+    if (!success) {
+      this.showToast('Failed to update staff gate deployment. Please try again.');
+      return;
+    }
     this.showToast('Staff gate deployment updated.');
   }
 

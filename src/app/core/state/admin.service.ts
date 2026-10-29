@@ -95,7 +95,7 @@ export class AdminService {
 
       const firstError = appsRes.error || eventsRes.error || usersRes.error || bcRes.error;
       if (firstError) {
-        this.error.set(firstError.message);
+        this.error.set(firstError.userMessage);
       }
 
       if (appsRes.data) {
@@ -203,6 +203,7 @@ export class AdminService {
 
   async approveEvent(eventId: string): Promise<boolean> {
     const res = await this.api.patch(`/events/${eventId}`, { status: 'published' });
+    if (res.error) return false;
     this.curationEvents.update(list =>
       list.map(e => e.id === eventId ? { ...e, status: 'approved' } : e)
     );
@@ -211,6 +212,7 @@ export class AdminService {
 
   async delistEvent(eventId: string): Promise<boolean> {
     const res = await this.api.patch(`/events/${eventId}`, { status: 'rejected' });
+    if (res.error) return false;
     this.curationEvents.update(list =>
       list.map(e => e.id === eventId ? { ...e, status: 'rejected' } : e)
     );
@@ -221,7 +223,8 @@ export class AdminService {
     const ev = this.curationEvents().find(e => e.id === eventId);
     if (!ev) return false;
     const nextVal = !ev.isFeatured;
-    await this.api.patch(`/events/${eventId}`, { isFeatured: nextVal });
+    const res = await this.api.patch(`/events/${eventId}`, { isFeatured: nextVal });
+    if (res.error) return false;
     this.curationEvents.update(list =>
       list.map(e => e.id === eventId ? { ...e, isFeatured: nextVal } : e)
     );
@@ -260,10 +263,11 @@ export class AdminService {
   }
 
   async sendEventFeedback(eventId: string, feedback: string): Promise<boolean> {
-    await this.api.patch(`/events/${eventId}`, {
+    const res = await this.api.patch(`/events/${eventId}`, {
       status: 'pending_review',
       adminFeedback: feedback
     });
+    if (res.error) return false;
     this.curationEvents.update(list =>
       list.map(e => e.id === eventId ? { ...e, status: 'changes_requested' } : e)
     );
@@ -271,10 +275,11 @@ export class AdminService {
   }
 
   async changeUserRole(userId: string, newRole: AdminUser['role']): Promise<boolean> {
-    await this.api.patch(`/users/${userId}`, {
+    const res = await this.api.patch(`/users/${userId}`, {
       platformRole: newRole,
       isHost: newRole === 'host'
     });
+    if (res.error) return false;
     this.users.update(list =>
       list.map(u => u.id === userId ? { ...u, role: newRole, isHost: newRole === 'host' } : u)
     );
@@ -282,7 +287,8 @@ export class AdminService {
   }
 
   async changeUserStatus(userId: string, newStatus: 'active' | 'suspended'): Promise<boolean> {
-    await this.api.patch(`/users/${userId}`, { status: newStatus });
+    const res = await this.api.patch(`/users/${userId}`, { status: newStatus });
+    if (res.error) return false;
     this.users.update(list =>
       list.map(u => u.id === userId ? { ...u, status: newStatus } : u)
     );

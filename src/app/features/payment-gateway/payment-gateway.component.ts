@@ -211,7 +211,7 @@ export class PaymentGatewayComponent implements OnInit, OnDestroy {
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
-        alert('Payment verification failed. Please try again.');
+        alert(res.error?.userMessage || 'Payment verification failed. Please try again.');
       }
     } catch (err) {
       console.error(err);
