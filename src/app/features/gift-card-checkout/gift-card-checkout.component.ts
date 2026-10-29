@@ -13,7 +13,7 @@ export class GiftCardCheckoutComponent implements OnInit {
   @ViewChild(PaymentFormComponent) paymentForm!: PaymentFormComponent;
   giftCard = signal<GiftCard | null>(null); isLoading = signal(true); isProcessing = signal(false); error = signal<string | null>(null);
   purchaseSuccess = signal(false); giftCode = signal('');
-  async ngOnInit() { const id = this.route.snapshot.paramMap.get('id'); if (!id) { this.router.navigate(['/gift-cards']); return; } const result = await this.apiClient.get<GiftCard>(`/giftCards/${id}`); if (result.data?.isActive) this.giftCard.set(result.data); else this.error.set('This gift card is no longer available.'); this.isLoading.set(false); }
+  async ngOnInit() { const id = this.route.snapshot.paramMap.get('id'); if (!id) { this.router.navigate(['/gift-cards']); return; } const result = await this.apiClient.get<GiftCard>(`/giftCards/${id}`); if (result.data?.isActive) this.giftCard.set(result.data); else this.error.set(result.error?.message || 'This gift card is no longer available.'); this.isLoading.set(false); }
   async pay() {
     const card = this.giftCard(); const user = this.authService.currentUser();
     if (!card || !user || !this.paymentForm.validate()) { this.error.set('Please complete valid payment details to continue.'); return; }

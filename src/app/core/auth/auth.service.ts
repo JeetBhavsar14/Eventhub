@@ -177,7 +177,7 @@ export class AuthService {
 
     const result = await this.apiClient.patch<User>(`/users/${user.id}`, changes);
     if (result.error) {
-      return { success: false, message: 'Could not save your profile. Is the server running?' };
+      return { success: false, message: result.error?.message || 'Could not save your profile. Is the server running?' };
     }
 
     const updatedUser = result.data;

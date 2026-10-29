@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EventFilter } from './event-filter';
+import { EventFilterComponent } from './event-filter.component';
 
-describe('EventFilter', () => {
-  let component: EventFilter;
-  let fixture: ComponentFixture<EventFilter>;
+describe('EventFilterComponent', () => {
+  let component: EventFilterComponent;
+  let fixture: ComponentFixture<EventFilterComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EventFilter]
+      imports: [EventFilterComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(EventFilter);
+    fixture = TestBed.createComponent(EventFilterComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

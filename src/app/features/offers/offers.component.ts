@@ -17,7 +17,7 @@ export class OffersComponent implements OnInit {
     this.isLoading.set(true); this.error.set(null);
     const result = await this.apiClient.get<Offer[]>('/offers');
     if (result.data) this.offers.set(result.data.filter((offer) => offer.isActive && new Date(offer.expiresAt) >= new Date()));
-    else this.error.set('Offers are unavailable right now. Please try again shortly.');
+    else this.error.set(result.error?.message || 'Offers are unavailable right now. Please try again shortly.');
     this.isLoading.set(false);
   }
   async copyCode(code: string) {

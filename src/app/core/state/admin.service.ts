@@ -93,6 +93,11 @@ export class AdminService {
         this.api.get<AdminBroadcast[]>('/broadcasts')
       ]);
 
+      const firstError = appsRes.error || eventsRes.error || usersRes.error || bcRes.error;
+      if (firstError) {
+        this.error.set(firstError.message);
+      }
+
       if (appsRes.data) {
         const mappedApps = appsRes.data.map((a: any) => ({
           ...a,

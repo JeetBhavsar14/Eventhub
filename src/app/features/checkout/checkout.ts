@@ -97,7 +97,7 @@ export class Checkout implements OnInit {
       if (res.data) {
         this.event.set(res.data);
       } else {
-        this.error.set('Event not found.');
+        this.error.set(res.error?.message || 'Event not found.');
       }
     } catch (err) {
       this.error.set('Failed to load event details.');

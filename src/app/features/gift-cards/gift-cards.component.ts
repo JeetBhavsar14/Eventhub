@@ -16,7 +16,7 @@ export class GiftCardsComponent implements OnInit {
   error = signal<string | null>(null);
   selectedCard = signal<GiftCard | null>(null);
   async ngOnInit() { await this.loadGiftCards(); }
-  async loadGiftCards() { this.isLoading.set(true); this.error.set(null); const result = await this.apiClient.get<GiftCard[]>('/giftCards'); if (result.data) this.giftCards.set(result.data.filter((card) => card.isActive)); else this.error.set('Gift cards are unavailable right now. Please try again shortly.'); this.isLoading.set(false); }
+  async loadGiftCards() { this.isLoading.set(true); this.error.set(null); const result = await this.apiClient.get<GiftCard[]>('/giftCards'); if (result.data) this.giftCards.set(result.data.filter((card) => card.isActive)); else this.error.set(result.error?.message || 'Gift cards are unavailable right now. Please try again shortly.'); this.isLoading.set(false); }
   selectCard(card: GiftCard) { this.selectedCard.set(card); }
   closeModal() { this.selectedCard.set(null); }
   purchase() {

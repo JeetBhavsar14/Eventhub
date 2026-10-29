@@ -115,6 +115,11 @@ export class StaffService {
         user ? this.api.get<EventMembership[]>('/eventMemberships', { email: user.email }) : Promise.resolve({ data: [] as EventMembership[] })
       ]);
 
+      const firstError = attendeesRes.error || incidentsRes.error;
+      if (firstError) {
+        this.error.set(firstError.message);
+      }
+
       if (attendeesRes.data) {
         this.attendees.set(attendeesRes.data);
       }

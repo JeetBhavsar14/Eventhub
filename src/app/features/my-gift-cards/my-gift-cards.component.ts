@@ -22,7 +22,7 @@ export class MyGiftCardsComponent implements OnInit {
     this.isLoading.set(true); this.error.set(null);
     const result = await this.apiClient.get<GiftCardPurchase[]>('/giftCardPurchases', { userId: user.id });
     if (result.data) this.giftCards.set([...result.data].sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt)));
-    else this.error.set('We could not load your gift cards. Please try again.');
+    else this.error.set(result.error?.message || 'We could not load your gift cards. Please try again.');
     this.isLoading.set(false);
   }
   async copyCode(code: string) { try { await navigator.clipboard.writeText(code); } catch { /* Clipboard may be unavailable over local HTTP. */ } this.copiedCode.set(code); setTimeout(() => this.copiedCode.set(null), 1800); }

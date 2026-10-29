@@ -65,7 +65,7 @@ export class EventDetailsComponent implements OnInit {
         this.event.set(res.data);
         await this.loadSimilarEvents(res.data.category, res.data.id, res.data.location?.city);
       } else {
-        this.error.set('Event not found.');
+        this.error.set(res.error?.message || 'Event not found.');
       }
     } catch (err) {
       console.error(err);

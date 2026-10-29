@@ -59,6 +59,11 @@ export class ManagementService {
         this.api.get<ManagementStaffMember[]>('/staffRoster')
       ]);
 
+      const firstError = eventsRes.error || staffRes.error;
+      if (firstError) {
+        this.error.set(firstError.message);
+      }
+
       if (eventsRes.data) {
         // Events specifically delegated by Event Owners to this Management operations desk
         const mappedMonitored: ManagementMonitoredEvent[] = eventsRes.data.slice(0, 4).map((e: any, idx: number) => ({
