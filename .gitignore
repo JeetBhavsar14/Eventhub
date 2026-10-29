@@ -31,7 +31,8 @@ yarn-error.log
 db.json
 !db.seed.example.json
 
-# Large media binaries (use external CDN/link or Git LFS)
+
+
 *.mp4
 *.mov
 *.avi
@@ -48,6 +49,7 @@ testem.log
 __screenshots__/
 docs/
 /Development-logs
+PROJECT_CONTEXT.md
 
 # System files
 .DS_Store
