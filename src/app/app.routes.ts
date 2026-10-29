@@ -8,114 +8,55 @@ export const routes: Routes = [
     component: ShellComponent,
     children: [
       
-      // 1. HOST WORKSPACE / DASHBOARD LAYOUT (Lazy Loaded)
+      // 1. HOST WORKSPACE (Canonical Entry: /host/dashboard - Lazy Loaded)
       { 
         path: 'host/dashboard', 
         loadComponent: () => import('./layout/host-layout/host-layout.component').then(m => m.HostLayoutComponent),
         canActivate: [hostGuard]
       },
-      { 
-        path: 'host/workspace', 
-        loadComponent: () => import('./layout/host-layout/host-layout.component').then(m => m.HostLayoutComponent),
-        canActivate: [hostGuard]
-      },
-      { 
-        path: 'host/layout', 
-        loadComponent: () => import('./layout/host-layout/host-layout.component').then(m => m.HostLayoutComponent),
-        canActivate: [hostGuard]
-      },
-      { 
-        path: 'host-dashboard', 
-        loadComponent: () => import('./layout/host-layout/host-layout.component').then(m => m.HostLayoutComponent),
-        canActivate: [hostGuard]
-      },
+      // Host Legacy Aliases (Redirect to Canonical Workspace)
+      { path: 'host/workspace', redirectTo: 'host/dashboard', pathMatch: 'full' },
+      { path: 'host/layout', redirectTo: 'host/dashboard', pathMatch: 'full' },
+      { path: 'host-dashboard', redirectTo: 'host/dashboard', pathMatch: 'full' },
 
-      // 2. MANAGEMENT WORKSPACE (Operations Center & Approvals Workflow - Lazy Loaded)
+      // 2. MANAGEMENT WORKSPACE (Canonical Entry: /management - Lazy Loaded)
       {
         path: 'management',
         loadComponent: () => import('./layout/management-layout/management-layout').then(m => m.ManagementLayoutComponent),
         canActivate: [managementGuard]
       },
-      {
-        path: 'management/overview',
-        loadComponent: () => import('./layout/management-layout/management-layout').then(m => m.ManagementLayoutComponent),
-        canActivate: [managementGuard]
-      },
-      {
-        path: 'management/approvals',
-        loadComponent: () => import('./layout/management-layout/management-layout').then(m => m.ManagementLayoutComponent),
-        canActivate: [managementGuard]
-      },
-      {
-        path: 'management/hosts',
-        loadComponent: () => import('./layout/management-layout/management-layout').then(m => m.ManagementLayoutComponent),
-        canActivate: [managementGuard]
-      },
-      {
-        path: 'management/operations',
-        loadComponent: () => import('./layout/management-layout/management-layout').then(m => m.ManagementLayoutComponent),
-        canActivate: [managementGuard]
-      },
-      {
-        path: 'manage',
-        loadComponent: () => import('./layout/management-layout/management-layout').then(m => m.ManagementLayoutComponent),
-        canActivate: [managementGuard],
-        children: [
-          { 
-            path: ':eventId', 
-            loadComponent: () => import('./layout/management-layout/management-layout').then(m => m.ManagementLayoutComponent) 
-          }
-        ]
-      },
+      // Management Legacy Aliases & Sub-Paths (Redirect to Canonical Workspace)
+      { path: 'management/overview', redirectTo: 'management', pathMatch: 'full' },
+      { path: 'management/approvals', redirectTo: 'management', pathMatch: 'full' },
+      { path: 'management/hosts', redirectTo: 'management', pathMatch: 'full' },
+      { path: 'management/operations', redirectTo: 'management', pathMatch: 'full' },
+      { path: 'manage', redirectTo: 'management', pathMatch: 'full' },
+      { path: 'manage/:eventId', redirectTo: 'management', pathMatch: 'full' },
 
-      // 3. EVENT-STAFF WORKSPACE (Mobile-First Venue Check-in & Scanner - Lazy Loaded)
+      // 3. EVENT-STAFF WORKSPACE (Canonical Entry: /staff - Lazy Loaded)
       {
         path: 'staff',
         loadComponent: () => import('./layout/staff-layout/staff-layout').then(m => m.StaffLayoutComponent),
         canActivate: [staffGuard]
       },
-      {
-        path: 'staff/scanner',
-        loadComponent: () => import('./layout/staff-layout/staff-layout').then(m => m.StaffLayoutComponent),
-        canActivate: [staffGuard]
-      },
-      {
-        path: 'staff/checkin',
-        loadComponent: () => import('./layout/staff-layout/staff-layout').then(m => m.StaffLayoutComponent),
-        canActivate: [staffGuard]
-      },
-      {
-        path: 'staff/today',
-        loadComponent: () => import('./layout/staff-layout/staff-layout').then(m => m.StaffLayoutComponent),
-        canActivate: [staffGuard]
-      },
-      {
-        path: 'staff/issues',
-        loadComponent: () => import('./layout/staff-layout/staff-layout').then(m => m.StaffLayoutComponent),
-        canActivate: [staffGuard]
-      },
+      // Staff Legacy Aliases & Sub-Paths (Redirect to Canonical Workspace)
+      { path: 'staff/scanner', redirectTo: 'staff', pathMatch: 'full' },
+      { path: 'staff/checkin', redirectTo: 'staff', pathMatch: 'full' },
+      { path: 'staff/today', redirectTo: 'staff', pathMatch: 'full' },
+      { path: 'staff/issues', redirectTo: 'staff', pathMatch: 'full' },
 
-      // 4. PLATFORM SUPER ADMIN WORKSPACE (Platform Governance & Finance - Lazy Loaded)
+      // 4. PLATFORM SUPER ADMIN WORKSPACE (Canonical Entry: /admin - Lazy Loaded)
       {
         path: 'admin',
         loadComponent: () => import('./layout/admin-layout/admin-layout').then(m => m.AdminLayoutComponent),
         canActivate: [adminGuard]
       },
-      {
-        path: 'admin/dashboard',
-        loadComponent: () => import('./layout/admin-layout/admin-layout').then(m => m.AdminLayoutComponent),
-        canActivate: [adminGuard]
-      },
-      {
-        path: 'admin/curation',
-        loadComponent: () => import('./layout/admin-layout/admin-layout').then(m => m.AdminLayoutComponent),
-        canActivate: [adminGuard]
-      },
-      {
-        path: 'admin/hosts',
-        loadComponent: () => import('./layout/admin-layout/admin-layout').then(m => m.AdminLayoutComponent),
-        canActivate: [adminGuard]
-      },
+      // Admin Legacy Aliases & Sub-Paths (Redirect to Canonical Workspace)
+      { path: 'admin/dashboard', redirectTo: 'admin', pathMatch: 'full' },
+      { path: 'admin/curation', redirectTo: 'admin', pathMatch: 'full' },
+      { path: 'admin/hosts', redirectTo: 'admin', pathMatch: 'full' },
+      { path: 'admin/applications', redirectTo: 'admin', pathMatch: 'full' },
+      { path: 'admin/users', redirectTo: 'admin', pathMatch: 'full' },
 
       // 5. MAIN PUBLIC & USER LAYOUT (With Header & Footer - Features Lazy Loaded)
       {

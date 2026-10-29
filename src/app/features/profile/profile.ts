@@ -127,14 +127,14 @@ export class Profile implements OnInit {
         },
         {
           title: 'Host Applications Queue',
-          route: '/admin/applications',
+          route: '/admin',
           icon: 'file-text',
           description: 'Review and accredit organizer host applications with full vetting audit',
           actionText: 'Review Applications'
         },
         {
           title: 'User & Role Governance',
-          route: '/admin/users',
+          route: '/admin',
           icon: 'users',
           description: 'Audit attendee and host accounts, manage platform privileges and roles',
           actionText: 'Manage Users'
@@ -153,14 +153,14 @@ export class Profile implements OnInit {
         },
         {
           title: 'Host Approvals Queue',
-          route: '/management/approvals',
+          route: '/management',
           icon: 'shield-check',
           description: 'Vet and approve incoming event organizer applications',
           actionText: 'Review Approvals'
         },
         {
           title: 'Turnstile Gate Monitoring',
-          route: '/management/operations',
+          route: '/management',
           icon: 'activity',
           description: 'Real-time gate traffic, pass scans, and emergency overrides',
           actionText: 'View Gate Flow'
@@ -172,21 +172,21 @@ export class Profile implements OnInit {
       return [
         {
           title: 'Live QR Turnstile Scanner',
-          route: '/staff/scanner',
+          route: '/staff',
           icon: 'qr-code',
           description: 'High-speed camera scanner for gate admission and rapid pass validation',
           actionText: 'Open QR Scanner'
         },
         {
           title: "Today's Assigned Shifts",
-          route: '/staff/today',
+          route: '/staff',
           icon: 'calendar',
           description: 'View your active event stations, shift timings, and venue details',
           actionText: 'View Schedule'
         },
         {
           title: 'Attendee Roster Search',
-          route: '/staff/checkin',
+          route: '/staff',
           icon: 'user-check',
           description: 'Manual check-in lookup by name, booking reference, or phone number',
           actionText: 'Check-in Roster'
