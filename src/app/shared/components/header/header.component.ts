@@ -1,4 +1,4 @@
-import { Component, Input, inject, computed, signal, HostListener, OnInit } from '@angular/core';
+import { Component, Input, inject, computed, signal, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -27,7 +27,8 @@ export interface NavSecondaryLink {
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive, FormsModule, IconComponent],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.css'
+  styleUrl: './header.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HeaderComponent implements OnInit {
   private authService = inject(AuthService);

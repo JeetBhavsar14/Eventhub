@@ -1,4 +1,4 @@
-import { Component, signal, computed, HostListener, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, HostListener, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -20,7 +20,8 @@ export type ManagementView =
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './management-layout.html',
-  styleUrl: './management-layout.css'
+  styleUrl: './management-layout.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManagementLayoutComponent implements OnInit {
   private readonly authService = inject(AuthService);

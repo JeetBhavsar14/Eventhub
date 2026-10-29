@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -13,7 +13,8 @@ import { IconComponent, EventCardComponent } from '@shared/components';
   standalone: true,
   imports: [CommonModule, IconComponent, RouterLink, EventCardComponent],
   templateUrl: './event-details.component.html',
-  styleUrl: './event-details.component.css'
+  styleUrl: './event-details.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);

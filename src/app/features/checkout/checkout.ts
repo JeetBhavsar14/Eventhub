@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +13,8 @@ import { ButtonComponent, IconComponent } from '@shared/components';
   standalone: true,
   imports: [CommonModule, FormsModule, ButtonComponent, IconComponent],
   templateUrl: './checkout.html',
-  styleUrl: './checkout.css'
+  styleUrl: './checkout.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Checkout implements OnInit {
   private route = inject(ActivatedRoute);

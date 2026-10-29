@@ -1,4 +1,4 @@
-import { Component, signal, inject, computed, OnInit } from '@angular/core';
+import { Component, signal, inject, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -34,6 +34,7 @@ export interface RolePermissionItem {
   imports: [CommonModule, RouterLink, FormsModule, ProfileFormComponent, IconComponent, PaginationBarComponent],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Profile implements OnInit {
   activeTab = signal<ProfileTab>('dashboard');

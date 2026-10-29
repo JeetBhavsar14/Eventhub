@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InputComponent } from '@shared/components';
@@ -17,7 +17,8 @@ export interface PaymentSelection {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, InputComponent],
   templateUrl: './payment-form.component.html',
-  styleUrl: './payment-form.component.css'
+  styleUrl: './payment-form.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PaymentFormComponent implements OnChanges {
   @Input() amount = 0;

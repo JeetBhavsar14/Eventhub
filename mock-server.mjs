@@ -22,7 +22,8 @@ function loadEnv() {
       if (eqIdx !== -1) {
         const key = trimmed.slice(0, eqIdx).trim();
         const val = trimmed.slice(eqIdx + 1).trim();
-        if (!process.env[key]) {
+        // Ignore placeholder values from .env.example templates
+        if (val && !val.startsWith('replace-with-') && !process.env[key]) {
           process.env[key] = val;
         }
       }
@@ -34,7 +35,9 @@ loadEnv();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const DB_FILE = path.resolve('db.json');
 const SEED_FILE = path.resolve('db.seed.example.json');
-const JWT_SECRET = process.env.JWT_SECRET || 'eventhub-demo-cryptographic-jwt-secret-key-change-in-production';
+const JWT_SECRET = (process.env.JWT_SECRET && !process.env.JWT_SECRET.startsWith('replace-with-'))
+  ? process.env.JWT_SECRET
+  : 'eventhub-demo-cryptographic-jwt-secret-key-change-in-production';
 
 // 2. Cryptographic JWT Helpers (HMAC-SHA256 with timing-safe verification)
 export function signJwt(payload) {
@@ -112,12 +115,17 @@ if (sanitizedAny) {
 
 // 5. Distinct, role-specific demo credentials loaded from environment variables
 // (Universal fallback passwords completely eliminated)
+const getCredential = (envKey, fallback) => {
+  const val = process.env[envKey];
+  return (val && !val.startsWith('replace-with-')) ? val : fallback;
+};
+
 const DEMO_CREDENTIALS = new Map([
-  ['admin@eventhub.com', process.env.DEMO_ADMIN_PASSWORD || 'Admin@EventHub#2026'],
-  ['host@eventhub.com', process.env.DEMO_HOST_PASSWORD || 'Host@EventHub#2026'],
-  ['management@eventhub.com', process.env.DEMO_MANAGEMENT_PASSWORD || 'Manage@EventHub#2026'],
-  ['staff@eventhub.com', process.env.DEMO_STAFF_PASSWORD || 'Staff@EventHub#2026'],
-  ['jeet@eventhub.com', process.env.DEMO_USER_PASSWORD || 'User@EventHub#2026']
+  ['admin@eventhub.com', getCredential('DEMO_ADMIN_PASSWORD', 'Admin@EventHub#2026')],
+  ['host@eventhub.com', getCredential('DEMO_HOST_PASSWORD', 'Host@EventHub#2026')],
+  ['management@eventhub.com', getCredential('DEMO_MANAGEMENT_PASSWORD', 'Manage@EventHub#2026')],
+  ['staff@eventhub.com', getCredential('DEMO_STAFF_PASSWORD', 'Staff@EventHub#2026')],
+  ['jeet@eventhub.com', getCredential('DEMO_USER_PASSWORD', 'User@EventHub#2026')]
 ]);
 
 // Track runtime-registered passwords in-memory

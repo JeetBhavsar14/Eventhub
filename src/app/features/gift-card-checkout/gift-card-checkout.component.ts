@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { Component, OnInit, ViewChild, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiClient } from '@core/api';
@@ -7,7 +7,9 @@ import { GiftCard, GiftCardPurchase } from '@core/models';
 import { ButtonComponent } from '@shared/components';
 import { PaymentFormComponent } from '@shared/forms';
 
-@Component({ selector: 'app-gift-card-checkout', standalone: true, imports: [CommonModule, ButtonComponent, PaymentFormComponent], templateUrl: './gift-card-checkout.component.html', styleUrl: './gift-card-checkout.component.css' })
+@Component({ selector: 'app-gift-card-checkout', standalone: true, imports: [CommonModule, ButtonComponent, PaymentFormComponent], templateUrl: './gift-card-checkout.component.html', styleUrl: './gift-card-checkout.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
 export class GiftCardCheckoutComponent implements OnInit {
   private route = inject(ActivatedRoute); private router = inject(Router); private apiClient = inject(ApiClient); private authService = inject(AuthService);
   @ViewChild(PaymentFormComponent) paymentForm!: PaymentFormComponent;

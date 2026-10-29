@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, AfterViewInit, ViewChild, ElementRef, signal, computed, HostListener } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, ViewChild, ElementRef, signal, computed, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -25,7 +25,8 @@ export interface CategoryCard {
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule, IconComponent],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  styleUrl: './home.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit, AfterViewInit {
   private api = inject(ApiClient);

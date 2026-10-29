@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -53,7 +53,8 @@ interface FaqItem {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, SelectComponent],
   templateUrl: './host-event.component.html',
-  styleUrl: './host-event.component.css'
+  styleUrl: './host-event.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HostEventComponent implements OnInit {
   private authService = inject(AuthService);

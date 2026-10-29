@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -13,7 +13,8 @@ export type ScanOutcome = 'idle' | 'valid' | 'invalid' | 'duplicate';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './staff-layout.html',
-  styleUrl: './staff-layout.css'
+  styleUrl: './staff-layout.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StaffLayoutComponent implements OnInit {
   private readonly authService = inject(AuthService);

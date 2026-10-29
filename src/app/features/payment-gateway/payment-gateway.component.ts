@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ApiClient } from '@core/api';
@@ -14,7 +14,8 @@ import * as QRCode from 'qrcode';
   standalone: true,
   imports: [CommonModule, ButtonComponent, IconComponent, PaymentFormComponent],
   templateUrl: './payment-gateway.component.html',
-  styleUrl: './payment-gateway.component.css'
+  styleUrl: './payment-gateway.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PaymentGatewayComponent implements OnInit, OnDestroy {
   private router = inject(Router);

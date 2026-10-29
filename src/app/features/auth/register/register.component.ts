@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +10,8 @@ import { ButtonComponent, InputComponent } from '@shared/components';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, ButtonComponent, InputComponent],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  styleUrl: './register.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RegisterComponent {
   private authService = inject(AuthService);

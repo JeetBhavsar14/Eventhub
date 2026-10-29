@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import * as QRCode from 'qrcode';
@@ -14,7 +14,8 @@ type BookingFilter = 'upcoming' | 'past' | 'all';
   standalone: true,
   imports: [CommonModule, RouterLink, ButtonComponent, PaginationBarComponent],
   templateUrl: './bookings.component.html',
-  styleUrl: './bookings.component.css'
+  styleUrl: './bookings.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BookingsComponent implements OnInit {
   private apiClient = inject(ApiClient);

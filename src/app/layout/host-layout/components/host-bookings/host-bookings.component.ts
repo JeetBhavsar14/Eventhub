@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HostAttendeeRecord } from '@core/models';
 import { IconComponent, PaginationBarComponent } from '@shared/components';
@@ -8,7 +8,8 @@ import { IconComponent, PaginationBarComponent } from '@shared/components';
   standalone: true,
   imports: [CommonModule, IconComponent, PaginationBarComponent],
   templateUrl: './host-bookings.component.html',
-  styleUrl: './host-bookings.component.css'
+  styleUrl: './host-bookings.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HostBookingsComponent {
   @Input({ required: true }) attendees: HostAttendeeRecord[] = [];

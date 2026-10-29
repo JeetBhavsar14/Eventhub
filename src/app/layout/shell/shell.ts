@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastContainerComponent } from '@shared/components';
 
@@ -6,6 +6,7 @@ import { ToastContainerComponent } from '@shared/components';
   selector: 'app-shell',
   imports: [RouterOutlet, ToastContainerComponent],
   templateUrl: './shell.html',
-  styleUrl: './shell.css'
+  styleUrl: './shell.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ShellComponent {}

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastService, ToastItem } from '@core/state';
 import { IconComponent } from '../icon/icon.component';
@@ -187,7 +187,8 @@ import { IconComponent } from '../icon/icon.component';
         width: auto;
       }
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ToastContainerComponent {
   private toastService = inject(ToastService);

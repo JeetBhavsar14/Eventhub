@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { User, UserProfileUpdate } from '@core/models';
@@ -10,6 +10,7 @@ import { ButtonComponent, InputComponent } from '@shared/components';
   imports: [CommonModule, ReactiveFormsModule, ButtonComponent, InputComponent],
   templateUrl: './profile-form.component.html',
   styleUrl: './profile-form.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileFormComponent implements OnChanges {
   @Input() user: User | null = null;

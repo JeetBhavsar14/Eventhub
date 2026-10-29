@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { 
@@ -15,7 +15,8 @@ import { IconComponent } from '@shared/components';
   standalone: true,
   imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './host-team.component.html',
-  styleUrl: './host-team.component.css'
+  styleUrl: './host-team.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HostTeamComponent {
   @Input({ required: true }) ownerStakes: EventOwnerStake[] = [];

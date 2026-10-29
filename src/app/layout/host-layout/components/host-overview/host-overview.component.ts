@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { 
   HostWorkspaceInfo, 
@@ -16,7 +16,8 @@ import { IconComponent, PaginationBarComponent } from '@shared/components';
   standalone: true,
   imports: [CommonModule, IconComponent, PaginationBarComponent],
   templateUrl: './host-overview.component.html',
-  styleUrl: './host-overview.component.css'
+  styleUrl: './host-overview.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HostOverviewComponent {
   @Input({ required: true }) hostInfo!: HostWorkspaceInfo;

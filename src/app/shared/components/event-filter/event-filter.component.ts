@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, Input, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Output, Input, HostListener, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectComponent } from '../select/select.component';
@@ -28,6 +28,7 @@ export interface CalendarDay {
   imports: [CommonModule, FormsModule, SelectComponent, IconComponent],
   templateUrl: './event-filter.component.html',
   styleUrl: './event-filter.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventFilterComponent implements OnInit, OnDestroy {
   @Output() filterChange = new EventEmitter<EventFilter>();

@@ -1,4 +1,4 @@
-import { Component, ElementRef, QueryList, ViewChildren, inject, signal } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +18,8 @@ export interface DemoAccount {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, ButtonComponent, InputComponent, IconComponent],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginComponent {
   private authService = inject(AuthService);

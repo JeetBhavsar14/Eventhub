@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal, effect, computed, HostListener } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, effect, computed, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { ApiClient } from '@core/api';
@@ -13,7 +13,8 @@ import { getStartingPrice, filterEvents } from '@core/utils';
   standalone: true,
   imports: [CommonModule, RouterLink, ButtonComponent, EventFilterComponent, IconComponent, EventCardComponent, PaginationBarComponent],
   templateUrl: './discover.component.html',
-  styleUrl: './discover.component.css'
+  styleUrl: './discover.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DiscoverComponent implements OnInit, OnDestroy {
   private apiClient = inject(ApiClient);

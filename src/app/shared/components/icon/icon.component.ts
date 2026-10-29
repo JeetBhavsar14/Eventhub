@@ -1,4 +1,4 @@
-import { Component, Input, computed, inject } from '@angular/core';
+import { Component, Input, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ICON_REGISTRY } from './icon.registry';
@@ -46,7 +46,8 @@ import { ICON_REGISTRY } from './icon.registry';
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class IconComponent {
   private readonly sanitizer = inject(DomSanitizer);

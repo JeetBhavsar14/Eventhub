@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HostEventItem, HostEventStatus } from '@core/models';
 import { IconComponent, PaginationBarComponent } from '@shared/components';
@@ -8,7 +8,8 @@ import { IconComponent, PaginationBarComponent } from '@shared/components';
   standalone: true,
   imports: [CommonModule, IconComponent, PaginationBarComponent],
   templateUrl: './host-my-events.component.html',
-  styleUrl: './host-my-events.component.css'
+  styleUrl: './host-my-events.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HostMyEventsComponent {
   @Input({ required: true }) events: HostEventItem[] = [];

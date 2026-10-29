@@ -1,4 +1,4 @@
-import { Component, signal, computed, HostListener, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, HostListener, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -20,7 +20,8 @@ export interface AdminConfirmDialogData {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, IconComponent, ConfirmDialogComponent],
   templateUrl: './admin-layout.html',
-  styleUrl: './admin-layout.css'
+  styleUrl: './admin-layout.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminLayoutComponent implements OnInit {
   private readonly authService = inject(AuthService);

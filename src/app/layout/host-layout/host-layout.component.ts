@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, HostListener, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -50,7 +50,8 @@ import { HostSettingsComponent } from './components/host-settings/host-settings.
     HostSettingsComponent
   ],
   templateUrl: './host-layout.component.html',
-  styleUrl: './host-layout.component.css'
+  styleUrl: './host-layout.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HostLayoutComponent implements OnInit {
   readonly dashboardService = inject(HostDashboardService);

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HostNotificationItem } from '@core/models';
 import { IconComponent } from '@shared/components';
@@ -8,7 +8,8 @@ import { IconComponent } from '@shared/components';
   standalone: true,
   imports: [CommonModule, IconComponent],
   templateUrl: './host-notifications.component.html',
-  styleUrl: './host-notifications.component.css'
+  styleUrl: './host-notifications.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HostNotificationsComponent {
   @Input({ required: true }) notifications: HostNotificationItem[] = [];

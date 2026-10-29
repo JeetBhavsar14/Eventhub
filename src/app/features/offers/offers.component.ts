@@ -1,10 +1,12 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiClient } from '@core/api';
 import { Offer } from '@core/models';
 import { ButtonComponent } from '@shared/components';
 
-@Component({ selector: 'app-offers', standalone: true, imports: [CommonModule, ButtonComponent], templateUrl: './offers.component.html', styleUrl: './offers.component.css' })
+@Component({ selector: 'app-offers', standalone: true, imports: [CommonModule, ButtonComponent], templateUrl: './offers.component.html', styleUrl: './offers.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
 export class OffersComponent implements OnInit {
   private apiClient = inject(ApiClient);
   offers = signal<Offer[]>([]);

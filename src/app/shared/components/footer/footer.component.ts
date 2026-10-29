@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -9,7 +9,8 @@ import { AuthService } from '@core/auth';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './footer.component.html',
-  styleUrl: './footer.component.css'
+  styleUrl: './footer.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FooterComponent {
   private sanitizer = inject(DomSanitizer);

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { ApiClient } from '@core/api';
@@ -6,7 +6,9 @@ import { AuthService } from '@core/auth';
 import { GiftCardPurchase } from '@core/models';
 import { ButtonComponent } from '@shared/components';
 
-@Component({ selector: 'app-my-gift-cards', standalone: true, imports: [CommonModule, RouterLink, ButtonComponent], templateUrl: './my-gift-cards.component.html', styleUrl: './my-gift-cards.component.css' })
+@Component({ selector: 'app-my-gift-cards', standalone: true, imports: [CommonModule, RouterLink, ButtonComponent], templateUrl: './my-gift-cards.component.html', styleUrl: './my-gift-cards.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
 export class MyGiftCardsComponent implements OnInit {
   private apiClient = inject(ApiClient);
   private authService = inject(AuthService);

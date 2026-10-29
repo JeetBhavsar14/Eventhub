@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '../icon/icon.component';
 
@@ -7,7 +7,8 @@ import { IconComponent } from '../icon/icon.component';
   standalone: true,
   imports: [CommonModule, IconComponent],
   templateUrl: './pagination-bar.component.html',
-  styleUrl: './pagination-bar.component.css'
+  styleUrl: './pagination-bar.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PaginationBarComponent {
   @Input() currentPage: number = 1;
