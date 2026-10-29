@@ -3,10 +3,16 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '@core/auth';
-import { ApiClient } from '@core/api';
 import { ButtonComponent, IconComponent, InputComponent } from '@shared/components';
 
 export type ForgotStep = 'email' | 'otp' | 'password' | 'success';
+
+export interface DemoAccount {
+  role: string;
+  email: string;
+  pass: string;
+  badge: string;
+}
 
 @Component({
   selector: 'app-login',
@@ -17,7 +23,6 @@ export type ForgotStep = 'email' | 'otp' | 'password' | 'success';
 })
 export class LoginComponent {
   private authService = inject(AuthService);
-  private apiClient = inject(ApiClient);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -29,7 +34,7 @@ export class LoginComponent {
   errorMessage = signal('');
   isLoading = this.authService.isLoading;
 
-  // Forgot Password Modal State
+  // Forgot Password Simulation State
   isForgotModalOpen = signal(false);
   forgotStep = signal<ForgotStep>('email');
   forgotEmail = '';
@@ -38,12 +43,21 @@ export class LoginComponent {
   confirmPassword = '';
   showNewPassword = false;
   showConfirmPassword = false;
-  
-  targetUserId = '';
-  targetUser: any = null;
+
   forgotError = signal('');
   forgotNotice = signal('');
   isForgotLoading = signal(false);
+
+  // Pre-configured demonstration OTP code (avoids accepting arbitrary OTPs)
+  readonly DEMO_OTP = '1234';
+
+  readonly demoAccounts: DemoAccount[] = [
+    { role: 'Super Admin', email: 'admin@eventhub.com', pass: 'admin123', badge: 'admin' },
+    { role: 'Host / Organizer', email: 'host@eventhub.com', pass: 'host123', badge: 'host' },
+    { role: 'Management & Operations', email: 'management@eventhub.com', pass: 'manage123', badge: 'management' },
+    { role: 'Event Staff', email: 'staff@eventhub.com', pass: 'staff123', badge: 'staff' },
+    { role: 'Standard Attendee', email: 'jeet@eventhub.com', pass: 'password123', badge: 'user' }
+  ];
 
   async onSubmit() {
     this.errorMessage.set('');
@@ -83,7 +97,7 @@ export class LoginComponent {
   }
 
   // ----------------------------------------------------
-  // Forgot Password Modal Methods
+  // Interactive Demonstration Walkthrough Modal Methods
   // ----------------------------------------------------
   openForgotPassword() {
     this.forgotEmail = this.email?.trim() || '';
@@ -92,8 +106,6 @@ export class LoginComponent {
     this.otpDigits = ['', '', '', ''];
     this.newPassword = '';
     this.confirmPassword = '';
-    this.targetUserId = '';
-    this.targetUser = null;
     this.forgotStep.set('email');
     this.isForgotModalOpen.set(true);
   }
@@ -110,14 +122,22 @@ export class LoginComponent {
     return list && list[index] ? list[index].nativeElement : null;
   }
 
-  // Step 1: Verify Email
-  async verifyEmail() {
+  focusOtpBox(index: number) {
+    const el = this.getOtpEl(index);
+    if (el) {
+      el.focus();
+      el.select();
+    }
+  }
+
+  // Step 1: Simulate Email Verification
+  verifyEmail() {
     this.forgotError.set('');
     this.forgotNotice.set('');
 
     const trimmedEmail = this.forgotEmail.trim().toLowerCase();
     if (!trimmedEmail) {
-      this.forgotError.set('Please enter your registered email address.');
+      this.forgotError.set('Please enter your email address.');
       return;
     }
 
@@ -128,26 +148,17 @@ export class LoginComponent {
     }
 
     this.isForgotLoading.set(true);
-    try {
-      const res = await this.apiClient.get<any[]>(`/users?email=${encodeURIComponent(trimmedEmail)}`);
-      if (res.data && res.data.length > 0) {
-        this.targetUser = res.data[0];
-        this.targetUserId = this.targetUser.id;
-        this.forgotStep.set('otp');
-        this.forgotNotice.set(`A 4-digit code was sent to ${trimmedEmail}. Any 4 digits are accepted!`);
-        setTimeout(() => this.focusOtpBox(0), 100);
-      } else {
-        this.forgotError.set('No registered account was found with this email address.');
-      }
-    } catch (err) {
-      console.error(err);
-      this.forgotError.set('Unable to verify email at this moment. Please try again.');
-    } finally {
+
+    // Simulate network dispatch with demonstration notice
+    setTimeout(() => {
       this.isForgotLoading.set(false);
-    }
+      this.forgotStep.set('otp');
+      this.forgotNotice.set(`Demonstration Mode: Test code [1 2 3 4] issued for ${trimmedEmail}.`);
+      setTimeout(() => this.focusOtpBox(0), 100);
+    }, 350);
   }
 
-  // Step 2: OTP Input Handlers (Fixed: Prevents double-input & handles full backspace)
+  // Step 2: OTP Input Handling
   onOtpInput(event: Event, index: number) {
     const input = event.target as HTMLInputElement;
     const rawVal = input.value;
@@ -158,14 +169,11 @@ export class LoginComponent {
       return;
     }
 
-    // Take only the single character entered
     const char = rawVal.slice(-1);
     this.otpDigits[index] = char;
     input.value = char;
-
     this.forgotError.set('');
 
-    // Advance focus using setTimeout to prevent key repeating/multiple inputs
     if (char && index < 3) {
       setTimeout(() => {
         const nextEl = this.getOtpEl(index + 1);
@@ -181,14 +189,11 @@ export class LoginComponent {
     const input = event.target as HTMLInputElement;
 
     if (event.key === 'Backspace') {
-      event.preventDefault(); // Complete control over backspace
-
+      event.preventDefault();
       if (input.value || this.otpDigits[index]) {
-        // Clear current box immediately in both state and DOM
         input.value = '';
         this.otpDigits[index] = '';
       } else if (index > 0) {
-        // Move to previous box and clear it completely
         const prevEl = this.getOtpEl(index - 1);
         this.otpDigits[index - 1] = '';
         if (prevEl) {
@@ -251,14 +256,6 @@ export class LoginComponent {
     }
   }
 
-  focusOtpBox(index: number) {
-    const el = this.getOtpEl(index);
-    if (el) {
-      el.focus();
-      el.select();
-    }
-  }
-
   resendOtp() {
     this.otpDigits = ['', '', '', ''];
     for (let i = 0; i < 4; i++) {
@@ -266,28 +263,31 @@ export class LoginComponent {
       if (el) el.value = '';
     }
     this.forgotError.set('');
-    this.forgotNotice.set('A new 4-digit code has been sent! Enter any 4 digits to proceed.');
-    setTimeout(() => {
-      this.focusOtpBox(0);
-    }, 50);
+    this.forgotNotice.set('Demonstration code re-issued! Enter 1 2 3 4 to proceed with the walkthrough.');
+    setTimeout(() => this.focusOtpBox(0), 50);
   }
 
+  // Enforces strictly the DEMO_OTP ('1234') — rejects arbitrary OTP codes
   verifyOtp() {
     this.forgotError.set('');
     const code = this.otpDigits.join('').trim();
 
     if (code.length < 4) {
-      this.forgotError.set('Please enter all 4 digits in the boxes.');
+      this.forgotError.set('Please enter all 4 digits.');
       return;
     }
 
-    // Any 4 digits are acceptable as requested
+    if (code !== this.DEMO_OTP) {
+      this.forgotError.set('Invalid code. For this demonstration walkthrough, please enter 1 2 3 4.');
+      return;
+    }
+
     this.forgotStep.set('password');
     this.forgotNotice.set('');
   }
 
-  // Step 3: Change Password in DB
-  async updatePasswordInDb() {
+  // Step 3: Non-destructive Password Change Simulation (Zero DB Mutations)
+  submitDemoPassword() {
     this.forgotError.set('');
 
     if (!this.newPassword || this.newPassword.length < 6) {
@@ -300,38 +300,23 @@ export class LoginComponent {
       return;
     }
 
-    if (!this.targetUserId) {
-      this.forgotError.set('Session expired. Please restart the forgot password process.');
-      this.forgotStep.set('email');
-      return;
-    }
-
     this.isForgotLoading.set(true);
-    try {
-      // Update password directly in json-server DB
-      const res = await this.apiClient.patch(`/users/${this.targetUserId}`, {
-        password: this.newPassword.trim()
-      });
 
-      if (res.error) {
-        this.forgotError.set(res.error.message || 'Failed to update password in database.');
-        return;
-      }
-
-      // Success! Auto-fill login fields for immediate smooth login
-      this.email = this.forgotEmail.trim();
-      this.password = this.newPassword.trim();
-      this.forgotStep.set('success');
-    } catch (err) {
-      console.error(err);
-      this.forgotError.set('Failed to update password in database. Please try again.');
-    } finally {
+    // Simulate completion with zero backend mutation to preserve shared accounts
+    setTimeout(() => {
       this.isForgotLoading.set(false);
-    }
+      this.forgotStep.set('success');
+    }, 400);
   }
 
-  finishAndLogin() {
+  finishWalkthrough() {
+    this.closeForgotPassword();
+  }
+
+  selectDemoAccount(account: DemoAccount) {
+    this.email = account.email;
+    this.password = account.pass;
+    this.errorMessage.set('');
     this.closeForgotPassword();
   }
 }
-

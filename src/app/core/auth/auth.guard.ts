@@ -1,3 +1,15 @@
+/**
+ * ============================================================================
+ * ⚠️ SECURITY ARCHITECTURE NOTICE: CLIENT-SIDE AUTHENTICATION GUARD
+ * ============================================================================
+ * This Angular `CanActivateFn` guard prevents unauthenticated users from accessing
+ * private routes in the browser application and redirects them to `/auth/login`.
+ *
+ * NOTE: Client-side route guards are for UX workflow and screen navigation.
+ * Production security must always be enforced server-side per API request.
+ * ============================================================================
+ */
+
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';

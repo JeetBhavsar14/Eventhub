@@ -54,6 +54,11 @@ Open your browser and navigate to: **`http://localhost:4200/`**
 | **Field Staff** | `staff@eventhub.com` | `staff123` | `/staff` |
 | **Standard User** | `jeet@eventhub.com` | `password123` | `/discover` |
 
+> **⚠️ Security Architecture Note (Demo/Prototype vs Production):**
+> - **Zero Plaintext Passwords in Database:** Passwords are completely omitted from `db.json` and `db.seed.example.json`. Authentication credentials are handled in-memory by `mock-server.mjs`.
+> - **Server-Side Validation:** The Angular client never inspects or compares password strings. Credentials are submitted to `POST /auth/login`, and only sanitized user profiles are returned.
+> - **Frontend Guards as UX Aids:** Frontend Angular Route Guards (`authGuard`, `roleGuard`) provide UI flow control and navigation convenience. In production, backend APIs must independently enforce cryptographic JWT validation and RBAC/ABAC authorization.
+
 ---
 
 ## 🏗️ Architecture & Technology Stack
@@ -154,7 +159,7 @@ The current prototype provides an end-to-end dynamic workflow. The following tas
 | Script | Purpose |
 | :--- | :--- |
 | `npm start` | Runs Angular dev server on `http://localhost:4200` |
-| `npm run mock-api` | Runs json-server watching `db.json` on port `3000` |
+| `npm run mock-api` | Runs mock API server (with secure `POST /auth/login`) on port `3000` |
 | `npm run build` | Builds the production bundle in `dist/Eventhub` |
 | `npm run watch` | Builds and watches for changes in development mode |
 | `npm test` | Runs unit test suite using Vitest |

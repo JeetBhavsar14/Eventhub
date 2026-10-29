@@ -7,9 +7,12 @@ import { ApiClient } from '@core/api';
 const AUTH_USER_KEY = 'eventhub_user';
 const AUTH_TOKEN_KEY = 'eventhub_token';
 
-// Shape coming from db.json (includes password field — only for mock)
-interface MockUserRecord extends User {
-  password: string;
+// Server response contract for authentication endpoints
+interface AuthResponse {
+  success: boolean;
+  message: string;
+  token?: string;
+  user?: User;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -42,31 +45,34 @@ export class AuthService {
   async login(email: string, password: string): Promise<{ success: boolean; message: string }> {
     this._authState.update(s => ({ ...s, isLoading: true }));
 
-    // Query json-server: GET /users?email=...
-    const result = await this.apiClient.get<MockUserRecord[]>('/users', { email });
+    // Send credentials to mock authentication endpoint (never compare passwords client-side)
+    const result = await this.apiClient.post<AuthResponse>('/auth/login', {
+      email,
+      password
+    });
 
     if (result.error) {
       this._authState.update(s => ({ ...s, isLoading: false }));
-      return { success: false, message: 'Could not reach the server. Is json-server running?' };
+      return {
+        success: false,
+        message: result.error.message || 'Invalid email or password.'
+      };
     }
 
-    const match = result.data.find(u => u.password === password);
-
-    if (!match) {
+    const { user, token } = result.data;
+    if (!user) {
       this._authState.update(s => ({ ...s, isLoading: false }));
-      return { success: false, message: 'Invalid email or password.' };
+      return { success: false, message: 'Invalid response from authentication server.' };
     }
 
-    // Strip the password field before storing — never store passwords
-    const { password: _removed, ...safeUser } = match;
-    const mockToken = generateMockJwt(safeUser as User);
+    const sessionToken = token || generateMockJwt(user);
 
-    this.localStorage.set(AUTH_USER_KEY, safeUser);
-    this.localStorage.set(AUTH_TOKEN_KEY, mockToken);
+    this.localStorage.set(AUTH_USER_KEY, user);
+    this.localStorage.set(AUTH_TOKEN_KEY, sessionToken);
 
     this._authState.set({
-      user: safeUser as User,
-      token: mockToken,
+      user,
+      token: sessionToken,
       isAuthenticated: true,
       isLoading: false,
     });
@@ -83,43 +89,37 @@ export class AuthService {
   ): Promise<{ success: boolean; message: string }> {
     this._authState.update(s => ({ ...s, isLoading: true }));
 
-    // Check if user already exists
-    const existingCheck = await this.apiClient.get<MockUserRecord[]>('/users', { email });
-    if (!existingCheck.error && existingCheck.data && existingCheck.data.length > 0) {
-      this._authState.update(s => ({ ...s, isLoading: false }));
-      return { success: false, message: 'An account with this email already exists.' };
-    }
-
-    // POST /users — json-server creates and persists the new user in db.json
-    const newRecord: Omit<MockUserRecord, 'id'> = {
+    // Dispatch registration to mock auth endpoint (password is never stored in plaintext database)
+    const result = await this.apiClient.post<AuthResponse>('/auth/register', {
       email,
       password,
-      phone,
       firstName,
       lastName,
-      isEmailVerified: false,
-      isPhoneVerified: false,
-      isHost: false,
-      platformRole: 'user',
-      createdAt: new Date().toISOString(),
-    };
-
-    const result = await this.apiClient.post<MockUserRecord>('/users', newRecord);
+      phone
+    });
 
     if (result.error) {
       this._authState.update(s => ({ ...s, isLoading: false }));
-      return { success: false, message: 'Registration failed. Is json-server running?' };
+      return {
+        success: false,
+        message: result.error.message || 'Registration failed.'
+      };
     }
 
-    const { password: _removed, ...safeUser } = result.data;
-    const mockToken = generateMockJwt(safeUser as User);
+    const { user, token } = result.data;
+    if (!user) {
+      this._authState.update(s => ({ ...s, isLoading: false }));
+      return { success: false, message: 'Invalid response from registration server.' };
+    }
 
-    this.localStorage.set(AUTH_USER_KEY, safeUser);
-    this.localStorage.set(AUTH_TOKEN_KEY, mockToken);
+    const sessionToken = token || generateMockJwt(user);
+
+    this.localStorage.set(AUTH_USER_KEY, user);
+    this.localStorage.set(AUTH_TOKEN_KEY, sessionToken);
 
     this._authState.set({
-      user: safeUser as User,
-      token: mockToken,
+      user,
+      token: sessionToken,
       isAuthenticated: true,
       isLoading: false,
     });
@@ -137,13 +137,12 @@ export class AuthService {
       return { success: false, message: 'Please sign in before updating your profile.' };
     }
 
-    const result = await this.apiClient.patch<MockUserRecord>(`/users/${user.id}`, changes);
+    const result = await this.apiClient.patch<User>(`/users/${user.id}`, changes);
     if (result.error) {
-      return { success: false, message: 'Could not save your profile. Is json-server running?' };
+      return { success: false, message: 'Could not save your profile. Is the server running?' };
     }
 
-    const { password: _removed, ...safeUser } = result.data;
-    const updatedUser = safeUser as User;
+    const updatedUser = result.data;
     this.localStorage.set(AUTH_USER_KEY, updatedUser);
     this._authState.update(state => ({ ...state, user: updatedUser }));
 
@@ -157,6 +156,7 @@ export class AuthService {
     this.router.navigate(['/']);
   }
 }
+
 // Helper function to create a realistic JWT string
 function generateMockJwt(user: User): string {
   const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));

@@ -16,7 +16,7 @@
         label="Email Address" 
         type="email" 
         name="email"
-        placeholder="e.g. jeet@eventhub.com" 
+        placeholder="Email Address" 
         [(ngModel)]="email"
         [maxLength]="100"
         [required]="true">
@@ -28,7 +28,7 @@
         name="password"
         placeholder="Enter your password" 
         [(ngModel)]="password"
-        [minLength]="8"
+        [minLength]="6"
         [maxLength]="64"
         [required]="true">
       </app-input>
@@ -55,7 +55,7 @@
 </div>
 
 <!-- ==========================================================================
-     Forgot Password Popup Modal (Email Verify -> 4-digit OTP -> Set New Password)
+     Forgot Password Modal (Interactive Demonstration Walkthrough)
      ========================================================================== -->
 <div class="fp-modal-backdrop" *ngIf="isForgotModalOpen()" (click)="closeForgotPassword()">
   <div class="fp-modal-card" (click)="$event.stopPropagation()">
@@ -80,7 +80,13 @@
         </div>
       </div>
 
-      <!-- Modal Close Button (Separated from stepper to prevent any overlap) -->
+      <!-- Demonstration Pill if on success step -->
+      <div class="fp-demo-pill" *ngIf="forgotStep() === 'success'">
+        <app-icon name="shield" [size]="14"></app-icon>
+        <span>Demonstration Walkthrough</span>
+      </div>
+
+      <!-- Close Button -->
       <button type="button" class="fp-close-btn" (click)="closeForgotPassword()" aria-label="Close modal">
         <app-icon name="x" [size]="16"></app-icon>
       </button>
@@ -97,16 +103,21 @@
       <span>{{ forgotNotice() }}</span>
     </div>
 
-    <!-- STEP 1: Verify Email -->
+    <!-- STEP 1: Email Walkthrough -->
     <div class="fp-step-content" *ngIf="forgotStep() === 'email'">
       <div class="fp-header">
         <div class="fp-icon-badge">
           <app-icon name="mail" [size]="24"></app-icon>
         </div>
-        <h3 class="fp-title">Forgot Password</h3>
+        <h3 class="fp-title">Password Recovery Walkthrough</h3>
         <p class="fp-subtitle">
-          Enter your registered email address and we'll verify your account to send a 4-digit code.
+          Enter an email address to preview the interactive OTP verification and reset workflow.
         </p>
+      </div>
+
+      <div class="fp-demo-pill mb-3" style="display: flex; justify-content: center; margin-bottom: 1rem;">
+        <app-icon name="info" [size]="14"></app-icon>
+        <span>Demonstration Mode &bull; No live database changes</span>
       </div>
 
       <form (ngSubmit)="verifyEmail()" class="fp-form">
@@ -121,7 +132,7 @@
               type="email" 
               name="forgotEmail" 
               [(ngModel)]="forgotEmail" 
-              placeholder="e.g. jeet@eventhub.com"
+              placeholder="e.g. jeet@eventhub.com" 
               class="fp-text-input" 
               required 
               autocomplete="email"
@@ -134,14 +145,14 @@
             Cancel
           </button>
           <button type="submit" class="fp-btn-primary" [disabled]="isForgotLoading()">
-            <span *ngIf="!isForgotLoading()">Verify Email</span>
+            <span *ngIf="!isForgotLoading()">Continue Walkthrough</span>
             <span *ngIf="isForgotLoading()" class="fp-loading-spinner"></span>
           </button>
         </div>
       </form>
     </div>
 
-    <!-- STEP 2: Enter 4-Digit OTP in Box Format -->
+    <!-- STEP 2: Enter 4-Digit OTP -->
     <div class="fp-step-content" *ngIf="forgotStep() === 'otp'">
       <div class="fp-header">
         <div class="fp-icon-badge">
@@ -149,7 +160,7 @@
         </div>
         <h3 class="fp-title">Enter Verification Code</h3>
         <p class="fp-subtitle">
-          Please enter the 4-digit verification code sent to <strong>{{ forgotEmail }}</strong>.
+          Please enter the 4-digit demonstration code issued for <strong>{{ forgotEmail }}</strong>.
         </p>
       </div>
 
@@ -219,13 +230,13 @@
 
         <div class="fp-otp-hint">
           <app-icon name="check" [size]="13"></app-icon>
-          <span>Any 4-digit code is acceptable for testing (e.g. 1 2 3 4)</span>
+          <span>Demonstration Code: <strong>1 2 3 4</strong></span>
         </div>
 
         <div class="fp-resend-row">
-          <span>Didn't receive the code?</span>
+          <span>Need code again?</span>
           <button type="button" class="fp-btn-link" (click)="resendOtp()">
-            Resend OTP
+            Re-issue Code
           </button>
         </div>
       </div>
@@ -240,19 +251,19 @@
       </div>
     </div>
 
-    <!-- STEP 3: Enter New Password -->
+    <!-- STEP 3: Create New Password (Simulated) -->
     <div class="fp-step-content" *ngIf="forgotStep() === 'password'">
       <div class="fp-header">
         <div class="fp-icon-badge">
           <app-icon name="key" [size]="24"></app-icon>
         </div>
-        <h3 class="fp-title">Create New Password</h3>
+        <h3 class="fp-title">Set New Password</h3>
         <p class="fp-subtitle">
-          Your account is verified. Enter a new password for <strong>{{ forgotEmail }}</strong>.
+          Code verified! Preview the password creation form for <strong>{{ forgotEmail }}</strong>.
         </p>
       </div>
 
-      <form (ngSubmit)="updatePasswordInDb()" class="fp-form">
+      <form (ngSubmit)="submitDemoPassword()" class="fp-form">
         <!-- New Password Field -->
         <div class="fp-field-group">
           <label class="fp-label" for="fp-new-password">New Password</label>
@@ -265,15 +276,15 @@
               [type]="showNewPassword ? 'text' : 'password'" 
               name="newPassword" 
               [(ngModel)]="newPassword" 
-              placeholder="At least 6 characters"
+              placeholder="Minimum 6 characters" 
               class="fp-text-input" 
-              required
+              required 
               minlength="6"
             />
             <button 
               type="button" 
               class="fp-eye-btn" 
-              (click)="showNewPassword = !showNewPassword" 
+              (click)="showNewPassword = !showNewPassword"
               [attr.aria-label]="showNewPassword ? 'Hide password' : 'Show password'">
               <app-icon [name]="showNewPassword ? 'eye-off' : 'eye'" [size]="16"></app-icon>
             </button>
@@ -292,15 +303,15 @@
               [type]="showConfirmPassword ? 'text' : 'password'" 
               name="confirmPassword" 
               [(ngModel)]="confirmPassword" 
-              placeholder="Re-enter your new password"
+              placeholder="Re-enter password" 
               class="fp-text-input" 
-              required
+              required 
               minlength="6"
             />
             <button 
               type="button" 
               class="fp-eye-btn" 
-              (click)="showConfirmPassword = !showConfirmPassword" 
+              (click)="showConfirmPassword = !showConfirmPassword"
               [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'">
               <app-icon [name]="showConfirmPassword ? 'eye-off' : 'eye'" [size]="16"></app-icon>
             </button>
@@ -312,38 +323,40 @@
             Back
           </button>
           <button type="submit" class="fp-btn-primary" [disabled]="isForgotLoading()">
-            <span *ngIf="!isForgotLoading()">Update Password</span>
+            <span *ngIf="!isForgotLoading()">Complete Walkthrough</span>
             <span *ngIf="isForgotLoading()" class="fp-loading-spinner"></span>
           </button>
         </div>
       </form>
     </div>
 
-    <!-- STEP 4: Success View -->
+    <!-- STEP 4: Success View (Demonstration Complete) -->
     <div class="fp-step-content fp-success-content" *ngIf="forgotStep() === 'success'">
       <div class="fp-success-badge">
-        <app-icon name="check" [size]="32"></app-icon>
+        <app-icon name="check" [size]="34"></app-icon>
       </div>
-      <h3 class="fp-title">Password Changed!</h3>
+
+      <h3 class="fp-title">Walkthrough Completed!</h3>
       <p class="fp-subtitle">
-        Your new password has been successfully updated in the database for <strong>{{ forgotEmail }}</strong>.
+        The complete recovery UI flow has been successfully demonstrated.
       </p>
 
-      <div class="fp-success-card">
-        <div class="db-sync-pill">
-          <span class="db-dot"></span>
-          <span>Database Synchronized</span>
+      <div class="fp-notice-card" style="margin-top: 1.25rem;">
+        <div class="fp-notice-header">
+          <app-icon name="shield" [size]="16"></app-icon>
+          <strong>Demonstration Notice</strong>
         </div>
+        <p>
+          In this prototype environment, shared mock accounts remain protected and passwords are <strong>not modified</strong>. Please log in using your standard demo credentials.
+        </p>
       </div>
 
       <div class="fp-actions mt-4">
-        <button type="button" class="fp-btn-primary full-width" (click)="finishAndLogin()">
-          <span>Log In with New Password</span>
-          <app-icon name="arrow-right" [size]="16"></app-icon>
+        <button type="button" class="fp-btn-primary full-width" (click)="finishWalkthrough()">
+          Return to Login
         </button>
       </div>
     </div>
 
   </div>
 </div>
-
