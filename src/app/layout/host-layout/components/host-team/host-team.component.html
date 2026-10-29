@@ -83,7 +83,7 @@
               min="1" 
               [max]="maxCoOwnerCanHold(stake.id)" 
               [ngModel]="stake.percentage" 
-              (change)="onUpdateStake(stake.id, $any($event.target).value)" 
+              (change)="onUpdateStake(stake.id, $event)" 
               class="stake-range-slider" />
             
             <!-- For Primary Host: balance display -->

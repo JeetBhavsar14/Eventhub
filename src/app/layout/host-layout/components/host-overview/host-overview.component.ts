@@ -7,8 +7,14 @@ import {
   HostPendingAction, 
   HostRecentActivity,
   HostEventStatus,
-  HostDashboardView
+  HostDashboardView,
+  BookingDataPoint
 } from '@core/models';
+
+export interface HostOverviewChartData {
+  points: BookingDataPoint[];
+  maxVal: number;
+}
 import { IconComponent, PaginationBarComponent } from '@shared/components';
 
 @Component({
@@ -23,7 +29,7 @@ export class HostOverviewComponent {
   @Input({ required: true }) hostInfo!: HostWorkspaceInfo;
   @Input({ required: true }) stats!: HostDashboardStats;
   @Input({ required: true }) selectedPeriod: '7d' | '30d' | '90d' = '30d';
-  @Input({ required: true }) chartData!: any;
+  @Input({ required: true }) chartData!: HostOverviewChartData;
   @Input({ required: true }) events: HostEventItem[] = [];
   @Input({ required: true }) upcomingEvents: HostEventItem[] = [];
   @Input({ required: true }) pendingActions: HostPendingAction[] = [];
@@ -41,7 +47,7 @@ export class HostOverviewComponent {
   @Output() toast = new EventEmitter<string>();
 
   // Interactive Chart Tooltip
-  hoveredChartPoint = signal<any | null>(null);
+  hoveredChartPoint = signal<BookingDataPoint | null>(null);
 
   // Status Filter for Recent Events
   selectedStatusFilter = signal<'all' | 'published' | 'pending' | 'draft' | 'action_required'>('all');

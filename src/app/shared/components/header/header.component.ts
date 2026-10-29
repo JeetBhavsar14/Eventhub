@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '@core/auth';
 import { ApiClient } from '@core/api';
 import { LocationService, HostApplicationService, NotificationService, EventTeamService, ToastService } from '@core/state';
-import { AppNotification } from '@core/models';
+import { AppNotification, EventItem } from '@core/models';
 import { POPULAR_CITIES, DEFAULT_RECENT_SEARCHES } from '@core/constants';
 import { IconComponent } from '../icon/icon.component';
 
@@ -109,7 +109,7 @@ export class HeaderComponent implements OnInit {
   // ── Search & Spotlight State ───────────────────────────────
   searchQuery      = signal<string>('');
   searchFocused    = signal(false);
-  allEvents        = signal<any[]>([]);
+  allEvents        = signal<EventItem[]>([]);
   recentSearches   = signal<string[]>([...DEFAULT_RECENT_SEARCHES]);
 
   readonly spotlightEvents = computed(() => {
@@ -350,7 +350,7 @@ export class HeaderComponent implements OnInit {
 
   async loadEventsForSearch() {
     try {
-      const res = await this.apiClient.get<any[]>('/events');
+      const res = await this.apiClient.get<EventItem[]>('/events');
       if (res.data) {
         this.allEvents.set(res.data);
       }

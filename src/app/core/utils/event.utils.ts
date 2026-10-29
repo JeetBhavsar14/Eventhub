@@ -12,7 +12,6 @@ export interface EventLike {
   id?: string;
   title?: string;
   ticketTypes?: TicketTypeLike[];
-  [key: string]: any;
 }
 
 /**

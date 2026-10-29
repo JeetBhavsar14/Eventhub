@@ -30,12 +30,13 @@ export class InputComponent implements ControlValueAccessor {
 
   value: string = '';
 
-  onChange: any = () => {};
-  onTouched: any = () => {};
+  onChange: (val: string) => void = () => {};
+  onTouched: () => void = () => {};
 
   // Called when input value changes
-  onInputChange(event: any) {
-    this.value = event.target.value;
+  onInputChange(event: Event) {
+    const target = event.target as HTMLInputElement | null;
+    this.value = target?.value ?? '';
     this.onChange(this.value);
   }
 
@@ -45,13 +46,13 @@ export class InputComponent implements ControlValueAccessor {
   }
 
   // --- ControlValueAccessor methods ---
-  writeValue(value: any): void {
-    this.value = value || '';
+  writeValue(value: string | number | null): void {
+    this.value = value != null ? String(value) : '';
   }
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (val: string) => void): void {
     this.onChange = fn;
   }
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
   setDisabledState?(isDisabled: boolean): void {

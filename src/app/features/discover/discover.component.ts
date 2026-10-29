@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, signal, effect, computed, HostListener, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router, ActivatedRoute } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute, Params } from '@angular/router';
 import { ApiClient } from '@core/api';
 import { LocationService } from '@core/state';
 import { ButtonComponent, EventFilterComponent, IconComponent, EventCardComponent, PaginationBarComponent } from '@shared/components';
@@ -51,8 +51,8 @@ export class DiscoverComponent implements OnInit, OnDestroy {
   
   searchQuery = signal<string>('');
   currentSlideIndex = signal(0);
-  private slideInterval: any;
-  private filterDebounceTimer: any;
+  private slideInterval: ReturnType<typeof setInterval> | null = null;
+  private filterDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 
   currentFilter: EventFilter = {
@@ -171,7 +171,7 @@ export class DiscoverComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.startCarousel();
     
-    this.route.queryParams.subscribe((params: any) => {
+    this.route.queryParams.subscribe((params: Params) => {
       this.searchQuery.set(params['search'] || '');
       this.currentFilter = {
         category: params['category'] || 'All',
@@ -219,7 +219,9 @@ export class DiscoverComponent implements OnInit, OnDestroy {
       replaceUrl: true
     });
     
-    clearTimeout(this.filterDebounceTimer);
+    if (this.filterDebounceTimer) {
+      clearTimeout(this.filterDebounceTimer);
+    }
     this.filterDebounceTimer = setTimeout(() => {
       const city = this.locationService.selectedCity();
       this.loadEvents(city, this.currentFilter, false);
@@ -246,11 +248,11 @@ export class DiscoverComponent implements OnInit, OnDestroy {
     this.startCarousel();
   }
 
-  getStartingPrice(event: any): number {
+  getStartingPrice(event: Parameters<typeof getStartingPrice>[0]): number {
     return getStartingPrice(event, 0);
   }
 
-  private async loadEvents(city: string, filter: any, isInitial: boolean = false) {
+  private async loadEvents(city: string, filter: EventFilter, isInitial: boolean = false) {
     if (isInitial || this.featuredEvents().length === 0) {
       this.isLoading.set(true);
     } else {
@@ -296,7 +298,7 @@ export class DiscoverComponent implements OnInit, OnDestroy {
   clearActiveSearch() {
     this.searchQuery.set('');
     this.currentPage.set(1);
-    const params: any = { ...this.route.snapshot.queryParams };
+    const params: Record<string, unknown> = { ...this.route.snapshot.queryParams };
     delete params['search'];
     this.router.navigate(['/discover'], { queryParams: params });
   }

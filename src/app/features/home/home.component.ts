@@ -406,7 +406,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
     });
   }
 
-  getStartingPrice(event: any): number {
+  getStartingPrice(event: Parameters<typeof getStartingPrice>[0]): number {
     return getStartingPrice(event, 0);
   }
 }

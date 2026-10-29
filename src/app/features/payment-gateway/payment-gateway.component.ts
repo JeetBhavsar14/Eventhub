@@ -5,6 +5,7 @@ import { ApiClient } from '@core/api';
 import { AuthService } from '@core/auth';
 import { BookingStateService, TicketBookingOrder } from '@core/state/booking-state.service';
 import { NotificationService, ToastService } from '@core/state';
+import { Booking } from '@core/models';
 import { ButtonComponent, IconComponent } from '@shared/components';
 import { PaymentFormComponent } from '@shared/forms';
 import * as QRCode from 'qrcode';
@@ -29,7 +30,7 @@ export class PaymentGatewayComponent implements OnInit, OnDestroy {
   isLoading = signal(true);
   isProcessing = signal(false);
   paymentSuccess = signal(false);
-  bookingResult = signal<any>(null);
+  bookingResult = signal<Booking | null>(null);
   qrCodeUrl = signal<string>('');
 
   currentUser = this.authService.currentUser;
@@ -37,7 +38,7 @@ export class PaymentGatewayComponent implements OnInit, OnDestroy {
   // 2-minute Timer (120 seconds)
   timeRemaining = signal<number>(120);
   isExpired = signal<boolean>(false);
-  private timerInterval: any = null;
+  private timerInterval: ReturnType<typeof setInterval> | null = null;
 
   @ViewChild(PaymentFormComponent) paymentForm!: PaymentFormComponent;
 
@@ -185,7 +186,7 @@ export class PaymentGatewayComponent implements OnInit, OnDestroy {
     };
 
     try {
-      const res = await this.apiClient.post<any>('/bookings', payload);
+      const res = await this.apiClient.post<Booking>('/bookings', payload);
       if (!res.error && res.data) {
         this.clearTimer();
         this.bookingState.clearPendingOrder();

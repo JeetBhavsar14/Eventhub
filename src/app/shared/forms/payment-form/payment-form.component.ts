@@ -34,8 +34,7 @@ export class PaymentFormComponent implements OnChanges {
     this.cardForm = this.fb.group({
       nameOnCard: ['', [Validators.required, Validators.minLength(2)]],
       cardNumber: ['', [Validators.required, Validators.pattern('^[0-9]{16}$')]],
-      expiry: ['', [Validators.required, Validators.pattern('^(0[1-9]|1[0-2])\\/([0-9]{2})$')]],
-      cvv: ['', [Validators.required, Validators.pattern('^[0-9]{3,4}$')]],
+      expiry: ['', [Validators.required, Validators.pattern('^(0[1-9]|1[0-2])\\/([0-9]{2})$')]]
     });
 
     this.upiForm = this.fb.group({
@@ -61,6 +60,24 @@ export class PaymentFormComponent implements OnChanges {
 
   setMethod(method: PaymentMethod) {
     this.activeMethod.set(method);
+    this.emitValidity();
+  }
+
+  fillDemoCard() {
+    this.cardForm.patchValue({
+      nameOnCard: 'Demo Customer',
+      cardNumber: '4242424242424242',
+      expiry: '12/28'
+    });
+    this.cardForm.markAsDirty();
+    this.emitValidity();
+  }
+
+  fillDemoUpi() {
+    this.upiForm.patchValue({
+      upiId: 'demo@okhdfcbank'
+    });
+    this.upiForm.markAsDirty();
     this.emitValidity();
   }
 
@@ -90,7 +107,7 @@ export class PaymentFormComponent implements OnChanges {
     return true; // QR
   }
 
-  /** Returns safe metadata only; card number and CVV never leave this component. */
+  /** Returns safe metadata only; card numbers never leave this component and CVVs are not collected. */
   public getPaymentSelection(): PaymentSelection {
     const method = this.activeMethod();
     if (method === 'card') return { method, label: 'Credit / Debit Card', cardLast4: this.cardForm.value.cardNumber?.slice(-4) };

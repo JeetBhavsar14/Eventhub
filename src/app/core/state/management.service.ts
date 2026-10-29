@@ -1,6 +1,11 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { ApiClient } from '@core/api';
-import { ManagementStaffMember } from '@core/models';
+import { ManagementStaffMember, EventItem } from '@core/models';
+
+interface MonitoredEventSource extends EventItem {
+  hostName?: string;
+  organization?: string;
+}
 
 export interface ManagementMonitoredEvent {
   id: string;
@@ -55,7 +60,7 @@ export class ManagementService {
 
     try {
       const [eventsRes, staffRes] = await Promise.all([
-        this.api.get<any[]>('/events'),
+        this.api.get<MonitoredEventSource[]>('/events'),
         this.api.get<ManagementStaffMember[]>('/staffRoster')
       ]);
 
@@ -66,7 +71,7 @@ export class ManagementService {
 
       if (eventsRes.data) {
         // Events specifically delegated by Event Owners to this Management operations desk
-        const mappedMonitored: ManagementMonitoredEvent[] = eventsRes.data.slice(0, 4).map((e: any, idx: number) => ({
+        const mappedMonitored: ManagementMonitoredEvent[] = eventsRes.data.slice(0, 4).map((e: MonitoredEventSource, idx: number) => ({
           id: e.id,
           title: e.title,
           hostName: e.hostName || 'Riya Mehta (Event Owner)',
@@ -85,8 +90,9 @@ export class ManagementService {
       if (staffRes.data) {
         this.staffRoster.set(staffRes.data);
       }
-    } catch (err: any) {
-      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
+    } catch (err: unknown) {
+      const apiErr = err as { userMessage?: string } | null;
+      this.error.set(apiErr?.userMessage || 'An unexpected error occurred. Please try again.');
     } finally {
       this.isLoading.set(false);
     }

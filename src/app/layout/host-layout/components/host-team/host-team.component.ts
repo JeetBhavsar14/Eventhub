@@ -47,8 +47,12 @@ export class HostTeamComponent {
     return target.percentage + Math.max(0, primary.percentage - 1);
   }
 
-  onUpdateStake(stakeId: string, value: any): void {
-    const percentage = Number(value);
+  onUpdateStake(stakeId: string, event: Event | string | number): void {
+    let rawVal: unknown = event;
+    if (event && typeof event === 'object' && 'target' in event) {
+      rawVal = (event.target as HTMLInputElement | null)?.value;
+    }
+    const percentage = Number(rawVal);
     if (!isNaN(percentage)) {
       this.updateStake.emit({ stakeId, percentage });
     }

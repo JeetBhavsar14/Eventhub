@@ -97,7 +97,7 @@ export const routes: Routes = [
           { 
             path: 'privacy', 
             loadComponent: () => import('./features/info-page/info-page.component').then(m => m.InfoPageComponent), 
-            data: { title: 'Privacy Policy', intro: 'How this demonstration app handles your local data.', sections: [{ heading: 'Local data', body: 'Profile, booking and gift-card records are stored in the local json-server database used by this project.' }, { heading: 'Payment details', body: 'Card number and CVV are validated for the mock checkout but are not stored with bookings or gift cards.' }] } 
+            data: { title: 'Privacy Policy', intro: 'How this demonstration app handles your local data.', sections: [{ heading: 'Local data', body: 'Profile, booking and gift-card records are stored in the local json-server database used by this project.' }, { heading: 'Payment details', body: 'Card numbers are simulated in demo mode and CVVs are never collected or stored.' }] } 
           },
           { 
             path: 'cancellation', 

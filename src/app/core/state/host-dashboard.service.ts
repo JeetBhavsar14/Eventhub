@@ -12,7 +12,10 @@ import {
   HostAttendeeRecord,
   HostNotificationItem,
   HostDashboardView,
-  DashboardPrototypeState
+  DashboardPrototypeState,
+  EventItem,
+  Booking,
+  BookingTicket
 } from '@core/models';
 
 @Injectable({
@@ -40,10 +43,10 @@ export class HostDashboardService {
     this.error.set(null);
     try {
       const [eventsRes, actsRes, notifsRes, bookingsRes] = await Promise.all([
-        this.api.get<any[]>('/events'),
+        this.api.get<EventItem[]>('/events'),
         this.api.get<HostRecentActivity[]>('/hostActivities'),
         this.api.get<HostNotificationItem[]>('/hostNotifications'),
-        this.api.get<any[]>('/bookings')
+        this.api.get<Booking[]>('/bookings')
       ]);
 
       const firstError = eventsRes?.error || actsRes?.error || notifsRes?.error || bookingsRes?.error;
@@ -52,7 +55,7 @@ export class HostDashboardService {
       }
 
       if (eventsRes.data && eventsRes.data.length > 0) {
-        const mappedEvents: HostEventItem[] = eventsRes.data.map((e: any) => ({
+        const mappedEvents: HostEventItem[] = eventsRes.data.map((e: EventItem) => ({
           id: e.id,
           title: e.title,
           category: e.category || 'Music & Concerts',
@@ -65,7 +68,7 @@ export class HostDashboardService {
           bookingsCount: e.capacity ? Math.floor(e.capacity * 0.4) : 120,
           capacity: e.capacity || 500,
           price: e.ticketTypes?.[0]?.price ?? 500,
-          status: e.status || 'published',
+          status: (e.status === 'cancelled' ? 'rejected' : e.status === 'draft' ? 'draft' : 'published') as HostEventStatus,
           revenue: (e.ticketTypes?.[0]?.price ?? 500) * (e.capacity ? Math.floor(e.capacity * 0.4) : 120),
           daysRemaining: 15,
           description: e.description || 'Live curated experience.'
@@ -82,21 +85,22 @@ export class HostDashboardService {
       }
 
       if (bookingsRes.data && bookingsRes.data.length > 0) {
-        const mappedAttendees: HostAttendeeRecord[] = bookingsRes.data.map((b: any) => ({
+        const mappedAttendees: HostAttendeeRecord[] = bookingsRes.data.map((b: Booking) => ({
           orderId: b.bookingReference || b.id || 'ORD-9820',
           attendeeName: b.attendee?.name || 'Devansh Kothari',
           email: b.attendee?.email || 'devansh@example.com',
           eventTitle: b.eventTitle || 'Mumbai Festivals Showcase 1',
           tier: b.tickets?.[0]?.name ? `${b.tickets[0].name} Pass` : 'General Admission',
-          ticketsCount: b.tickets?.reduce((acc: number, t: any) => acc + (t.quantity || 1), 0) || 1,
+          ticketsCount: b.tickets?.reduce((acc: number, t: BookingTicket) => acc + (t.quantity || 1), 0) || 1,
           totalAmount: b.totalAmount || 1500,
           bookingDate: b.createdAt ? new Date(b.createdAt).toLocaleDateString() : 'Today',
           checkInStatus: 'pending'
         }));
         this.attendees.set(mappedAttendees);
       }
-    } catch (err: any) {
-      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
+    } catch (err: unknown) {
+      const apiErr = err as { userMessage?: string } | null;
+      this.error.set(apiErr?.userMessage || 'An unexpected error occurred. Please try again.');
       console.warn('Could not connect to mock server, using cached default signals', err);
     } finally {
       this.isLoading.set(false);
@@ -807,7 +811,7 @@ export class HostDashboardService {
     );
   }
 
-  inviteTeamMember(name: string, email: string, role: any) {
+  inviteTeamMember(name: string, email: string, role: HostTeamMember['role']) {
     const newMember: HostTeamMember = {
       id: `TM-${Date.now()}`,
       name,

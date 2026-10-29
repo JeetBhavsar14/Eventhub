@@ -67,8 +67,9 @@ export class NotificationService {
 
         this.notifications.set(userNotifs);
       }
-    } catch (err: any) {
-      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
+    } catch (err: unknown) {
+      const apiErr = err as { userMessage?: string } | null;
+      this.error.set(apiErr?.userMessage || 'An unexpected error occurred. Please try again.');
     } finally {
       this.isLoading.set(false);
     }

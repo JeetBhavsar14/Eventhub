@@ -348,10 +348,10 @@ export class EventFilterComponent implements OnInit, OnDestroy {
     }
   }
 
-  private priceDebounceTimer: any;
+  private priceDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ── Price Input Range Limits (Debounced to prevent screen flicker) ──────
-  onMinPriceChange(val: any): void {
+  onMinPriceChange(val: string | number | null | undefined): void {
     let num = val !== null && val !== '' ? Number(val) : undefined;
     if (num !== undefined) {
       if (num < this.minPriceLimit) num = this.minPriceLimit;
@@ -362,13 +362,15 @@ export class EventFilterComponent implements OnInit, OnDestroy {
     }
     this.currentFilter.minPrice = num;
 
-    clearTimeout(this.priceDebounceTimer);
+    if (this.priceDebounceTimer) {
+      clearTimeout(this.priceDebounceTimer);
+    }
     this.priceDebounceTimer = setTimeout(() => {
       this.emitChange();
     }, 220);
   }
 
-  onMaxPriceChange(val: any): void {
+  onMaxPriceChange(val: string | number | null | undefined): void {
     let num = val !== null && val !== '' ? Number(val) : undefined;
     if (num !== undefined) {
       if (num < this.minPriceLimit) num = this.minPriceLimit;
@@ -379,7 +381,9 @@ export class EventFilterComponent implements OnInit, OnDestroy {
     }
     this.currentFilter.maxPrice = num;
 
-    clearTimeout(this.priceDebounceTimer);
+    if (this.priceDebounceTimer) {
+      clearTimeout(this.priceDebounceTimer);
+    }
     this.priceDebounceTimer = setTimeout(() => {
       this.emitChange();
     }, 220);

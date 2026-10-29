@@ -20,7 +20,8 @@ import {
   EventOwnerStake,
   EventManagerAssignment,
   EventParticipantProfile,
-  ManagerResponsibilityArea
+  ManagerResponsibilityArea,
+  StaffResponsibility
 } from '@core/models';
 import { SelectComponent, SelectOption, IconComponent, ConfirmDialogComponent } from '@shared/components';
 import { HostMyEventsComponent } from './components/host-my-events/host-my-events.component';
@@ -136,7 +137,7 @@ export class HostLayoutComponent implements OnInit {
     customRoleName: '',
     designationPreset: 'gate_scanner',
     designation: 'Gate & Barcode Scanner',
-    responsibility: 'ticketing',
+    responsibility: 'ticketing' as StaffResponsibility,
     permissions: ['scan_tickets', 'view_attendees', 'view_duty'] as string[]
   };
 
@@ -758,7 +759,7 @@ export class HostLayoutComponent implements OnInit {
       customRoleName: '',
       designationPreset: 'gate_scanner',
       designation: 'Gate & Barcode Scanner',
-      responsibility: 'ticketing',
+      responsibility: 'ticketing' as StaffResponsibility,
       permissions: ['scan_tickets', 'view_attendees', 'view_duty']
     };
     this.showInviteTeamModal.set(true);

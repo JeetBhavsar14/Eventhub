@@ -17,16 +17,28 @@
   <div class="payment-content">
     <!-- Card Form -->
     <form *ngIf="activeMethod() === 'card'" [formGroup]="cardForm" class="card-form fade-in">
+      <div class="demo-notice-bar">
+        <div class="demo-notice-text">
+          <span class="demo-tag">Demo Mode</span>
+          <span>CVV is disabled for security. Test with mock card details.</span>
+        </div>
+        <button type="button" class="btn-demo-quick" (click)="fillDemoCard()">Fill Demo Card</button>
+      </div>
+
       <app-input formControlName="nameOnCard" label="Name on card" placeholder="Cardholder name" [required]="true"></app-input>
       <app-input formControlName="cardNumber" label="Card Number" placeholder="0000000000000000" type="tel" [required]="true" [maxLength]="16"></app-input>
-      <div class="form-row">
-        <app-input formControlName="expiry" label="Expiry Date" placeholder="MM/YY" [required]="true" [maxLength]="5"></app-input>
-        <app-input formControlName="cvv" label="CVV" placeholder="123" type="password" [required]="true" [maxLength]="4"></app-input>
-      </div>
+      <app-input formControlName="expiry" label="Expiry Date" placeholder="MM/YY" [required]="true" [maxLength]="5"></app-input>
     </form>
 
     <!-- UPI Form -->
     <form *ngIf="activeMethod() === 'upi'" [formGroup]="upiForm" class="upi-form fade-in">
+      <div class="demo-notice-bar">
+        <div class="demo-notice-text">
+          <span class="demo-tag">Demo Mode</span>
+          <span>Simulated UPI validation flow.</span>
+        </div>
+        <button type="button" class="btn-demo-quick" (click)="fillDemoUpi()">Fill Demo UPI</button>
+      </div>
       <app-input formControlName="upiId" label="UPI ID / VPA" placeholder="username@bank" [required]="true"></app-input>
       <p class="hint">A payment request will be sent to your UPI app.</p>
     </form>

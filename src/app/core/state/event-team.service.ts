@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { ApiClient } from '@core/api';
-import { EventMembership, EventInvitation, MembershipRole, EventOperationalRole, EventParticipantType } from '@core/models';
+import { EventMembership, EventInvitation, MembershipRole, EventOperationalRole, EventParticipantType, StaffResponsibility } from '@core/models';
 
 @Injectable({
   providedIn: 'root'
@@ -44,8 +44,9 @@ export class EventTeamService {
       if (invRes.data) {
         this.invitations.set(invRes.data);
       }
-    } catch (err: any) {
-      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
+    } catch (err: unknown) {
+      const apiErr = err as { userMessage?: string } | null;
+      this.error.set(apiErr?.userMessage || 'An unexpected error occurred. Please try again.');
     } finally {
       this.isLoading.set(false);
     }
@@ -68,7 +69,7 @@ export class EventTeamService {
     customRoleName?: string,
     options?: {
       designation?: string;
-      responsibility?: any;
+      responsibility?: StaffResponsibility;
       permissions?: string[];
     }
   ): Promise<{ success: boolean; message: string }> {

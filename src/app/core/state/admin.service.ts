@@ -1,6 +1,16 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { ApiClient } from '@core/api';
-import { AdminHostApplication, AdminCurationEvent, AdminUser, AdminBroadcast, AdminSettlement } from '@core/models';
+import { AdminHostApplication, AdminCurationEvent, AdminUser, AdminBroadcast, AdminSettlement, EventItem, User } from '@core/models';
+
+interface StoredAdminEvent extends EventItem {
+  hostName?: string;
+  organization?: string;
+}
+interface StoredAdminUser extends User {
+  status?: AdminUser['status'];
+  avatar?: string;
+  totalBookings?: number;
+}
 
 export type { AdminHostApplication, AdminCurationEvent, AdminUser, AdminBroadcast, AdminSettlement };
 
@@ -88,8 +98,8 @@ export class AdminService {
     try {
       const [appsRes, eventsRes, usersRes, bcRes] = await Promise.all([
         this.api.get<AdminHostApplication[]>('/hostApplications'),
-        this.api.get<any[]>('/events'),
-        this.api.get<any[]>('/users'),
+        this.api.get<StoredAdminEvent[]>('/events'),
+        this.api.get<StoredAdminUser[]>('/users'),
         this.api.get<AdminBroadcast[]>('/broadcasts')
       ]);
 
@@ -99,7 +109,7 @@ export class AdminService {
       }
 
       if (appsRes.data) {
-        const mappedApps = appsRes.data.map((a: any) => ({
+        const mappedApps = appsRes.data.map((a: AdminHostApplication) => ({
           ...a,
           submittedAt: a.submittedAt || a.submittedDate || 'Recently'
         }));
@@ -107,7 +117,7 @@ export class AdminService {
       }
 
       if (eventsRes.data) {
-        const mappedEvents: AdminCurationEvent[] = eventsRes.data.map((e: any) => ({
+        const mappedEvents: AdminCurationEvent[] = eventsRes.data.map((e: StoredAdminEvent) => ({
           id: e.id,
           title: e.title,
           hostName: e.hostName || (e.location?.city ? `${e.location.city} Organizer` : 'Event Producer'),
@@ -119,7 +129,7 @@ export class AdminService {
           ticketPrice: e.ticketTypes?.[0]?.price ?? 0,
           soundPermitUploaded: true,
           venuePermitUploaded: true,
-          status: e.status === 'published' ? 'approved' : e.status === 'rejected' ? 'rejected' : 'pending_review',
+          status: e.status === 'published' ? 'approved' : e.status === 'cancelled' ? 'rejected' : 'pending_review',
           isFeatured: !!e.isFeatured,
           imageUrl: e.thumbnailUrl || 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=800&q=80'
         }));
@@ -127,14 +137,14 @@ export class AdminService {
       }
 
       if (usersRes.data) {
-        const mappedUsers: AdminUser[] = usersRes.data.map((u: any) => ({
+        const mappedUsers: AdminUser[] = usersRes.data.map((u: StoredAdminUser) => ({
           id: u.id,
           name: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email.split('@')[0],
           email: u.email,
           phone: u.phone || '+91 98000 00000',
-          role: u.platformRole || (u.isHost ? 'host' : 'user'),
+          role: (u.platformRole === 'super_admin' ? 'admin' : (u.platformRole || (u.isHost ? 'host' : 'user'))) as AdminUser['role'],
           status: u.status || 'active',
-          avatar: u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.email}`,
+          avatar: u.avatar || u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.email}`,
           joinedDate: u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '2025-01-01',
           totalSpent: u.platformRole === 'admin' ? 0 : 4200,
           totalBookings: u.totalBookings ?? 3,
@@ -146,8 +156,9 @@ export class AdminService {
       if (bcRes.data) {
         this.broadcasts.set(bcRes.data);
       }
-    } catch (err: any) {
-      this.error.set(err?.userMessage || 'An unexpected error occurred. Please try again.');
+    } catch (err: unknown) {
+      const apiErr = err as { userMessage?: string } | null;
+      this.error.set(apiErr?.userMessage || 'An unexpected error occurred. Please try again.');
     } finally {
       this.isLoading.set(false);
     }

@@ -2,9 +2,9 @@ import { Component, Input, Output, EventEmitter, forwardRef, ElementRef, HostLis
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
-export interface SelectOption {
+export interface SelectOption<T = unknown> {
   label: string;
-  value: any;
+  value: T;
   icon?: string;
   badge?: string;
   disabled?: boolean;
@@ -65,14 +65,14 @@ export class SelectComponent implements ControlValueAccessor {
   }
 
 
-  @Output() selectionChange = new EventEmitter<any>();
+  @Output() selectionChange = new EventEmitter<string>();
 
   isOpen = signal(false);
   openUpward = signal(false);
-  selectedValue: any = null;
+  selectedValue: unknown = null;
 
-  onChange: any = () => {};
-  onTouched: any = () => {};
+  onChange: (val: unknown) => void = () => {};
+  onTouched: () => void = () => {};
 
   constructor(private elementRef: ElementRef) {}
 
@@ -120,7 +120,7 @@ export class SelectComponent implements ControlValueAccessor {
 
     this.selectedValue = opt.value;
     this.onChange(this.selectedValue);
-    this.selectionChange.emit(this.selectedValue);
+    this.selectionChange.emit(opt.value != null ? String(opt.value) : '');
     this.isOpen.set(false);
   }
 
@@ -137,15 +137,15 @@ export class SelectComponent implements ControlValueAccessor {
   }
 
   // --- ControlValueAccessor methods ---
-  writeValue(val: any): void {
+  writeValue(val: unknown): void {
     this.selectedValue = val;
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (val: unknown) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 

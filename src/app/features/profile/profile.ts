@@ -15,7 +15,7 @@ export type ProfileTab = 'dashboard' | 'bookings' | 'personal' | 'payments' | 'r
 export interface RoleWorkspaceTask {
   title: string;
   route: string;
-  queryParams?: Record<string, any>;
+  queryParams?: Record<string, string | number | boolean | undefined>;
   icon: string;
   description: string;
   badge?: string;

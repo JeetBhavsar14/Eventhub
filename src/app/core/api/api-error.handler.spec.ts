@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { handleApiError } from './api-error.handler';
 
 describe('handleApiError', () => {
@@ -9,7 +9,7 @@ describe('handleApiError', () => {
       status,
       statusText: 'Error',
       headers: {},
-      config: {} as any,
+      config: {} as InternalAxiosRequestConfig,
       data
     } as AxiosResponse;
     if (code) error.code = code;
