@@ -35,9 +35,21 @@ loadEnv();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const DB_FILE = path.resolve('db.json');
 const SEED_FILE = path.resolve('db.seed.example.json');
-const JWT_SECRET = (process.env.JWT_SECRET && !process.env.JWT_SECRET.startsWith('replace-with-'))
-  ? process.env.JWT_SECRET
-  : 'eventhub-demo-cryptographic-jwt-secret-key-change-in-production';
+// 2. Validate configuration and eliminate hardcoded server secrets
+function resolveJwtSecret() {
+  const envSecret = process.env.JWT_SECRET;
+  if (envSecret && !envSecret.startsWith('replace-with-')) {
+    return envSecret;
+  }
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('[Mock Server Fatal] JWT_SECRET must be configured in environment variables for production.');
+  }
+  const ephemeralSecret = crypto.randomBytes(32).toString('hex');
+  console.warn('[Mock Server] ⚠️  JWT_SECRET not configured in .env; generated an ephemeral in-memory secret for this session.');
+  return ephemeralSecret;
+}
+
+const JWT_SECRET = resolveJwtSecret();
 
 // 2. Cryptographic JWT Helpers (HMAC-SHA256 with timing-safe verification)
 export function signJwt(payload) {
@@ -113,20 +125,60 @@ if (sanitizedAny) {
   await db.write();
 }
 
-// 5. Distinct, role-specific demo credentials loaded from environment variables
-// (Universal fallback passwords completely eliminated)
-const getCredential = (envKey, fallback) => {
-  const val = process.env[envKey];
-  return (val && !val.startsWith('replace-with-')) ? val : fallback;
-};
+// 5. Validate required configuration and resolve role credentials
+// (Fallback secrets committed to version control are completely eliminated)
+const DEMO_ROLES = [
+  { email: 'admin@eventhub.com', role: 'Super Admin', envKey: 'DEMO_ADMIN_PASSWORD' },
+  { email: 'host@eventhub.com', role: 'Host / Organizer', envKey: 'DEMO_HOST_PASSWORD' },
+  { email: 'management@eventhub.com', role: 'Management / Ops', envKey: 'DEMO_MANAGEMENT_PASSWORD' },
+  { email: 'staff@eventhub.com', role: 'Field Staff', envKey: 'DEMO_STAFF_PASSWORD' },
+  { email: 'jeet@eventhub.com', role: 'Standard User', envKey: 'DEMO_USER_PASSWORD' }
+];
 
-const DEMO_CREDENTIALS = new Map([
-  ['admin@eventhub.com', getCredential('DEMO_ADMIN_PASSWORD', 'Admin@EventHub#2026')],
-  ['host@eventhub.com', getCredential('DEMO_HOST_PASSWORD', 'Host@EventHub#2026')],
-  ['management@eventhub.com', getCredential('DEMO_MANAGEMENT_PASSWORD', 'Manage@EventHub#2026')],
-  ['staff@eventhub.com', getCredential('DEMO_STAFF_PASSWORD', 'Staff@EventHub#2026')],
-  ['jeet@eventhub.com', getCredential('DEMO_USER_PASSWORD', 'User@EventHub#2026')]
-]);
+function resolveDemoCredentials() {
+  const credentials = new Map();
+  const unconfigured = [];
+
+  for (const item of DEMO_ROLES) {
+    const configured = process.env[item.envKey];
+    if (configured && !configured.startsWith('replace-with-')) {
+      credentials.set(item.email, configured);
+    } else {
+      unconfigured.push(item);
+    }
+  }
+
+  if (unconfigured.length > 0) {
+    if (process.env.NODE_ENV === 'production') {
+      const missingKeys = unconfigured.map(u => u.envKey).join(', ');
+      throw new Error(`[Mock Server Fatal] Missing required credentials in production: ${missingKeys}`);
+    }
+
+    console.warn(`[Mock Server] ⚠️  ${unconfigured.length} demo credentials not configured in .env.`);
+    console.warn('[Mock Server] ℹ️  Generating ephemeral session passwords for local development.\n');
+
+    const tableData = [];
+    for (const item of unconfigured) {
+      // Ephemeral random password for development session (never committed to git)
+      const ephemeralPassword = `Dev#${crypto.randomBytes(4).toString('hex')}!`;
+      credentials.set(item.email, ephemeralPassword);
+      tableData.push({
+        Role: item.role,
+        Email: item.email,
+        'Env Key': item.envKey,
+        'Session Password': ephemeralPassword
+      });
+    }
+    console.table(tableData);
+    console.warn('[Mock Server] 💡 Tip: Copy .env.example to .env to define persistent custom credentials.\n');
+  } else {
+    console.log('[Mock Server] ✅ Verified environment configuration: All 5 demo credentials loaded from .env.');
+  }
+
+  return credentials;
+}
+
+const DEMO_CREDENTIALS = resolveDemoCredentials();
 
 // Track runtime-registered passwords in-memory
 const REGISTERED_CREDENTIALS = new Map();
