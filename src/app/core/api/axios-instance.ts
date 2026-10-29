@@ -1,18 +1,19 @@
-import axios from "axios";
-import { config } from "rxjs";
+import axios from 'axios';
+import { environment } from '@env/environment';
 
-export const axiosInstance=axios.create({
-    baseURL:'http://localhost:3000',
-    timeout: 10000,
-    headers:{
-        "Content-Type":"application/json",
-    },
+export const axiosInstance = axios.create({
+  baseURL: environment.apiBaseUrl,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
+
 axiosInstance.interceptors.request.use(
   (config) => {
     // 1. Read token from local storage directly (avoids circular dependency)
     const storedToken = localStorage.getItem('eventhub_token');
-    
+
     // 2. If token exists, parse it and attach it to the headers
     if (storedToken) {
       try {
@@ -23,7 +24,7 @@ axiosInstance.interceptors.request.use(
         // If parsing fails, just ignore and send without token
       }
     }
-    
+
     return config;
   },
   (error) => {
