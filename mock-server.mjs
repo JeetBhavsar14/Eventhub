@@ -183,20 +183,32 @@ const DEMO_CREDENTIALS = resolveDemoCredentials();
 // Track runtime-registered passwords in-memory
 const REGISTERED_CREDENTIALS = new Map();
 
+// 5b. Resolve allowed CORS origins (explicit development allowlist with env override)
+function resolveAllowedOrigins() {
+  const envOrigins = process.env.ALLOWED_ORIGINS || process.env.CORS_ORIGIN;
+  if (envOrigins) {
+    return envOrigins.split(',').map((o) => o.trim()).filter(Boolean);
+  }
+  // Local Angular development server origins
+  return ['http://localhost:4200', 'http://127.0.0.1:4200'];
+}
+
+const ALLOWED_ORIGINS = resolveAllowedOrigins();
+
 // 6. Create base json-server application & wrapper app
 const jsonServerApp = createApp(db);
 const app = new App();
 
-// CORS configuration
-app.use(
-  cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-  })
-);
+// CORS configuration with explicit origin allowlist
+const corsMiddleware = cors({
+  origin: ALLOWED_ORIGINS,
+  credentials: true,
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+});
 
-app.options('*', cors());
+app.use(corsMiddleware);
+app.options('*', corsMiddleware);
 app.use(json());
 
 // 7. Secure Mock Auth Endpoint: POST /auth/login
@@ -362,6 +374,7 @@ app.listen(PORT, () => {
   console.log(`\n======================================================`);
   console.log(`🚀 EventHub Mock API & Cryptographic Auth Server Running`);
   console.log(`📡 URL: http://localhost:${PORT}`);
+  console.log(`🌐 CORS Allowed Origins: ${ALLOWED_ORIGINS.join(', ')}`);
   console.log(`🔐 Cryptographic Security:`);
   console.log(`   - HMAC-SHA256 Token Signing Active (Node.js crypto)`);
   console.log(`   - Session Verification: GET http://localhost:${PORT}/auth/me`);
