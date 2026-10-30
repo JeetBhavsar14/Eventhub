@@ -1,230 +1,351 @@
-# EventHub — Modern Event Management & Discovery Platform
+# EventHub – Event Management System
 
-[![Angular](https://img.shields.io/badge/Angular-21.0-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Status](https://img.shields.io/badge/Prototype-Active_Development-4F46E5?style=for-the-badge)](#)
+EventHub is an event management web application built using Angular. The project aims to bring event discovery, ticket booking, event hosting, team management, and platform administration into one application.
 
-**EventHub** is a modern, full-featured event discovery, hosting, operations, and governance web application built with **Angular 21 (Standalone Components & Signals)** and powered by a local REST mock backend (`json-server`).
+The application provides separate workspaces for attendees, event hosts, management teams, field staff, and administrators.
 
-The platform provides a complete ecosystem for all event stakeholders:
-- 🎟️ **Attendees & Public Users**: Discover events, filter by category/city/date, inspect venue details, book tickets with interactive seat selection, apply gift cards/offers, and manage tickets with live QR codes.
-- 🏢 **Event Hosts**: Create and edit event listings, manage tier pricing, monitor ticket sales & revenue analytics, manage team staff permissions, and submit organizer verification dossiers.
-- ⚡ **Management / Operations Staff**: Review incoming event approvals, inspect changes requested, manage live operational incidents, and monitor attendance metrics.
-- 🛡️ **Super Admin**: Platform-wide governance, user directory role reassignment (freeze/suspend/assign roles), event curation gatekeeping (Hero showcase / Delist), host verification queue (with responsive mobile cards), and financial GMV / 5% platform cut escrow settlements.
+I am developing this project with a focus on modular architecture, reusable components, centralized API communication, and maintainable frontend code.
+
+**Project Status:** Active Development
 
 ---
 
-## 🚀 Quick Start & Development Setup
+## Features
+
+### 1. Event Discovery
+- Browse and explore events.
+- Search events.
+- Filter events by category.
+- Explore events based on location.
+- View event details and ticket information.
+
+### 2. User / Attendee
+- User registration and login.
+- Event and ticket selection.
+- Checkout and payment form interface.
+- Apply offers and discounts.
+- View booking details.
+- Generate QR-code-based digital tickets.
+- Manage user profile.
+
+### 3. Host / Organizer Dashboard
+- Dashboard with event statistics.
+- Create and manage events.
+- Edit event information.
+- Manage ticket categories and pricing.
+- View bookings and attendee information.
+- Event performance analytics.
+- Manage event team members.
+- Multiple event co-owners and ownership allocation.
+- Ownership percentage validation (100%).
+- Assign event managers and operational responsibilities.
+- Manage event participants, speakers, artists, and sponsors.
+- Notifications and organizer settings.
+
+### 4. Management Dashboard
+- Management workspace.
+- Event approval-related workflows.
+- Operational management screens.
+
+### 5. Field Staff Dashboard
+- Staff workspace.
+- Ticket validation interface.
+- QR-code-based check-in experience.
+- Attendance tracking.
+
+### 6. Super Admin Dashboard
+- Platform overview and analytics.
+- Host application management.
+- Event curation and management.
+- User directory and role management.
+- Financial settlement and payout screens.
+
+### 7. Shared Application Features
+- Centralized Axios API client.
+- Centralized API error handling.
+- Authentication and role-based route guards.
+- Angular Signals for reactive state management.
+- Reusable confirmation dialogs.
+- Reusable pagination component.
+- Toast notification system.
+- Responsive layouts.
+- Lazy-loaded application routes.
+
+---
+
+## Technology Stack
+
+| Technology | Purpose |
+|---|---|
+| Angular 21 | Frontend framework |
+| TypeScript 5.9 | Application development |
+| HTML5 & CSS3 | UI and styling |
+| Angular Signals | Reactive state management |
+| Angular Router | Routing and navigation |
+| Axios | API communication |
+| RxJS | Reactive programming |
+| json-server | Mock REST API |
+| LowDB | Local JSON data persistence |
+| qrcode | QR code generation |
+| Vitest | Unit testing |
+| npm | Package management |
+
+---
+
+## Project Structure
+
+The application follows a modular structure to keep features, shared components, and application services separate.
+
+```text
+src/
+└── app/
+    ├── core/
+    │   ├── api/
+    │   ├── auth/
+    │   ├── authorization/
+    │   ├── constants/
+    │   ├── models/
+    │   ├── state/
+    │   ├── storage/
+    │   └── utils/
+    │
+    ├── features/
+    │   ├── auth/
+    │   ├── bookings/
+    │   ├── checkout/
+    │   ├── discover/
+    │   ├── event-details/
+    │   ├── gift-cards/
+    │   ├── offers/
+    │   ├── payment-gateway/
+    │   ├── profile/
+    │   └── host-event/
+    │
+    ├── layout/
+    │   ├── admin-layout/
+    │   ├── host-layout/
+    │   ├── management-layout/
+    │   ├── staff-layout/
+    │   ├── main-layout/
+    │   └── shell/
+    │
+    ├── shared/
+    │   ├── components/
+    │   └── forms/
+    │
+    ├── app.routes.ts
+    └── app.config.ts
+```
+
+### Architecture Approach
+
+- **Core:** Application-wide services, authentication, API communication, models, and state management.
+- **Features:** Individual application modules such as discovery, bookings, checkout, and profiles.
+- **Layout:** Separate workspaces for different user roles.
+- **Shared:** Reusable UI components and forms.
+
+For API communication, the application follows this structure:
+
+```text
+Feature Component
+       |
+       v
+Feature Service
+       |
+       v
+Centralized ApiClient
+       |
+       v
+Axios Instance
+       |
+       v
+Mock API
+```
+
+---
+
+## Authentication
+
+EventHub currently uses a custom mock authentication implementation.
+
+It includes:
+- Login and registration endpoints.
+- JWT generation using HMAC-SHA256.
+- Token signature and expiration verification.
+- Session validation through `/auth/me`.
+- Role-based frontend route guards.
+- Environment-based demo credentials.
+
+### User Roles
+
+| Role | Landing Route |
+|---|---|
+| Super Admin | `/admin` |
+| Host | `/host/dashboard` |
+| Management | `/management` |
+| Field Staff | `/staff` |
+| Standard User | `/discover` |
+
+Frontend route guards control navigation. Backend authorization must be implemented independently for production use.
+
+---
+
+## Getting Started
 
 ### Prerequisites
-- **Node.js**: v18+ or v20+
-- **npm**: v9+ (or v11)
 
-### 1. Clone & Install Dependencies
+- Node.js compatible with Angular 21
+- npm
+- Git
+
+### 1. Clone the repository
+
 ```bash
-git clone <repository-url>
+git clone https://github.com/JeetBhavsar14/Eventhub.git
 cd Eventhub
+```
+
+### 2. Install dependencies
+
+```bash
 npm install
 ```
 
-### 2. Run Local Mock Backend (`json-server`)
-The application uses `db.json` on port `3000` to simulate database records and REST endpoints:
+### 3. Configure environment variables
+
+Create your local `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+For Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Configure your local demo credentials and JWT secret in `.env`.
+
+### 4. Start the mock API
+
 ```bash
 npm run mock-api
 ```
-*(Starts REST API at `http://localhost:3000`)*
 
-### 3. Start Angular Development Server
-In a separate terminal, launch the Angular application:
-```bash
-npm start
-# or: ng serve
-```
-Open your browser and navigate to: **`http://localhost:4200/`**
-
----
-
-## 🔐 Demo Credentials & Role Access
-
-Demo account credentials are kept out of tracked database records and public code repositories. They are configured locally in your environment via `.env` (copied from `.env.example`).
-
-| Role | Configured Demo Email | Environment Variable in `.env` | Assigned Landing Route |
-| :--- | :--- | :--- | :--- |
-| **Super Admin** | `admin@eventhub.com` | `DEMO_ADMIN_PASSWORD` | `/admin` |
-| **Host / Organizer** | `host@eventhub.com` | `DEMO_HOST_PASSWORD` | `/host/dashboard` |
-| **Management / Ops** | `management@eventhub.com` | `DEMO_MANAGEMENT_PASSWORD` | `/management` |
-| **Field Staff** | `staff@eventhub.com` | `DEMO_STAFF_PASSWORD` | `/staff` |
-| **Standard User** | `jeet@eventhub.com` | `DEMO_USER_PASSWORD` | `/discover` |
-
-> **⚠️ Security Architecture Note (Demo/Prototype vs Production):**
-> - **Zero Plaintext Passwords in Database & Bundles:** Passwords are completely omitted from `db.json`, `db.seed.example.json`, and Angular client bundles.
-> - **Cryptographic HMAC-SHA256 Sessions:** The mock backend cryptographically signs JWTs using `JWT_SECRET`. Sessions are validated against `GET /auth/me` on startup. If `localStorage` is tampered with in the browser, the server rejects the signature and the session is immediately revoked.
-> - **Distinct Credentials (No Shared Passwords):** Each role requires its own distinct password. Universal fallback passwords have been completely eliminated.
-> - **Frontend Guards as UX Aids:** Frontend Angular Route Guards (`authGuard`, `roleGuard`) provide UI flow control and navigation convenience. In production, backend APIs must independently enforce cryptographic JWT validation and RBAC/ABAC authorization.
-
----
-
-## 🏗️ Architecture & Technology Stack
-
-| Layer | Technology | Details |
-| :--- | :--- | :--- |
-| **Frontend Framework** | **Angular 21** | 100% Standalone components, reactive Signals, inject-based DI |
-| **Language** | **TypeScript 5.9** | Strict type-safety, robust interface contracts |
-| **Styling** | **Vanilla CSS3** | Custom design tokens, glassmorphism, responsive flex/grid layouts |
-| **State Management** | **Angular Signals** | `signal()`, `computed()`, and reactive service stores |
-| **HTTP Client** | **Axios + ApiClient** | Wrapped under `@core/api/api-client.service.ts` returning `{ data, error }` |
-| **Mock Database** | **json-server** | `db.json` containing users, events, host applications, payouts, & tickets |
-| **QR Code Generation**| **qrcode** | Dynamic QR code generation for digital event ticket check-ins |
-
----
-
-## 📁 Repository Directory Structure
+The mock API runs on:
 
 ```text
-Eventhub/
-├── db.json                     # Mock database (Users, Events, Applications, Settlements)
-├── generate-events.js          # Generator script for mock event data
-├── src/
-│   ├── app/
-│   │   ├── core/               # Singleton services, models, auth guards, API client
-│   │   │   ├── api/            # Axios instance, error handler, API client wrapper
-│   │   │   ├── auth/           # AuthService, JWT storage, role-based route guards
-│   │   │   ├── models/         # TypeScript interfaces (User, Event, HostApp, Payout)
-│   │   │   └── state/          # Signal-driven stores (ManagementService, HostDashboardService)
-│   │   ├── features/           # Routed domain views
-│   │   │   ├── auth/           # Login & Register components
-│   │   │   ├── discover/       # Event discovery catalog with search and filters
-│   │   │   ├── event-details/  # Single event deep dive, venue details & ticket selection
-│   │   │   ├── checkout/       # Checkout flow, discount codes & payment methods
-│   │   │   ├── bookings/       # User ticket dashboard with live QR codes & receipt modal
-│   │   │   ├── offers/         # Active promo codes and seasonal discounts
-│   │   │   ├── gift-cards/     # Digital gift card catalog and gifting checkout
-│   │   │   ├── profile/        # User profile, notifications, and security settings
-│   │   │   └── host-event/     # Onboarding form to register as a verified event host
-│   │   ├── layout/             # Platform shells and role workspaces
-│   │   │   ├── shell/          # Outer application shell and navigation wrapper
-│   │   │   ├── main-layout/    # Public customer header, search, and footer
-│   │   │   ├── admin-layout/   # Super Admin dashboard (Governance, Curation, Payouts)
-│   │   │   ├── host-layout/    # Host workspace (Event creation, stats, team members)
-│   │   │   ├── management-layout/ # Operations dashboard (Approval pipeline, live events)
-│   │   │   └── staff-layout/   # Check-in scanner portal for field staff
-│   │   ├── shared/             # Reusable UI components, modals, and SVG icon sets
-│   │   ├── app.routes.ts       # Master route definitions and role-based guards
-│   │   └── app.config.ts       # Application providers
-└── README.md
+http://localhost:3000
 ```
 
----
+### 5. Start Angular
 
-## 🛣️ Roadmap & Future Engineering Enhancements
+Open another terminal:
 
-The current prototype provides an end-to-end dynamic workflow. The following tasks are prioritized for subsequent development phases:
+```bash
+npm start
+```
 
-### 1. ⚡ Performance & Lazy Loading Architecture
-- **Route-Level Code Splitting**: Currently, feature components and layout workspaces are eagerly imported in `app.routes.ts`. Refactor all routes to use `loadComponent()` and `loadChildren()`:
-  ```ts
-  {
-    path: 'admin',
-    loadComponent: () => import('./layout/admin-layout/admin-layout').then(m => m.AdminLayoutComponent),
-    canActivate: [adminGuard]
-  }
-  ```
-- **Heavy Dependency Lazy Loading**: Lazy-load secondary utility libraries like `qrcode` dynamically only when a ticket receipt or modal is opened.
-- **Image Optimization**: Replace standard `<img>` tags with Angular's `@defer` blocks and `NgOptimizedImage` (`ngSrc`) with priority hints for hero banners.
+Open the application:
 
-### 2. 🎯 Change Detection Optimization (`ChangeDetectionStrategy.OnPush`)
-- **Adopt `OnPush` Across All Components**: Explicitly configure `changeDetection: ChangeDetectionStrategy.OnPush` on all feature components and layout shells.
-- **Signal-Native Reactivity**: Because state is managed via Angular `signal()` and `computed()`, switching to `OnPush` will eliminate unnecessary component tree re-evaluations, improving frame rates and rendering performance.
+```text
+http://127.0.0.1:4200
+```
 
-### 3. 🎨 UI & UX Improvements
-- **Micro-Interactions & Transitions**:
-  - Add page transition animations using Angular View Transitions API (`withViewTransitions()` in `provideRouter`).
-  - Skeleton loading states for event cards, user dossiers, and analytics charts.
-- **Mobile & Accessibility (a11y)**:
-  - Add ARIA attributes (`aria-expanded`, `aria-modal`, `role="dialog"`) across all custom confirmation modals and slide-out drawers.
-  - Implement full keyboard accessibility (`Tab`, `Esc`, arrow keys) for dropdowns and filter chips.
-- **Advanced Data Visualizations**:
-  - Integrate interactive vector sparklines or SVG charts in the Admin Financial performance and Host Analytics panels.
-  - Export CSV / PDF receipts for payouts and ticket bookings.
-- **Form Validation & Toast Notifications**:
-  - Convert remaining template-driven forms to reactive forms with real-time inline validation feedback.
-  - Global toast notification queue service replacing ad-hoc inline alerts.
-
-### 4. 🔒 Production Readiness & Backend Integration
-- Replace local `json-server` mock with a production backend (NestJS / Node / Go / Spring Boot).
-- Real JWT authentication with HTTP-only cookies, refresh token rotation, and BCrypt password hashing.
-- Cloud storage integration (AWS S3 / Cloudinary) for event banners, organizer identity proofs, and profile avatars.
+Keep both servers running while using the application.
 
 ---
 
-## 📜 Available Scripts
+## Environment Variables
 
-| Script | Purpose |
-| :--- | :--- |
-| `npm start` | Runs Angular dev server on `http://localhost:4200` |
-| `npm run mock-api` | Runs mock API server (with secure `POST /auth/login`) on port `3000` |
-| `npm run build` | Builds the production bundle in `dist/Eventhub` |
-| `npm run watch` | Builds and watches for changes in development mode |
-| `npm test` | Runs unit test suite using Vitest |
-| `node generate-events.js` | Generates a fresh mock batch of events into `db.json` |
+| Variable | Description |
+|---|---|
+| `PORT` | Mock API port |
+| `NODE_ENV` | Runtime environment |
+| `ALLOWED_ORIGINS` | Allowed CORS origins |
+| `JWT_SECRET` | JWT signing secret |
+| `DEMO_ADMIN_PASSWORD` | Admin demo password |
+| `DEMO_HOST_PASSWORD` | Host demo password |
+| `DEMO_MANAGEMENT_PASSWORD` | Management demo password |
+| `DEMO_STAFF_PASSWORD` | Staff demo password |
+| `DEMO_USER_PASSWORD` | User demo password |
+| `API_BASE_URL` | API URL setting in the environment template |
+
+Never commit your actual `.env` file or credentials.
 
 ---
 
-## 📋 Live Implementation Tracker
+## Mock API
 
-This tracker documents our progress against the architecture specifications in `docs/PROJECT_CONTEXT.md` and `docs/DEVELOPMENT_CHECKLIST.md`. As remaining items are developed and verified, they are moved to the Completed list.
+The project currently uses a local JSON-based mock backend.
 
-### ✅ Completed & Verified
-- [x] **Foundation Architecture**: Centralized Axios `ApiClient`, Angular Signals reactive store, Storage services, and Route Guards.
-- [x] **Authentication & Role Redirection**: Mock JWT auth with automated role-based landing redirection (`/admin`, `/host/dashboard`, `/management`, `/staff`, `/discover`).
-- [x] **Phase 1 — Public Event Discovery**: Full event discovery catalog, search, multi-category filters, city switcher, responsive hero banner, and event detail views.
-- [x] **Phase 3 — Booking & Dynamic QR Tickets**: Interactive seat/ticket selection, checkout flow with discounts/gift cards, and ticket dashboard with live QR code generation.
-- [x] **Phase 4 — Host SaaS Platform**: Host dashboard, event creator, sales KPIs, and team staff management.
-- [x] **Phase 5 — Event Ownership & Multi-Owner Allocation**:
-  - [x] Multiple co-owners allocation totaling exactly 100% equity with real-time pool validation.
-  - [x] Interactive visual equity progress bar & dynamic stake range sliders.
-  - [x] Multiple Event Manager assignments with operational portfolios (Operations, Logistics, Sponsorships, AV, Safety).
-  - [x] Temporary management authority delegation toggles.
-  - [x] Event Participant management (Speakers, Artists, Brand Sponsors).
-- [x] **Phase 7 — Attendance & Staff Portal**: Field staff check-in portal (`/staff`), ticket validator scanner, and real-time attendance counter.
-- [x] **Phase 11 — Super Admin Governance**: Platform analytics, Host Approvals, Event Curation gatekeeper (hero showcase / delist), User Directory & Dossier management, and Financial Settlement queue (all views mobile-optimized with card layouts).
-- [x] **High-Resolution Typography**: Preconnected Google Fonts, subpixel font antialiasing (`-webkit-font-smoothing`, `-moz-osx-font-smoothing`), OpenType Inter glyphs (`cv02`, `cv03`, `cv04`, `cv11`), and tabular numerals (`tabular-nums`) for currency and stats.
-- [x] **Phase 8.1 — Global Toast Notification System**: Signal-driven reactive Toast service with dynamic queues, multi-severity styling (success, error, warning, info), auto-dismiss, and accessibility.
-- [x] **Shared UI Architecture & Layout Refactoring**:
-  - [x] **Reusable Pagination System**: `PaginationBarComponent` with dynamic page slicing, page-size selectors (`6 / 12 / 24`), item counting, and smooth scroll.
-  - [x] **Reusable Confirmation Modals**: `ConfirmDialogComponent` replacing ad-hoc modals across admin governance and host destructive actions.
-  - [x] **Event Edit & Admin Approval Workflow**: Full in-drawer event editing with change-request rationale submitted directly to Admin re-approval queue.
-  - [x] **Host Layout Decomposition (Complete)**: Fully modularized the monolithic `HostLayoutComponent` into 7 scoped standalone components with encapsulated styles, responsive breakpoints (desktop down to 320px mobile), and typed inputs/outputs:
-    - [x] `HostOverviewComponent`: Stats KPI cards, SVG trend performance chart, recent events table, and timeline sidebar.
-    - [x] `HostMyEventsComponent`: Full event portfolio grid, search/filter controls, and pagination bar.
-    - [x] `HostBookingsComponent`: Attendee roster data table, CSV exporter, search filtering, and page-size selector.
-    - [x] `HostTeamComponent`: 100% equity governance bar, co-owners sliders, manager portfolios, staff roster, participant management, and dispatched invites tracker.
-    - [x] `HostAnalyticsComponent`: Time-period toggle, KPI summary cards, traffic source bars, and top-performing events.
-    - [x] `HostNotificationsComponent`: Notification activity cards, unread badges, action tags, and mark-all-read action.
-    - [x] `HostSettingsComponent`: Host organizer profile, business credentials, and bank payout verification banner.
+Important files:
 
-### ⏳ Remaining Things To Do (Backlog)
-- [ ] **Layout Decomposition & Architecture (Ongoing)**:
-  - [ ] Step 2: `HostBookingsComponent` (attendee management table, mobile cards, CSV export, bookings pagination).
-  - [ ] Step 3: `HostOverviewComponent` (stats cards grid, performance charts, quick actions).
-  - [ ] Step 4: `HostTeamComponent` (ownership allocation, manager portfolios, delegations).
-  - [ ] Step 5: `HostAnalyticsComponent`, `HostNotificationsComponent`, and `HostSettingsComponent`.
-- [ ] **Phase 6 — Permission Management Center UI**:
-  - [ ] Visual UI for inspecting and editing permission policies (Registration, Venue, Technical, Security).
-  - [ ] Direct permission overrides per user.
-  - [ ] Effective Permission computation viewer (Policy + Direct).
-- [ ] **Phase 8 — In-App Notifications Center**:
-  - [ ] Top-nav notification bell with interactive dropdown panel.
-  - [ ] Role-specific notifications (event approval/rejection, booking confirmation, payout released, staff invite).
-  - [ ] Read/unread state persistence in `db.json`.
-- [ ] **Phase 9 — Post-Attendance Event Reviews & Ratings**:
-  - [ ] Verified attendee review submission form ($1-5$ stars + comments) after check-in.
-  - [ ] Public ratings display and reviews list on Event Details page.
-- [ ] **Phase 10 — Corporate & Group Booking Workflow**:
-  - [ ] Corporate bulk ticket request entry point and custom organization quote form.
-  - [ ] Host/Management review and invoice approval queue.
-- [ ] **Phase 12 — Django REST Framework Backend Integration**:
-  - [ ] Replace `json-server` (`db.json`) with Django REST API endpoints while preserving the current frontend `ApiClient` layer.
+| File | Purpose |
+|---|---|
+| `mock-server.mjs` | Mock API and authentication logic |
+| `db.seed.example.json` | Initial sample data |
+| `db.json` | Local database created at runtime |
+| `.env.example` | Environment configuration template |
 
+### Custom Authentication Endpoints
 
+| Method | Endpoint | Purpose |
+|---|---|---|
+| POST | `/auth/login` | User login |
+| POST | `/auth/register` | User registration |
+| GET | `/auth/me` | Session validation |
 
+Other REST-style endpoints are handled by json-server.
+
+---
+
+## Available Commands
+
+| Command | Description |
+|---|---|
+| `npm install` | Install dependencies |
+| `npm start` | Start Angular application |
+| `npm run mock-api` | Start mock API server |
+| `npm run build` | Build the application |
+| `npm run watch` | Watch and rebuild source files |
+| `npm test` | Run configured unit tests |
+
+---
+
+## Current Limitations
+
+EventHub is currently a development and demonstration project.
+
+- Authentication uses a custom mock backend.
+- Demo and registered-user passwords are maintained in memory by the mock server.
+- The application does not currently have a verified external payment gateway integration.
+- Frontend route guards do not replace backend authorization.
+- Production database, payment, and identity integrations are still required.
+
+Do not use real payment details or sensitive user information with the mock backend.
+
+---
+
+## Future Development
+
+Some planned improvements include:
+
+- Permission Management Center.
+- Complete in-app notification workflows.
+- Event reviews and ratings.
+- Corporate and group booking workflows.
+- Django REST Framework backend integration.
+- Production database and payment gateway integration.
+- Backend-side authentication and authorization.
+
+---
+
+## Developer
+
+**Jeet Bhavsar**
+
+GitHub: [@JeetBhavsar14](https://github.com/JeetBhavsar14)
+
+Repository: [EventHub](https://github.com/JeetBhavsar14/Eventhub)
