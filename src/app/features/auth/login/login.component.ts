@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '@core/auth';
 import { ButtonComponent, IconComponent, InputComponent } from '@shared/components';
+import { environment } from '@env/environment';
 
 export type ForgotStep = 'email' | 'otp' | 'password' | 'success';
 
@@ -47,6 +48,9 @@ export class LoginComponent {
   forgotError = signal('');
   forgotNotice = signal('');
   isForgotLoading = signal(false);
+
+  // Environment-based Demo Auth Flag
+  readonly isDemoAuth = environment.demoAuth;
 
   // Pre-configured demonstration OTP code (avoids accepting arbitrary OTPs)
   readonly DEMO_OTP = '1234';
@@ -135,6 +139,11 @@ export class LoginComponent {
   verifyEmail() {
     this.forgotError.set('');
     this.forgotNotice.set('');
+
+    if (!this.isDemoAuth) {
+      this.forgotError.set('Self-service password reset is disabled in production. Please contact support@eventhub.com.');
+      return;
+    }
 
     const trimmedEmail = this.forgotEmail.trim().toLowerCase();
     if (!trimmedEmail) {
@@ -271,6 +280,12 @@ export class LoginComponent {
   // Enforces strictly the DEMO_OTP ('1234') — rejects arbitrary OTP codes
   verifyOtp() {
     this.forgotError.set('');
+
+    if (!this.isDemoAuth) {
+      this.forgotError.set('Demo authentication is disabled in this environment.');
+      return;
+    }
+
     const code = this.otpDigits.join('').trim();
 
     if (code.length < 4) {

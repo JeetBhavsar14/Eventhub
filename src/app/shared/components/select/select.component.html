@@ -43,7 +43,7 @@
           (click)="selectOption(opt, $event)">
           
           <div class="option-content-left">
-            <span *ngIf="opt.icon" class="option-icon" [innerHTML]="opt.icon"></span>
+            <app-icon *ngIf="opt.icon" [name]="opt.icon" [size]="16" class="option-icon"></app-icon>
             <span class="option-label">{{ opt.label }}</span>
           </div>
 

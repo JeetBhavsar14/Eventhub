@@ -93,6 +93,22 @@
     </div>
 
     <!-- Alert / Notice Messages -->
+    <div class="fp-demo-banner" *ngIf="isDemoAuth">
+      <app-icon name="shield" [size]="15"></app-icon>
+      <div class="fp-demo-banner-text">
+        <strong>Demo Authentication Mode</strong> (<code>environment.demoAuth = true</code>)
+        <span>Live SMS/Email gateway disabled &bull; Use demonstration code <strong>1 2 3 4</strong></span>
+      </div>
+    </div>
+
+    <div class="fp-demo-banner fp-prod-banner" *ngIf="!isDemoAuth">
+      <app-icon name="alert-triangle" [size]="15"></app-icon>
+      <div class="fp-demo-banner-text">
+        <strong>Production Mode</strong> (<code>environment.demoAuth = false</code>)
+        <span>Self-service OTP reset is disabled. Please contact the administrator.</span>
+      </div>
+    </div>
+
     <div class="fp-alert fp-alert-error" *ngIf="forgotError()">
       <app-icon name="alert-circle" [size]="16"></app-icon>
       <span>{{ forgotError() }}</span>

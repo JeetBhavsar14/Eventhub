@@ -473,6 +473,50 @@
   color: #1e2078;
 }
 
+/* Demo Auth Banner */
+.fp-demo-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background: rgba(97, 112, 195, 0.08);
+  border: 1px solid rgba(97, 112, 195, 0.25);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  color: #2d31a5;
+  line-height: 1.35;
+}
+
+.fp-demo-banner code {
+  background: rgba(45, 49, 165, 0.1);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+.fp-demo-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.fp-demo-banner-text span {
+  font-size: 0.74rem;
+  color: #4b5563;
+}
+
+.fp-prod-banner {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #b91c1c;
+}
+
+.fp-prod-banner-text span {
+  color: #7f1d1d;
+}
+
 /* Actions */
 .fp-actions {
   display: flex;

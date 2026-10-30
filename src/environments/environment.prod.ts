@@ -2,6 +2,7 @@ import { Environment } from './environment.model';
 
 export const environment: Environment = {
   production: true,
-  apiBaseUrl: 'https://api.eventhub.com'
+  apiBaseUrl: 'https://api.eventhub.com',
+  demoAuth: false
 };
 

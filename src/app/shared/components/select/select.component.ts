@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, forwardRef, ElementRef, HostListener, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import { IconComponent } from '../icon/icon.component';
 
 export interface SelectOption<T = unknown> {
   label: string;
@@ -13,7 +14,7 @@ export interface SelectOption<T = unknown> {
 @Component({
   selector: 'app-select',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IconComponent],
   templateUrl: './select.component.html',
   styleUrl: './select.component.css',
   host: {
