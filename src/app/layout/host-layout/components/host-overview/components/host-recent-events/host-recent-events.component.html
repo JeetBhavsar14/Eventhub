@@ -1,0 +1,274 @@
+<section class="recent-events-section" id="host-recent-events-section">
+  <div class="section-title-bar">
+    <div>
+      <h2 class="section-title">My Recent Events</h2>
+      <p class="section-subtitle">Manage, edit, monitor ticket sales and curation status</p>
+    </div>
+    <div class="section-actions-right">
+      <!-- Filter Tabs -->
+      <div class="status-filter-pills">
+        <button 
+          class="filter-pill" 
+          [class.active]="selectedStatusFilter() === 'all'" 
+          (click)="setFilterStatus('all')">
+          All ({{ events.length }})
+        </button>
+        <button 
+          class="filter-pill" 
+          [class.active]="selectedStatusFilter() === 'published'" 
+          (click)="setFilterStatus('published')">
+          Published
+        </button>
+        <button 
+          class="filter-pill" 
+          [class.active]="selectedStatusFilter() === 'pending'" 
+          (click)="setFilterStatus('pending')">
+          Pending
+        </button>
+        <button 
+          class="filter-pill" 
+          [class.active]="selectedStatusFilter() === 'draft'" 
+          (click)="setFilterStatus('draft')">
+          Drafts
+        </button>
+        <button 
+          class="filter-pill" 
+          [class.active]="selectedStatusFilter() === 'action_required'" 
+          (click)="setFilterStatus('action_required')">
+          Action Required
+        </button>
+      </div>
+
+      <button class="view-all-link-btn" (click)="viewAllEvents.emit()">
+        <span>View All Events</span>
+        <app-icon name="chevron-right"></app-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty Events State -->
+  <div class="events-empty-card" *ngIf="filteredEvents().length === 0">
+    <div class="empty-icon-box">
+      <app-icon name="calendar" strokeWidth="1.5" [size]="1.5"></app-icon>
+    </div>
+    <h4>No events match your criteria</h4>
+    <p>Try adjusting your search terms or create a new event for your audience.</p>
+    <button class="btn-create-event-primary" (click)="createEvent.emit()">+ Create New Event</button>
+  </div>
+
+  <!-- Desktop Table Layout -->
+  <div class="events-table-wrapper" *ngIf="filteredEvents().length > 0">
+    <table class="events-data-table" aria-label="Recent Events Table">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Date & Time</th>
+          <th>Venue</th>
+          <th>Bookings</th>
+          <th>Status</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let event of paginatedOverviewEvents()" (click)="openDetails.emit({ event: event })" class="clickable-row">
+          
+          <!-- Event Details Column -->
+          <td class="col-event">
+            <div class="event-info-cell">
+              <img [src]="event.imageUrl" [alt]="event.title" class="event-thumb-img" />
+              <div class="event-text-meta">
+                <span class="event-title-text">{{ event.title }}</span>
+                <span class="event-category-tag">{{ event.category }} • {{ event.type }}</span>
+              </div>
+            </div>
+          </td>
+
+          <!-- Date & Time Column -->
+          <td class="col-date">
+            <div class="date-cell">
+              <strong>{{ event.date }}</strong>
+              <small>{{ event.time }}</small>
+            </div>
+          </td>
+
+          <!-- Venue Column -->
+          <td class="col-venue">
+            <div class="venue-cell">
+              <span>{{ event.venue }}</span>
+              <small>{{ event.city }}</small>
+            </div>
+          </td>
+
+          <!-- Bookings / Capacity Column -->
+          <td class="col-bookings">
+            <div class="bookings-cell">
+              <div class="bookings-numbers">
+                <strong>{{ event.bookingsCount }}</strong>
+                <span class="capacity-total">/ {{ event.capacity }} booked</span>
+              </div>
+              <div class="mini-progress-bar">
+                <div 
+                  class="mini-progress-fill" 
+                  [style.width.%]="event.capacity > 0 ? (event.bookingsCount / event.capacity) * 100 : 0">
+                </div>
+              </div>
+            </div>
+          </td>
+
+          <!-- Status Column -->
+          <td class="col-status">
+            <span class="status-badge" [ngClass]="getStatusBadgeClass(event.status)">
+              {{ getStatusLabel(event.status) }}
+            </span>
+          </td>
+
+          <!-- Context Actions Column -->
+          <td class="col-actions text-right" (click)="$event.stopPropagation()">
+            <div class="row-actions-group">
+              
+              <!-- Quick Status-Specific Action Buttons -->
+              <button 
+                *ngIf="event.status === 'draft'" 
+                class="btn-action-pill pill-indigo" 
+                (click)="submitForReview.emit(event.id)"
+                title="Submit for Review">
+                Submit
+              </button>
+
+              <button 
+                *ngIf="event.status === 'approved'" 
+                class="btn-action-pill pill-emerald" 
+                (click)="publishEvent.emit(event.id)"
+                title="Publish Live">
+                Publish
+              </button>
+
+              <button 
+                *ngIf="event.status === 'changes_requested'" 
+                class="btn-action-pill pill-amber" 
+                (click)="reviewFeedback.emit(event)"
+                title="Review Feedback">
+                Feedback
+              </button>
+
+              <!-- Three-Dot Context Menu Button -->
+              <div class="relative-action-menu">
+                <button 
+                  class="btn-three-dots" 
+                  (click)="toggleActionMenu(event.id, $event)" 
+                  [attr.aria-label]="'Actions for ' + event.title">
+                  <app-icon name="more-vertical"></app-icon>
+                </button>
+
+                <!-- Context Menu Dropdown -->
+                <div class="context-menu-box" *ngIf="activeActionMenuId() === event.id">
+                  <button class="context-menu-item" (click)="openDetails.emit({ event: event }); activeActionMenuId.set(null)">
+                    <app-icon name="eye"></app-icon>
+                    <span>View Details</span>
+                  </button>
+
+                  <button class="context-menu-item" (click)="openDetails.emit({ event: event, editMode: true }); activeActionMenuId.set(null)">
+                    <app-icon name="edit"></app-icon>
+                    <span>{{ event.status === 'draft' ? 'Edit Draft' : 'Edit / Request Changes' }}</span>
+                  </button>
+
+                  <button class="context-menu-item" *ngIf="event.status === 'published'" (click)="navigateView.emit('analytics'); activeActionMenuId.set(null)">
+                    <app-icon name="bar-chart"></app-icon>
+                    <span>View Analytics</span>
+                  </button>
+
+                  <button class="context-menu-item" *ngIf="event.status === 'draft'" (click)="submitForReview.emit(event.id); activeActionMenuId.set(null)">
+                    <app-icon name="check"></app-icon>
+                    <span>Submit for Review</span>
+                  </button>
+
+                  <button class="context-menu-item" *ngIf="event.status === 'changes_requested'" (click)="reviewFeedback.emit(event); activeActionMenuId.set(null)">
+                    <app-icon name="alert-circle"></app-icon>
+                    <span>Review Feedback</span>
+                  </button>
+
+                  <div class="menu-divider" *ngIf="event.status === 'draft'"></div>
+                  <button class="context-menu-item item-danger" *ngIf="event.status === 'draft'" (click)="deleteDraft.emit(event.id); activeActionMenuId.set(null)">
+                    <app-icon name="trash"></app-icon>
+                    <span>Delete Draft</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Cards Layout (< 768px) -->
+  <div class="events-mobile-cards-list" *ngIf="filteredEvents().length > 0">
+    <div 
+      *ngFor="let event of paginatedOverviewEvents()" 
+      class="event-mobile-card"
+      (click)="openDetails.emit({ event: event })">
+      <div class="mobile-card-header">
+        <img [src]="event.imageUrl" [alt]="event.title" class="mobile-thumb" />
+        <div class="mobile-header-meta">
+          <span class="status-badge" [ngClass]="getStatusBadgeClass(event.status)">
+            {{ getStatusLabel(event.status) }}
+          </span>
+          <h4 class="mobile-card-title">{{ event.title }}</h4>
+          <span class="mobile-cat-tag">{{ event.category }}</span>
+        </div>
+      </div>
+
+      <div class="mobile-card-details">
+        <div class="detail-row">
+          <span class="d-label">Date & Time:</span>
+          <span class="d-val">{{ event.date }} • {{ event.time }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="d-label">Venue:</span>
+          <span class="d-val">{{ event.venue }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="d-label">Bookings:</span>
+          <span class="d-val"><strong>{{ event.bookingsCount }}</strong> / {{ event.capacity }} booked</span>
+        </div>
+      </div>
+
+      <div class="mobile-card-actions" (click)="$event.stopPropagation()">
+        <button class="btn-mobile-action" (click)="openDetails.emit({ event: event })">View Details</button>
+        <button 
+          *ngIf="event.status === 'draft'" 
+          class="btn-mobile-primary" 
+          (click)="submitForReview.emit(event.id)">
+          Submit for Review
+        </button>
+        <button 
+          *ngIf="event.status === 'approved'" 
+          class="btn-mobile-primary" 
+          (click)="publishEvent.emit(event.id)">
+          Publish Live
+        </button>
+        <button 
+          *ngIf="event.status === 'changes_requested'" 
+          class="btn-mobile-warning" 
+          (click)="reviewFeedback.emit(event)">
+          Review Feedback
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overview Events Table Pagination Controls -->
+  <app-pagination-bar 
+    *ngIf="filteredEvents().length > 0"
+    [currentPage]="overviewPage()"
+    [totalPages]="overviewTotalPages()"
+    [pageNumbers]="overviewPageNumbers()"
+    [startItem]="overviewPaginationInfo().start"
+    [endItem]="overviewPaginationInfo().end"
+    [totalItems]="overviewPaginationInfo().total"
+    itemLabel="events"
+    (pageChange)="setOverviewPage($event)">
+  </app-pagination-bar>
+</section>
+

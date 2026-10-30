@@ -1,0 +1,185 @@
+<section class="performance-section-grid">
+  <!-- LEFT CARD: Booking Overview Chart -->
+  <div class="perf-card booking-chart-card">
+    <div class="card-header-row">
+      <div>
+        <h3 class="card-title">Booking Overview</h3>
+        <p class="card-subtitle">Ticket sales momentum and verified attendee registrations</p>
+      </div>
+      <div class="period-pills-group">
+        <button 
+          class="period-pill-btn" 
+          [class.active]="selectedPeriod === '7d'" 
+          (click)="periodChange.emit('7d')">7 Days</button>
+        <button 
+          class="period-pill-btn" 
+          [class.active]="selectedPeriod === '30d'" 
+          (click)="periodChange.emit('30d')">30 Days</button>
+        <button 
+          class="period-pill-btn" 
+          [class.active]="selectedPeriod === '90d'" 
+          (click)="periodChange.emit('90d')">90 Days</button>
+      </div>
+    </div>
+
+    <!-- Interactive CSS/SVG Bar & Trend Chart -->
+    <div class="chart-container">
+      <div class="chart-bars-wrap">
+        <div 
+          *ngFor="let pt of chartData.points" 
+          class="chart-bar-column"
+          (mouseenter)="hoveredChartPoint.set(pt)"
+          (mouseleave)="hoveredChartPoint.set(null)">
+          <div class="bar-track">
+            <div 
+              class="bar-fill bookings-fill" 
+              [style.height.%]="(pt.bookings / chartData.maxVal) * 100">
+            </div>
+            <div 
+              class="bar-fill attendance-fill" 
+              [style.height.%]="(pt.attendees / chartData.maxVal) * 100">
+            </div>
+          </div>
+          <span class="bar-label">{{ pt.label }}</span>
+        </div>
+      </div>
+
+      <!-- Tooltip on Hover -->
+      <div class="chart-tooltip" *ngIf="hoveredChartPoint()">
+        <strong>{{ hoveredChartPoint()?.label }}</strong>
+        <div>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/>
+            <line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2"/>
+          </svg> 
+          Bookings: <span>{{ hoveredChartPoint()?.bookings }}</span>
+        </div>
+        <div>
+          <app-icon name="users" [size]="13"></app-icon> 
+          Attendees: <span>{{ hoveredChartPoint()?.attendees }}</span>
+        </div>
+        <div>
+          <app-icon name="rupee" [size]="13"></app-icon> 
+          Revenue: <span>₹{{ hoveredChartPoint()?.revenue | number }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart Legend & Footer Metrics -->
+    <div class="chart-footer-row">
+      <div class="chart-legend">
+        <div class="legend-item">
+          <span class="legend-dot color-indigo"></span>
+          <span>Bookings (Tickets Sold)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot color-light-blue"></span>
+          <span>Verified Attendees</span>
+        </div>
+      </div>
+
+      <div class="chart-stats-summary">
+        <div class="summary-metric">
+          <span class="metric-lbl">Total Revenue</span>
+          <span class="metric-val">₹{{ stats.totalRevenue | number }}</span>
+        </div>
+        <div class="summary-metric">
+          <span class="metric-lbl">Avg. Ticket</span>
+          <span class="metric-val">₹1,405</span>
+        </div>
+        <div class="summary-metric">
+          <span class="metric-lbl">Conversion Rate</span>
+          <span class="metric-val">12.4%</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-sample-notice">
+      <app-icon name="info"></app-icon>
+      <span>Illustrative prototype sample data for {{ hostInfo.organization }}.</span>
+    </div>
+  </div>
+
+  <!-- RIGHT CARD: Event Status Breakdown -->
+  <div class="perf-card event-status-card">
+    <div class="card-header-row">
+      <div>
+        <h3 class="card-title">Event Status</h3>
+        <p class="card-subtitle">Portfolio distribution</p>
+      </div>
+      <span class="status-total-badge">{{ stats.totalEvents }} Events</span>
+    </div>
+
+    <div class="status-bars-list">
+      <div class="status-row-item">
+        <div class="status-row-top">
+          <span class="status-name"><span class="status-dot dot-published"></span> Published</span>
+          <span class="status-counts"><strong>5</strong> (42%)</span>
+        </div>
+        <div class="status-meter-track">
+          <div class="status-meter-fill fill-published" style="width: 42%;"></div>
+        </div>
+      </div>
+
+      <div class="status-row-item">
+        <div class="status-row-top">
+          <span class="status-name"><span class="status-dot dot-pending"></span> Pending Review</span>
+          <span class="status-counts"><strong>3</strong> (25%)</span>
+        </div>
+        <div class="status-meter-track">
+          <div class="status-meter-fill fill-pending" style="width: 25%;"></div>
+        </div>
+      </div>
+
+      <div class="status-row-item">
+        <div class="status-row-top">
+          <span class="status-name"><span class="status-dot dot-draft"></span> Draft</span>
+          <span class="status-counts"><strong>2</strong> (17%)</span>
+        </div>
+        <div class="status-meter-track">
+          <div class="status-meter-fill fill-draft" style="width: 17%;"></div>
+        </div>
+      </div>
+
+      <div class="status-row-item">
+        <div class="status-row-top">
+          <span class="status-name"><span class="status-dot dot-changes"></span> Changes Requested</span>
+          <span class="status-counts"><strong>1</strong> (8%)</span>
+        </div>
+        <div class="status-meter-track">
+          <div class="status-meter-fill fill-changes" style="width: 8%;"></div>
+        </div>
+      </div>
+
+      <div class="status-row-item">
+        <div class="status-row-top">
+          <span class="status-name"><span class="status-dot dot-approved"></span> Approved (Unpublished)</span>
+          <span class="status-counts"><strong>1</strong> (8%)</span>
+        </div>
+        <div class="status-meter-track">
+          <div class="status-meter-fill fill-approved" style="width: 8%;"></div>
+        </div>
+      </div>
+
+      <div class="status-row-item">
+        <div class="status-row-top">
+          <span class="status-name"><span class="status-dot dot-rejected"></span> Rejected</span>
+          <span class="status-counts"><strong>0</strong> (0%)</span>
+        </div>
+        <div class="status-meter-track">
+          <div class="status-meter-fill fill-rejected" style="width: 0%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Notice Box -->
+    <div class="status-card-notice" *ngIf="stats.changesRequestedCount > 0">
+      <app-icon name="alert-circle"></app-icon>
+      <div>
+        <strong>Action Needed:</strong>
+        <p>1 event requires clarification notes before curation approval.</p>
+      </div>
+    </div>
+  </div>
+</section>
+

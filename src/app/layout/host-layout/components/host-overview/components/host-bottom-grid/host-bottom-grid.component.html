@@ -1,0 +1,169 @@
+<section class="dashboard-bottom-grid">
+
+  <!-- SECTION 8: UPCOMING EVENTS -->
+  <div class="dashboard-panel upcoming-events-panel" id="host-upcoming-events-section">
+    <div class="panel-header">
+      <div>
+        <h3 class="panel-title">Upcoming Events</h3>
+        <p class="panel-sub">Scheduled events with active tickets</p>
+      </div>
+      <span class="panel-count-tag">{{ upcomingEvents.length }} Live</span>
+    </div>
+
+    <!-- Empty State for Upcoming Events -->
+    <div class="panel-empty-box" *ngIf="upcomingEvents.length === 0">
+      <app-icon name="calendar" strokeWidth="1.5" [size]="1.5"></app-icon>
+      <p>No upcoming published events right now.</p>
+      <button class="btn-small-link" (click)="createEvent.emit()">Publish an Event</button>
+    </div>
+
+    <!-- Horizontal Upcoming Cards -->
+    <div class="upcoming-cards-list" *ngIf="upcomingEvents.length > 0">
+      <div 
+        *ngFor="let up of paginatedUpcomingEvents()" 
+        class="upcoming-event-row-card"
+        (click)="openDetails.emit({ event: up })">
+        <img [src]="up.imageUrl" [alt]="up.title" class="upcoming-img" />
+        <div class="upcoming-content">
+          <div class="upcoming-top-row">
+            <span class="days-countdown-pill" *ngIf="up.daysRemaining">In {{ up.daysRemaining }} days</span>
+            <span class="upcoming-price-tag">{{ up.price > 0 ? '₹' + up.price : 'Free' }}</span>
+          </div>
+          <h4 class="upcoming-title">{{ up.title }}</h4>
+          <div class="upcoming-venue-text">
+            <app-icon name="map-pin"></app-icon>
+            <span>{{ up.venue }} • {{ up.date }}</span>
+          </div>
+          
+          <div class="upcoming-capacity-meter">
+            <div class="cap-text">
+              <span>Bookings</span>
+              <strong>{{ up.bookingsCount }} / {{ up.capacity }}</strong>
+            </div>
+            <div class="cap-track">
+              <div class="cap-fill" [style.width.%]="(up.bookingsCount / up.capacity) * 100"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming Events Pagination -->
+    <app-pagination-bar 
+      *ngIf="upcomingEvents.length > 0"
+      variant="panel"
+      [currentPage]="upcomingPage()"
+      [totalPages]="upcomingTotalPages()"
+      [pageNumbers]="upcomingPageNumbers()"
+      [startItem]="upcomingPaginationInfo().start"
+      [endItem]="upcomingPaginationInfo().end"
+      [totalItems]="upcomingPaginationInfo().total"
+      (pageChange)="setUpcomingPage($event)">
+    </app-pagination-bar>
+  </div>
+
+  <!-- SECTION 9: PENDING ACTIONS (Needs Your Attention) -->
+  <div class="dashboard-panel pending-actions-panel">
+    <div class="panel-header">
+      <div>
+        <h3 class="panel-title">Needs Your Attention</h3>
+        <p class="panel-sub">Tasks and pending reviewer items</p>
+      </div>
+      <span class="panel-badge-warning" *ngIf="pendingActions.length > 0">{{ pendingActions.length }} Action{{ pendingActions.length > 1 ? 's' : '' }}</span>
+    </div>
+
+    <!-- Empty State for Pending Actions -->
+    <div class="panel-all-clear-box" *ngIf="pendingActions.length === 0">
+      <div class="all-clear-icon">
+        <app-icon name="check-circle" [strokeWidth]="2.5"></app-icon>
+      </div>
+      <h4>All caught up!</h4>
+      <p>You have no pending curation actions or incomplete drafts at this time.</p>
+    </div>
+
+    <!-- Pending Actions List -->
+    <div class="pending-actions-list" *ngIf="pendingActions.length > 0">
+      <div 
+        *ngFor="let act of pendingActions" 
+        class="action-item-card" 
+        [attr.data-severity]="act.severity">
+        <div class="action-top">
+          <span class="action-badge-pill">{{ act.badgeText }}</span>
+          <div class="action-icon">
+            <app-icon name="alert-circle" *ngIf="act.severity === 'warning'"></app-icon>
+            <app-icon name="alert-circle" *ngIf="act.severity === 'info'"></app-icon>
+            <svg *ngIf="act.severity === 'notice'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+          </div>
+        </div>
+        <h4 class="action-title">{{ act.title }}</h4>
+        <p class="action-desc">{{ act.description }}</p>
+        <div class="action-footer">
+          <button 
+            *ngIf="act.type === 'feedback'" 
+            class="btn-action-trigger trigger-warning"
+            (click)="handleFilterAction('action_required')">
+            {{ act.actionLabel }} →
+          </button>
+          <button 
+            *ngIf="act.type === 'pending_review'" 
+            class="btn-action-trigger trigger-info"
+            (click)="handleFilterAction('pending')">
+            {{ act.actionLabel }} →
+          </button>
+          <button 
+            *ngIf="act.type === 'draft_incomplete'" 
+            class="btn-action-trigger trigger-notice"
+            (click)="handleFilterAction('draft')">
+            {{ act.actionLabel }} →
+          </button>
+          <button 
+            *ngIf="act.type === 'team_invite'" 
+            class="btn-action-trigger trigger-notice"
+            (click)="navigateView.emit('team')">
+            {{ act.actionLabel }} →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 10: RECENT ACTIVITY TIMELINE -->
+  <div class="dashboard-panel recent-activity-panel">
+    <div class="panel-header">
+      <div>
+        <h3 class="panel-title">Recent Activity</h3>
+        <p class="panel-sub">Real-time audit log and event milestones</p>
+      </div>
+      <button class="btn-refresh-activity" (click)="toast.emit('Activity log refreshed')" title="Refresh Activity">
+        <app-icon name="refresh"></app-icon>
+      </button>
+    </div>
+
+    <!-- Vertical Timeline -->
+    <div class="activity-timeline-list">
+      <div 
+        *ngFor="let item of recentActivities" 
+        class="timeline-row-item">
+        <div class="timeline-left">
+          <div class="timeline-dot" [attr.data-type]="item.type">
+            <app-icon name="check" *ngIf="item.type === 'approved'"></app-icon>
+            <app-icon name="ticket-simple" *ngIf="item.type === 'booking'"></app-icon>
+            <app-icon name="send" *ngIf="item.type === 'submission'"></app-icon>
+            <app-icon name="alert-circle" *ngIf="item.type === 'feedback'"></app-icon>
+            <app-icon name="user" *ngIf="item.type === 'team'"></app-icon>
+            <svg *ngIf="item.type === 'update'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <div class="timeline-line"></div>
+        </div>
+
+        <div class="timeline-right">
+          <span class="timeline-item-title">{{ item.title }}</span>
+          <p class="timeline-item-desc">{{ item.description }}</p>
+          <span class="timeline-item-time">{{ item.timestamp }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
