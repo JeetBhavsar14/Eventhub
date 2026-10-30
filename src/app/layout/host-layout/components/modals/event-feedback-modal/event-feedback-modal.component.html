@@ -1,0 +1,38 @@
+<div class="modal-backdrop" (click)="onClose()">
+  <div class="modal-container feedback-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">CURATION CLARIFICATION</span>
+        <h3 class="modal-title">Review Feedback & Update</h3>
+      </div>
+      <button class="modal-close-btn" (click)="onClose()">
+        <app-icon name="close"></app-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="feedback-banner">
+        <app-icon name="alert-circle"></app-icon>
+        <div>
+          <strong>Feedback from Curation Team:</strong>
+          <p>{{ event.feedbackNotes || 'Please provide updated safety or sound permit clearance.' }}</p>
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Your Clarification Response Note *</label>
+        <textarea class="form-textarea" rows="4" [ngModel]="responseNote()" (ngModelChange)="responseNote.set($event)"
+          placeholder="e.g. Attached sound clearance certificate and updated acoustic boundaries till 10:00 PM.">
+        </textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="onClose()">Cancel</button>
+      <button class="btn-primary" [disabled]="!responseNote().trim()" (click)="onSubmit()">
+        Resubmit for Review
+      </button>
+    </div>
+  </div>
+</div>
+

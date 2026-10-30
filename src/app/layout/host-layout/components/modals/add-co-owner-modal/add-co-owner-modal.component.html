@@ -1,0 +1,58 @@
+<div class="modal-backdrop" (click)="onClose()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">EQUITY ALLOCATION</span>
+        <h3 class="modal-title">Allocate Co-Owner Stake</h3>
+      </div>
+      <button class="modal-close-btn" (click)="onClose()">
+        <app-icon name="close"></app-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="equity-pool-reminder-box">
+        <span>Available Equity for Co-Owners:</span>
+        <strong>{{ availableEquity }}%</strong>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Co-Owner Full Name *</label>
+        <input type="text" class="form-input" [(ngModel)]="newOwnerForm.userName" placeholder="e.g. Rahul Verma" />
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Verified Email Address *</label>
+        <input type="email" class="form-input" [(ngModel)]="newOwnerForm.userEmail"
+          placeholder="e.g. rahul@musicfest.in" />
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Organization / Production Company</label>
+        <input type="text" class="form-input" [(ngModel)]="newOwnerForm.organizationName"
+          placeholder="e.g. Verma Live Productions LLP" />
+      </div>
+
+      <div class="form-group full-width">
+        <div class="label-with-val">
+          <label class="form-label">Equity Stake Percentage (%) *</label>
+          <strong class="text-primary">{{ newOwnerForm.percentage }}%</strong>
+        </div>
+        <input type="range" min="1" [max]="availableEquity > 0 ? availableEquity : 1"
+          [(ngModel)]="newOwnerForm.percentage" class="stake-range-slider" />
+        <small class="form-hint">Maximum permissible allocation right now is {{ availableEquity }}% (Primary host retains
+          at least 1%).</small>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" (click)="onClose()">Cancel</button>
+      <button class="btn-modal-submit"
+        [disabled]="!newOwnerForm.userEmail.trim() || newOwnerForm.percentage <= 0 || newOwnerForm.percentage > availableEquity"
+        (click)="submitAddOwner()">
+        Confirm Co-Ownership
+      </button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,67 @@
+<div class="admin-view-pane">
+  <div class="view-header-row">
+    <div>
+      <h2>Event Curation & Gatekeeper Queue</h2>
+      <p>Ensure event listings meet safety, venue licensing, and ticketing standards before publishing live to Discover.</p>
+    </div>
+    <div class="filter-pills-row">
+      <button class="filter-pill" [class.active]="eventFilter() === 'all'" (click)="setFilter('all')">All ({{ curationEvents().length }})</button>
+      <button class="filter-pill" [class.active]="eventFilter() === 'pending_review'" (click)="setFilter('pending_review')">Pending Review</button>
+      <button class="filter-pill" [class.active]="eventFilter() === 'changes_requested'" (click)="setFilter('changes_requested')">Action Required</button>
+      <button class="filter-pill" [class.active]="eventFilter() === 'approved'" (click)="setFilter('approved')">Published Live</button>
+      <button class="filter-pill" [class.active]="eventFilter() === 'rejected'" (click)="setFilter('rejected')">Delisted</button>
+    </div>
+  </div>
+
+  <div class="curation-cards-grid">
+    <div *ngFor="let ev of filteredCurationEvents()" class="curation-card">
+      <div class="curation-card-image" [style.backgroundImage]="'url(' + ev.imageUrl + ')'">
+        <div class="card-image-overlay-top">
+          <button 
+            class="btn-featured-star" 
+            [class.active]="ev.isFeatured" 
+            (click)="onToggleFeatured(ev.id, ev.title)"
+            title="Toggle Featured on Discover Hero">
+            ★ {{ ev.isFeatured ? 'Featured on Hero' : 'Feature' }}
+          </button>
+          <span class="app-status-badge" [attr.data-status]="ev.status">
+            {{ ev.status === 'approved' ? 'Published Live' : ev.status === 'pending_review' ? 'In Review' : (ev.status | titlecase) }}
+          </span>
+        </div>
+      </div>
+      <div class="curation-card-content">
+        <h3>{{ ev.title }}</h3>
+        <p class="host-meta">By <strong>{{ ev.hostName }}</strong> ({{ ev.organization }})</p>
+        
+        <div class="curation-details-grid">
+          <div><app-icon name="map-pin" [size]="13"></app-icon> {{ ev.venue }}, {{ ev.city }}</div>
+          <div><app-icon name="calendar" [size]="13"></app-icon> {{ ev.date }}</div>
+          <div><app-icon name="users" [size]="13"></app-icon> Capacity: {{ ev.capacity }} seats</div>
+          <div><app-icon name="credit-card" [size]="13"></app-icon> {{ ev.ticketPrice === 0 ? 'Free Entry' : '₹' + ev.ticketPrice }}</div>
+        </div>
+
+        <div class="permits-row">
+          <span class="permit-tag" [class.verified]="ev.soundPermitUploaded">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline *ngIf="ev.soundPermitUploaded" points="20 6 9 17 4 12"/><line *ngIf="!ev.soundPermitUploaded" x1="12" y1="8" x2="12" y2="12"/><line *ngIf="!ev.soundPermitUploaded" x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ ev.soundPermitUploaded ? 'Sound Decibel Clear' : 'Sound Permit Missing' }}
+          </span>
+          <span class="permit-tag" [class.verified]="ev.venuePermitUploaded">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline *ngIf="ev.venuePermitUploaded" points="20 6 9 17 4 12"/><line *ngIf="!ev.venuePermitUploaded" x1="12" y1="8" x2="12" y2="12"/><line *ngIf="!ev.venuePermitUploaded" x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ ev.venuePermitUploaded ? 'Fire & Venue NOC Clear' : 'Venue Clearance Missing' }}
+          </span>
+        </div>
+
+        <div class="curation-actions">
+          <button class="btn-curation-feedback" (click)="onInspect(ev)">Feedback / Review</button>
+          <button *ngIf="ev.status !== 'approved'" class="btn-curation-approve" (click)="onApprove(ev.id, ev.title)">
+            Approve for Live Listing
+          </button>
+          <button *ngIf="ev.status === 'approved'" class="btn-curation-delist" (click)="onDelist(ev.id, ev.title)">
+            Delist from App
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

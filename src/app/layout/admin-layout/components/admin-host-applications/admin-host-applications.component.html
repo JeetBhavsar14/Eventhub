@@ -1,0 +1,130 @@
+<div class="admin-view-pane">
+  <div class="view-header-row">
+    <div>
+      <h2>Host Verification Queue</h2>
+      <p>Review organization credentials, identity documentation, and grant organizer privileges.</p>
+    </div>
+    <div class="filter-pills-row">
+      <button class="filter-pill" [class.active]="hostFilter() === 'all'" (click)="setFilter('all')">All</button>
+      <button class="filter-pill" [class.active]="hostFilter() === 'submitted'" (click)="setFilter('submitted')">New Submissions</button>
+      <button class="filter-pill" [class.active]="hostFilter() === 'under_review'" (click)="setFilter('under_review')">Under Review</button>
+      <button class="filter-pill" [class.active]="hostFilter() === 'approved'" (click)="setFilter('approved')">Approved</button>
+    </div>
+  </div>
+
+  <!-- Desktop Table View (Hidden on mobile) -->
+  <div class="admin-table-container host-desktop-table">
+    <table class="admin-data-table">
+      <thead>
+        <tr>
+          <th>Applicant / Organization</th>
+          <th>Categories & Scale</th>
+          <th>Location</th>
+          <th>Submitted</th>
+          <th>Status</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of filteredHostApplications()">
+          <td>
+            <div class="table-applicant-info">
+              <strong>{{ app.applicantName }}</strong>
+              <span>{{ app.organizationName }}</span>
+              <small>{{ app.email }} • {{ app.phone }}</small>
+            </div>
+          </td>
+          <td>
+            <div class="table-category-tags">
+              <span class="mini-tag" *ngFor="let cat of app.primaryCategories">{{ cat }}</span>
+              <small>{{ app.expectedScale }}</small>
+            </div>
+          </td>
+          <td>{{ app.city }}</td>
+          <td>{{ app.submittedAt }}</td>
+          <td>
+            <span class="app-status-badge" [attr.data-status]="app.status">
+              {{ app.status === 'under_review' ? 'Under Review' : (app.status | titlecase) }}
+            </span>
+          </td>
+          <td class="text-right">
+            <div class="table-actions-group">
+              <button class="btn-action-view" (click)="onInspect(app)">Inspect</button>
+              <button 
+                *ngIf="app.status !== 'approved'" 
+                class="btn-action-approve" 
+                (click)="onApprove(app.id, app.applicantName)" 
+                title="Approve Host">
+                Approve
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile Responsive Cards View (Visible on small screens) -->
+  <div class="host-mobile-cards-list">
+    <div class="host-app-card" *ngFor="let app of filteredHostApplications()">
+      <!-- Header: Applicant & Status -->
+      <div class="host-app-card-header">
+        <div class="host-app-card-title-group">
+          <span class="host-app-card-name">{{ app.applicantName }}</span>
+          <span class="host-app-card-org">{{ app.organizationName }}</span>
+        </div>
+        <span class="app-status-badge" [attr.data-status]="app.status">
+          {{ app.status === 'under_review' ? 'Under Review' : (app.status | titlecase) }}
+        </span>
+      </div>
+
+      <!-- Meta details (Location, Scale, Submitted) -->
+      <div class="host-app-card-details">
+        <div class="host-detail-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <span>{{ app.city }}</span>
+        </div>
+        <div class="host-detail-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+          <span>{{ app.expectedScale }}</span>
+        </div>
+        <div class="host-detail-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span>{{ app.submittedAt }}</span>
+        </div>
+      </div>
+
+      <!-- Categories tags -->
+      <div class="host-app-card-tags">
+        <span class="mini-tag" *ngFor="let cat of app.primaryCategories">{{ cat }}</span>
+      </div>
+
+      <!-- Contact Line -->
+      <div class="host-app-card-contact">
+        <small>{{ app.email }} • {{ app.phone }}</small>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="host-app-card-actions">
+        <button class="btn-action-view flex-1" (click)="onInspect(app)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+          Inspect
+        </button>
+        <button 
+          *ngIf="app.status !== 'approved'" 
+          class="btn-action-approve flex-1" 
+          (click)="onApprove(app.id, app.applicantName)" 
+          title="Approve Host">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          Approve
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty state if no applications -->
+    <div *ngIf="filteredHostApplications().length === 0" class="admin-empty-state">
+      <p>No host applications found matching the selected filter.</p>
+    </div>
+  </div>
+</div>
+

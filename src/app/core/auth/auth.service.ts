@@ -109,6 +109,7 @@ export class AuthService {
     // Persist verified user profile and cryptographically signed JWT
     this.localStorage.set(AUTH_USER_KEY, user);
     this.localStorage.set(AUTH_TOKEN_KEY, token);
+    this.localStorage.remove('eventhub_host_prototype_override');
 
     this._authState.set({
       user,
@@ -154,6 +155,8 @@ export class AuthService {
 
     this.localStorage.set(AUTH_USER_KEY, user);
     this.localStorage.set(AUTH_TOKEN_KEY, token);
+    this.localStorage.remove('eventhub_host_application');
+    this.localStorage.remove('eventhub_host_prototype_override');
 
     this._authState.set({
       user,
@@ -190,6 +193,8 @@ export class AuthService {
   logout(navigate: boolean = true): void {
     this.localStorage.remove(AUTH_USER_KEY);
     this.localStorage.remove(AUTH_TOKEN_KEY);
+    this.localStorage.remove('eventhub_host_application');
+    this.localStorage.remove('eventhub_host_prototype_override');
     this._authState.set(INITIAL_AUTH_STATE);
     if (navigate) {
       this.router.navigate(['/']);

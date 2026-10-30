@@ -1,7 +1,7 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal, effect, untracked } from '@angular/core';
 import { AuthService } from '@core/auth';
 import { ApiClient } from '@core/api';
-import { HostApplicationData, HostApplicationStatus } from '@core/models';
+import { HostApplicationData, HostApplicationStatus, User } from '@core/models';
 import { LocalStorageService } from '@core/storage';
 
 const HOST_APP_KEY = 'eventhub_host_application';
@@ -37,36 +37,116 @@ export class HostApplicationService {
   private localStorage = inject(LocalStorageService);
   private api = inject(ApiClient);
 
-  private readonly _prototypeOverride = signal<HostApplicationStatus | null>(
-    this.localStorage.get<HostApplicationStatus | null>(PROTOTYPE_OVERRIDE_KEY) || null
-  );
+  private _lastUserId: string | null | undefined = undefined;
 
-  private readonly _storedApplication = signal<HostApplicationData | null>(
-    this.localStorage.get<HostApplicationData>(HOST_APP_KEY) || null
-  );
+  private readonly _prototypeOverride = signal<HostApplicationStatus | null>(null);
+  private readonly _storedApplication = signal<HostApplicationData | null>(null);
+
+  constructor() {
+    // Initial sync with currently active auth state
+    this.syncUserApplication(this.authService.currentUser());
+
+    // Reactive sync whenever currentUser signal changes (register, login, logout)
+    effect(() => {
+      const user = this.authService.currentUser();
+      untracked(() => {
+        this.syncUserApplication(user);
+      });
+    });
+  }
 
   /**
-   * Computed effective status based on prototype override or natural auth & application status
+   * Synchronizes host application state strictly for the given user.
+   * Ensures new users or attendee accounts never inherit stale application data or prototype flags.
+   */
+  private syncUserApplication(user: User | null): void {
+    const currentId = user ? user.id : null;
+    if (this._lastUserId === currentId) {
+      return;
+    }
+    this._lastUserId = currentId;
+
+    // Reset prototype override on any auth user transition
+    this._prototypeOverride.set(null);
+    this.localStorage.remove(PROTOTYPE_OVERRIDE_KEY);
+
+    if (!user) {
+      this._storedApplication.set(null);
+      this.localStorage.remove(HOST_APP_KEY);
+      return;
+    }
+
+    if (user.isHost || user.platformRole === 'host') {
+      this._storedApplication.set(null);
+      return;
+    }
+
+    // Check user-specific storage key
+    const userKey = `${HOST_APP_KEY}_${user.id}`;
+    const userApp = this.localStorage.get<HostApplicationData>(userKey);
+    if (userApp && (userApp.userId === user.id || (userApp.email && user.email && userApp.email.toLowerCase() === user.email.toLowerCase()))) {
+      this._storedApplication.set(userApp);
+      return;
+    }
+
+    // Check legacy key; if it matches this user, migrate it to user-specific key, otherwise discard
+    const legacyApp = this.localStorage.get<HostApplicationData>(HOST_APP_KEY);
+    if (legacyApp && (legacyApp.userId === user.id || (legacyApp.email && user.email && legacyApp.email.toLowerCase() === user.email.toLowerCase()))) {
+      this._storedApplication.set(legacyApp);
+      this.localStorage.set(userKey, legacyApp);
+      return;
+    } else {
+      this.localStorage.remove(HOST_APP_KEY);
+    }
+
+    // Default for clean newly registered users
+    this._storedApplication.set(null);
+
+    // Optional asynchronous lookup on backend in case application was submitted previously on another device
+    if (user.email) {
+      this.api.get<HostApplicationData[]>(`/hostApplications?email=${encodeURIComponent(user.email.toLowerCase())}`)
+        .then(res => {
+          if (res.data && res.data.length > 0) {
+            const found = res.data[0];
+            if (this.authService.currentUser()?.id === user.id) {
+              this._storedApplication.set(found);
+              this.localStorage.set(userKey, found);
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
+  /**
+   * Computed effective status based on natural auth & application status
    */
   readonly status = computed<HostApplicationStatus>(() => {
-    // 1. If prototype switcher override is active, respect it
-    const override = this._prototypeOverride();
-    if (override) return override;
-
-    // 2. Check auth
+    // 1. Check auth
     if (!this.authService.isAuthenticated()) {
       return 'guest';
     }
 
     const user = this.authService.currentUser();
-    if (user?.isHost) {
+    if (!user) {
+      return 'guest';
+    }
+
+    // 2. Approved hosts bypass application checks
+    if (user.isHost || user.platformRole === 'host') {
       return 'approved';
     }
 
-    // 3. Check stored application
+    // 3. Check stored application strictly belonging to current user
     const app = this._storedApplication();
-    if (app) {
+    if (app && (app.userId === user.id || (app.email && user.email && app.email.toLowerCase() === user.email.toLowerCase()))) {
       return app.status;
+    }
+
+    // 4. If prototype override was explicitly invoked in the active session
+    const override = this._prototypeOverride();
+    if (override) {
+      return override;
     }
 
     return 'not_applied';
@@ -74,19 +154,24 @@ export class HostApplicationService {
 
   readonly applicationData = computed<HostApplicationData | null>(() => {
     const currentStatus = this.status();
-    const stored = this._storedApplication();
+    const user = this.authService.currentUser();
 
-    if (stored) {
+    if (!user || currentStatus === 'guest' || currentStatus === 'not_applied') {
+      return null;
+    }
+
+    const stored = this._storedApplication();
+    if (stored && (stored.userId === user.id || (stored.email && user.email && stored.email.toLowerCase() === user.email.toLowerCase()))) {
       return { ...stored, status: currentStatus };
     }
 
-    if (currentStatus !== 'guest' && currentStatus !== 'not_applied') {
-      const user = this.authService.currentUser();
+    // If an explicit override is active for simulation purposes
+    if (this._prototypeOverride()) {
       return {
         ...DEFAULT_SAMPLE_APPLICATION,
-        applicantName: user ? `${user.firstName} ${user.lastName}` : DEFAULT_SAMPLE_APPLICATION.applicantName,
-        email: user?.email || DEFAULT_SAMPLE_APPLICATION.email,
-        phone: user?.phone || DEFAULT_SAMPLE_APPLICATION.phone,
+        applicantName: `${user.firstName} ${user.lastName}`.trim(),
+        email: user.email,
+        phone: user.phone || DEFAULT_SAMPLE_APPLICATION.phone,
         status: currentStatus,
         statusMessage: this.getStatusMessageFor(currentStatus)
       };
@@ -98,7 +183,21 @@ export class HostApplicationService {
   readonly isOverrideActive = computed(() => this._prototypeOverride() !== null);
 
   /**
-   * Allows prototype switcher to force test any state
+   * Clears any local host application cache and prototype override state
+   */
+  clearApplication(): void {
+    const user = this.authService.currentUser();
+    this._prototypeOverride.set(null);
+    this._storedApplication.set(null);
+    if (user?.id) {
+      this.localStorage.remove(`${HOST_APP_KEY}_${user.id}`);
+    }
+    this.localStorage.remove(HOST_APP_KEY);
+    this.localStorage.remove(PROTOTYPE_OVERRIDE_KEY);
+  }
+
+  /**
+   * Allows prototype switcher to force test any state in current session
    */
   setPrototypeState(state: HostApplicationStatus | 'auto'): void {
     if (state === 'auto') {
@@ -122,11 +221,18 @@ export class HostApplicationService {
         statusMessage: 'Congratulations! Your application has been approved. You have full organizer access.'
       };
       this._storedApplication.set(app);
+      if (user?.id) {
+        this.localStorage.set(`${HOST_APP_KEY}_${user.id}`, app);
+      }
       this.localStorage.set(HOST_APP_KEY, app);
     }
 
-    // If state is not_applied or guest, handle appropriately
+    // If state is not_applied, clear stored applications
     if (state === 'not_applied') {
+      const user = this.authService.currentUser();
+      if (user?.id) {
+        this.localStorage.remove(`${HOST_APP_KEY}_${user.id}`);
+      }
       this.localStorage.remove(HOST_APP_KEY);
       this._storedApplication.set(null);
     }
@@ -140,17 +246,17 @@ export class HostApplicationService {
     const newApp: HostApplicationData = {
       id: `EH-APP-${Math.floor(1000 + Math.random() * 9000)}`,
       userId: user?.id || 'guest-session',
-      applicantName: formData.applicantName || (user ? `${user.firstName} ${user.lastName}`.trim() : 'Jeet Bhavsar'),
-      email: formData.email || user?.email || 'jeet@eventhub.com',
-      phone: formData.phone || user?.phone || '+91 98765 43210',
+      applicantName: formData.applicantName || (user ? `${user.firstName} ${user.lastName}`.trim() : 'Applicant'),
+      email: formData.email || user?.email || '',
+      phone: formData.phone || user?.phone || '',
       organizationType: formData.organizationType || 'individual',
-      organizationName: formData.organizationName || 'Starlight Live Experiences',
+      organizationName: formData.organizationName || 'Independent Organizer',
       websiteOrSocial: formData.websiteOrSocial || '',
       experienceLevel: formData.experienceLevel || 'beginner',
       primaryCategories: formData.primaryCategories || ['Workshops'],
       expectedAttendeeScale: formData.expectedAttendeeScale || '100 - 500 attendees',
       city: formData.city || 'Mumbai',
-      pastEventDescription: formData.pastEventDescription || 'Organizing local events and community meetups.',
+      pastEventDescription: formData.pastEventDescription || 'Organizing local community gatherings and events.',
       idType: formData.idType || 'national_id',
       sampleDocumentName: formData.sampleDocumentName || 'host_verification_doc.pdf',
       status: 'submitted',
@@ -160,9 +266,10 @@ export class HostApplicationService {
     };
 
     this._storedApplication.set(newApp);
+    if (user?.id) {
+      this.localStorage.set(`${HOST_APP_KEY}_${user.id}`, newApp);
+    }
     this.localStorage.set(HOST_APP_KEY, newApp);
-    this._prototypeOverride.set('submitted');
-    this.localStorage.set(PROTOTYPE_OVERRIDE_KEY, 'submitted');
 
     // Asynchronously sync to backend json-server
     this.api.post('/hostApplications', {
@@ -194,6 +301,7 @@ export class HostApplicationService {
    */
   submitAdditionalInfo(responseNotes: string): void {
     const current = this.applicationData();
+    const user = this.authService.currentUser();
     if (current) {
       const updated: HostApplicationData = {
         ...current,
@@ -203,20 +311,25 @@ export class HostApplicationService {
         updatedAt: new Date().toISOString()
       };
       this._storedApplication.set(updated);
+      if (user?.id) {
+        this.localStorage.set(`${HOST_APP_KEY}_${user.id}`, updated);
+      }
       this.localStorage.set(HOST_APP_KEY, updated);
-      this._prototypeOverride.set('under_review');
-      this.localStorage.set(PROTOTYPE_OVERRIDE_KEY, 'under_review');
     }
   }
 
   /**
-   * Resets or restarts application flow
+   * Resets or restarts application flow for current user
    */
   resetApplication(): void {
+    const user = this.authService.currentUser();
     this._storedApplication.set(null);
+    this._prototypeOverride.set(null);
+    if (user?.id) {
+      this.localStorage.remove(`${HOST_APP_KEY}_${user.id}`);
+    }
     this.localStorage.remove(HOST_APP_KEY);
-    this._prototypeOverride.set('not_applied');
-    this.localStorage.set(PROTOTYPE_OVERRIDE_KEY, 'not_applied');
+    this.localStorage.remove(PROTOTYPE_OVERRIDE_KEY);
   }
 
   private getStatusMessageFor(status: HostApplicationStatus): string {

@@ -1,0 +1,47 @@
+<div class="modal-backdrop" (click)="onClose()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">PARTICIPANTS & PARTNERS</span>
+        <h3 class="modal-title">Add Event Participant</h3>
+      </div>
+      <button class="modal-close-btn" (click)="onClose()">
+        <app-icon name="close"></app-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group full-width">
+        <label class="form-label">Participant Category *</label>
+        <app-select [options]="participantCategoryOptions" [(ngModel)]="newParticipantForm.category">
+        </app-select>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Name / Stage Name / Brand *</label>
+        <input type="text" class="form-input" [(ngModel)]="newParticipantForm.name"
+          placeholder="e.g. Divine / Red Bull / Dr. V. Patel" />
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Designation / Role / Brand Title</label>
+        <input type="text" class="form-input" [(ngModel)]="newParticipantForm.designationOrCompany"
+          placeholder="e.g. Headline Rapper / Keynote Speaker / Official Hydration Partner" />
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Bio / Profile Snippet</label>
+        <textarea class="form-textarea" rows="3" [(ngModel)]="newParticipantForm.bio"
+          placeholder="Short description or bio for public display..."></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" (click)="onClose()">Cancel</button>
+      <button class="btn-modal-submit" [disabled]="!newParticipantForm.name.trim()" (click)="submitAddParticipant()">
+        Save Participant
+      </button>
+    </div>
+  </div>
+</div>
+

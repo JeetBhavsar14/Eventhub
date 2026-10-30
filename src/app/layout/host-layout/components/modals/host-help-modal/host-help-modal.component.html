@@ -1,0 +1,36 @@
+<div class="modal-backdrop" (click)="onClose()">
+  <div class="modal-container help-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">SUPPORT & GUIDELINES</span>
+        <h3 class="modal-title">Host Help Center</h3>
+      </div>
+      <button class="modal-close-btn" (click)="onClose()">
+        <app-icon name="close"></app-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="help-item">
+        <h4>How does event review work?</h4>
+        <p>Every event submitted by a verified host is evaluated by the EventHub curation panel for safety, accurate
+          venue details, and ticketing integrity (~24h turnaround).</p>
+      </div>
+      <div class="help-item">
+        <h4>When are ticket payouts disbursed?</h4>
+        <p>Payouts are automatically initiated to your registered bank account within 48 hours following successful
+          event completion.</p>
+      </div>
+      <div class="help-item">
+        <h4>Can I update event details after publishing?</h4>
+        <p>Yes! Minor updates to artist lineups and venue directions can be edited directly without re-entering the
+          curation queue.</p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" (click)="onClose()">Close Help</button>
+    </div>
+  </div>
+</div>
+

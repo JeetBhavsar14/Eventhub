@@ -1,0 +1,107 @@
+<div class="admin-view-pane">
+  <div class="admin-hero-banner">
+    <div>
+      <h1>Global Platform Overview</h1>
+      <p>Real-time metrics across all verified hosts, ticket sales, and verification queues.</p>
+    </div>
+    <div class="hero-actions">
+      <button class="btn-primary-action" (click)="goTo('host_applications')">
+        Review {{ platformStats.pendingAppsCount }} Host Applications
+      </button>
+    </div>
+  </div>
+
+  <!-- 4 Platform Metric Cards -->
+  <div class="admin-stats-grid">
+    <div class="admin-stat-card">
+      <div class="card-head">
+        <span>Gross Marketplace Volume (GMV)</span>
+        <div class="stat-icon purple"><app-icon name="rupee"></app-icon></div>
+      </div>
+      <div class="card-value">{{ platformStats.totalGMV }}</div>
+      <div class="card-foot">
+        <span class="positive-trend">+18.4% this month</span>
+        <span class="foot-sub">10% Platform Cut: {{ platformStats.platformCommission }}</span>
+      </div>
+    </div>
+
+    <div class="admin-stat-card">
+      <div class="card-head">
+        <span>Registered Attendees & Users</span>
+        <div class="stat-icon blue"><app-icon name="users"></app-icon></div>
+      </div>
+      <div class="card-value">{{ platformStats.activeUsers | number }}</div>
+      <div class="card-foot">
+        <span class="positive-trend">+420 new this week</span>
+        <span class="foot-sub">{{ platformStats.verifiedHosts }} Verified Hosts</span>
+      </div>
+    </div>
+
+    <div class="admin-stat-card" (click)="goTo('host_applications')" style="cursor: pointer;">
+      <div class="card-head">
+        <span>Pending Host Approvals</span>
+        <div class="stat-icon amber"><app-icon name="user-check"></app-icon></div>
+      </div>
+      <div class="card-value">{{ platformStats.pendingAppsCount }}</div>
+      <div class="card-foot">
+        <span class="action-tag">Click to review queue</span>
+        <span class="foot-sub">Avg. turnaround: 18h</span>
+      </div>
+    </div>
+
+    <div class="admin-stat-card" (click)="goTo('event_curation')" style="cursor: pointer;">
+      <div class="card-head">
+        <span>Events Awaiting Curation</span>
+        <div class="stat-icon emerald"><app-icon name="calendar"></app-icon></div>
+      </div>
+      <div class="card-value">{{ platformStats.pendingEventsCount }}</div>
+      <div class="card-foot">
+        <span class="warning-tag" *ngIf="platformStats.actionRequiredEvents > 0">{{ platformStats.actionRequiredEvents }} feedback pending</span>
+        <span class="foot-sub">Ready for live check</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Split Grid: Action Queues Preview -->
+  <div class="admin-split-grid">
+    <!-- Recent Host Submissions -->
+    <div class="admin-panel-card">
+      <div class="panel-header">
+        <h3>Recent Host Applications</h3>
+        <button class="panel-link-btn" (click)="goTo('host_applications')">View All Queue</button>
+      </div>
+      <div class="panel-list">
+        <div *ngFor="let app of hostApplications().slice(0, 3)" class="panel-item">
+          <div class="panel-item-left">
+            <strong>{{ app.applicantName }}</strong>
+            <small>{{ app.organizationName }} • {{ app.city }}</small>
+          </div>
+          <div class="panel-item-right">
+            <span class="app-status-badge" [attr.data-status]="app.status">{{ app.status | titlecase }}</span>
+            <button class="btn-mini-action" (click)="onInspectApp(app)">Inspect</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Event Listings -->
+    <div class="admin-panel-card">
+      <div class="panel-header">
+        <h3>Pending Event Verifications</h3>
+        <button class="panel-link-btn" (click)="goTo('event_curation')">Moderate Events</button>
+      </div>
+      <div class="panel-list">
+        <div *ngFor="let event of curationEvents().slice(0, 3)" class="panel-item">
+          <div class="panel-item-left">
+            <strong>{{ event.title }}</strong>
+            <small>{{ event.organization }} • {{ event.venue }}</small>
+          </div>
+          <div class="panel-item-right">
+            <span class="app-status-badge" [attr.data-status]="event.status">{{ event.status | titlecase }}</span>
+            <button class="btn-mini-action" (click)="onInspectEvent(event)">Review</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

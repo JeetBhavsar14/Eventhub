@@ -1,0 +1,181 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.table-applicant-info strong {
+  display: block;
+  color: #0F172A;
+}
+
+.table-applicant-info span {
+  display: block;
+  color: #475569;
+  font-size: var(--text-sm);
+}
+
+.table-applicant-info small {
+  color: #94A3B8;
+  font-size: var(--text-xs);
+}
+
+.table-category-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* Host Mobile Cards (Hidden by default on desktop) */
+.host-mobile-cards-list {
+  display: none;
+}
+
+.host-app-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 1.125rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.host-app-card:hover {
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+.host-app-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.host-app-card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.host-app-card-name {
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.25;
+}
+
+.host-app-card-org {
+  font-size: var(--text-sm);
+  color: #64748B;
+  font-weight: 500;
+}
+
+.host-app-card-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem 1rem;
+  background: #F8FAFC;
+  padding: 0.625rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #F1F5F9;
+}
+
+.host-detail-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: var(--text-xs);
+  color: #475569;
+  font-weight: 500;
+}
+
+.host-detail-item svg,
+.host-detail-item app-icon {
+  width: 14px;
+  height: 14px;
+  color: #64748B;
+  flex-shrink: 0;
+}
+
+.host-app-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.host-app-card-tags .mini-tag {
+  margin-right: 0;
+  background: #EEF2FF;
+  color: #4338CA;
+  font-weight: 600;
+  font-size: var(--text-xs);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+
+.host-app-card-contact {
+  font-size: var(--text-xs);
+  color: #94A3B8;
+  word-break: break-all;
+}
+
+.host-app-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #F1F5F9;
+}
+
+.host-app-card-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.6rem 1rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  border-radius: 8px;
+  flex: 1;
+}
+
+.host-app-card-actions button svg,
+.host-app-card-actions button app-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.host-app-card-actions .btn-action-view {
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  color: #334155;
+}
+
+.host-app-card-actions .btn-action-view:hover {
+  background: #F1F5F9;
+  border-color: #94A3B8;
+}
+
+.host-app-card-actions .btn-action-approve {
+  background: #10B981;
+  color: #FFFFFF;
+}
+
+.host-app-card-actions .btn-action-approve:hover {
+  background: #059669;
+}
+
+@media (max-width: 768px) {
+  .host-desktop-table {
+    display: none !important;
+  }
+
+  .host-mobile-cards-list {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+}

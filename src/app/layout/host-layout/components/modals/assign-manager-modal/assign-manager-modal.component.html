@@ -1,0 +1,47 @@
+<div class="modal-backdrop" (click)="onClose()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">OPERATIONAL PORTFOLIO</span>
+        <h3 class="modal-title">Assign Event Manager</h3>
+      </div>
+      <button class="modal-close-btn" (click)="onClose()">
+        <app-icon name="close"></app-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group full-width">
+        <label class="form-label">Manager Full Name *</label>
+        <input type="text" class="form-input" [(ngModel)]="newManagerForm.userName"
+          placeholder="e.g. Siddharth Shah" />
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Manager Email Address *</label>
+        <input type="email" class="form-input" [(ngModel)]="newManagerForm.userEmail"
+          placeholder="e.g. siddharth@operations.com" />
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Responsibility Portfolio *</label>
+        <app-select [options]="managerAreaOptions" [(ngModel)]="newManagerForm.responsibilityArea">
+        </app-select>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Custom Designation / Title (Optional)</label>
+        <input type="text" class="form-input" [(ngModel)]="newManagerForm.customTitle"
+          placeholder="e.g. Head of Stage & Audio Engineering" />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" (click)="onClose()">Cancel</button>
+      <button class="btn-modal-submit" [disabled]="!newManagerForm.userEmail.trim()" (click)="submitAssignManager()">
+        Assign Manager Portfolio
+      </button>
+    </div>
+  </div>
+</div>
+

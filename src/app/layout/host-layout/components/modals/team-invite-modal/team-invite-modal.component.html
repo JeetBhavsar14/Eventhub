@@ -1,0 +1,130 @@
+<div class="modal-backdrop" (click)="onClose()">
+  <div class="modal-container invite-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">EVENT OWNER INVITATION SYSTEM (§ 5.2)</span>
+        <h3 class="modal-title">Invite Team or Participant</h3>
+      </div>
+      <button class="modal-close-btn" (click)="onClose()">
+        <app-icon name="close"></app-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Category Toggle: Operational vs Participant -->
+      <div class="form-group full-width">
+        <label class="form-label">Invitation Category *</label>
+        <div class="category-toggle-grid">
+          <button type="button" class="cat-toggle-btn" [class.active]="inviteForm.roleCategory === 'operational'"
+            (click)="inviteForm.roleCategory = 'operational'; inviteForm.role = 'event_manager'">
+            <strong>Operational Team</strong>
+            <small>Event Manager, Gate Staff, Volunteer</small>
+          </button>
+          <button type="button" class="cat-toggle-btn" [class.active]="inviteForm.roleCategory === 'participant'"
+            (click)="inviteForm.roleCategory = 'participant'; inviteForm.role = 'speaker'">
+            <strong>Event Participant</strong>
+            <small>Keynote Speaker, Brand Sponsor</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Invitee Full Name</label>
+        <input type="text" class="form-input" [(ngModel)]="inviteForm.name" placeholder="e.g. Priya Desai" />
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Invitee Email Address *</label>
+        <input type="email" class="form-input" [(ngModel)]="inviteForm.email" placeholder="e.g. priya@agency.com" />
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Role Assignment *</label>
+        <app-select *ngIf="inviteForm.roleCategory === 'operational'" [options]="operationalRoleOptions"
+          [(ngModel)]="inviteForm.role">
+        </app-select>
+        <app-select *ngIf="inviteForm.roleCategory === 'participant'" [options]="participantRoleOptions"
+          [(ngModel)]="inviteForm.role">
+        </app-select>
+      </div>
+
+      <!-- Staff Operational Designation & Permissions Config -->
+      <div class="staff-designation-box"
+        *ngIf="inviteForm.roleCategory === 'operational' && inviteForm.role === 'staff'">
+        <label class="form-label">Staff Designation & Functional Station *</label>
+        <app-select [options]="staffDesignationOptions" [ngModel]="inviteForm.designationPreset"
+          (ngModelChange)="onDesignationPresetChange($event)">
+        </app-select>
+
+        <!-- Permissions configured for this designation -->
+        <div class="staff-perms-preview">
+          <span class="perms-label">Granted Operational Permissions:</span>
+          <div class="perms-pills-list">
+            <span class="perm-pill" [class.active]="hasInvitePermission('scan_tickets')">
+              <app-icon name="check"></app-icon>
+              Gate Scanner Access
+            </span>
+            <span class="perm-pill" [class.active]="hasInvitePermission('view_attendees')">
+              <app-icon name="check"></app-icon>
+              Attendee Roster
+            </span>
+            <span class="perm-pill" [class.active]="hasInvitePermission('log_incidents')">
+              <app-icon name="check"></app-icon>
+              Incident Reporting
+            </span>
+            <span class="perm-pill" [class.active]="hasInvitePermission('view_duty')">
+              <app-icon name="check"></app-icon>
+              Duty Briefing
+            </span>
+          </div>
+          <p class="perms-hint">The staff member's mobile workspace will automatically adapt its tabs and controls to
+            reflect these permissions.</p>
+        </div>
+      </div>
+
+      <!-- Custom Role Input & Checkboxes -->
+      <div class="custom-role-config-box" *ngIf="inviteForm.role === 'custom_role'">
+        <div class="form-group full-width">
+          <label class="form-label">Custom Designation Name *</label>
+          <input type="text" class="form-input" [(ngModel)]="inviteForm.customRoleName"
+            placeholder="e.g. VIP Lounge Coordinator" />
+        </div>
+        <label class="form-label">Select Permissions to Grant:</label>
+        <div class="custom-perms-checks">
+          <label class="checkbox-label">
+            <input type="checkbox" [checked]="hasInvitePermission('scan_tickets')"
+              (change)="toggleInvitePermission('scan_tickets')" />
+            <span>Gate & Barcode Check-in Scanner</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" [checked]="hasInvitePermission('view_attendees')"
+              (change)="toggleInvitePermission('view_attendees')" />
+            <span>Attendee List & Status Lookup</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" [checked]="hasInvitePermission('log_incidents')"
+              (change)="toggleInvitePermission('log_incidents')" />
+            <span>Ground Incident & Security Dispatching</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Delegation notice for Event Manager -->
+      <div class="delegation-info-box" *ngIf="inviteForm.role === 'event_manager'">
+        <app-icon name="info"></app-icon>
+        <p><strong>Temporary Management Delegation:</strong> You are granting operational authority to coordinate
+          venue logistics and staff without transferring event ownership.</p>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" (click)="onClose()">Cancel</button>
+      <button class="btn-modal-submit" [disabled]="!inviteForm.email.trim()" (click)="submitTeamInvite()">
+        Dispatch Invitation
+      </button>
+    </div>
+  </div>
+</div>
+

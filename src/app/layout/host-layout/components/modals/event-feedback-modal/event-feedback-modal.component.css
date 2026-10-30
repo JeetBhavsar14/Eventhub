@@ -1,0 +1,26 @@
+.feedback-modal {
+  max-width: 520px;
+}
+
+.feedback-banner {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.feedback-banner strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.feedback-banner p {
+  margin: 0;
+  line-height: 1.4;
+}
+

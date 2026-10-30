@@ -106,19 +106,19 @@ export class HostEventComponent implements OnInit {
   // Application Wizard Form State
   currentWizardStep = signal(1);
   wizardForm = {
-    applicantName: 'Jeet Bhavsar',
-    email: 'jeet@eventhub.com',
-    phone: '+91 98765 43210',
-    organizationType: 'agency' as 'individual' | 'agency' | 'company' | 'non_profit',
-    organizationName: 'Starlight Live Experiences',
-    websiteOrSocial: 'https://instagram.com/starlightlive',
-    experienceLevel: '3-5-years' as 'beginner' | '1-3-years' | '3-5-years' | '5+-years',
-    primaryCategories: ['Music and Festivals', 'Conferences'] as string[],
-    expectedAttendeeScale: '500 - 2,500 attendees',
+    applicantName: '',
+    email: '',
+    phone: '',
+    organizationType: 'individual' as 'individual' | 'agency' | 'company' | 'non_profit',
+    organizationName: '',
+    websiteOrSocial: '',
+    experienceLevel: 'beginner' as 'beginner' | '1-3-years' | '3-5-years' | '5+-years',
+    primaryCategories: ['Workshops'] as string[],
+    expectedAttendeeScale: '100 - 500 attendees',
     city: 'Mumbai',
-    pastEventDescription: 'Organized Indie Vibe Fest 2025 and annual UX Design Summit.',
+    pastEventDescription: '',
     idType: 'national_id' as 'national_id' | 'passport' | 'business_reg',
-    documentFileName: 'identity_doc_verified_sample.pdf',
+    documentFileName: 'host_verification_doc.pdf',
     termsAccepted: true
   };
 
@@ -408,8 +408,8 @@ export class HostEventComponent implements OnInit {
     const user = this.currentUser();
     if (user) {
       this.wizardForm.applicantName = `${user.firstName} ${user.lastName}`.trim();
-      this.wizardForm.email = user.email;
-      this.wizardForm.phone = user.phone;
+      this.wizardForm.email = user.email || '';
+      this.wizardForm.phone = user.phone || '';
     }
   }
 
@@ -440,8 +440,8 @@ export class HostEventComponent implements OnInit {
         const user = this.currentUser();
         if (user) {
           this.wizardForm.applicantName = `${user.firstName} ${user.lastName}`.trim();
-          this.wizardForm.email = user.email;
-          this.wizardForm.phone = user.phone;
+          this.wizardForm.email = user.email || '';
+          this.wizardForm.phone = user.phone || '';
         }
         this.currentWizardStep.set(1);
         this.showApplicationModal.set(true);

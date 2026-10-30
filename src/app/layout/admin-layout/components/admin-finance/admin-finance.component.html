@@ -1,0 +1,161 @@
+<div class="admin-view-pane">
+  <div class="view-header-row">
+    <div>
+      <h2>Platform Financial Performance & Host Settlements</h2>
+      <p>Platform gross revenue, EventHub 5% marketplace take rate, and host payout disbursement cycles.</p>
+    </div>
+  </div>
+
+  <!-- 4 Finance Metric Cards -->
+  <div class="finance-overview-grid">
+    <div class="finance-box">
+      <span class="fin-lbl">Gross Marketplace Value (GMV)</span>
+      <h3>{{ platformStats.totalGMV }}</h3>
+      <small class="text-positive">+22.4% vs last cycle</small>
+    </div>
+
+    <div class="finance-box">
+      <span class="fin-lbl">EventHub Platform Cut (5%)</span>
+      <h3>{{ platformStats.platformCommission }}</h3>
+      <small>Direct commission retained</small>
+    </div>
+
+    <div class="finance-box">
+      <span class="fin-lbl">Pending Escrow Payouts</span>
+      <h3 class="text-amber">{{ platformStats.pendingPayouts }}</h3>
+      <small>Awaiting admin release</small>
+    </div>
+
+    <div class="finance-box">
+      <span class="fin-lbl">Settled to Organizers</span>
+      <h3 class="text-emerald">{{ platformStats.settledPayouts }}</h3>
+      <small>Disbursed via IMPS/NEFT</small>
+    </div>
+  </div>
+
+  <!-- Host Settlements Disbursal Table (Desktop) -->
+  <div class="admin-table-container mt-6 settlement-desktop-table">
+    <div class="table-section-head">
+      <h3>Organizer Payout Settlement Queue</h3>
+      <span class="table-sub-badge">Escrow Release Engine</span>
+    </div>
+    
+    <table class="admin-data-table">
+      <thead>
+        <tr>
+          <th>Event & Organizer</th>
+          <th>Bank Account</th>
+          <th>Gross Revenue</th>
+          <th>5% Platform Cut</th>
+          <th>Net Organizer Payout</th>
+          <th>Status</th>
+          <th class="text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of settlements()">
+          <td>
+            <strong>{{ s.eventTitle }}</strong>
+            <span class="sub-text">{{ s.hostName }} • {{ s.organization }}</span>
+          </td>
+          <td>{{ s.bankAccount }}</td>
+          <td>₹{{ s.grossAmount | number }}</td>
+          <td class="text-emerald font-semibold">- ₹{{ s.platformCommission | number }}</td>
+          <td><strong>₹{{ s.netPayout | number }}</strong></td>
+          <td>
+            <span class="settle-badge" [attr.data-status]="s.status">
+              {{ s.status === 'settled' ? 'Settled (' + s.settledDate + ')' : (s.status | titlecase) }}
+            </span>
+          </td>
+          <td class="text-right">
+            <button 
+              *ngIf="s.status === 'pending'" 
+              class="btn-release-payout" 
+              (click)="onReleasePayout(s)">
+              Release Payout
+            </button>
+            <span *ngIf="s.status === 'settled'" class="settled-check">
+              <app-icon name="check" [strokeWidth]="2.5" [size]="14"></app-icon> Disbursed
+            </span>
+            <button 
+              *ngIf="s.status === 'on_hold'" 
+              class="btn-investigate" 
+              (click)="onReleasePayout(s)">
+              Clear Hold & Pay
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Host Settlements Mobile Cards (Visible on smaller screens) -->
+  <div class="settlement-mobile-cards-list">
+    <div class="settlement-section-header">
+      <h3>Organizer Payout Settlement Queue</h3>
+      <span class="table-sub-badge">Escrow Engine</span>
+    </div>
+
+    <div class="settle-app-card" *ngFor="let s of settlements()">
+      <!-- Card Head: Event, Host, Status -->
+      <div class="settle-card-header">
+        <div class="settle-card-titles">
+          <span class="settle-event-title">{{ s.eventTitle }}</span>
+          <span class="settle-host-sub">{{ s.hostName }} • {{ s.organization }}</span>
+        </div>
+        <span class="settle-badge" [attr.data-status]="s.status">
+          {{ s.status === 'settled' ? 'Settled' : (s.status | titlecase) }}
+        </span>
+      </div>
+
+      <!-- Financial Breakdown Grid -->
+      <div class="settle-breakdown-box">
+        <div class="settle-breakdown-row">
+          <span class="lbl">Gross Sales:</span>
+          <span class="val">₹{{ s.grossAmount | number }}</span>
+        </div>
+        <div class="settle-breakdown-row">
+          <span class="lbl">5% Platform Cut:</span>
+          <span class="val text-emerald">- ₹{{ s.platformCommission | number }}</span>
+        </div>
+        <div class="settle-breakdown-row border-top">
+          <span class="lbl-total">Net Organizer Payout:</span>
+          <span class="val-total">₹{{ s.netPayout | number }}</span>
+        </div>
+      </div>
+
+      <!-- Bank & Date Info -->
+      <div class="settle-meta-line">
+        <div class="meta-item">
+          <app-icon name="wallet"></app-icon>
+          <span>{{ s.bankAccount }}</span>
+        </div>
+        <div class="meta-item" *ngIf="s.settledDate">
+          <app-icon name="clock"></app-icon>
+          <span>Paid {{ s.settledDate }}</span>
+        </div>
+      </div>
+
+      <!-- Action footer -->
+      <div class="settle-card-action">
+        <button 
+          *ngIf="s.status === 'pending'" 
+          class="btn-release-payout w-full" 
+          (click)="onReleasePayout(s)">
+          <app-icon name="rupee"></app-icon>
+          Release Payout (₹{{ s.netPayout | number }})
+        </button>
+        <div *ngIf="s.status === 'settled'" class="settled-status-banner">
+          <app-icon name="check" [strokeWidth]="2.5"></app-icon>
+          Disbursed to Host Account
+        </div>
+        <button 
+          *ngIf="s.status === 'on_hold'" 
+          class="btn-investigate w-full" 
+          (click)="onReleasePayout(s)">
+          Clear Hold & Release Payout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

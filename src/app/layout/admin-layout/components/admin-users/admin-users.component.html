@@ -1,0 +1,147 @@
+<div class="admin-view-pane">
+  <div class="view-header-row">
+    <div>
+      <h2>Platform User Directory & Role Governance</h2>
+      <p>Manage consumer accounts, promote users to Organizer Hosts or Field Operations, or suspend accounts.</p>
+    </div>
+    
+    <!-- Filters & Search -->
+    <div class="user-filters-bar">
+      <div class="filter-pills-row">
+        <button class="filter-pill" [class.active]="userRoleFilter() === 'all'" (click)="setRoleFilter('all')">All Roles ({{ users().length }})</button>
+        <button class="filter-pill" [class.active]="userRoleFilter() === 'admin'" (click)="setRoleFilter('admin')">Admins</button>
+        <button class="filter-pill" [class.active]="userRoleFilter() === 'host'" (click)="setRoleFilter('host')">Hosts</button>
+        <button class="filter-pill" [class.active]="userRoleFilter() === 'management'" (click)="setRoleFilter('management')">Operations</button>
+        <button class="filter-pill" [class.active]="userRoleFilter() === 'staff'" (click)="setRoleFilter('staff')">Staff</button>
+        <button class="filter-pill" [class.active]="userRoleFilter() === 'user'" (click)="setRoleFilter('user')">Attendees</button>
+      </div>
+
+      <div class="filter-sub-row">
+        <input 
+          type="text" 
+          [ngModel]="userSearch()"
+          (ngModelChange)="userSearch.set($event)" 
+          placeholder="Search by name, email, or role..." 
+          class="admin-table-search" />
+
+        <div class="status-toggle-pills">
+          <button class="mini-pill" [class.active]="userStatusFilter() === 'all'" (click)="setStatusFilter('all')">All Status</button>
+          <button class="mini-pill" [class.active]="userStatusFilter() === 'active'" (click)="setStatusFilter('active')">Active</button>
+          <button class="mini-pill" [class.active]="userStatusFilter() === 'suspended'" (click)="setStatusFilter('suspended')">Suspended</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop User Table (Hidden on small screens) -->
+  <div class="admin-table-container user-desktop-table">
+    <table class="admin-data-table">
+      <thead>
+        <tr>
+          <th>User Account</th>
+          <th>Platform Role</th>
+          <th>Status</th>
+          <th>Bookings / Usage</th>
+          <th>Lifetime GMV</th>
+          <th>Joined Date</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of filteredUsers()" class="clickable-user-row" (click)="onInspect(u)">
+          <td>
+            <div class="user-row-meta">
+              <img [src]="u.avatar" class="table-user-avatar" [alt]="u.name" />
+              <div>
+                <strong>{{ u.name }}</strong>
+                <small>{{ u.email }}</small>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="role-pill" [attr.data-role]="u.role">{{ u.role | uppercase }}</span>
+          </td>
+          <td>
+            <span class="status-indicator" [class.suspended]="u.status === 'suspended'">
+              ● {{ u.status | titlecase }}
+            </span>
+          </td>
+          <td>{{ u.totalBookings }} bookings</td>
+          <td>₹{{ u.totalSpent | number }}</td>
+          <td>{{ u.joinedDate }}</td>
+          <td class="text-right" (click)="$event.stopPropagation()">
+            <div class="table-actions-group">
+              <button class="btn-inspect-user" (click)="onInspect(u)">Dossier</button>
+              <button 
+                class="btn-suspend-toggle" 
+                [class.danger]="u.status === 'active'" 
+                (click)="onToggleSuspension(u)">
+                {{ u.status === 'active' ? 'Suspend' : 'Reactivate' }}
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mobile User Cards (Visible on small screens) -->
+  <div class="user-mobile-cards-list">
+    <div class="user-app-card" *ngFor="let u of filteredUsers()" (click)="onInspect(u)">
+      <!-- Top Row: User Avatar, Name, Email, and Role -->
+      <div class="user-card-header">
+        <div class="user-card-identity">
+          <img [src]="u.avatar" class="user-card-avatar" [alt]="u.name" />
+          <div class="user-card-titles">
+            <span class="user-card-name">{{ u.name }}</span>
+            <span class="user-card-email">{{ u.email }}</span>
+          </div>
+        </div>
+        <span class="role-pill" [attr.data-role]="u.role">{{ u.role | uppercase }}</span>
+      </div>
+
+      <!-- Middle Stats Grid -->
+      <div class="user-card-metrics">
+        <div class="user-metric-item">
+          <span class="metric-lbl">Status</span>
+          <span class="status-indicator" [class.suspended]="u.status === 'suspended'">
+            ● {{ u.status | titlecase }}
+          </span>
+        </div>
+        <div class="user-metric-item">
+          <span class="metric-lbl">Bookings</span>
+          <span class="metric-val">{{ u.totalBookings }} orders</span>
+        </div>
+        <div class="user-metric-item">
+          <span class="metric-lbl">Lifetime Spend</span>
+          <span class="metric-val highlight">₹{{ u.totalSpent | number }}</span>
+        </div>
+        <div class="user-metric-item">
+          <span class="metric-lbl">Joined Date</span>
+          <span class="metric-val text-muted">{{ u.joinedDate }}</span>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="user-card-actions" (click)="$event.stopPropagation()">
+        <button class="btn-inspect-user flex-1" (click)="onInspect(u)">
+          <app-icon name="user-plus"></app-icon>
+          Manage Dossier
+        </button>
+        <button 
+          class="btn-suspend-toggle flex-1" 
+          [class.danger]="u.status === 'active'" 
+          (click)="onToggleSuspension(u)">
+          <app-icon name="ban"></app-icon>
+          {{ u.status === 'active' ? 'Suspend' : 'Reactivate' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty state if no users match filters -->
+    <div *ngIf="filteredUsers().length === 0" class="admin-empty-state">
+      <p>No user accounts found matching your search and role filters.</p>
+    </div>
+  </div>
+</div>
+

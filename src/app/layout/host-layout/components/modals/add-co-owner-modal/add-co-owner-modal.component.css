@@ -1,0 +1,37 @@
+.equity-pool-reminder-box {
+  background: #f0f4ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #3730a3;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.equity-pool-reminder-box strong {
+  font-size: 1.15rem;
+  color: #1e1b4b;
+}
+
+.label-with-val {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stake-range-slider {
+  width: 100%;
+  margin: 0.5rem 0;
+  cursor: pointer;
+}
+
+.form-hint {
+  font-size: 0.75rem;
+  color: #64748b;
+  display: block;
+}
+

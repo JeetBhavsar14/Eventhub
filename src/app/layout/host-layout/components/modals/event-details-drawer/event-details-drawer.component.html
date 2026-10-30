@@ -1,0 +1,168 @@
+<div class="modal-backdrop" (click)="onClose()">
+  <div class="modal-container event-details-drawer" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">{{ isEditing() ? 'EVENT MODIFICATION & CURATION REQUEST' : 'EVENT OVERVIEW' }}</span>
+        <h3 class="modal-title">{{ isEditing() ? 'Edit: ' + event.title : event.title }}</h3>
+      </div>
+      <div class="modal-header-actions">
+        <button *ngIf="!isEditing()" type="button" class="btn-secondary" (click)="startEditing()"
+          title="Edit event details or submit modifications to admin">
+          <app-icon name="edit" [size]="14"></app-icon>
+          <span>{{ event.status === 'draft' ? 'Edit Draft' : 'Edit / Propose Changes' }}</span>
+        </button>
+        <button *ngIf="isEditing()" type="button" class="btn-secondary" (click)="cancelEditing()">
+          <span>Switch to View</span>
+        </button>
+        <button class="modal-close-btn" (click)="onClose()">
+          <app-icon name="close"></app-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW MODE -->
+    <div class="modal-body" *ngIf="!isEditing()">
+      <img [src]="event.imageUrl" [alt]="event.title" class="drawer-cover-img" />
+
+      <div class="drawer-status-strip">
+        <span class="status-badge" [ngClass]="getStatusBadgeClass(event.status)">
+          {{ getStatusLabel(event.status) }}
+        </span>
+        <span class="event-id-tag">ID: {{ event.id }}</span>
+      </div>
+
+      <p class="drawer-desc">{{ event.description }}</p>
+
+      <div class="drawer-details-grid">
+        <div class="detail-box">
+          <span class="d-lbl">Date & Time</span>
+          <span class="d-val">{{ event.date }}</span>
+          <small>{{ event.time }}</small>
+        </div>
+        <div class="detail-box">
+          <span class="d-lbl">Venue Location</span>
+          <span class="d-val">{{ event.venue }}</span>
+          <small>{{ event.city }}</small>
+        </div>
+        <div class="detail-box">
+          <span class="d-lbl">Ticket Capacity</span>
+          <span class="d-val">{{ event.bookingsCount }} / {{ event.capacity }} Sold</span>
+        </div>
+        <div class="detail-box">
+          <span class="d-lbl">Ticket Pricing</span>
+          <span class="d-val">{{ event.price > 0 ? '₹' + event.price : 'Free Entry' }}</span>
+        </div>
+      </div>
+
+      <div class="feedback-alert-box" *ngIf="event.feedbackNotes">
+        <app-icon name="alert-circle"></app-icon>
+        <div>
+          <strong>Reviewer Feedback / Note:</strong>
+          <p>{{ event.feedbackNotes }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT & CHANGE REQUEST MODE -->
+    <div class="modal-body edit-event-body" *ngIf="isEditing()">
+      <div class="curation-notice-banner" *ngIf="event.status !== 'draft'">
+        <app-icon name="shield" [size]="20"></app-icon>
+        <div>
+          <strong>Admin Approval Required for Active Event</strong>
+          <p>Because this event is active on EventHub, all modifications will be submitted as an official change request for Admin curation review before reflecting publicly.</p>
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Event Title *</label>
+        <input type="text" class="form-input" [(ngModel)]="editForm.title" placeholder="Event title" />
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Category</label>
+        <app-select [options]="categoryOptions" [(ngModel)]="editForm.category"></app-select>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Description</label>
+        <textarea rows="3" class="form-textarea" [(ngModel)]="editForm.description" placeholder="Describe your event..."></textarea>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input type="text" class="form-input" [(ngModel)]="editForm.date" placeholder="e.g. Dec 25, 2026" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Time</label>
+          <input type="text" class="form-input" [(ngModel)]="editForm.time" placeholder="e.g. 7:00 PM – 10:00 PM" />
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Venue Location</label>
+          <input type="text" class="form-input" [(ngModel)]="editForm.venue" placeholder="e.g. Grand Ballroom" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">City</label>
+          <input type="text" class="form-input" [(ngModel)]="editForm.city" placeholder="e.g. Mumbai" />
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Ticket Capacity</label>
+          <input type="number" class="form-input" [(ngModel)]="editForm.capacity" min="1" placeholder="100" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price per Ticket (₹)</label>
+          <input type="number" class="form-input" [(ngModel)]="editForm.price" min="0" placeholder="0 for Free" />
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Cover Image URL</label>
+        <input type="text" class="form-input" [(ngModel)]="editForm.imageUrl" placeholder="https://images.unsplash.com/..." />
+      </div>
+
+      <div class="form-group full-width" *ngIf="event.status !== 'draft'">
+        <label class="form-label">Reason for Modifications (Sent to Admin Reviewer) *</label>
+        <input type="text" class="form-input" [(ngModel)]="editForm.changeReason" placeholder="e.g. Upgraded venue sound system and increased total capacity" />
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="onClose()">Close</button>
+      <div style="flex: 1;"></div>
+
+      <!-- In View Mode Buttons -->
+      <ng-container *ngIf="!isEditing()">
+        <button type="button" class="btn-secondary" (click)="startEditing()">
+          <app-icon name="edit" [size]="14"></app-icon>
+          <span>{{ event.status === 'draft' ? 'Edit Draft' : 'Edit / Request Changes' }}</span>
+        </button>
+        <button *ngIf="event.status === 'draft'" class="btn-primary" (click)="onSubmitDraft()">
+          Submit for Review
+        </button>
+        <button *ngIf="event.status === 'approved'" class="btn-primary" (click)="onPublishApproved()">
+          Publish Live Now
+        </button>
+      </ng-container>
+
+      <!-- In Edit Mode Buttons -->
+      <ng-container *ngIf="isEditing()">
+        <button type="button" class="btn-secondary" (click)="cancelEditing()">Discard Edits</button>
+        <button *ngIf="event.status === 'draft'" type="button" class="btn-secondary" (click)="onSave(false)">
+          Save Draft
+        </button>
+        <button type="button" class="btn-primary" (click)="onSave(true)">
+          <app-icon name="shield" [size]="14"></app-icon>
+          <span>{{ event.status === 'draft' ? 'Save & Submit for Review' : 'Submit Changes for Admin Approval' }}</span>
+        </button>
+      </ng-container>
+    </div>
+  </div>
+</div>
+

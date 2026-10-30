@@ -1,0 +1,162 @@
+<div class="modal-backdrop" (click)="onClose()">
+  <div class="modal-container wizard-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">STEP {{ createWizardStep() }} OF 4</span>
+        <h3 class="modal-title">Create New Event</h3>
+      </div>
+      <button class="modal-close-btn" (click)="onClose()">
+        <app-icon name="close"></app-icon>
+      </button>
+    </div>
+
+    <!-- Stepper Indicator -->
+    <div class="wizard-stepper">
+      <div class="step-indicator" [class.active]="createWizardStep() >= 1">
+        <span class="step-num">1</span>
+        <span class="step-lbl">Details</span>
+      </div>
+      <div class="step-sep" [class.active]="createWizardStep() >= 2"></div>
+      <div class="step-indicator" [class.active]="createWizardStep() >= 2">
+        <span class="step-num">2</span>
+        <span class="step-lbl">Schedule</span>
+      </div>
+      <div class="step-sep" [class.active]="createWizardStep() >= 3"></div>
+      <div class="step-indicator" [class.active]="createWizardStep() >= 3">
+        <span class="step-num">3</span>
+        <span class="step-lbl">Tickets</span>
+      </div>
+      <div class="step-sep" [class.active]="createWizardStep() >= 4"></div>
+      <div class="step-indicator" [class.active]="createWizardStep() >= 4">
+        <span class="step-num">4</span>
+        <span class="step-lbl">Review</span>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <!-- STEP 1: Basic Info -->
+      <div *ngIf="createWizardStep() === 1" class="wizard-pane">
+        <div class="form-group full-width">
+          <label class="form-label">Event Title *</label>
+          <input type="text" class="form-input" [(ngModel)]="newEventForm.title"
+            placeholder="e.g. West Coast Indie Music Night" />
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <app-select [options]="categoryOptions" [(ngModel)]="newEventForm.category">
+            </app-select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Event Format *</label>
+            <app-select [options]="formatOptions" [(ngModel)]="newEventForm.type">
+            </app-select>
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Short Description</label>
+          <textarea class="form-textarea" rows="3" [(ngModel)]="newEventForm.description"
+            placeholder="Describe your event experience, artist lineup, and attendee expectations...">
+          </textarea>
+        </div>
+      </div>
+
+      <!-- STEP 2: Date & Venue -->
+      <div *ngIf="createWizardStep() === 2" class="wizard-pane">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" [(ngModel)]="newEventForm.date" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">City *</label>
+            <app-select [options]="cityOptions" [(ngModel)]="newEventForm.city"></app-select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Start Time *</label>
+            <input type="time" class="form-input" [(ngModel)]="newEventForm.timeStart" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Time *</label>
+            <input type="time" class="form-input" [(ngModel)]="newEventForm.timeEnd" />
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Venue Location *</label>
+          <input type="text" class="form-input" [(ngModel)]="newEventForm.venue"
+            placeholder="e.g. Sabarmati Riverfront Pavilion" />
+        </div>
+      </div>
+
+      <!-- STEP 3: Tickets & Pricing -->
+      <div *ngIf="createWizardStep() === 3" class="wizard-pane">
+        <div class="form-group full-width">
+          <label class="form-label">Ticket Type *</label>
+          <div class="radio-pill-group">
+            <label class="radio-pill" [class.selected]="newEventForm.priceType === 'paid'">
+              <input type="radio" name="pType" value="paid" [(ngModel)]="newEventForm.priceType" />
+              <span>Paid Admission</span>
+            </label>
+            <label class="radio-pill" [class.selected]="newEventForm.priceType === 'free'">
+              <input type="radio" name="pType" value="free" [(ngModel)]="newEventForm.priceType" />
+              <span>Free Entry</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group" *ngIf="newEventForm.priceType === 'paid'">
+            <label class="form-label">Ticket Price (₹) *</label>
+            <input type="number" class="form-input" [(ngModel)]="newEventForm.price" min="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Max Capacity *</label>
+            <input type="number" class="form-input" [(ngModel)]="newEventForm.capacity" min="10" />
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Review & Cover Image -->
+      <div *ngIf="createWizardStep() === 4" class="wizard-pane">
+        <div class="preview-event-box">
+          <img [src]="newEventForm.imageUrl" alt="Cover preview" class="cover-preview-img" />
+          <div class="preview-meta">
+            <h4>{{ newEventForm.title || 'Untitled Event' }}</h4>
+            <p>{{ newEventForm.category }} • {{ newEventForm.venue || 'Venue TBD' }}</p>
+            <span class="preview-badge">{{ newEventForm.priceType === 'paid' ? '₹' + newEventForm.price : 'Free' }} •
+              Cap: {{ newEventForm.capacity }}</span>
+          </div>
+        </div>
+
+        <div class="form-group full-width" style="margin-top: 1rem;">
+          <label class="form-label">Cover Image URL</label>
+          <input type="text" class="form-input" [(ngModel)]="newEventForm.imageUrl" />
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" *ngIf="createWizardStep() === 1"
+        (click)="onClose()">Cancel</button>
+      <button class="btn-secondary" *ngIf="createWizardStep() > 1" (click)="prevStep()">Back</button>
+      <div style="flex: 1;"></div>
+
+      <button class="btn-primary" *ngIf="createWizardStep() < 4" (click)="nextStep()"
+        [disabled]="createWizardStep() === 1 && !newEventForm.title.trim()">
+        Next Step →
+      </button>
+
+      <div style="display: flex; gap: 0.5rem;" *ngIf="createWizardStep() === 4">
+        <button class="btn-secondary" (click)="onFinish('draft')">Save as Draft</button>
+        <button class="btn-primary" (click)="onFinish('pending_review')">Submit for Review</button>
+      </div>
+    </div>
+  </div>
+</div>
+

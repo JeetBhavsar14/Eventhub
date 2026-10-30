@@ -1,0 +1,469 @@
+<div class="admin-platform-shell" [class.sidebar-collapsed]="isSidebarCollapsed()" [class.mobile-open]="isMobileNavOpen()">
+
+  <!-- MOBILE OVERLAY BACKDROP -->
+  <div class="admin-backdrop" *ngIf="isMobileNavOpen()" (click)="toggleMobileNav()"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 1. LEFT ADMIN SIDEBAR                                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <aside class="admin-sidebar" aria-label="Super Admin Navigation">
+    <div class="admin-brand-header">
+      <a routerLink="/discover" class="admin-brand-link">
+        <img src="assets/images/eventhub-logo.svg" alt="EventHub Logo" class="admin-brand-logo-img" width="38" height="38" />
+        <div class="brand-text-block">
+          <span class="brand-name">EventHub</span>
+          <span class="admin-badge">SUPER ADMIN</span>
+        </div>
+      </a>
+      <button class="mobile-close-btn" (click)="toggleMobileNav()" aria-label="Close menu">
+        <app-icon name="close"></app-icon>
+      </button>
+    </div>
+
+    <!-- Admin Navigation Links -->
+    <nav class="admin-nav-menu">
+      <div class="nav-section-title">CORE PLATFORM</div>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'overview'" 
+        (click)="setView('overview')">
+        <app-icon name="grid"></app-icon>
+        <span class="btn-label">Dashboard Overview</span>
+      </button>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'host_applications'" 
+        (click)="setView('host_applications')">
+        <app-icon name="user-check"></app-icon>
+        <span class="btn-label">Host Approvals</span>
+        <span class="badge-count" *ngIf="platformStats().pendingAppsCount > 0">{{ platformStats().pendingAppsCount }}</span>
+      </button>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'event_curation'" 
+        (click)="setView('event_curation')">
+        <app-icon name="calendar"></app-icon>
+        <span class="btn-label">Event Curation</span>
+        <span class="badge-count warning" *ngIf="platformStats().pendingEventsCount > 0">{{ platformStats().pendingEventsCount }}</span>
+      </button>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'users'" 
+        (click)="setView('users')">
+        <app-icon name="users"></app-icon>
+        <span class="btn-label">Users & Directory</span>
+      </button>
+
+      <div class="nav-section-title">GOVERNANCE & FINANCE</div>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'finance'" 
+        (click)="setView('finance')">
+        <app-icon name="rupee"></app-icon>
+        <span class="btn-label">Finance & GMV</span>
+      </button>
+
+      <button 
+        class="admin-nav-btn" 
+        [class.active]="currentView() === 'settings'" 
+        (click)="setView('settings')">
+        <app-icon name="settings"></app-icon>
+        <span class="btn-label">System Settings</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Bottom Admin Profile with Dropdown -->
+    <div class="admin-sidebar-footer">
+      <!-- Admin Dropdown Menu Popup (Anchored Above the Footer Card) -->
+      <div class="admin-dropdown-menu-box" *ngIf="showAdminMenu()" (click)="$event.stopPropagation()">
+        <div class="admin-dropdown-profile-box">
+          <div class="admin-avatar">AD</div>
+          <div class="admin-dropdown-details">
+            <strong>Platform Administrator</strong>
+            <small>admin@eventhub.com</small>
+            <span class="admin-role-badge">Super Admin</span>
+          </div>
+        </div>
+
+        <div class="admin-menu-divider"></div>
+
+        <button class="admin-menu-item" (click)="setView('settings'); showAdminMenu.set(false)">
+          <app-icon name="settings"></app-icon>
+          <span>Platform Settings</span>
+        </button>
+
+        <a routerLink="/host/dashboard" class="admin-menu-item" (click)="showAdminMenu.set(false)">
+          <app-icon name="monitor"></app-icon>
+          <span>Host SaaS Portal</span>
+        </a>
+
+        <a routerLink="/management" class="admin-menu-item" (click)="showAdminMenu.set(false)">
+          <app-icon name="shield"></app-icon>
+          <span>Operations Center</span>
+        </a>
+
+        <a routerLink="/discover" class="admin-menu-item" (click)="showAdminMenu.set(false)">
+          <app-icon name="compass"></app-icon>
+          <span>Explore Public Website</span>
+        </a>
+
+        <div class="admin-menu-divider"></div>
+
+        <button class="admin-menu-item signout-item" (click)="signOut()">
+          <app-icon name="log-out"></app-icon>
+          <span>Sign Out</span>
+        </button>
+      </div>
+
+      <div class="admin-user-card" (click)="toggleAdminMenu($event)">
+        <div class="admin-avatar">AD</div>
+        <div class="admin-user-meta">
+          <strong>Admin Control</strong>
+          <small>admin@eventhub.com</small>
+        </div>
+        <app-icon name="chevron-down" class="admin-card-chevron" [class.rotated]="showAdminMenu()"></app-icon>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 2. MAIN ADMIN WRAPPER                                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="admin-main-wrapper">
+    
+    <!-- Top Header -->
+    <header class="admin-header">
+      <div class="header-left">
+        <button class="mobile-toggle" (click)="toggleMobileNav()" aria-label="Toggle navigation">
+          <app-icon name="menu"></app-icon>
+        </button>
+
+        <div class="admin-breadcrumbs">
+          <span class="crumb-root">Platform Admin</span>
+          <span class="crumb-slash">/</span>
+          <span class="crumb-active">
+            <span *ngIf="currentView() === 'overview'">Platform Overview</span>
+            <span *ngIf="currentView() === 'host_applications'">Host Verification Queue</span>
+            <span *ngIf="currentView() === 'event_curation'">Event Moderation & Curation</span>
+            <span *ngIf="currentView() === 'users'">User & Host Directory</span>
+            <span *ngIf="currentView() === 'finance'">Financial Performance</span>
+            <span *ngIf="currentView() === 'settings'">Platform Configuration</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Quick Broadcast Button -->
+        <button class="btn-broadcast-quick" (click)="openBroadcastModal()">
+          <app-icon name="message-square"></app-icon>
+          <span class="btn-text">Broadcast</span>
+        </button>
+
+        <!-- Quick Link to Host Workspace / Public App -->
+        <a routerLink="/host/dashboard" class="btn-secondary-link" title="Open Host Workspace">
+          <span>Host SaaS</span>
+        </a>
+        <a routerLink="/discover" class="btn-secondary-link" title="Open Public Website">
+          <span>Public App</span>
+        </a>
+
+        <!-- Sign Out Button -->
+        <button class="btn-signout-icon" (click)="signOut()" title="Sign Out">
+          <app-icon name="log-out"></app-icon>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="admin-content">
+
+      <!-- Toast Feedback -->
+      <div class="admin-toast" *ngIf="toastMessage()">
+        <app-icon name="check-circle"></app-icon>
+        <span>{{ toastMessage() }}</span>
+      </div>
+
+
+      <!-- VIEW 1: DASHBOARD OVERVIEW -->
+      <app-admin-overview 
+        *ngIf="currentView() === 'overview'"
+        [platformStats]="platformStats()"
+        (navigate)="setView($event)"
+        (inspectApp)="openAppDetailsModal($event)"
+        (inspectEvent)="openEventCurationModal($event)">
+      </app-admin-overview>
+
+      <!-- VIEW 2: HOST APPLICATIONS QUEUE -->
+      <app-admin-host-applications
+        *ngIf="currentView() === 'host_applications'"
+        (inspectApp)="openAppDetailsModal($event)"
+        (approveApp)="promptApproveHostApplication($event.id, $event.name)">
+      </app-admin-host-applications>
+
+      <!-- VIEW 3: EVENT CURATION & MODERATION -->
+      <app-admin-event-curation
+        *ngIf="currentView() === 'event_curation'"
+        (inspectEvent)="openEventCurationModal($event)"
+        (approveEvent)="promptApproveEventForLive($event.id, $event.title)"
+        (delistEvent)="promptDelistEvent($event.id, $event.title)"
+        (toggleFeatured)="toggleEventFeatured($event.id, $event.title)">
+      </app-admin-event-curation>
+
+      <!-- VIEW 4: USER & HOST DIRECTORY -->
+      <app-admin-users
+        *ngIf="currentView() === 'users'"
+        (inspectUser)="openUserDossier($event)"
+        (toggleSuspension)="promptToggleUserSuspension($event)">
+      </app-admin-users>
+
+      <!-- VIEW 5: FINANCE & SETTLEMENTS -->
+      <app-admin-finance
+        *ngIf="currentView() === 'finance'"
+        [platformStats]="platformStats()"
+        (releasePayout)="promptReleaseSettlementPayout($event)">
+      </app-admin-finance>
+
+      <!-- VIEW 6: SYSTEM SETTINGS -->
+      <app-admin-settings
+        *ngIf="currentView() === 'settings'">
+      </app-admin-settings>
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MODAL: HOST APPLICATION INSPECTION                          -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="admin-modal-backdrop" *ngIf="selectedAppForModal()" (click)="selectedAppForModal.set(null)">
+    <div class="admin-modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <h3>Host Application: {{ selectedAppForModal()?.applicantName }}</h3>
+          <span class="modal-sub">{{ selectedAppForModal()?.organizationName }} • ID: {{ selectedAppForModal()?.id }}</span>
+        </div>
+        <button class="btn-modal-close" (click)="selectedAppForModal.set(null)"><app-icon name="close" [size]="14"></app-icon></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-section">
+          <h4>Organization Details</h4>
+          <p><strong>Type:</strong> {{ selectedAppForModal()?.organizationType }}</p>
+          <p><strong>City / Base:</strong> {{ selectedAppForModal()?.city }}</p>
+          <p><strong>Expected Scale:</strong> {{ selectedAppForModal()?.expectedScale }}</p>
+          <p><strong>Categories:</strong> {{ selectedAppForModal()?.primaryCategories?.join(', ') }}</p>
+        </div>
+
+        <div class="modal-section">
+          <h4>Past Organizing Experience</h4>
+          <p class="modal-note-box">{{ selectedAppForModal()?.pastExperience }}</p>
+        </div>
+
+        <div class="modal-section">
+          <h4>Submitted Verification Documents</h4>
+          <div class="doc-pill">
+            <app-icon name="file-text"></app-icon>
+            <span>{{ selectedAppForModal()?.idDocName }}</span>
+            <small class="doc-status-ok">Verified Signature</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-modal-secondary" (click)="requestMoreHostInfo(selectedAppForModal()!.id)">Request Clarification</button>
+        <button class="btn-modal-danger" (click)="promptRejectHostApplication(selectedAppForModal()!.id, selectedAppForModal()!.applicantName)">Reject</button>
+        <button class="btn-modal-primary" (click)="promptApproveHostApplication(selectedAppForModal()!.id, selectedAppForModal()!.applicantName)">Approve & Grant Host Privileges</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MODAL: EVENT CURATION FEEDBACK                              -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="admin-modal-backdrop" *ngIf="selectedEventForModal()" (click)="selectedEventForModal.set(null)">
+    <div class="admin-modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <h3>Moderate Event: {{ selectedEventForModal()?.title }}</h3>
+          <span class="modal-sub">Hosted by {{ selectedEventForModal()?.hostName }}</span>
+        </div>
+        <button class="btn-modal-close" (click)="selectedEventForModal.set(null)"><app-icon name="close" [size]="14"></app-icon></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-section">
+          <label>Curation Review Notes / Action Items:</label>
+          <textarea 
+            [(ngModel)]="feedbackText" 
+            class="admin-textarea" 
+            rows="4" 
+            placeholder="Explain required changes before this event can be published live...">
+          </textarea>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-modal-secondary" (click)="selectedEventForModal.set(null)">Cancel</button>
+        <button class="btn-modal-warning" (click)="sendEventFeedback(selectedEventForModal()!.id)">Send Changes Requested</button>
+        <button class="btn-modal-primary" (click)="promptApproveEventForLive(selectedEventForModal()!.id, selectedEventForModal()!.title)">Approve Listing</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- MODAL: BROADCAST ANNOUNCEMENT                               -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="admin-modal-backdrop" *ngIf="showBroadcastModal()" (click)="showBroadcastModal.set(false)">
+    <div class="admin-modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <h3>Platform Broadcast Announcement</h3>
+          <span class="modal-sub">Push alert to all organizers and attendees</span>
+        </div>
+        <button class="btn-modal-close" (click)="showBroadcastModal.set(false)"><app-icon name="close" [size]="14"></app-icon></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-section">
+          <label>Broadcast Title</label>
+          <input 
+            type="text" 
+            [(ngModel)]="broadcastMessage().title" 
+            class="admin-input" 
+            placeholder="e.g. Scheduled Platform Maintenance" />
+        </div>
+        <div class="modal-section">
+          <label>Broadcast Content</label>
+          <textarea 
+            [(ngModel)]="broadcastMessage().body" 
+            class="admin-textarea" 
+            rows="3" 
+            placeholder="Enter announcement text...">
+          </textarea>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-modal-secondary" (click)="showBroadcastModal.set(false)">Cancel</button>
+        <button class="btn-modal-primary" (click)="sendBroadcast()">Send Platform Broadcast</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- DRAWER: USER DOSSIER & ROLE REASSIGNMENT                    -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="admin-modal-backdrop" *ngIf="selectedUserForDossier()" (click)="closeUserDossier()">
+    <div class="user-dossier-card" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="dossier-header-profile">
+          <img [src]="selectedUserForDossier()?.avatar" class="dossier-avatar" [alt]="selectedUserForDossier()?.name" />
+          <div>
+            <h3>{{ selectedUserForDossier()?.name }}</h3>
+            <span class="modal-sub">{{ selectedUserForDossier()?.email }} • ID: {{ selectedUserForDossier()?.id }}</span>
+          </div>
+        </div>
+        <button class="btn-modal-close" (click)="closeUserDossier()"><app-icon name="close" [size]="14"></app-icon></button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Status & Role Banner -->
+        <div class="dossier-meta-grid">
+          <div class="meta-card">
+            <span>Current Role</span>
+            <strong class="role-pill" [attr.data-role]="selectedUserForDossier()?.role">{{ selectedUserForDossier()?.role | uppercase }}</strong>
+          </div>
+          <div class="meta-card">
+            <span>Account Status</span>
+            <strong [class.text-danger]="selectedUserForDossier()?.status === 'suspended'" [class.text-emerald]="selectedUserForDossier()?.status === 'active'">
+              {{ selectedUserForDossier()?.status | uppercase }}
+            </strong>
+          </div>
+          <div class="meta-card">
+            <span>Lifetime GMV</span>
+            <strong>₹{{ selectedUserForDossier()?.totalSpent | number }}</strong>
+          </div>
+          <div class="meta-card">
+            <span>Total Bookings</span>
+            <strong>{{ selectedUserForDossier()?.totalBookings }} orders</strong>
+          </div>
+        </div>
+
+        <!-- Role Reassignment Section -->
+        <div class="modal-section mt-4">
+          <h4>Reassign Platform Privilege</h4>
+          <p class="section-desc">Change user permissions according to system hierarchy (Super Admin $\rightarrow$ Host $\rightarrow$ Operations $\rightarrow$ Staff $\rightarrow$ Attendee).</p>
+          
+          <div class="role-promotion-buttons">
+            <button 
+              class="btn-promo-role" 
+              [class.current]="selectedUserForDossier()?.role === 'user'" 
+              (click)="promptChangeUserRole(selectedUserForDossier()!, 'user')">
+              Attendee User
+            </button>
+            <button 
+              class="btn-promo-role" 
+              [class.current]="selectedUserForDossier()?.role === 'host'" 
+              (click)="promptChangeUserRole(selectedUserForDossier()!, 'host')">
+              ★ Event Host (Owner)
+            </button>
+            <button 
+              class="btn-promo-role" 
+              [class.current]="selectedUserForDossier()?.role === 'management'" 
+              (click)="promptChangeUserRole(selectedUserForDossier()!, 'management')">
+              Operations Lead
+            </button>
+            <button 
+              class="btn-promo-role" 
+              [class.current]="selectedUserForDossier()?.role === 'staff'" 
+              (click)="promptChangeUserRole(selectedUserForDossier()!, 'staff')">
+              Field Staff
+            </button>
+            <button 
+              class="btn-promo-role" 
+              [class.current]="selectedUserForDossier()?.role === 'admin'" 
+              (click)="promptChangeUserRole(selectedUserForDossier()!, 'admin')">
+              Super Admin
+            </button>
+          </div>
+        </div>
+
+        <!-- Security & Ban Action -->
+        <div class="modal-section mt-4 border-top">
+          <h4>Security & Access Controls</h4>
+          <p class="section-desc">Suspending an account revokes active tokens and immediately redirects any active session to login.</p>
+          
+          <button 
+            class="btn-suspend-account" 
+            [class.active-reactivate]="selectedUserForDossier()?.status === 'suspended'" 
+            (click)="promptToggleUserSuspension(selectedUserForDossier()!)">
+            {{ selectedUserForDossier()?.status === 'active' ? 'Suspend & Freeze Account' : 'Reactivate User Account' }}
+          </button>
+        </div>
+
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-modal-secondary" (click)="closeUserDossier()">Close Dossier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- CONFIRMATION DIALOG MODAL (POPUP VERIFICATION)               -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <app-confirm-dialog
+    [show]="showConfirmationDialog()"
+    [title]="confirmDialogData.title"
+    [message]="confirmDialogData.message"
+    [actionBtnText]="confirmDialogData.actionBtnText"
+    [isDestructive]="confirmDialogData.isDestructive"
+    (confirm)="executeConfirmAction()"
+    (cancel)="cancelConfirm()">
+  </app-confirm-dialog>
+
+</div>

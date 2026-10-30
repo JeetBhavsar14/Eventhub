@@ -22,7 +22,7 @@ export const routes: Routes = [
       // 2. MANAGEMENT WORKSPACE (Canonical Entry: /management - Lazy Loaded)
       {
         path: 'management',
-        loadComponent: () => import('./layout/management-layout/management-layout').then(m => m.ManagementLayoutComponent),
+        loadComponent: () => import('./layout/management-layout/management-layout.component').then(m => m.ManagementLayoutComponent),
         canActivate: [managementGuard]
       },
       // Management Legacy Aliases & Sub-Paths (Redirect to Canonical Workspace)
@@ -36,7 +36,7 @@ export const routes: Routes = [
       // 3. EVENT-STAFF WORKSPACE (Canonical Entry: /staff - Lazy Loaded)
       {
         path: 'staff',
-        loadComponent: () => import('./layout/staff-layout/staff-layout').then(m => m.StaffLayoutComponent),
+        loadComponent: () => import('./layout/staff-layout/staff-layout.component').then(m => m.StaffLayoutComponent),
         canActivate: [staffGuard]
       },
       // Staff Legacy Aliases & Sub-Paths (Redirect to Canonical Workspace)
@@ -48,7 +48,7 @@ export const routes: Routes = [
       // 4. PLATFORM SUPER ADMIN WORKSPACE (Canonical Entry: /admin - Lazy Loaded)
       {
         path: 'admin',
-        loadComponent: () => import('./layout/admin-layout/admin-layout').then(m => m.AdminLayoutComponent),
+        loadComponent: () => import('./layout/admin-layout/admin-layout.component').then(m => m.AdminLayoutComponent),
         canActivate: [adminGuard]
       },
       // Admin Legacy Aliases & Sub-Paths (Redirect to Canonical Workspace)
@@ -144,7 +144,7 @@ export const routes: Routes = [
           // Protected User Routes (Lazy Loaded)
           { 
             path: 'checkout/:eventId', 
-            loadComponent: () => import('./features/checkout/checkout').then(m => m.Checkout), 
+            loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent), 
             canActivate: [authGuard] 
           },
           {
@@ -169,7 +169,7 @@ export const routes: Routes = [
           },
           { 
             path: 'profile', 
-            loadComponent: () => import('./features/profile/profile').then(m => m.Profile), 
+            loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent), 
             canActivate: [authGuard] 
           }
         ]
