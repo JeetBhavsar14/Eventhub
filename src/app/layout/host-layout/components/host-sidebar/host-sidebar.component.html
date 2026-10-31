@@ -1,0 +1,131 @@
+<!-- MOBILE SIDEBAR BACKDROP OVERLAY -->
+<div class="sidebar-backdrop" *ngIf="isMobileSidebarOpen" (click)="closeMobileSidebar.emit()"></div>
+
+<!-- A. LEFT SIDEBAR (240px Fixed Navigation Shell) -->
+<aside class="workspace-sidebar" [class.mobile-open]="isMobileSidebarOpen" aria-label="Host Workspace Sidebar">
+
+  <!-- Sidebar Top: Brand Logo & Workspace Pill -->
+  <div class="sidebar-brand-header">
+    <a routerLink="/discover" class="brand-logo-link" title="EventHub Home">
+      <img src="assets/images/eventhub-logo.svg" alt="EventHub Logo" class="host-brand-logo-img" width="38"
+        height="38" />
+      <div class="brand-text-block">
+        <span class="brand-title">EventHub</span>
+        <span class="workspace-tag">HOST WORKSPACE</span>
+      </div>
+    </a>
+    <button class="mobile-sidebar-close" (click)="closeMobileSidebar.emit()" aria-label="Close Sidebar">
+      <app-icon name="close"></app-icon>
+    </button>
+  </div>
+
+  <!-- Sidebar Main Navigation Items -->
+  <nav class="sidebar-nav" aria-label="Workspace Navigation">
+    <div class="nav-group-title">MAIN MENU</div>
+
+    <button class="nav-item-btn" [class.active]="currentView === 'overview'" (click)="onViewClick('overview')"
+      id="nav-overview">
+      <app-icon name="grid" class="nav-icon"></app-icon>
+      <span class="nav-label">Overview</span>
+      <span class="nav-active-pill" *ngIf="currentView === 'overview'"></span>
+    </button>
+
+    <button class="nav-item-btn" [class.active]="currentView === 'my_events'" (click)="onViewClick('my_events')"
+      id="nav-my-events">
+      <app-icon name="calendar" class="nav-icon"></app-icon>
+      <span class="nav-label">My Events</span>
+      <span class="nav-badge" *ngIf="eventsCount > 0">{{ eventsCount }}</span>
+    </button>
+
+    <button class="nav-item-btn highlight-btn" (click)="openCreateWizard.emit()" id="nav-create-event">
+      <app-icon name="plus" class="nav-icon" [strokeWidth]="2.5"></app-icon>
+      <span class="nav-label">Create Event</span>
+      <span class="nav-sparkle-tag">New</span>
+    </button>
+
+    <button class="nav-item-btn" [class.active]="currentView === 'bookings'" (click)="onViewClick('bookings')"
+      id="nav-bookings">
+      <app-icon name="ticket" class="nav-icon"></app-icon>
+      <span class="nav-label">Bookings & Attendees</span>
+      <span class="nav-badge" *ngIf="totalBookingsCount > 0">{{ totalBookingsCount }}</span>
+    </button>
+
+    <div class="nav-group-title">WORKSPACE</div>
+
+    <button class="nav-item-btn" [class.active]="currentView === 'team'" (click)="onViewClick('team')" id="nav-team">
+      <app-icon name="users" class="nav-icon"></app-icon>
+      <span class="nav-label">Team Management</span>
+      <span class="nav-badge" *ngIf="teamMembersCount > 0">{{ teamMembersCount }}</span>
+    </button>
+
+    <button class="nav-item-btn" [class.active]="currentView === 'analytics'" (click)="onViewClick('analytics')"
+      id="nav-analytics">
+      <app-icon name="bar-chart" class="nav-icon"></app-icon>
+      <span class="nav-label">Analytics</span>
+    </button>
+
+    <button class="nav-item-btn" [class.active]="currentView === 'notifications'"
+      (click)="onViewClick('notifications')" id="nav-notifications">
+      <app-icon name="bell" class="nav-icon"></app-icon>
+      <span class="nav-label">Notifications</span>
+      <span class="nav-badge unread-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+    </button>
+
+    <button class="nav-item-btn" [class.active]="currentView === 'settings'" (click)="onViewClick('settings')"
+      id="nav-settings">
+      <app-icon name="settings" class="nav-icon"></app-icon>
+      <span class="nav-label">Settings</span>
+    </button>
+  </nav>
+
+  <!-- Sidebar Bottom: Help & Host Profile Card -->
+  <div class="sidebar-footer">
+    <button class="help-link-btn" (click)="openHelp.emit()">
+      <app-icon name="help-circle" class="help-icon"></app-icon>
+      <span>Help & Host Support</span>
+    </button>
+
+    <div class="relative-sidebar-user-container">
+      <!-- Sidebar User Menu Popup (Anchored Above the Sidebar Card) -->
+      <div class="host-sidebar-dropdown-box" *ngIf="showSidebarUserMenu()" (click)="$event.stopPropagation()">
+        <div class="host-sidebar-profile-box">
+          <div class="user-avatar-badge">{{ getInitials() }}</div>
+          <div class="host-dropdown-meta">
+            <strong>{{ hostInfo.name }}</strong>
+            <small>{{ hostInfo.organization }}</small>
+            <span class="role-badge">{{ hostInfo.verificationBadge }}</span>
+          </div>
+        </div>
+        <div class="host-dropdown-divider"></div>
+        <button class="host-dropdown-item" (click)="onViewClick('settings')">
+          <app-icon name="settings" [size]="16"></app-icon>
+          <span>Workspace Settings</span>
+        </button>
+        <button class="host-dropdown-item" (click)="onViewClick('team')">
+          <app-icon name="user" [size]="16"></app-icon>
+          <span>Team & Permissions</span>
+        </button>
+        <a routerLink="/discover" class="host-dropdown-item" (click)="showSidebarUserMenu.set(false)">
+          <app-icon name="compass" [size]="16"></app-icon>
+          <span>Explore Events as Guest</span>
+        </a>
+        <div class="host-dropdown-divider"></div>
+        <button class="host-dropdown-item signout-item" (click)="signOut.emit()">
+          <app-icon name="log-out" [size]="16"></app-icon>
+          <span>Sign Out of Workspace</span>
+        </button>
+      </div>
+
+      <!-- Sidebar User Card Trigger Button -->
+      <div class="sidebar-user-card dropdown-trigger" (click)="toggleSidebarUserMenu($event)">
+        <div class="user-avatar-badge">{{ getInitials() }}</div>
+        <div class="user-meta">
+          <span class="user-name">{{ hostInfo.name }}</span>
+          <span class="user-role-tag">{{ hostInfo.verificationBadge }}</span>
+        </div>
+        <app-icon name="chevron-down" class="user-chevron" [class.rotated]="showSidebarUserMenu()"></app-icon>
+      </div>
+    </div>
+  </div>
+</aside>
+

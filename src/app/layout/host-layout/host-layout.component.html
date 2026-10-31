@@ -1,334 +1,56 @@
 <div class="host-workspace-layout" [class.mobile-sidebar-open]="isMobileSidebarOpen()">
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- MOBILE SIDEBAR BACKDROP OVERLAY                             -->
+  <!-- A. LEFT SIDEBAR (EXTRACTED COMPONENT)                       -->
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <div class="sidebar-backdrop" *ngIf="isMobileSidebarOpen()" (click)="toggleMobileSidebar()"></div>
-
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- A. LEFT SIDEBAR (240px Fixed Navigation Shell)             -->
-  <!-- ═══════════════════════════════════════════════════════════ -->
-  <aside class="workspace-sidebar" aria-label="Host Workspace Sidebar">
-
-    <!-- Sidebar Top: Brand Logo & Workspace Pill -->
-    <div class="sidebar-brand-header">
-      <a routerLink="/discover" class="brand-logo-link" title="EventHub Home">
-        <img src="assets/images/eventhub-logo.svg" alt="EventHub Logo" class="host-brand-logo-img" width="38"
-          height="38" />
-        <div class="brand-text-block">
-          <span class="brand-title">EventHub</span>
-          <span class="workspace-tag">HOST WORKSPACE</span>
-        </div>
-      </a>
-      <button class="mobile-sidebar-close" (click)="toggleMobileSidebar()" aria-label="Close Sidebar">
-        <app-icon name="close"></app-icon>
-      </button>
-    </div>
-
-    <!-- Sidebar Main Navigation Items -->
-    <nav class="sidebar-nav" aria-label="Workspace Navigation">
-      <div class="nav-group-title">MAIN MENU</div>
-
-      <button class="nav-item-btn" [class.active]="currentView() === 'overview'" (click)="switchView('overview')"
-        id="nav-overview">
-        <app-icon name="grid" class="nav-icon"></app-icon>
-        <span class="nav-label">Overview</span>
-        <span class="nav-active-pill" *ngIf="currentView() === 'overview'"></span>
-      </button>
-
-      <button class="nav-item-btn" [class.active]="currentView() === 'my_events'" (click)="switchView('my_events')"
-        id="nav-my-events">
-        <app-icon name="calendar" class="nav-icon"></app-icon>
-        <span class="nav-label">My Events</span>
-        <span class="nav-badge" *ngIf="events().length > 0">{{ events().length }}</span>
-      </button>
-
-      <button class="nav-item-btn highlight-btn" (click)="openCreateWizard()" id="nav-create-event">
-        <app-icon name="plus" class="nav-icon" [strokeWidth]="2.5"></app-icon>
-        <span class="nav-label">Create Event</span>
-        <span class="nav-sparkle-tag">New</span>
-      </button>
-
-      <button class="nav-item-btn" [class.active]="currentView() === 'bookings'" (click)="switchView('bookings')"
-        id="nav-bookings">
-        <app-icon name="ticket" class="nav-icon"></app-icon>
-        <span class="nav-label">Bookings & Attendees</span>
-        <span class="nav-badge" *ngIf="stats().totalBookings > 0">{{ stats().totalBookings }}</span>
-      </button>
-
-      <div class="nav-group-title">WORKSPACE</div>
-
-      <button class="nav-item-btn" [class.active]="currentView() === 'team'" (click)="switchView('team')" id="nav-team">
-        <app-icon name="users" class="nav-icon"></app-icon>
-        <span class="nav-label">Team Management</span>
-        <span class="nav-badge" *ngIf="teamMembers().length > 0">{{ teamMembers().length }}</span>
-      </button>
-
-      <button class="nav-item-btn" [class.active]="currentView() === 'analytics'" (click)="switchView('analytics')"
-        id="nav-analytics">
-        <app-icon name="bar-chart" class="nav-icon"></app-icon>
-        <span class="nav-label">Analytics</span>
-      </button>
-
-      <button class="nav-item-btn" [class.active]="currentView() === 'notifications'"
-        (click)="switchView('notifications')" id="nav-notifications">
-        <app-icon name="bell" class="nav-icon"></app-icon>
-        <span class="nav-label">Notifications</span>
-        <span class="nav-badge unread-badge" *ngIf="unreadCount() > 0">{{ unreadCount() }}</span>
-      </button>
-
-      <button class="nav-item-btn" [class.active]="currentView() === 'settings'" (click)="switchView('settings')"
-        id="nav-settings">
-        <app-icon name="settings" class="nav-icon"></app-icon>
-        <span class="nav-label">Settings</span>
-      </button>
-    </nav>
-
-    <!-- Sidebar Bottom: Help & Host Profile Card -->
-    <div class="sidebar-footer">
-      <button class="help-link-btn" (click)="showHelpModal.set(true)">
-        <app-icon name="help-circle" class="help-icon"></app-icon>
-        <span>Help & Host Support</span>
-      </button>
-
-      <div class="relative-sidebar-user-container">
-        <!-- Sidebar User Menu Popup (Anchored Above the Sidebar Card) -->
-        <div class="host-sidebar-dropdown-box" *ngIf="showSidebarUserMenu()" (click)="$event.stopPropagation()">
-          <div class="host-sidebar-profile-box">
-            <div class="user-avatar-badge">{{ getInitials() }}</div>
-            <div class="host-dropdown-meta">
-              <strong>{{ hostInfo().name }}</strong>
-              <small>{{ hostInfo().organization }}</small>
-              <span class="role-badge">{{ hostInfo().verificationBadge }}</span>
-            </div>
-          </div>
-          <div class="host-dropdown-divider"></div>
-          <button class="host-dropdown-item" (click)="switchView('settings'); showSidebarUserMenu.set(false)">
-            <app-icon name="settings" [size]="16"></app-icon>
-            <span>Workspace Settings</span>
-          </button>
-          <button class="host-dropdown-item" (click)="switchView('team'); showSidebarUserMenu.set(false)">
-            <app-icon name="user" [size]="16"></app-icon>
-            <span>Team & Permissions</span>
-          </button>
-          <a routerLink="/discover" class="host-dropdown-item" (click)="showSidebarUserMenu.set(false)">
-            <app-icon name="compass" [size]="16"></app-icon>
-            <span>Explore Events as Guest</span>
-          </a>
-          <div class="host-dropdown-divider"></div>
-          <button class="host-dropdown-item signout-item" (click)="signOut()">
-            <app-icon name="log-out" [size]="16"></app-icon>
-            <span>Sign Out of Workspace</span>
-          </button>
-        </div>
-
-        <!-- Sidebar User Card Trigger Button -->
-        <div class="sidebar-user-card dropdown-trigger" (click)="toggleSidebarUserMenu($event)">
-          <div class="user-avatar-badge">{{ getInitials() }}</div>
-          <div class="user-meta">
-            <span class="user-name">{{ hostInfo().name }}</span>
-            <span class="user-role-tag">{{ hostInfo().verificationBadge }}</span>
-          </div>
-          <app-icon name="chevron-down" class="user-chevron" [class.rotated]="showSidebarUserMenu()"></app-icon>
-        </div>
-      </div>
-    </div>
-  </aside>
+  <app-host-sidebar
+    [currentView]="currentView()"
+    [eventsCount]="events().length"
+    [totalBookingsCount]="stats().totalBookings"
+    [teamMembersCount]="teamMembers().length"
+    [unreadCount]="unreadCount()"
+    [hostInfo]="hostInfo()"
+    [isMobileSidebarOpen]="isMobileSidebarOpen()"
+    (switchView)="switchView($event)"
+    (openCreateWizard)="openCreateWizard()"
+    (openHelp)="showHelpModal.set(true)"
+    (signOut)="signOut()"
+    (closeMobileSidebar)="isMobileSidebarOpen.set(false)">
+  </app-host-sidebar>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
   <!-- B. MAIN WRAPPER (Header + View Content)                    -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <div class="workspace-main-wrapper">
 
-    <!-- TOP HEADER -->
-    <header class="workspace-header">
-      <div class="header-left">
-        <!-- Mobile Sidebar Toggle -->
-        <button class="mobile-toggle-btn" (click)="toggleMobileSidebar()" aria-label="Toggle Navigation Menu">
-          <app-icon name="menu"></app-icon>
-        </button>
-
-        <!-- Breadcrumb & Context Title -->
-        <div class="breadcrumb-container">
-          <span class="crumb-root">Host Workspace</span>
-          <span class="crumb-separator">/</span>
-          <span class="crumb-current">
-            <span *ngIf="currentView() === 'overview'">Overview</span>
-            <span *ngIf="currentView() === 'my_events'">My Events</span>
-            <span *ngIf="currentView() === 'create_event'">Create Event</span>
-            <span *ngIf="currentView() === 'bookings'">Bookings & Attendees</span>
-            <span *ngIf="currentView() === 'team'">Team Management</span>
-            <span *ngIf="currentView() === 'analytics'">Analytics</span>
-            <span *ngIf="currentView() === 'notifications'">Notifications</span>
-            <span *ngIf="currentView() === 'settings'">Settings</span>
-          </span>
-        </div>
-      </div>
-
-      <!-- Header Search & Actions -->
-      <div class="header-right">
-        <!-- Quick Search with Top 3 Live Matching Results -->
-        <div class="header-search-box" (click)="$event.stopPropagation()">
-          <app-icon name="search" class="search-icon"></app-icon>
-          <input type="text" placeholder="Search events, bookings, attendees..." [ngModel]="eventSearchTerm()"
-            (ngModelChange)="onEventSearchChange($event)" (focus)="onSearchFocus()" class="header-search-input" />
-          <button type="button" class="btn-clear-search" *ngIf="eventSearchTerm().trim()" (click)="clearSearch()"
-            title="Clear search">
-            <app-icon name="close" [size]="13"></app-icon>
-          </button>
-
-          <!-- Top 3 Live Matching Results Dropdown -->
-          <div class="search-results-dropdown" *ngIf="showSearchDropdown() && eventSearchTerm().trim()">
-            <div class="dropdown-top-meta">
-              <span class="results-header-tag">Top Matches</span>
-              <span class="results-count-text">{{ topMatchingResults().length }} of {{ totalMatchesCount() }}
-                found</span>
-            </div>
-
-            <!-- Results List -->
-            <div class="search-results-list" *ngIf="topMatchingResults().length > 0">
-              <div *ngFor="let item of topMatchingResults()" class="search-result-item"
-                (click)="selectSearchResult(item)">
-                <img [src]="item.imageUrl" [alt]="item.title" class="result-thumb" />
-                <div class="result-info">
-                  <div class="result-title-row">
-                    <span class="result-title">{{ item.title }}</span>
-                    <span class="result-badge" [ngClass]="getStatusBadgeClass(item.status)">
-                      {{ getStatusLabel(item.status) }}
-                    </span>
-                  </div>
-                  <div class="result-meta-row">
-                    <span class="result-meta-date"><app-icon name="calendar" [size]="11"></app-icon> {{ item.date
-                      }}</span>
-                    <span class="result-meta-venue"><app-icon name="map-pin" [size]="11"></app-icon> {{ item.venue
-                      }}</span>
-                    <span class="result-price">{{ item.price > 0 ? '₹' + item.price : 'Free' }}</span>
-                  </div>
-                </div>
-                <div class="result-arrow">
-                  <app-icon name="chevron-right" [size]="14"></app-icon>
-                </div>
-              </div>
-            </div>
-
-            <!-- Empty Search State -->
-            <div class="search-no-results" *ngIf="topMatchingResults().length === 0">
-              <app-icon name="search" [size]="20"></app-icon>
-              <p>No matching events found for "<strong>{{ eventSearchTerm() }}</strong>"</p>
-            </div>
-
-            <!-- Dropdown Footer -->
-            <div class="search-dropdown-footer" *ngIf="topMatchingResults().length > 0">
-              <button class="btn-see-all-results" (click)="seeAllSearchResults()">
-                <span>See all results in Portfolio</span>
-                <app-icon name="arrow-right" [size]="13"></app-icon>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Help Button -->
-        <button class="header-icon-btn header-help-btn" (click)="showHelpModal.set(true)" title="Help & Documentation">
-          <app-icon name="help-circle"></app-icon>
-        </button>
-
-        <!-- Notifications Bell with Badge & Dropdown -->
-        <div class="relative-dropdown-container">
-          <button class="header-icon-btn dropdown-trigger" (click)="toggleNotifications($event)" title="Notifications">
-            <app-icon name="bell"></app-icon>
-            <span class="notification-dot" *ngIf="unreadCount() > 0"></span>
-          </button>
-
-          <!-- Notifications Dropdown Panel -->
-          <div class="dropdown-menu-box notifications-dropdown" *ngIf="showNotificationsDropdown()"
-            (click)="$event.stopPropagation()">
-            <div class="dropdown-header">
-              <span class="dropdown-title">Notifications</span>
-              <button class="mark-all-read-btn" (click)="markAllNotificationsRead()" *ngIf="unreadCount() > 0">
-                Mark all as read
-              </button>
-            </div>
-            <div class="notifications-list">
-              <div *ngFor="let notif of notifications()" class="notification-item" [class.unread]="notif.unread"
-                (click)="dashboardService.markNotificationRead(notif.id)">
-                <div class="notif-icon-circle" [attr.data-type]="notif.type">
-                  <app-icon name="check-circle" *ngIf="notif.type === 'approval'"></app-icon>
-                  <app-icon name="alert-circle" *ngIf="notif.type === 'action'"></app-icon>
-                  <app-icon name="ticket-simple" *ngIf="notif.type === 'booking'"></app-icon>
-                  <app-icon name="shield" *ngIf="notif.type === 'system'"></app-icon>
-                </div>
-                <div class="notif-text-wrap">
-                  <span class="notif-title">{{ notif.title }}</span>
-                  <p class="notif-msg">{{ notif.message }}</p>
-                  <span class="notif-time">{{ notif.timestamp }}</span>
-                </div>
-              </div>
-            </div>
-            <div class="dropdown-footer">
-              <button class="view-all-notifs-btn"
-                (click)="switchView('notifications'); showNotificationsDropdown.set(false)">
-                View All Notifications
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Host Avatar & Account Menu -->
-        <div class="relative-dropdown-container">
-          <button class="header-avatar-btn dropdown-trigger" (click)="toggleTopUserMenu($event)">
-            <div class="header-avatar-badge">{{ getInitials() }}</div>
-            <span class="header-user-name">{{ hostInfo().name }}</span>
-            <app-icon name="chevron-down" class="header-chevron" [class.rotated]="showTopUserMenu()"></app-icon>
-          </button>
-
-          <!-- User Menu Dropdown -->
-          <div class="dropdown-menu-box user-menu-dropdown" *ngIf="showTopUserMenu()"
-            (click)="$event.stopPropagation()">
-            <div class="user-menu-profile-box">
-              <div class="user-menu-avatar-badge">{{ getInitials() }}</div>
-              <strong>{{ hostInfo().name }}</strong>
-              <small>{{ hostInfo().organization }}</small>
-              <span class="role-badge">{{ hostInfo().verificationBadge }}</span>
-            </div>
-            <div class="user-menu-divider"></div>
-            <button class="user-menu-item" (click)="switchView('settings'); showTopUserMenu.set(false)">
-              <app-icon name="settings"></app-icon>
-              <span>Workspace Settings</span>
-            </button>
-            <button class="user-menu-item" (click)="switchView('team'); showTopUserMenu.set(false)">
-              <app-icon name="user"></app-icon>
-              <span>Team & Permissions</span>
-            </button>
-            <a routerLink="/discover" class="user-menu-item" (click)="showTopUserMenu.set(false)">
-              <app-icon name="compass"></app-icon>
-              <span>Explore Events as Guest</span>
-            </a>
-            <div class="user-menu-divider"></div>
-            <button class="user-menu-item signout-item" (click)="signOut()">
-              <app-icon name="log-out"></app-icon>
-              <span>Sign Out of Workspace</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
+    <!-- TOP HEADER (EXTRACTED COMPONENT) -->
+    <app-host-header
+      [currentView]="currentView()"
+      [events]="events()"
+      [notifications]="notifications()"
+      [unreadCount]="unreadCount()"
+      [hostInfo]="hostInfo()"
+      (toggleMobileSidebar)="toggleMobileSidebar()"
+      (switchView)="switchView($event)"
+      (openHelp)="showHelpModal.set(true)"
+      (selectEvent)="openEventDetails($event)"
+      (markNotificationRead)="dashboardService.markNotificationRead($event)"
+      (markAllNotificationsRead)="markAllNotificationsRead()"
+      (signOut)="signOut()">
+    </app-host-header>
 
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- C. MAIN CONTENT BODY AREA                                  -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <main class="workspace-main-content">
 
-      <!-- ─────────────────────────────────────────────────────────
-           TOAST NOTIFICATION (Interactive Feedback)
-           ───────────────────────────────────────────────────────── -->
+      <!-- TOAST NOTIFICATION (Interactive Feedback) -->
       <div class="dashboard-toast" *ngIf="toastMessage()">
         <app-icon name="check-circle"></app-icon>
         <span>{{ toastMessage() }}</span>
       </div>
 
-      <!-- ─────────────────────────────────────────────────────────
-           MAIN DASHBOARD VIEW: OVERVIEW (EXTRACTED COMPONENT)
-           ───────────────────────────────────────────────────────── -->
+      <!-- MAIN DASHBOARD VIEW: OVERVIEW (EXTRACTED COMPONENT) -->
       <div class="dashboard-error-banner" *ngIf="dashboardService.error()"
         style="background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
         <span>{{ dashboardService.error() }}</span>
@@ -343,25 +65,19 @@
         (deleteDraft)="deleteDraftEvent($event)" (navigateView)="switchView($event)" (toast)="showToast($event)">
       </app-host-overview>
 
-      <!-- ─────────────────────────────────────────────────────────
-           SUB-VIEW 2: MY EVENTS FULL VIEW (EXTRACTED COMPONENT)
-           ───────────────────────────────────────────────────────── -->
+      <!-- SUB-VIEW 2: MY EVENTS FULL VIEW (EXTRACTED COMPONENT) -->
       <app-host-my-events *ngIf="currentView() === 'my_events'" [events]="filteredEvents()"
         (viewDetails)="openEventDetails($event)" (createEvent)="openCreateWizard()"
         (submitForReview)="submitDraftForReview($event)" (publishEvent)="publishApprovedEvent($event)"
         (reviewFeedback)="openFeedbackModal($event)">
       </app-host-my-events>
 
-      <!-- ─────────────────────────────────────────────────────────
-           SUB-VIEW 3: BOOKINGS & ATTENDEES VIEW (EXTRACTED COMPONENT)
-           ───────────────────────────────────────────────────────── -->
+      <!-- SUB-VIEW 3: BOOKINGS & ATTENDEES VIEW (EXTRACTED COMPONENT) -->
       <app-host-bookings *ngIf="currentView() === 'bookings'" [attendees]="attendees()"
         (exportCsv)="showToast('Exported attendee roster to CSV')">
       </app-host-bookings>
 
-      <!-- ─────────────────────────────────────────────────────────
-           SUB-VIEW 4: TEAM MANAGEMENT VIEW (EXTRACTED COMPONENT)
-           ───────────────────────────────────────────────────────── -->
+      <!-- SUB-VIEW 4: TEAM MANAGEMENT VIEW (EXTRACTED COMPONENT) -->
       <app-host-team *ngIf="currentView() === 'team'" [ownerStakes]="ownerStakes()" [isEquityValid]="isEquityValid()"
         [totalAllocatedEquity]="totalAllocatedEquity()" [remainingEquityPool]="remainingEquityPool()"
         [eventManagers]="eventManagers()" [operationalTeam]="operationalTeam()"
@@ -374,22 +90,16 @@
         (removeParticipant)="removeParticipantItem($event)">
       </app-host-team>
 
-      <!-- ─────────────────────────────────────────────────────────
-           SUB-VIEW 5: ANALYTICS VIEW (EXTRACTED COMPONENT)
-           ───────────────────────────────────────────────────────── -->
+      <!-- SUB-VIEW 5: ANALYTICS VIEW (EXTRACTED COMPONENT) -->
       <app-host-analytics *ngIf="currentView() === 'analytics'">
       </app-host-analytics>
 
-      <!-- ─────────────────────────────────────────────────────────
-           SUB-VIEW 6: NOTIFICATIONS CENTER VIEW (EXTRACTED COMPONENT)
-           ───────────────────────────────────────────────────────── -->
+      <!-- SUB-VIEW 6: NOTIFICATIONS CENTER VIEW (EXTRACTED COMPONENT) -->
       <app-host-notifications *ngIf="currentView() === 'notifications'" [notifications]="notifications()"
         [unreadCount]="unreadCount()" (markAllRead)="markAllNotificationsRead()">
       </app-host-notifications>
 
-      <!-- ─────────────────────────────────────────────────────────
-           SUB-VIEW 7: SETTINGS VIEW (EXTRACTED COMPONENT)
-           ───────────────────────────────────────────────────────── -->
+      <!-- SUB-VIEW 7: SETTINGS VIEW (EXTRACTED COMPONENT) -->
       <app-host-settings *ngIf="currentView() === 'settings'" [hostInfo]="hostInfo()">
       </app-host-settings>
 

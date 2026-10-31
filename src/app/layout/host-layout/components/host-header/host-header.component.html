@@ -1,0 +1,169 @@
+<header class="workspace-header">
+  <div class="header-left">
+    <!-- Mobile Sidebar Toggle -->
+    <button class="mobile-toggle-btn" (click)="toggleMobileSidebar.emit()" aria-label="Toggle Navigation Menu">
+      <app-icon name="menu"></app-icon>
+    </button>
+
+    <!-- Breadcrumb & Context Title -->
+    <div class="breadcrumb-container">
+      <span class="crumb-root">Host Workspace</span>
+      <span class="crumb-separator">/</span>
+      <span class="crumb-current">
+        <span *ngIf="currentView === 'overview'">Overview</span>
+        <span *ngIf="currentView === 'my_events'">My Events</span>
+        <span *ngIf="currentView === 'create_event'">Create Event</span>
+        <span *ngIf="currentView === 'bookings'">Bookings & Attendees</span>
+        <span *ngIf="currentView === 'team'">Team Management</span>
+        <span *ngIf="currentView === 'analytics'">Analytics</span>
+        <span *ngIf="currentView === 'notifications'">Notifications</span>
+        <span *ngIf="currentView === 'settings'">Settings</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Header Search & Actions -->
+  <div class="header-right">
+    <!-- Quick Search with Top 3 Live Matching Results -->
+    <div class="header-search-box" (click)="$event.stopPropagation()">
+      <app-icon name="search" class="search-icon"></app-icon>
+      <input type="text" placeholder="Search events, bookings, attendees..." [ngModel]="eventSearchTerm()"
+        (ngModelChange)="onEventSearchChange($event)" (focus)="onSearchFocus()" class="header-search-input" />
+      <button type="button" class="btn-clear-search" *ngIf="eventSearchTerm().trim()" (click)="clearSearch()"
+        title="Clear search">
+        <app-icon name="close" [size]="13"></app-icon>
+      </button>
+
+      <!-- Top 3 Live Matching Results Dropdown -->
+      <div class="search-results-dropdown" *ngIf="showSearchDropdown() && eventSearchTerm().trim()">
+        <div class="dropdown-top-meta">
+          <span class="results-header-tag">Top Matches</span>
+          <span class="results-count-text">{{ topMatchingResults().length }} of {{ totalMatchesCount() }} found</span>
+        </div>
+
+        <!-- Results List -->
+        <div class="search-results-list" *ngIf="topMatchingResults().length > 0">
+          <div *ngFor="let item of topMatchingResults()" class="search-result-item"
+            (click)="selectSearchResult(item)">
+            <img [src]="item.imageUrl" [alt]="item.title" class="result-thumb" />
+            <div class="result-info">
+              <div class="result-title-row">
+                <span class="result-title">{{ item.title }}</span>
+                <span class="result-badge" [ngClass]="getStatusBadgeClass(item.status)">
+                  {{ getStatusLabel(item.status) }}
+                </span>
+              </div>
+              <div class="result-meta-row">
+                <span class="result-meta-date"><app-icon name="calendar" [size]="11"></app-icon> {{ item.date }}</span>
+                <span class="result-meta-venue"><app-icon name="map-pin" [size]="11"></app-icon> {{ item.venue }}</span>
+                <span class="result-price">{{ item.price > 0 ? '₹' + item.price : 'Free' }}</span>
+              </div>
+            </div>
+            <div class="result-arrow">
+              <app-icon name="chevron-right" [size]="14"></app-icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty Search State -->
+        <div class="search-no-results" *ngIf="topMatchingResults().length === 0">
+          <app-icon name="search" [size]="20"></app-icon>
+          <p>No matching events found for "<strong>{{ eventSearchTerm() }}</strong>"</p>
+        </div>
+
+        <!-- Dropdown Footer -->
+        <div class="search-dropdown-footer" *ngIf="topMatchingResults().length > 0">
+          <button class="btn-see-all-results" (click)="seeAllSearchResults()">
+            <span>See all results in Portfolio</span>
+            <app-icon name="arrow-right" [size]="13"></app-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Button -->
+    <button class="header-icon-btn header-help-btn" (click)="openHelp.emit()" title="Help & Documentation">
+      <app-icon name="help-circle"></app-icon>
+    </button>
+
+    <!-- Notifications Bell with Badge & Dropdown -->
+    <div class="relative-dropdown-container">
+      <button class="header-icon-btn dropdown-trigger" (click)="toggleNotifications($event)" title="Notifications">
+        <app-icon name="bell"></app-icon>
+        <span class="notification-dot" *ngIf="unreadCount > 0"></span>
+      </button>
+
+      <!-- Notifications Dropdown Panel -->
+      <div class="dropdown-menu-box notifications-dropdown" *ngIf="showNotificationsDropdown()"
+        (click)="$event.stopPropagation()">
+        <div class="dropdown-header">
+          <span class="dropdown-title">Notifications</span>
+          <button class="mark-all-read-btn" (click)="markAllNotificationsRead.emit()" *ngIf="unreadCount > 0">
+            Mark all as read
+          </button>
+        </div>
+        <div class="notifications-list">
+          <div *ngFor="let notif of notifications" class="notification-item" [class.unread]="notif.unread"
+            (click)="onNotificationClick(notif)">
+            <div class="notif-icon-circle" [attr.data-type]="notif.type">
+              <app-icon name="check-circle" *ngIf="notif.type === 'approval'"></app-icon>
+              <app-icon name="alert-circle" *ngIf="notif.type === 'action'"></app-icon>
+              <app-icon name="ticket-simple" *ngIf="notif.type === 'booking'"></app-icon>
+              <app-icon name="shield" *ngIf="notif.type === 'system'"></app-icon>
+            </div>
+            <div class="notif-text-wrap">
+              <span class="notif-title">{{ notif.title }}</span>
+              <p class="notif-msg">{{ notif.message }}</p>
+              <span class="notif-time">{{ notif.timestamp }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown-footer">
+          <button class="view-all-notifs-btn"
+            (click)="onViewClick('notifications')">
+            View All Notifications
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Host Avatar & Account Menu -->
+    <div class="relative-dropdown-container">
+      <button class="header-avatar-btn dropdown-trigger" (click)="toggleTopUserMenu($event)">
+        <div class="header-avatar-badge">{{ getInitials() }}</div>
+        <span class="header-user-name">{{ hostInfo.name }}</span>
+        <app-icon name="chevron-down" class="header-chevron" [class.rotated]="showTopUserMenu()"></app-icon>
+      </button>
+
+      <!-- User Menu Dropdown -->
+      <div class="dropdown-menu-box user-menu-dropdown" *ngIf="showTopUserMenu()"
+        (click)="$event.stopPropagation()">
+        <div class="user-menu-profile-box">
+          <div class="user-menu-avatar-badge">{{ getInitials() }}</div>
+          <strong>{{ hostInfo.name }}</strong>
+          <small>{{ hostInfo.organization }}</small>
+          <span class="role-badge">{{ hostInfo.verificationBadge }}</span>
+        </div>
+        <div class="user-menu-divider"></div>
+        <button class="user-menu-item" (click)="onViewClick('settings')">
+          <app-icon name="settings"></app-icon>
+          <span>Workspace Settings</span>
+        </button>
+        <button class="user-menu-item" (click)="onViewClick('team')">
+          <app-icon name="user"></app-icon>
+          <span>Team & Permissions</span>
+        </button>
+        <a routerLink="/discover" class="user-menu-item" (click)="showTopUserMenu.set(false)">
+          <app-icon name="compass"></app-icon>
+          <span>Explore Events as Guest</span>
+        </a>
+        <div class="user-menu-divider"></div>
+        <button class="user-menu-item signout-item" (click)="signOut.emit()">
+          <app-icon name="log-out"></app-icon>
+          <span>Sign Out of Workspace</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
