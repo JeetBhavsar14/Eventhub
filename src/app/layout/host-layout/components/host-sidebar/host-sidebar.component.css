@@ -1,12 +1,15 @@
 :host {
-  display: contents;
+  display: block;
+  width: var(--sidebar-width, 260px);
+  flex-shrink: 0;
 }
 
 /* ─────────────────────────────────────────────────────────
    A. LEFT SIDEBAR (240px Fixed Shell)
    ───────────────────────────────────────────────────────── */
 .workspace-sidebar {
-  width: var(--sidebar-width);
+  width: var(--sidebar-width, 260px);
+  min-width: var(--sidebar-width, 260px);
   background: #ffffff;
   border-right: 1px solid var(--gray-200);
   display: flex;
@@ -20,7 +23,7 @@
 }
 
 .sidebar-brand-header {
-  height: var(--header-height);
+  height: var(--header-height, 70px);
   padding: 0 1.25rem;
   display: flex;
   align-items: center;
@@ -419,6 +422,10 @@
    RESPONSIVE DESIGN (Sidebar)
    ───────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  :host {
+    width: 0;
+  }
+
   .workspace-sidebar {
     transform: translateX(-100%);
   }
