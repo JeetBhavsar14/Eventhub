@@ -381,6 +381,8 @@ export class HostEventComponent implements OnInit {
   ];
 
   ngOnInit() {
+    this.hostService.refreshApplicationStatus();
+
     // Check if user came with query param action
     this.route.queryParams.subscribe(params => {
       if (params['apply'] === 'true') {
@@ -423,6 +425,7 @@ export class HostEventComponent implements OnInit {
         break;
 
       case 'info_required':
+      case 'changes_requested':
         this.showAdditionalInfoModal.set(true);
         break;
 

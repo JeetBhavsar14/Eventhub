@@ -4,6 +4,7 @@ export type HostApplicationStatus =
   | 'submitted'
   | 'under_review'
   | 'info_required'
+  | 'changes_requested'
   | 'approved'
   | 'rejected';
 
