@@ -1,0 +1,46 @@
+<div class="modal-backdrop" *ngIf="show" (click)="close.emit()">
+  <div class="modal-container info-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">ACTION REQUIRED</span>
+        <h3 class="modal-title">Provide Additional Information</h3>
+      </div>
+      <button class="modal-close-btn" (click)="close.emit()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="reviewer-request-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>
+          <strong>Reviewer Clarification Request:</strong>
+          <p>Our curation team has requested a link to your past event portfolio or written venue clearance notes.</p>
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Your Response / Clarification Notes *</label>
+        <textarea 
+          class="form-textarea" 
+          rows="4" 
+          [ngModel]="note"
+          (ngModelChange)="onNoteChange($event)"
+          placeholder="e.g. Attached are our past festival photos at https://instagram.com/... and venue safety clearance details.">
+        </textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" (click)="close.emit()">Cancel</button>
+      <button 
+        class="btn-modal-submit" 
+        [disabled]="!note.trim() || isSubmitting"
+        (click)="onSubmit()">
+        <span *ngIf="!isSubmitting">Submit Clarification</span>
+        <span *ngIf="isSubmitting">Submitting...</span>
+      </button>
+    </div>
+  </div>
+</div>
+

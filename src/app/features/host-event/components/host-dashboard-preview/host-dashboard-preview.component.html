@@ -1,0 +1,270 @@
+<section class="section-dashboard-preview" id="dashboard-preview">
+  <div class="container">
+    <div class="section-header text-center">
+      <span class="section-tag">ORGANIZER WORKSPACE</span>
+      <h2 class="section-title">Host Dashboard Preview</h2>
+      <p class="section-subtitle">
+        Approved hosts gain access to a dedicated organizer workspace built to monitor ticket sales, check-in guests, and manage event schedules.
+      </p>
+    </div>
+
+    <!-- Preview Mockup Container -->
+    <div class="preview-mockup-wrapper">
+      <div class="preview-mockup-browser-bar">
+        <div class="browser-dots">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+        <div class="browser-url-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="url-lock-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>https://eventhub.com/manage/host-workspace</span>
+          <span class="sample-data-pill">SAMPLE DATA PREVIEW</span>
+        </div>
+      </div>
+
+      <div class="preview-mockup-body">
+        <!-- Mockup Navigation Tab Bar -->
+        <div class="preview-tabs">
+          <button 
+            class="preview-tab" 
+            [class.active]="selectedDashboardTab() === 'overview'" 
+            (click)="selectedDashboardTab.set('overview')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Overview & Metrics
+          </button>
+          <button 
+            class="preview-tab" 
+            [class.active]="selectedDashboardTab() === 'events'" 
+            (click)="selectedDashboardTab.set('events')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+            Events Management (12)
+          </button>
+          <button 
+            class="preview-tab" 
+            [class.active]="selectedDashboardTab() === 'revenue'" 
+            (click)="selectedDashboardTab.set('revenue')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3a4.5 4.5 0 0 0 0-9H6"/></svg>
+            Ticket Summary & Revenue
+          </button>
+          <button 
+            class="preview-tab" 
+            [class.active]="selectedDashboardTab() === 'activity'" 
+            (click)="selectedDashboardTab.set('activity')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Recent Activity Feed
+          </button>
+        </div>
+
+        <!-- Tab Content 1: Overview & Metrics -->
+        <div class="preview-tab-pane" *ngIf="selectedDashboardTab() === 'overview'">
+          <!-- Status Stats Grid -->
+          <div class="preview-metrics-grid">
+            <div class="metric-card bg-indigo-tint">
+              <div class="metric-top">
+                <span class="metric-label">My Events</span>
+                <span class="metric-badge-status">All Time</span>
+              </div>
+              <div class="metric-value">12</div>
+              <div class="metric-sub">3 currently active in Mumbai</div>
+            </div>
+
+            <div class="metric-card bg-amber-tint">
+              <div class="metric-top">
+                <span class="metric-label">Draft Events</span>
+                <span class="metric-badge-draft">In Preparation</span>
+              </div>
+              <div class="metric-value">2</div>
+              <div class="metric-sub">Tech Talk & Acoustic Jam</div>
+            </div>
+
+            <div class="metric-card bg-blue-tint">
+              <div class="metric-top">
+                <span class="metric-label">Pending Review</span>
+                <span class="metric-badge-pending">Curation Queue</span>
+              </div>
+              <div class="metric-value">1</div>
+              <div class="metric-sub">Submitted yesterday at 4:30 PM</div>
+            </div>
+
+            <div class="metric-card bg-green-tint">
+              <div class="metric-top">
+                <span class="metric-label">Approved & Live</span>
+                <span class="metric-badge-approved">Published</span>
+              </div>
+              <div class="metric-value">9</div>
+              <div class="metric-sub">100% attendee satisfaction</div>
+            </div>
+          </div>
+
+          <!-- Two-column Preview layout -->
+          <div class="preview-split-grid">
+            <!-- Ticket Sales Snapshot -->
+            <div class="preview-card-box">
+              <div class="preview-box-header">
+                <div>
+                  <h4 class="preview-box-title">Ticket Summary Snapshot</h4>
+                  <span class="preview-box-sub">Sample aggregated revenue & capacity</span>
+                </div>
+                <span class="preview-box-pill">₹4,82,500 Total Gross</span>
+              </div>
+
+              <div class="ticket-progress-list">
+                <div class="progress-item">
+                  <div class="prog-labels">
+                    <span>VIP Platinum Passes (₹2,500)</span>
+                    <strong>240 / 250 Sold (96%)</strong>
+                  </div>
+                  <div class="prog-bar-track">
+                    <div class="prog-bar-fill fill-indigo" style="width: 96%"></div>
+                  </div>
+                </div>
+
+                <div class="progress-item">
+                  <div class="prog-labels">
+                    <span>Early Bird General (₹999)</span>
+                    <strong>600 / 600 Sold (100%)</strong>
+                  </div>
+                  <div class="prog-bar-track">
+                    <div class="prog-bar-fill fill-green" style="width: 100%"></div>
+                  </div>
+                </div>
+
+                <div class="progress-item">
+                  <div class="prog-labels">
+                    <span>Standard Phase 2 (₹1,499)</span>
+                    <strong>580 / 700 Sold (82%)</strong>
+                  </div>
+                  <div class="prog-bar-track">
+                    <div class="prog-bar-fill fill-periwinkle" style="width: 82%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Activity Snapshot -->
+            <div class="preview-card-box">
+              <div class="preview-box-header">
+                <div>
+                  <h4 class="preview-box-title">Recent Activity Feed</h4>
+                  <span class="preview-box-sub">Real-time mock event operations</span>
+                </div>
+                <span class="live-dot-pill"><span class="dot-pulse"></span> LIVE</span>
+              </div>
+
+              <div class="activity-feed-list">
+                <div class="activity-item">
+                  <div class="activity-icon bg-green">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <div class="activity-info">
+                    <p class="activity-text"><strong>2x VIP Passes</strong> booked by Rahul Sharma for Mumbai Vibe Fest</p>
+                    <span class="activity-time">3 minutes ago</span>
+                  </div>
+                </div>
+
+                <div class="activity-item">
+                  <div class="activity-icon bg-blue">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                  </div>
+                  <div class="activity-info">
+                    <p class="activity-text"><strong>Event Review Approved:</strong> "Design Sprint 2026" is now published.</p>
+                    <span class="activity-time">2 hours ago</span>
+                  </div>
+                </div>
+
+                <div class="activity-item">
+                  <div class="activity-icon bg-indigo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
+                  </div>
+                  <div class="activity-info">
+                    <p class="activity-text"><strong>Staff Access:</strong> Scanner role granted to gate coordinator Priya K.</p>
+                    <span class="activity-time">5 hours ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content 2: Events List -->
+        <div class="preview-tab-pane" *ngIf="selectedDashboardTab() === 'events'">
+          <div class="preview-table-wrapper">
+            <table class="preview-table">
+              <thead>
+                <tr>
+                  <th>Event Title</th>
+                  <th>Date & City</th>
+                  <th>Status</th>
+                  <th>Tickets Sold</th>
+                  <th>Gross</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Mumbai Indie Stage Live</strong></td>
+                  <td>14 Nov 2026 • Mumbai</td>
+                  <td><span class="table-badge badge-published">Live Published</span></td>
+                  <td>1,420 / 1,550</td>
+                  <td>₹4,82,500</td>
+                  <td><span class="table-action-link">View Stats</span></td>
+                </tr>
+                <tr>
+                  <td><strong>UX & AI Leaders Summit</strong></td>
+                  <td>22 Nov 2026 • Bengaluru</td>
+                  <td><span class="table-badge badge-review">Under Review</span></td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td><span class="table-action-link">Review Status</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Pottery & Artisan Clay Workshop</strong></td>
+                  <td>28 Nov 2026 • Pune</td>
+                  <td><span class="table-badge badge-draft">Draft</span></td>
+                  <td>0 / 40</td>
+                  <td>—</td>
+                  <td><span class="table-action-link">Edit Draft</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tab Content 3: Revenue -->
+        <div class="preview-tab-pane" *ngIf="selectedDashboardTab() === 'revenue'">
+          <div class="preview-revenue-breakdown">
+            <div class="revenue-summary-banner">
+              <div>
+                <span class="rev-label">Total Platform Net Payout (Sample)</span>
+                <h3 class="rev-val">₹4,58,375 <small class="text-muted">after 5% platform fee</small></h3>
+              </div>
+              <div class="rev-tag">Next Automated Payout: Monday 10:00 AM</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content 4: Activity -->
+        <div class="preview-tab-pane" *ngIf="selectedDashboardTab() === 'activity'">
+          <div class="activity-full-feed">
+            <div class="activity-item" *ngFor="let item of [1,2,3,4]">
+              <div class="activity-icon bg-indigo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <div class="activity-info">
+                <p class="activity-text"><strong>Gate Check-in Scan:</strong> Attendee QR pass #TKT-8910 verified by Gate 1 Scanner.</p>
+                <span class="activity-time">Earlier today</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="preview-mockup-footer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span><strong>Static Product Preview:</strong> Approved hosts receive access to the full authenticated organizer dashboard with live ticket tracking, scanner app integration, and instant settlement tools.</span>
+      </div>
+    </div>
+  </div>
+</section>
+

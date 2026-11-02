@@ -1,0 +1,38 @@
+<div class="modal-backdrop" *ngIf="category" (click)="close.emit()">
+  <div class="modal-container cat-detail-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">CATEGORY GUIDE</span>
+        <h3 class="modal-title">{{ category.title }}</h3>
+      </div>
+      <button class="modal-close-btn" (click)="close.emit()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="cat-modal-img-box">
+        <img [src]="category.imageUrl" [alt]="category.title" class="cat-modal-img" />
+        <span class="cat-modal-badge">{{ category.tag }}</span>
+      </div>
+      <p class="cat-modal-desc">{{ category.description }}</p>
+      
+      <div class="cat-features-list">
+        <div class="cat-feature-item">
+          <strong>Target Audience:</strong> High-intent explorers in {{ selectedCity }} looking for {{ category.title }}.
+        </div>
+        <div class="cat-feature-item">
+          <strong>Ticketing Formats:</strong> General Admission, Tiered Seating, Early-Bird & Group Passes.
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" (click)="close.emit()">Close</button>
+      <button class="btn-modal-submit" (click)="explore.emit(category)">
+        Explore Category Events
+      </button>
+    </div>
+  </div>
+</div>
+

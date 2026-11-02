@@ -1,57 +1,45 @@
 import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { AuthService } from '@core/auth';
 import { LocationService, HostApplicationService } from '@core/state';
-import { HostApplicationData, HostApplicationStatus } from '@core/models';
 import { POPULAR_CITIES } from '@core/constants';
-import { SelectComponent } from '@shared/components';
-
-interface BenefitItem {
-  icon: string;
-  badge: string;
-  title: string;
-  description: string;
-}
-
-interface ProcessStep {
-  stepNumber: string;
-  title: string;
-  description: string;
-  badge: string;
-  highlights: string[];
-}
-
-interface EventCategoryItem {
-  id: string;
-  title: string;
-  tag: string;
-  description: string;
-  imageUrl: string;
-  categoryQuery: string;
-  stats: string;
-}
-
-interface RequirementItem {
-  title: string;
-  category: string;
-  description: string;
-  details: string[];
-  icon: string;
-}
-
-interface FaqItem {
-  question: string;
-  answer: string;
-  category: string;
-  isOpen?: boolean;
-}
+import {
+  BenefitItem,
+  ProcessStep,
+  EventCategoryItem,
+  RequirementItem,
+  FaqItem,
+  HostWizardFormData
+} from './models/host-event.models';
+import { HostHowItWorksComponent } from './components/host-how-it-works/host-how-it-works.component';
+import { HostRequirementsComponent } from './components/host-requirements/host-requirements.component';
+import { HostDashboardPreviewComponent } from './components/host-dashboard-preview/host-dashboard-preview.component';
+import { HostFaqComponent } from './components/host-faq/host-faq.component';
+import {
+  HostApplicationWizardModalComponent,
+  HostApplicationStatusModalComponent,
+  HostAdditionalInfoModalComponent,
+  HostGuestAuthModalComponent,
+  HostCategoryDetailsModalComponent
+} from './components/modals';
 
 @Component({
   selector: 'app-host-event',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, SelectComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    HostHowItWorksComponent,
+    HostRequirementsComponent,
+    HostDashboardPreviewComponent,
+    HostFaqComponent,
+    HostApplicationWizardModalComponent,
+    HostApplicationStatusModalComponent,
+    HostAdditionalInfoModalComponent,
+    HostGuestAuthModalComponent,
+    HostCategoryDetailsModalComponent
+  ],
   templateUrl: './host-event.component.html',
   styleUrl: './host-event.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -99,25 +87,21 @@ export class HostEventComponent implements OnInit {
   showGuestAuthModal = signal(false);
   showAdditionalInfoModal = signal(false);
   showCategoryDetailsModal = signal<EventCategoryItem | null>(null);
-  selectedDashboardTab = signal<'overview' | 'events' | 'revenue' | 'activity'>('overview');
-  activeFaqCategory = signal<string>('all');
-  faqSearchTerm = signal<string>('');
 
   // Application Wizard Form State
-  currentWizardStep = signal(1);
-  wizardForm = {
+  wizardForm: HostWizardFormData = {
     applicantName: '',
     email: '',
     phone: '',
-    organizationType: 'individual' as 'individual' | 'agency' | 'company' | 'non_profit',
+    organizationType: 'individual',
     organizationName: '',
     websiteOrSocial: '',
-    experienceLevel: 'beginner' as 'beginner' | '1-3-years' | '3-5-years' | '5+-years',
-    primaryCategories: ['Workshops'] as string[],
+    experienceLevel: 'beginner',
+    primaryCategories: ['Workshops'],
     expectedAttendeeScale: '100 - 500 attendees',
     city: 'Mumbai',
     pastEventDescription: '',
-    idType: 'national_id' as 'national_id' | 'passport' | 'business_reg',
+    idType: 'national_id',
     documentFileName: 'host_verification_doc.pdf',
     termsAccepted: true
   };
@@ -348,50 +332,50 @@ export class HostEventComponent implements OnInit {
   readonly faqs: FaqItem[] = [
     {
       question: 'Who can apply to become a host on EventHub?',
-      answer: 'Anyone with a passion for bringing people together can apply! Whether you are an independent artist running workshops, a tech community leader organizing hackathons, or an event production company managing concerts, our platform supports creators of all sizes.',
+      answer: 'Anyone organizing quality experiences can apply — including solo workshop creators, college festival conveners, registered event management agencies, community groups, and enterprise summits.',
       category: 'eligibility',
       isOpen: true
     },
     {
-      question: 'What information is required during the application process?',
-      answer: 'You will need to provide your basic contact details, entity information (individual or organization), your event niche, past hosting experience or portfolio links, and sample identity verification. All documentation in this prototype is simulated safely.',
+      question: 'What is the difference between Host Approval and Event Approval?',
+      answer: 'Host Approval verifies your organizer identity, compliance, and contact credibility once. Event Approval is a rapid per-event review that ensures your specific venue, schedule, ticket tiers, and pricing details meet attendee protection guidelines.',
+      category: 'review',
+      isOpen: false
+    },
+    {
+      question: 'Are there any upfront or recurring fees to become a host?',
+      answer: 'No. Registering as an EventHub host is completely free. We do not charge registration, subscription, or listing setup fees. Platform commission is deducted automatically only upon successful ticket sales.',
+      category: 'eligibility',
+      isOpen: false
+    },
+    {
+      question: 'What documents are required during host verification?',
+      answer: 'For individuals, a valid government photo ID (Passport / National ID) is verified. For organizations and enterprises, a company registration certificate or GST certificate along with an authorization letter for the primary coordinator is recommended.',
       category: 'application',
       isOpen: false
     },
     {
-      question: 'How does the host review process work?',
-      answer: 'Once submitted, our curation team reviews your host profile, portfolio links, and verification details. The process verifies organizer authenticity to maintain high standards across EventHub. You will receive real-time status updates right on this page.',
+      question: 'How long does the host review process take?',
+      answer: 'Our curation team reviews submitted applications within 24 to 48 business hours. If clarifying documentation is required, you will see a request banner right inside your tracker and can respond directly.',
       category: 'review',
       isOpen: false
     },
     {
-      question: 'How can I check my application status?',
-      answer: 'You can check your status anytime by visiting this Host an Event page or clicking your profile menu. Your current status (Submitted, Under Review, Info Required, Approved, or Rejected) is displayed transparently at the top of the page.',
-      category: 'review',
-      isOpen: false
-    },
-    {
-      question: 'What happens if additional information is required?',
-      answer: 'If our team needs further clarification (e.g. updated links or venue details), your status changes to "Additional Information Required". You can submit the requested notes directly through our interactive portal without having to re-fill your entire application.',
-      category: 'review',
-      isOpen: false
-    },
-    {
-      question: 'Does host approval automatically publish my event?',
-      answer: 'No. Host approval and event approval are two distinct stages. Host approval certifies you as an eligible organizer on EventHub. Once approved, you can create and configure events in your Host Workspace, which are then reviewed individually before going live to attendees.',
+      question: 'When can I start publishing ticketed events?',
+      answer: 'Immediately upon host approval! Your Host Workspace unlocks instantly, giving you full access to the event creation wizard, tiered pricing controls, attendee rosters, and ticket check-in tools.',
       category: 'publishing',
       isOpen: false
     },
     {
-      question: 'Can I edit my event details after creating it?',
-      answer: 'Yes! Approved hosts can update event descriptions, speaker lineups, venue instructions, and ticket tier capacities from the host workspace before and during active ticket sales.',
+      question: 'Can I host both free and paid ticketed events?',
+      answer: 'Yes! EventHub supports completely free RSVP registrations, tiered paid tickets, early-bird passes, and VIP tables with custom per-tier capacities.',
       category: 'publishing',
       isOpen: false
     },
     {
-      question: 'Are there any upfront fees to apply as a host?',
-      answer: 'No. Applying to become an EventHub host is completely free. We do not charge any upfront application or registration fees to join the organizer community.',
-      category: 'pricing',
+      question: 'How do payouts and attendee ticket refunds work?',
+      answer: 'Net ticket revenues are reconciled and settled directly to your verified bank account following the event cycle. Automatic attendee cancellation and refund windows can be configured per your organizer policy.',
+      category: 'application',
       isOpen: false
     }
   ];
@@ -413,19 +397,6 @@ export class HostEventComponent implements OnInit {
     }
   }
 
-  get filteredFaqs(): FaqItem[] {
-    const cat = this.activeFaqCategory();
-    const search = this.faqSearchTerm().toLowerCase().trim();
-
-    return this.faqs.filter(faq => {
-      const matchesCategory = cat === 'all' || faq.category === cat;
-      const matchesSearch = !search || 
-        faq.question.toLowerCase().includes(search) || 
-        faq.answer.toLowerCase().includes(search);
-      return matchesCategory && matchesSearch;
-    });
-  }
-
   // Primary CTA click router
   handleApplyClick() {
     const status = this.appStatus();
@@ -435,17 +406,16 @@ export class HostEventComponent implements OnInit {
         this.showGuestAuthModal.set(true);
         break;
 
-      case 'not_applied':
-        // Pre-fill user data
+      case 'not_applied': {
         const user = this.currentUser();
         if (user) {
           this.wizardForm.applicantName = `${user.firstName} ${user.lastName}`.trim();
           this.wizardForm.email = user.email || '';
           this.wizardForm.phone = user.phone || '';
         }
-        this.currentWizardStep.set(1);
         this.showApplicationModal.set(true);
         break;
+      }
 
       case 'submitted':
       case 'under_review':
@@ -466,7 +436,7 @@ export class HostEventComponent implements OnInit {
     }
   }
 
-  // Smooth scroll to How It Works
+  // Smooth scroll to section
   scrollToSection(sectionId: string) {
     const el = document.getElementById(sectionId);
     if (el) {
@@ -486,61 +456,23 @@ export class HostEventComponent implements OnInit {
     this.showCategoryDetailsModal.set(cat);
   }
 
-  // Toggle FAQ Accordion
-  toggleFaq(faq: FaqItem) {
-    faq.isOpen = !faq.isOpen;
-  }
-
-  // Wizard Step Navigation
-  goToWizardStep(step: number) {
-    if (step >= 1 && step <= 4) {
-      this.currentWizardStep.set(step);
-    }
-  }
-
-  nextWizardStep() {
-    if (this.currentWizardStep() < 4) {
-      this.currentWizardStep.update(s => s + 1);
-    }
-  }
-
-  prevWizardStep() {
-    if (this.currentWizardStep() > 1) {
-      this.currentWizardStep.update(s => s - 1);
-    }
-  }
-
-  toggleCategorySelection(categoryName: string) {
-    const index = this.wizardForm.primaryCategories.indexOf(categoryName);
-    if (index > -1) {
-      if (this.wizardForm.primaryCategories.length > 1) {
-        this.wizardForm.primaryCategories.splice(index, 1);
-      }
-    } else {
-      this.wizardForm.primaryCategories.push(categoryName);
-    }
-  }
-
-  isCategorySelected(cat: string): boolean {
-    return this.wizardForm.primaryCategories.includes(cat);
-  }
-
   // Submit Host Application
-  submitHostApplication() {
+  submitHostApplication(formData?: HostWizardFormData) {
+    const data = formData || this.wizardForm;
     this.hostService.submitApplication({
-      applicantName: this.wizardForm.applicantName,
-      email: this.wizardForm.email,
-      phone: this.wizardForm.phone,
-      organizationType: this.wizardForm.organizationType,
-      organizationName: this.wizardForm.organizationName || 'Independent Host',
-      websiteOrSocial: this.wizardForm.websiteOrSocial,
-      experienceLevel: this.wizardForm.experienceLevel,
-      primaryCategories: this.wizardForm.primaryCategories,
-      expectedAttendeeScale: this.wizardForm.expectedAttendeeScale,
-      city: this.wizardForm.city,
-      pastEventDescription: this.wizardForm.pastEventDescription,
-      idType: this.wizardForm.idType,
-      sampleDocumentName: this.wizardForm.documentFileName
+      applicantName: data.applicantName,
+      email: data.email,
+      phone: data.phone,
+      organizationType: data.organizationType,
+      organizationName: data.organizationName || 'Independent Host',
+      websiteOrSocial: data.websiteOrSocial,
+      experienceLevel: data.experienceLevel,
+      primaryCategories: data.primaryCategories,
+      expectedAttendeeScale: data.expectedAttendeeScale,
+      city: data.city,
+      pastEventDescription: data.pastEventDescription,
+      idType: data.idType,
+      sampleDocumentName: data.documentFileName
     });
 
     this.showApplicationModal.set(false);
@@ -548,12 +480,13 @@ export class HostEventComponent implements OnInit {
   }
 
   // Submit Additional Info
-  submitAdditionalInfo() {
-    if (!this.additionalInfoNote().trim()) return;
+  submitAdditionalInfo(note?: string) {
+    const info = (note !== undefined ? note : this.additionalInfoNote()).trim();
+    if (!info) return;
     this.isSubmittingAdditionalInfo.set(true);
-    
+
     setTimeout(() => {
-      this.hostService.submitAdditionalInfo(this.additionalInfoNote());
+      this.hostService.submitAdditionalInfo(info);
       this.isSubmittingAdditionalInfo.set(false);
       this.showAdditionalInfoModal.set(false);
       this.additionalInfoNote.set('');
@@ -565,13 +498,7 @@ export class HostEventComponent implements OnInit {
   handleReapply() {
     this.hostService.resetApplication();
     this.showStatusModal.set(false);
-    this.currentWizardStep.set(1);
     this.showApplicationModal.set(true);
-  }
-
-  // Fast mock login for guests inside modal
-  quickMockLogin() {
-    this.navigateToLogin();
   }
 
   // Navigate to login with returnUrl

@@ -1,0 +1,85 @@
+<div class="modal-backdrop" *ngIf="show" (click)="close.emit()">
+  <div class="modal-container status-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">APPLICATION TRACKER</span>
+        <h3 class="modal-title">Host Application Status</h3>
+      </div>
+      <button class="modal-close-btn" (click)="close.emit()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Status Hero Banner -->
+      <div class="status-modal-banner" [attr.data-status]="appStatus">
+        <div class="status-banner-icon">
+          <svg *ngIf="appStatus === 'submitted'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+          <svg *ngIf="appStatus === 'under_review'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <svg *ngIf="appStatus === 'info_required'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <svg *ngIf="appStatus === 'approved'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <svg *ngIf="appStatus === 'rejected'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        </div>
+
+        <div>
+          <span class="status-pill-badge">
+            <span *ngIf="appStatus === 'submitted'">Submitted</span>
+            <span *ngIf="appStatus === 'under_review'">Under Review</span>
+            <span *ngIf="appStatus === 'info_required'">Action Required</span>
+            <span *ngIf="appStatus === 'approved'">Approved</span>
+            <span *ngIf="appStatus === 'rejected'">Not Approved</span>
+          </span>
+          <h4 class="status-modal-headline">
+            <span *ngIf="appStatus === 'submitted'">Application Received</span>
+            <span *ngIf="appStatus === 'under_review'">Curation Review In Progress</span>
+            <span *ngIf="appStatus === 'info_required'">Additional Clarification Requested</span>
+            <span *ngIf="appStatus === 'approved'">Host Profile Approved!</span>
+            <span *ngIf="appStatus === 'rejected'">Application Not Approved</span>
+          </h4>
+          <p class="status-modal-desc">{{ appData?.statusMessage }}</p>
+        </div>
+      </div>
+
+      <!-- Application Metadata -->
+      <div class="application-details-box">
+        <div class="detail-col">
+          <span class="detail-label">Application ID</span>
+          <strong>#{{ appData?.id || 'EH-APP-7829' }}</strong>
+        </div>
+        <div class="detail-col">
+          <span class="detail-label">Organization / Brand</span>
+          <strong>{{ appData?.organizationName || 'Starlight Live Experiences' }}</strong>
+        </div>
+        <div class="detail-col">
+          <span class="detail-label">Submission Date</span>
+          <span>Oct 8, 2026 • 2:30 PM</span>
+        </div>
+      </div>
+
+      <!-- Clarification Note if needed -->
+      <div class="action-required-callout" *ngIf="appStatus === 'info_required'">
+        <div class="callout-badge">Reviewer Note</div>
+        <p>Please provide confirmation of your primary venue layout or a reference link to past workshops.</p>
+        <button class="btn-respond-now" (click)="provideInfo.emit()">
+          Provide Requested Information
+        </button>
+      </div>
+
+      <!-- Reapplication if rejected -->
+      <div class="reapply-box" *ngIf="appStatus === 'rejected'">
+        <p>You can revise your hosting experience details and submit an updated application.</p>
+        <button class="btn-reapply" (click)="reapply.emit()">
+          Start New Application
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" (click)="close.emit()">Close</button>
+      <button class="btn-modal-submit" *ngIf="appStatus === 'approved'" (click)="openWorkspace.emit()">
+        Open Host Workspace
+      </button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,54 @@
+<section class="section-how-it-works" id="how-it-works">
+  <div class="container">
+    <div class="section-header text-center">
+      <span class="section-tag">CLEAR 4-STEP ONBOARDING</span>
+      <h2 class="section-title">How Hosting Works</h2>
+      <p class="section-subtitle">
+        Our straightforward onboarding process ensures safe attendee experiences while empowering you with complete event control.
+      </p>
+    </div>
+
+    <!-- Process Timeline (Horizontal Desktop / Vertical Mobile) -->
+    <div class="timeline-container">
+      <div class="timeline-track-line"></div>
+      <div class="timeline-grid">
+        <div class="timeline-step" *ngFor="let step of steps; let i = index">
+          <div class="step-marker-box">
+            <div class="step-num-circle">{{ step.stepNumber }}</div>
+            <div class="step-pulse"></div>
+          </div>
+          <div class="step-card">
+            <div class="step-top">
+              <span class="step-badge">{{ step.badge }}</span>
+              <span class="step-index">Step {{ i + 1 }}</span>
+            </div>
+            <h3 class="step-title">{{ step.title }}</h3>
+            <p class="step-desc">{{ step.description }}</p>
+            
+            <ul class="step-highlights">
+              <li *ngFor="let h of step.highlights">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="highlight-check">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>{{ h }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Critical Quality Distinction Notice -->
+    <div class="quality-callout-box">
+      <div class="callout-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+      </div>
+      <div class="callout-text">
+        <strong>Important Process Note:</strong> Host Approval and Event Approval are separate quality stages. Getting approved as an EventHub Host verifies your organizer credentials. Once approved, each specific event listing you create undergoes a rapid publishing review before going public.
+      </div>
+    </div>
+  </div>
+</section>
+
