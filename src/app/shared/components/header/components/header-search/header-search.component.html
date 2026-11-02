@@ -1,0 +1,93 @@
+<div class="search-container" (click)="$event.stopPropagation()">
+  <form class="search-wrapper" [class.focused]="isFocused" (submit)="onSearchSubmit($event)">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+      <path d="M20 20l-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <input
+      class="search-input"
+      type="text"
+      placeholder="Search for Events, Artists or Venues..."
+      [ngModel]="searchQuery()"
+      (ngModelChange)="onSearchInputChange($event)"
+      name="searchQuery"
+      (focus)="onSearchFocus()"
+      autocomplete="off"
+      id="global-search-input"
+    />
+    <button 
+      type="button" 
+      class="search-clear-btn" 
+      *ngIf="searchQuery()" 
+      (click)="clearSearch()"
+      title="Clear search">
+      <app-icon name="close" [size]="14"></app-icon>
+    </button>
+  </form>
+
+  <!-- Floating Spotlight Panel (High-Impact UI/UX) -->
+  <div class="search-spotlight-dropdown" *ngIf="isFocused">
+    <!-- Popular & Recent Searches -->
+    <div class="spotlight-section" *ngIf="!searchQuery().trim() && recentSearches().length > 0">
+      <div class="spotlight-section-title">
+        <app-icon name="trending-up" [size]="13"></app-icon>
+        <span>Popular & Recent Searches</span>
+      </div>
+      <div class="recent-chips">
+        <button 
+          type="button" 
+          class="recent-chip" 
+          *ngFor="let term of recentSearches()" 
+          (mousedown)="$event.preventDefault()"
+          (click)="selectRecentSearch(term)">
+          {{ term }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Matching Events Section -->
+    <div class="spotlight-section">
+      <div class="spotlight-section-title">
+        <span>{{ searchQuery().trim() ? 'Matching Events' : 'Trending Now' }}</span>
+        <span class="spotlight-count" *ngIf="searchQuery().trim()">({{ spotlightEvents().length }})</span>
+      </div>
+
+      <div class="spotlight-list" *ngIf="spotlightEvents().length > 0">
+        <div 
+          *ngFor="let ev of spotlightEvents()" 
+          class="spotlight-item" 
+          (mousedown)="$event.preventDefault()"
+          (click)="selectSearchItem(ev.id)">
+          <img [src]="ev.thumbnailUrl" [alt]="ev.title" class="spotlight-thumb">
+          <div class="spotlight-info">
+            <div class="spotlight-title">{{ ev.title }}</div>
+            <div class="spotlight-meta">
+              <span class="spotlight-cat">{{ ev.category }}</span>
+              <span>•</span>
+              <span class="spotlight-date">{{ ev.date | date:'mediumDate' }}</span>
+              <span>•</span>
+              <span class="spotlight-venue">{{ ev.location?.city || 'India' }}</span>
+            </div>
+          </div>
+          <div class="spotlight-price" *ngIf="ev.ticketTypes[0]?.price">
+            ₹{{ ev.ticketTypes[0].price }}
+          </div>
+        </div>
+      </div>
+
+      <!-- No results -->
+      <div class="spotlight-empty" *ngIf="spotlightEvents().length === 0">
+        <app-icon name="search" [size]="20"></app-icon>
+        <p>No experiences found matching "{{ searchQuery() }}"</p>
+      </div>
+    </div>
+
+    <!-- Spotlight Footer -->
+    <div class="spotlight-footer" *ngIf="searchQuery().trim()">
+      <button type="button" class="view-all-results-btn" (mousedown)="$event.preventDefault()" (click)="onSearchSubmit()">
+        See all results for "<strong>{{ searchQuery() }}</strong>" →
+      </button>
+    </div>
+  </div>
+</div>
+
