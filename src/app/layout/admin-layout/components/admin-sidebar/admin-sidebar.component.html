@@ -1,0 +1,125 @@
+<aside class="admin-sidebar" aria-label="Super Admin Navigation">
+  <div class="admin-brand-header">
+    <a routerLink="/discover" class="admin-brand-link">
+      <img src="assets/images/eventhub-logo.svg" alt="EventHub Logo" class="admin-brand-logo-img" width="38" height="38" />
+      <div class="brand-text-block">
+        <span class="brand-name">EventHub</span>
+        <span class="admin-badge">SUPER ADMIN</span>
+      </div>
+    </a>
+    <button class="mobile-close-btn" (click)="closeMobile.emit()" aria-label="Close menu">
+      <app-icon name="close"></app-icon>
+    </button>
+  </div>
+
+  <!-- Admin Navigation Links -->
+  <nav class="admin-nav-menu">
+    <div class="nav-section-title">CORE PLATFORM</div>
+
+    <button 
+      class="admin-nav-btn" 
+      [class.active]="currentView === 'overview'" 
+      (click)="onSelectView('overview')">
+      <app-icon name="grid"></app-icon>
+      <span class="btn-label">Dashboard Overview</span>
+    </button>
+
+    <button 
+      class="admin-nav-btn" 
+      [class.active]="currentView === 'host_applications'" 
+      (click)="onSelectView('host_applications')">
+      <app-icon name="user-check"></app-icon>
+      <span class="btn-label">Host Approvals</span>
+      <span class="badge-count" *ngIf="platformStats && platformStats.pendingAppsCount > 0">{{ platformStats.pendingAppsCount }}</span>
+    </button>
+
+    <button 
+      class="admin-nav-btn" 
+      [class.active]="currentView === 'event_curation'" 
+      (click)="onSelectView('event_curation')">
+      <app-icon name="calendar"></app-icon>
+      <span class="btn-label">Event Curation</span>
+      <span class="badge-count warning" *ngIf="platformStats && platformStats.pendingEventsCount > 0">{{ platformStats.pendingEventsCount }}</span>
+    </button>
+
+    <button 
+      class="admin-nav-btn" 
+      [class.active]="currentView === 'users'" 
+      (click)="onSelectView('users')">
+      <app-icon name="users"></app-icon>
+      <span class="btn-label">Users & Directory</span>
+    </button>
+
+    <div class="nav-section-title">GOVERNANCE & FINANCE</div>
+
+    <button 
+      class="admin-nav-btn" 
+      [class.active]="currentView === 'finance'" 
+      (click)="onSelectView('finance')">
+      <app-icon name="rupee"></app-icon>
+      <span class="btn-label">Finance & GMV</span>
+    </button>
+
+    <button 
+      class="admin-nav-btn" 
+      [class.active]="currentView === 'settings'" 
+      (click)="onSelectView('settings')">
+      <app-icon name="settings"></app-icon>
+      <span class="btn-label">System Settings</span>
+    </button>
+  </nav>
+
+  <!-- Sidebar Bottom Admin Profile with Dropdown -->
+  <div class="admin-sidebar-footer">
+    <!-- Admin Dropdown Menu Popup (Anchored Above the Footer Card) -->
+    <div class="admin-dropdown-menu-box" *ngIf="showAdminMenu()" (click)="$event.stopPropagation()">
+      <div class="admin-dropdown-profile-box">
+        <div class="admin-avatar">AD</div>
+        <div class="admin-dropdown-details">
+          <strong>Platform Administrator</strong>
+          <small>admin@eventhub.com</small>
+          <span class="admin-role-badge">Super Admin</span>
+        </div>
+      </div>
+
+      <div class="admin-menu-divider"></div>
+
+      <button class="admin-menu-item" (click)="onSelectView('settings')">
+        <app-icon name="settings"></app-icon>
+        <span>Platform Settings</span>
+      </button>
+
+      <a routerLink="/host/dashboard" class="admin-menu-item" (click)="showAdminMenu.set(false)">
+        <app-icon name="monitor"></app-icon>
+        <span>Host SaaS Portal</span>
+      </a>
+
+      <a routerLink="/management" class="admin-menu-item" (click)="showAdminMenu.set(false)">
+        <app-icon name="shield"></app-icon>
+        <span>Operations Center</span>
+      </a>
+
+      <a routerLink="/discover" class="admin-menu-item" (click)="showAdminMenu.set(false)">
+        <app-icon name="compass"></app-icon>
+        <span>Explore Public Website</span>
+      </a>
+
+      <div class="admin-menu-divider"></div>
+
+      <button class="admin-menu-item signout-item" (click)="onSignOut()">
+        <app-icon name="log-out"></app-icon>
+        <span>Sign Out</span>
+      </button>
+    </div>
+
+    <div class="admin-user-card" (click)="toggleAdminMenu($event)">
+      <div class="admin-avatar">AD</div>
+      <div class="admin-user-meta">
+        <strong>Admin Control</strong>
+        <small>admin@eventhub.com</small>
+      </div>
+      <app-icon name="chevron-down" class="admin-card-chevron" [class.rotated]="showAdminMenu()"></app-icon>
+    </div>
+  </div>
+</aside>
+

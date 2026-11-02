@@ -1,0 +1,99 @@
+<div class="admin-modal-backdrop" *ngIf="user" (click)="onClose()">
+  <div class="user-dossier-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div class="dossier-header-profile">
+        <img [src]="user.avatar" class="dossier-avatar" [alt]="user.name" />
+        <div>
+          <h3>{{ user.name }}</h3>
+          <span class="modal-sub">{{ user.email }} • ID: {{ user.id }}</span>
+        </div>
+      </div>
+      <button class="btn-modal-close" (click)="onClose()" aria-label="Close dossier">
+        <app-icon name="close" [size]="14"></app-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      
+      <!-- Status & Role Banner -->
+      <div class="dossier-meta-grid">
+        <div class="meta-card">
+          <span>Current Role</span>
+          <strong class="role-pill" [attr.data-role]="user.role">{{ user.role | uppercase }}</strong>
+        </div>
+        <div class="meta-card">
+          <span>Account Status</span>
+          <strong [class.text-danger]="user.status === 'suspended'" [class.text-emerald]="user.status === 'active'">
+            {{ user.status | uppercase }}
+          </strong>
+        </div>
+        <div class="meta-card">
+          <span>Lifetime GMV</span>
+          <strong>₹{{ user.totalSpent | number }}</strong>
+        </div>
+        <div class="meta-card">
+          <span>Total Bookings</span>
+          <strong>{{ user.totalBookings }} orders</strong>
+        </div>
+      </div>
+
+      <!-- Role Reassignment Section -->
+      <div class="modal-section mt-4">
+        <h4>Reassign Platform Privilege</h4>
+        <p class="section-desc">Change user permissions according to system hierarchy (Super Admin &rarr; Host &rarr; Operations &rarr; Staff &rarr; Attendee).</p>
+        
+        <div class="role-promotion-buttons">
+          <button 
+            class="btn-promo-role" 
+            [class.current]="user.role === 'user'" 
+            (click)="onRoleChange('user')">
+            Attendee User
+          </button>
+          <button 
+            class="btn-promo-role" 
+            [class.current]="user.role === 'host'" 
+            (click)="onRoleChange('host')">
+            ★ Event Host (Owner)
+          </button>
+          <button 
+            class="btn-promo-role" 
+            [class.current]="user.role === 'management'" 
+            (click)="onRoleChange('management')">
+            Operations Lead
+          </button>
+          <button 
+            class="btn-promo-role" 
+            [class.current]="user.role === 'staff'" 
+            (click)="onRoleChange('staff')">
+            Field Staff
+          </button>
+          <button 
+            class="btn-promo-role" 
+            [class.current]="user.role === 'admin'" 
+            (click)="onRoleChange('admin')">
+            Super Admin
+          </button>
+        </div>
+      </div>
+
+      <!-- Security & Ban Action -->
+      <div class="modal-section mt-4 border-top">
+        <h4>Security & Access Controls</h4>
+        <p class="section-desc">Suspending an account revokes active tokens and immediately redirects any active session to login.</p>
+        
+        <button 
+          class="btn-suspend-account" 
+          [class.active-reactivate]="user.status === 'suspended'" 
+          (click)="onToggleSuspension()">
+          {{ user.status === 'active' ? 'Suspend & Freeze Account' : 'Reactivate User Account' }}
+        </button>
+      </div>
+
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-modal-secondary" (click)="onClose()">Close Dossier</button>
+    </div>
+  </div>
+</div>
+

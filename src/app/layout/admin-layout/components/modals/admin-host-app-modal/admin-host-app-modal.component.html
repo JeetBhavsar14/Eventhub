@@ -1,0 +1,43 @@
+<div class="admin-modal-backdrop" *ngIf="app" (click)="close.emit()">
+  <div class="admin-modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <h3>Host Application: {{ app.applicantName }}</h3>
+        <span class="modal-sub">{{ app.organizationName }} • ID: {{ app.id }}</span>
+      </div>
+      <button class="btn-modal-close" (click)="close.emit()" aria-label="Close modal">
+        <app-icon name="close" [size]="14"></app-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-section">
+        <h4>Organization Details</h4>
+        <p><strong>Type:</strong> {{ app.organizationType }}</p>
+        <p><strong>City / Base:</strong> {{ app.city }}</p>
+        <p><strong>Expected Scale:</strong> {{ app.expectedScale }}</p>
+        <p><strong>Categories:</strong> {{ app.primaryCategories.join(', ') }}</p>
+      </div>
+
+      <div class="modal-section">
+        <h4>Past Organizing Experience</h4>
+        <p class="modal-note-box">{{ app.pastExperience }}</p>
+      </div>
+
+      <div class="modal-section">
+        <h4>Submitted Verification Documents</h4>
+        <div class="doc-pill">
+          <app-icon name="file-text"></app-icon>
+          <span>{{ app.idDocName }}</span>
+          <small class="doc-status-ok">Verified Signature</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-modal-secondary" (click)="onRequestClarification()">Request Clarification</button>
+      <button class="btn-modal-danger" (click)="onReject()">Reject</button>
+      <button class="btn-modal-primary" (click)="onApprove()">Approve & Grant Host Privileges</button>
+    </div>
+  </div>
+</div>

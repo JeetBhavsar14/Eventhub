@@ -1,17 +1,22 @@
-import { Component, signal, computed, HostListener, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '@core/auth';
 import { HostApplicationService, AdminService, AdminHostApplication, AdminCurationEvent, AdminUser, AdminSettlement, ToastService } from '@core/state';
 import { IconComponent, ConfirmDialogComponent } from '@shared/components';
 import {
+  AdminSidebarComponent,
+  AdminHeaderComponent,
   AdminOverviewComponent,
   AdminHostApplicationsComponent,
   AdminEventCurationComponent,
   AdminUsersComponent,
   AdminFinanceComponent,
-  AdminSettingsComponent
+  AdminSettingsComponent,
+  AdminHostAppModalComponent,
+  AdminEventCurationModalComponent,
+  AdminBroadcastModalComponent,
+  AdminUserDossierModalComponent
 } from './components';
 
 import { AdminView, PlatformStats } from './admin.models';
@@ -29,16 +34,20 @@ export interface AdminConfirmDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    RouterLink,
     IconComponent,
     ConfirmDialogComponent,
+    AdminSidebarComponent,
+    AdminHeaderComponent,
     AdminOverviewComponent,
     AdminHostApplicationsComponent,
     AdminEventCurationComponent,
     AdminUsersComponent,
     AdminFinanceComponent,
-    AdminSettingsComponent
+    AdminSettingsComponent,
+    AdminHostAppModalComponent,
+    AdminEventCurationModalComponent,
+    AdminBroadcastModalComponent,
+    AdminUserDossierModalComponent
   ],
   templateUrl: './admin-layout.component.html',
   styleUrls: ['./admin-layout.component.css', './admin-shared.css'],
@@ -56,18 +65,13 @@ export class AdminLayoutComponent implements OnInit {
   currentView = this.activeNav;
   isSidebarCollapsed = signal(false);
   isMobileNavOpen = signal(false);
-  showUserMenu = signal(false);
-  showAdminMenu = signal(false);
-  showNotifications = signal(false);
   toastMessage = signal<string | null>(null);
 
   // Modals & Drawers State
   selectedAppForModal = signal<AdminHostApplication | null>(null);
   selectedEventForModal = signal<AdminCurationEvent | null>(null);
   selectedUserForDossier = signal<AdminUser | null>(null);
-  feedbackText = signal('');
   showBroadcastModal = signal(false);
-  broadcastMessage = signal({ title: '', body: '', audience: 'all' });
 
   // Confirmation Dialog System
   showConfirmationDialog = signal(false);
@@ -87,7 +91,7 @@ export class AdminLayoutComponent implements OnInit {
   readonly financialMetrics = this.adminService.financialMetrics;
 
   // Computed Platform Metrics
-  platformStats = computed(() => {
+  platformStats = computed<PlatformStats>(() => {
     const apps = this.hostApplications();
     const curEvents = this.curationEvents();
     const usersList = this.users();
@@ -112,6 +116,10 @@ export class AdminLayoutComponent implements OnInit {
     };
   });
 
+  ngOnInit() {
+    this.adminService.loadAll();
+  }
+
   toggleMobileNav() {
     this.isMobileNavOpen.update(v => !v);
   }
@@ -120,17 +128,18 @@ export class AdminLayoutComponent implements OnInit {
     this.showBroadcastModal.set(true);
   }
 
+  closeBroadcastModal() {
+    this.showBroadcastModal.set(false);
+  }
+
+  // Navigation
   setView(view: AdminView) {
     this.setNav(view);
   }
 
-  ngOnInit() {
-    this.adminService.loadAll();
-  }
-
-  // Navigation
   setNav(view: AdminView) {
     this.activeNav.set(view);
+    this.isMobileNavOpen.set(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -202,6 +211,10 @@ export class AdminLayoutComponent implements OnInit {
     this.selectedAppForModal.set(app);
   }
 
+  closeAppDetailsModal() {
+    this.selectedAppForModal.set(null);
+  }
+
   promptApproveHostApplication(appId: string, applicantName: string) {
     this.triggerConfirm(
       'Approve Host Application & Grant SaaS Access?',
@@ -246,7 +259,10 @@ export class AdminLayoutComponent implements OnInit {
   // Event Curation Actions
   openEventCurationModal(event: AdminCurationEvent) {
     this.selectedEventForModal.set(event);
-    this.feedbackText.set('');
+  }
+
+  closeEventCurationModal() {
+    this.selectedEventForModal.set(null);
   }
 
   promptApproveEventForLive(eventId: string, eventTitle: string) {
@@ -286,9 +302,9 @@ export class AdminLayoutComponent implements OnInit {
     this.showToast(`Updated featured showcase banner for "${eventTitle}".`);
   }
 
-  async sendEventFeedback(eventId: string) {
-    const note = this.feedbackText().trim() || 'Please provide updated permit documentation.';
-    const success = await this.adminService.sendEventFeedback(eventId, note);
+  async sendEventFeedback(event: { id: string; feedback: string }) {
+    const note = event.feedback.trim() || 'Please provide updated permit documentation.';
+    const success = await this.adminService.sendEventFeedback(event.id, note);
     if (success) {
       this.selectedEventForModal.set(null);
       this.showToast('Compliance feedback dispatched to organizer.');
@@ -310,12 +326,11 @@ export class AdminLayoutComponent implements OnInit {
   }
 
   // Broadcast Announcement
-  async sendBroadcast() {
-    const msg = this.broadcastMessage();
-    if (msg.title && msg.body) {
-      await this.adminService.sendBroadcast(msg.title, msg.body);
+  async sendBroadcast(data: { title: string; body: string }) {
+    if (data.title && data.body) {
+      await this.adminService.sendBroadcast(data.title, data.body);
       this.showBroadcastModal.set(false);
-      this.showToast(`Global broadcast "${msg.title}" dispatched.`);
+      this.showToast(`Global broadcast "${data.title}" dispatched.`);
     }
   }
 
@@ -326,21 +341,6 @@ export class AdminLayoutComponent implements OnInit {
     setTimeout(() => {
       this.toastMessage.set(null);
     }, 3600);
-  }
-
-  toggleAdminMenu(event: MouseEvent) {
-    event.stopPropagation();
-    this.showAdminMenu.update(v => !v);
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.user-menu-wrap') && !target.closest('.notif-menu-wrap') && !target.closest('.admin-sidebar-footer')) {
-      this.showUserMenu.set(false);
-      this.showNotifications.set(false);
-      this.showAdminMenu.set(false);
-    }
   }
 
   signOut() {
