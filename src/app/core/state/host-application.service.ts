@@ -86,36 +86,54 @@ export class HostApplicationService {
     const userApp = this.localStorage.get<HostApplicationData>(userKey);
     if (userApp && (userApp.userId === user.id || (userApp.email && user.email && userApp.email.toLowerCase() === user.email.toLowerCase()))) {
       this._storedApplication.set(userApp);
-      return;
-    }
-
-    // Check legacy key; if it matches this user, migrate it to user-specific key, otherwise discard
-    const legacyApp = this.localStorage.get<HostApplicationData>(HOST_APP_KEY);
-    if (legacyApp && (legacyApp.userId === user.id || (legacyApp.email && user.email && legacyApp.email.toLowerCase() === user.email.toLowerCase()))) {
-      this._storedApplication.set(legacyApp);
-      this.localStorage.set(userKey, legacyApp);
-      return;
     } else {
-      this.localStorage.remove(HOST_APP_KEY);
+      // Check legacy key; if it matches this user, migrate it to user-specific key, otherwise discard
+      const legacyApp = this.localStorage.get<HostApplicationData>(HOST_APP_KEY);
+      if (legacyApp && (legacyApp.userId === user.id || (legacyApp.email && user.email && legacyApp.email.toLowerCase() === user.email.toLowerCase()))) {
+        this._storedApplication.set(legacyApp);
+        this.localStorage.set(userKey, legacyApp);
+      } else {
+        this.localStorage.remove(HOST_APP_KEY);
+        this._storedApplication.set(null);
+      }
     }
 
-    // Default for clean newly registered users
-    this._storedApplication.set(null);
+    // Always fetch latest authoritative status from backend
+    this.fetchBackendApplication(user);
+  }
 
-    // Optional asynchronous lookup on backend in case application was submitted previously on another device
-    if (user.email) {
-      this.api.get<HostApplicationData[]>(`/hostApplications?email=${encodeURIComponent(user.email.toLowerCase())}`)
-        .then(res => {
-          if (res.data && res.data.length > 0) {
-            const found = res.data[0];
-            if (this.authService.currentUser()?.id === user.id) {
-              this._storedApplication.set(found);
-              this.localStorage.set(userKey, found);
-            }
+  /**
+   * Refreshes host application state from backend to synchronize with any admin actions.
+   */
+  async refreshApplicationStatus(): Promise<HostApplicationData | null> {
+    const user = this.authService.currentUser();
+    if (!user) return null;
+    return this.fetchBackendApplication(user);
+  }
+
+  private async fetchBackendApplication(user: User): Promise<HostApplicationData | null> {
+    if (!user.email) return null;
+    const userKey = `${HOST_APP_KEY}_${user.id}`;
+
+    try {
+      const res = await this.api.get<HostApplicationData[]>(`/hostApplications?email=${encodeURIComponent(user.email.toLowerCase())}`);
+      if (res.data && res.data.length > 0) {
+        const found = res.data[res.data.length - 1];
+        if (this.authService.currentUser()?.id === user.id) {
+          this._storedApplication.set(found);
+          this.localStorage.set(userKey, found);
+
+          // If approved by admin, refresh user session so platformRole is promoted to host
+          if (found.status === 'approved' && !user.isHost && user.platformRole !== 'host') {
+            await this.authService.refreshCurrentUser();
           }
-        })
-        .catch(() => {});
+          return found;
+        }
+      }
+    } catch {
+      // Ignore background lookup errors
     }
+    return this._storedApplication();
   }
 
   /**
@@ -297,9 +315,9 @@ export class HostApplicationService {
   }
 
   /**
-   * Responds to additional info request
+   * Responds to additional info request and synchronizes back to admin board
    */
-  submitAdditionalInfo(responseNotes: string): void {
+  async submitAdditionalInfo(responseNotes: string): Promise<void> {
     const current = this.applicationData();
     const user = this.authService.currentUser();
     if (current) {
@@ -315,6 +333,18 @@ export class HostApplicationService {
         this.localStorage.set(`${HOST_APP_KEY}_${user.id}`, updated);
       }
       this.localStorage.set(HOST_APP_KEY, updated);
+
+      if (current.id) {
+        try {
+          await this.api.patch(`/hostApplications/${current.id}`, {
+            status: 'under_review',
+            additionalInfoResponse: responseNotes,
+            updatedAt: updated.updatedAt
+          });
+        } catch {
+          // Ignore network errors during background sync
+        }
+      }
     }
   }
 
@@ -339,6 +369,7 @@ export class HostApplicationService {
       case 'under_review':
         return 'Your credentials and past event history are currently under evaluation by our host verification panel.';
       case 'info_required':
+      case 'changes_requested':
         return 'Action Required: Please provide clarification on your venue safety documentation or past event links.';
       case 'approved':
         return 'Congratulations! Your host profile is verified and approved. You now have full access to create events.';

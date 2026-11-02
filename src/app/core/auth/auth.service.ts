@@ -190,6 +190,28 @@ export class AuthService {
     return { success: true, message: 'Profile updated successfully.' };
   }
 
+  /**
+   * Refreshes the currently authenticated user's profile from the backend.
+   * Useful when permissions, roles, or host verification status change out-of-band.
+   */
+  async refreshCurrentUser(): Promise<User | null> {
+    const user = this.currentUser();
+    if (!user) return null;
+
+    try {
+      const res = await this.apiClient.get<User>(`/users/${user.id}`);
+      if (res.data) {
+        const freshUser = res.data;
+        this.localStorage.set(AUTH_USER_KEY, freshUser);
+        this._authState.update(state => ({ ...state, user: freshUser }));
+        return freshUser;
+      }
+    } catch {
+      // Ignore background refresh errors
+    }
+    return user;
+  }
+
   logout(navigate: boolean = true): void {
     this.localStorage.remove(AUTH_USER_KEY);
     this.localStorage.remove(AUTH_TOKEN_KEY);

@@ -56,12 +56,14 @@ describe('HostApplicationService', () => {
 
     const mockAuthService = {
       currentUser: currentUserSignal,
-      isAuthenticated: isAuthenticatedSignal
+      isAuthenticated: isAuthenticatedSignal,
+      refreshCurrentUser: vi.fn().mockResolvedValue(null)
     };
 
     const mockApiClient = {
       get: vi.fn().mockResolvedValue({ data: [] }),
-      post: vi.fn().mockResolvedValue({ data: {} })
+      post: vi.fn().mockResolvedValue({ data: {} }),
+      patch: vi.fn().mockResolvedValue({ data: {} })
     };
 
     TestBed.configureTestingModule({
@@ -160,5 +162,51 @@ describe('HostApplicationService', () => {
     expect(service.status()).toBe('not_applied');
     expect(service.applicationData()).toBeNull();
   });
-});
 
+  it('should refresh application status from backend when admin updates it to changes_requested', async () => {
+    currentUserSignal.set(mockAttendeeUser);
+    isAuthenticatedSignal.set(true);
+    TestBed.flushEffects();
+
+    const mockApi = TestBed.inject(ApiClient);
+    vi.mocked(mockApi.get).mockResolvedValueOnce({
+      data: [{
+        id: 'APP-101',
+        userId: 'user-007',
+        applicantName: 'Priti Patel',
+        email: 'priti@gmail.com',
+        phone: '9313094070',
+        organizationType: 'individual',
+        organizationName: 'Priti Events',
+        websiteOrSocial: '',
+        experienceLevel: 'beginner',
+        primaryCategories: ['Workshops'],
+        expectedAttendeeScale: '100 - 500',
+        city: 'Mumbai',
+        pastEventDescription: '',
+        idType: 'national_id',
+        status: 'changes_requested',
+        statusMessage: 'Need updated ID',
+        submittedAt: '2026-10-30T10:00:00.000Z',
+        updatedAt: '2026-10-30T11:00:00.000Z'
+      }]
+    });
+
+    await service.refreshApplicationStatus();
+    expect(service.status()).toBe('changes_requested');
+    expect(service.applicationData()?.status).toBe('changes_requested');
+  });
+
+  it('should submit additional info and dispatch PATCH to backend with under_review', async () => {
+    currentUserSignal.set(mockAttendeeUser);
+    isAuthenticatedSignal.set(true);
+    TestBed.flushEffects();
+
+    service.submitApplication({ applicantName: 'Priti Patel', email: 'priti@gmail.com' });
+    const mockApi = TestBed.inject(ApiClient);
+
+    await service.submitAdditionalInfo('Here is my updated safety permit document.');
+    expect(service.status()).toBe('under_review');
+    expect(mockApi.patch).toHaveBeenCalled();
+  });
+});

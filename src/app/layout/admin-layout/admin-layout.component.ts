@@ -2,7 +2,7 @@ import { Component, signal, computed, inject, OnInit, ChangeDetectionStrategy } 
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '@core/auth';
-import { HostApplicationService, AdminService, AdminHostApplication, AdminCurationEvent, AdminUser, AdminSettlement, ToastService } from '@core/state';
+import { AdminService, AdminHostApplication, AdminCurationEvent, AdminUser, AdminSettlement, ToastService } from '@core/state';
 import { IconComponent, ConfirmDialogComponent } from '@shared/components';
 import {
   AdminSidebarComponent,
@@ -56,7 +56,6 @@ export interface AdminConfirmDialogData {
 export class AdminLayoutComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly hostAppService = inject(HostApplicationService);
   readonly adminService = inject(AdminService);
   private readonly toastService = inject(ToastService);
 
@@ -223,8 +222,7 @@ export class AdminLayoutComponent implements OnInit {
       false,
       async () => {
         const success = await this.adminService.approveHostApplication(appId);
-        if (success) {
-          this.hostAppService.setPrototypeState('approved');
+        if(success){
           this.selectedAppForModal.set(null);
           this.showToast(`Host application for ${applicantName} approved and promoted!`);
         }
