@@ -17,6 +17,9 @@
 }
 
 :root {
+  /* Shell Layout Dimensions */
+  --sidebar-width: 260px;
+  --header-height: 70px;
   /* Brand Navy Blue Palette */
   --primary-50: #eff6ff;
   --primary-100: #dbeafe;
