@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.5rem;
+}
+

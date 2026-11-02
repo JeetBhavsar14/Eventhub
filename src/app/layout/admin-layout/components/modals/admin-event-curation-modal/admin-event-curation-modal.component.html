@@ -1,0 +1,33 @@
+<div class="admin-modal-backdrop" *ngIf="event" (click)="onClose()">
+  <div class="admin-modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <h3>Moderate Event: {{ event.title }}</h3>
+        <span class="modal-sub">Hosted by {{ event.hostName }}</span>
+      </div>
+      <button class="btn-modal-close" (click)="onClose()" aria-label="Close modal">
+        <app-icon name="close" [size]="14"></app-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-section">
+        <label>Curation Review Notes / Action Items:</label>
+        <textarea 
+          [ngModel]="feedbackText()"
+          (ngModelChange)="feedbackText.set($event)"
+          class="admin-textarea" 
+          rows="4" 
+          placeholder="Explain required changes before this event can be published live...">
+        </textarea>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-modal-secondary" (click)="onClose()">Cancel</button>
+      <button class="btn-modal-warning" (click)="onSendFeedback()">Send Changes Requested</button>
+      <button class="btn-modal-primary" (click)="onApprove()">Approve Listing</button>
+    </div>
+  </div>
+</div>
+

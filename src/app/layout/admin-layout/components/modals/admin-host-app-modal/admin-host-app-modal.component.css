@@ -1,0 +1,36 @@
+:host {
+  display: block;
+}
+
+.modal-note-box {
+  background: #F8FAFC;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border-left: 3px solid #2D31A5;
+}
+
+.doc-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  background: #F1F5F9;
+  padding: 0.625rem 0.875rem;
+  border-radius: 6px;
+  font-size: var(--text-sm);
+  color: #0F172A;
+}
+
+.doc-pill app-icon,
+.doc-pill svg {
+  width: 18px;
+  height: 18px;
+  color: #2D31A5;
+}
+
+.doc-status-ok {
+  margin-left: auto;
+  color: #059669;
+  font-weight: 600;
+  font-size: var(--text-xs);
+}
+

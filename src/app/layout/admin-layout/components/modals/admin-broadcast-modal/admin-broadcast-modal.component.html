@@ -1,0 +1,41 @@
+<div class="admin-modal-backdrop" *ngIf="isOpen" (click)="onClose()">
+  <div class="admin-modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <h3>Platform Broadcast Announcement</h3>
+        <span class="modal-sub">Push alert to all organizers and attendees</span>
+      </div>
+      <button class="btn-modal-close" (click)="onClose()" aria-label="Close modal">
+        <app-icon name="close" [size]="14"></app-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-section">
+        <label>Broadcast Title</label>
+        <input 
+          type="text" 
+          [ngModel]="title()" 
+          (ngModelChange)="title.set($event)"
+          class="admin-input" 
+          placeholder="e.g. Scheduled Platform Maintenance" />
+      </div>
+      <div class="modal-section">
+        <label>Broadcast Content</label>
+        <textarea 
+          [ngModel]="body()" 
+          (ngModelChange)="body.set($event)"
+          class="admin-textarea" 
+          rows="3" 
+          placeholder="Enter announcement text...">
+        </textarea>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-modal-secondary" (click)="onClose()">Cancel</button>
+      <button class="btn-modal-primary" [disabled]="!title().trim() || !body().trim()" (click)="onSend()">Send Platform Broadcast</button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,42 @@
+<header class="admin-header">
+  <div class="header-left">
+    <button class="mobile-toggle" (click)="toggleMobile.emit()" aria-label="Toggle navigation">
+      <app-icon name="menu"></app-icon>
+    </button>
+
+    <div class="admin-breadcrumbs">
+      <span class="crumb-root">Platform Admin</span>
+      <span class="crumb-slash">/</span>
+      <span class="crumb-active">
+        <span *ngIf="currentView === 'overview'">Platform Overview</span>
+        <span *ngIf="currentView === 'host_applications'">Host Verification Queue</span>
+        <span *ngIf="currentView === 'event_curation'">Event Moderation & Curation</span>
+        <span *ngIf="currentView === 'users'">User & Host Directory</span>
+        <span *ngIf="currentView === 'finance'">Financial Performance</span>
+        <span *ngIf="currentView === 'settings'">Platform Configuration</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <!-- Quick Broadcast Button -->
+    <button class="btn-broadcast-quick" (click)="openBroadcast.emit()">
+      <app-icon name="message-square"></app-icon>
+      <span class="btn-text">Broadcast</span>
+    </button>
+
+    <!-- Quick Link to Host Workspace / Public App -->
+    <a routerLink="/host/dashboard" class="btn-secondary-link" title="Open Host Workspace">
+      <span>Host SaaS</span>
+    </a>
+    <a routerLink="/discover" class="btn-secondary-link" title="Open Public Website">
+      <span>Public App</span>
+    </a>
+
+    <!-- Sign Out Button -->
+    <button class="btn-signout-icon" (click)="signOut.emit()" title="Sign Out">
+      <app-icon name="log-out"></app-icon>
+    </button>
+  </div>
+</header>
+
