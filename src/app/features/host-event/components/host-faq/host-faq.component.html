@@ -1,0 +1,92 @@
+<section class="section-faq" id="faq">
+  <div class="container">
+    <div class="section-header text-center">
+      <span class="section-tag">COMMON QUESTIONS</span>
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <p class="section-subtitle">
+        Everything you need to know about becoming an EventHub host, verification requirements, and managing ticket sales.
+      </p>
+    </div>
+
+    <!-- FAQ Category Filter & Search Bar -->
+    <div class="faq-controls">
+      <div class="faq-tabs">
+        <button 
+          class="faq-cat-btn" 
+          [class.active]="activeFaqCategory() === 'all'" 
+          (click)="activeFaqCategory.set('all')">
+          All Questions
+        </button>
+        <button 
+          class="faq-cat-btn" 
+          [class.active]="activeFaqCategory() === 'eligibility'" 
+          (click)="activeFaqCategory.set('eligibility')">
+          Eligibility
+        </button>
+        <button 
+          class="faq-cat-btn" 
+          [class.active]="activeFaqCategory() === 'application'" 
+          (click)="activeFaqCategory.set('application')">
+          Application
+        </button>
+        <button 
+          class="faq-cat-btn" 
+          [class.active]="activeFaqCategory() === 'review'" 
+          (click)="activeFaqCategory.set('review')">
+          Review Process
+        </button>
+        <button 
+          class="faq-cat-btn" 
+          [class.active]="activeFaqCategory() === 'publishing'" 
+          (click)="activeFaqCategory.set('publishing')">
+          Event Publishing
+        </button>
+      </div>
+
+      <div class="faq-search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="faq-search-icon">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input 
+          type="text" 
+          placeholder="Search questions (e.g. review, documents, fees)..." 
+          [ngModel]="faqSearchTerm()"
+          (ngModelChange)="faqSearchTerm.set($event)"
+          class="faq-search-input"
+        />
+      </div>
+    </div>
+
+    <!-- FAQ Accordion List -->
+    <div class="faq-accordion-list">
+      <div 
+        class="faq-accordion-item" 
+        *ngFor="let faq of filteredFaqs(); let idx = index" 
+        [class.is-open]="faq.isOpen">
+        
+        <button 
+          class="faq-question-btn" 
+          (click)="toggleFaq(faq)" 
+          [attr.aria-expanded]="faq.isOpen"
+          [attr.aria-controls]="'faq-ans-' + idx">
+          <span class="faq-q-text">{{ faq.question }}</span>
+          <span class="faq-chevron-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </button>
+
+        <div 
+          class="faq-answer-pane" 
+          [id]="'faq-ans-' + idx" 
+          *ngIf="faq.isOpen">
+          <p class="faq-ans-text">{{ faq.answer }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="filteredFaqs().length === 0" class="faq-no-results">
+        <p>No questions found matching "{{ faqSearchTerm() }}". Please try a different search term or view all questions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+

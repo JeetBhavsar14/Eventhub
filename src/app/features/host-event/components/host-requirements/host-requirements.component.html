@@ -1,0 +1,61 @@
+<section class="section-requirements" id="requirements">
+  <div class="container">
+    <div class="requirements-header-wrap">
+      <div class="section-header">
+        <span class="section-tag">CLEAR EXPECTATIONS</span>
+        <h2 class="section-title">Host Application Requirements</h2>
+        <p class="section-subtitle">
+          Here is a summary of what you will need ready before submitting your host application.
+        </p>
+      </div>
+      <div class="requirements-quick-tip">
+        <div class="tip-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div>
+          <strong>Quick Submission Tip</strong>
+          <p>Applications with complete social links and sample past event references are verified fastest.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="requirements-grid">
+      <div class="requirement-card" *ngFor="let req of requirements">
+        <div class="req-header">
+          <div class="req-icon-box">
+            <svg *ngIf="req.icon === 'contact'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            <svg *ngIf="req.icon === 'building'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><line x1="8" y1="6" x2="8" y2="6"/><line x1="16" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>
+            <svg *ngIf="req.icon === 'award'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            <svg *ngIf="req.icon === 'shield'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg *ngIf="req.icon === 'file-text'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <svg *ngIf="req.icon === 'check-square'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div>
+            <span class="req-category">{{ req.category }}</span>
+            <h3 class="req-title">{{ req.title }}</h3>
+          </div>
+        </div>
+
+        <p class="req-desc">{{ req.description }}</p>
+
+        <ul class="req-checklist">
+          <li *ngFor="let item of req.details">
+            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>{{ item }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Prototype Disclaimer Callout -->
+    <div class="prototype-notice-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="prototype-notice-icon">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+      <div>
+        <strong>Prototype Simulation Note:</strong> Identity verification and document uploads on this landing page are design demonstration features. No government services, DigiLocker, or external identification APIs are connected in this environment. No application fees are charged.
+      </div>
+    </div>
+  </div>
+</section>
+

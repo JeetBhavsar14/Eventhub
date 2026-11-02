@@ -1,0 +1,35 @@
+<div class="modal-backdrop" *ngIf="show" (click)="close.emit()">
+  <div class="modal-container auth-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">SIGN IN REQUIRED</span>
+        <h3 class="modal-title">Host with EventHub</h3>
+      </div>
+      <button class="modal-close-btn" (click)="close.emit()" title="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body auth-modal-body text-center">
+      <div class="auth-modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <h4 class="auth-modal-headline">Sign In to Begin Your Host Application</h4>
+      <p class="auth-modal-sub">
+        Please log in or create an account to start your host application and track verification progress.
+      </p>
+
+      <div class="auth-modal-buttons">
+        <button class="btn-auth-primary" (click)="login.emit()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Log In to Continue
+        </button>
+        <button class="btn-auth-secondary" (click)="register.emit()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          Create New Account
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+

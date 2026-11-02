@@ -1,0 +1,213 @@
+<div class="modal-backdrop" *ngIf="show" (click)="close.emit()">
+  <div class="modal-container wizard-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">STEP {{ currentWizardStep() }} OF 4</span>
+        <h3 class="modal-title">Host Application</h3>
+      </div>
+      <button class="modal-close-btn" (click)="close.emit()" title="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Stepper Progress Bar -->
+    <div class="wizard-stepper">
+      <div class="step-indicator" [class.active]="currentWizardStep() >= 1" [class.current]="currentWizardStep() === 1" (click)="goToWizardStep(1)">
+        <div class="step-circle">1</div>
+        <span class="step-text">Basic Profile</span>
+      </div>
+      <div class="step-line" [class.active]="currentWizardStep() >= 2"></div>
+      <div class="step-indicator" [class.active]="currentWizardStep() >= 2" [class.current]="currentWizardStep() === 2" (click)="goToWizardStep(2)">
+        <div class="step-circle">2</div>
+        <span class="step-text">Event Niche</span>
+      </div>
+      <div class="step-line" [class.active]="currentWizardStep() >= 3"></div>
+      <div class="step-indicator" [class.active]="currentWizardStep() >= 3" [class.current]="currentWizardStep() === 3" (click)="goToWizardStep(3)">
+        <div class="step-circle">3</div>
+        <span class="step-text">Verification</span>
+      </div>
+      <div class="step-line" [class.active]="currentWizardStep() >= 4"></div>
+      <div class="step-indicator" [class.active]="currentWizardStep() >= 4" [class.current]="currentWizardStep() === 4" (click)="goToWizardStep(4)">
+        <div class="step-circle">4</div>
+        <span class="step-text">Review</span>
+      </div>
+    </div>
+
+    <div class="modal-body wizard-body">
+      <!-- STEP 1: Basic & Organizer Details -->
+      <div class="wizard-step-pane" *ngIf="currentWizardStep() === 1">
+        <h4 class="pane-title">Organizer Information</h4>
+        <p class="pane-sub">Tell us who is applying to become an EventHub host.</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Full Name / Contact Person *</label>
+            <input type="text" class="form-input" [(ngModel)]="wizardForm.applicantName" placeholder="e.g. Jeet Shah" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Official Email Address *</label>
+            <input type="email" class="form-input" [(ngModel)]="wizardForm.email" placeholder="e.g. organizer@domain.com" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Mobile Phone Number *</label>
+            <input type="tel" class="form-input" [(ngModel)]="wizardForm.phone" placeholder="e.g. +91 98765 43210" />
+          </div>
+
+          <div class="form-group">
+            <app-select
+              label="Hosting Structure"
+              [required]="true"
+              [options]="organizationTypeOptions"
+              [(ngModel)]="wizardForm.organizationType">
+            </app-select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Brand / Organization Display Name</label>
+            <input type="text" class="form-input" [(ngModel)]="wizardForm.organizationName" placeholder="e.g. Starlight Live Experiences" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Website or Active Social Profile</label>
+            <input type="url" class="form-input" [(ngModel)]="wizardForm.websiteOrSocial" placeholder="e.g. https://instagram.com/starlightlive" />
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Event Details & Niche -->
+      <div class="wizard-step-pane" *ngIf="currentWizardStep() === 2">
+        <h4 class="pane-title">Event Experience & Scale</h4>
+        <p class="pane-sub">Select your primary event formats and expected audience numbers.</p>
+
+        <div class="form-group full-width">
+          <label class="form-label">Primary Event Categories (Select all that apply) *</label>
+          <div class="category-chips-grid">
+            <button 
+              type="button"
+              *ngFor="let cat of eventCategories" 
+              class="chip-btn" 
+              [class.selected]="isCategorySelected(cat.title)"
+              (click)="toggleCategorySelection(cat.title)">
+              <span class="chip-check" *ngIf="isCategorySelected(cat.title)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
+              {{ cat.title }}
+            </button>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <app-select
+              label="Expected Attendee Scale per Event"
+              [options]="expectedAttendeeScaleOptions"
+              [(ngModel)]="wizardForm.expectedAttendeeScale">
+            </app-select>
+          </div>
+
+          <div class="form-group">
+            <app-select
+              label="Primary Event City"
+              [required]="true"
+              [options]="cityOptions"
+              [(ngModel)]="wizardForm.city">
+            </app-select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Past Event Track Record / Experience</label>
+            <textarea class="form-textarea" rows="3" [(ngModel)]="wizardForm.pastEventDescription" placeholder="Briefly describe events you have hosted previously, past attendance numbers, or links to photos/videos."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Verification & Prototype Upload -->
+      <div class="wizard-step-pane" *ngIf="currentWizardStep() === 3">
+        <h4 class="pane-title">Verification & Identification</h4>
+        <p class="pane-sub">Sample document submission for host eligibility verification.</p>
+
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <app-select
+              label="Verification ID Type"
+              [required]="true"
+              [options]="idTypeOptions"
+              [(ngModel)]="wizardForm.idType">
+            </app-select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Prototype Document Upload</label>
+            <div class="upload-dropzone">
+              <div class="dropzone-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <div class="dropzone-text">
+                <span class="dropzone-title">Uploaded Mock File: <strong>{{ wizardForm.documentFileName }}</strong></span>
+                <span class="dropzone-sub">PDF, PNG, or JPG (Simulated prototype file)</span>
+              </div>
+              <span class="dropzone-badge">Ready</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="verification-disclaimer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>This is a prototype demonstration. Uploaded documents are simulated locally and no government databases are queried.</span>
+        </div>
+      </div>
+
+      <!-- STEP 4: Terms & Review -->
+      <div class="wizard-step-pane" *ngIf="currentWizardStep() === 4">
+        <h4 class="pane-title">Review & Submit Application</h4>
+        <p class="pane-sub">Please review your submission details before sending to the curation queue.</p>
+
+        <div class="review-summary-card">
+          <div class="summary-row">
+            <span class="sum-label">Applicant:</span>
+            <strong class="sum-val">{{ wizardForm.applicantName || 'Jeet Shah' }} ({{ wizardForm.organizationType }})</strong>
+          </div>
+          <div class="summary-row">
+            <span class="sum-label">Contact:</span>
+            <span class="sum-val">{{ wizardForm.email }} • {{ wizardForm.phone }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="sum-label">Organization:</span>
+            <span class="sum-val">{{ wizardForm.organizationName || 'Independent Host' }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="sum-label">Event Focus:</span>
+            <span class="sum-val">{{ wizardForm.primaryCategories.join(', ') }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="sum-label">City & Scale:</span>
+            <span class="sum-val">{{ wizardForm.city }} ({{ wizardForm.expectedAttendeeScale }})</span>
+          </div>
+        </div>
+
+        <div class="terms-checkbox-wrap">
+          <label class="custom-checkbox-label">
+            <input type="checkbox" [(ngModel)]="wizardForm.termsAccepted" />
+            <span>I confirm the accuracy of the details provided and agree to abide by the EventHub Host Guidelines and Attendee Safety Code.</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-back" *ngIf="currentWizardStep() > 1" (click)="prevWizardStep()">Back</button>
+      <div class="footer-spacer"></div>
+      <button class="btn-modal-cancel" (click)="close.emit()">Cancel</button>
+      
+      <button class="btn-modal-next" *ngIf="currentWizardStep() < 4" (click)="nextWizardStep()">
+        Continue
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <button class="btn-modal-submit" *ngIf="currentWizardStep() === 4" [disabled]="!wizardForm.termsAccepted" (click)="onSubmit()">
+        Submit Host Application
+      </button>
+    </div>
+  </div>
+</div>
+
