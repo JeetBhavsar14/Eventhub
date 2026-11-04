@@ -49,7 +49,18 @@ function extractServerMessage(data: unknown): string | null {
     return trimmed.length > 0 && trimmed.length < 300 ? trimmed : null;
   }
 
-  // 2. Structured JSON response
+  // 2. Top-level array response from Django DRF (e.g. ["Only valid tickets can be cancelled."])
+  if (Array.isArray(data) && data.length > 0) {
+    const first = data[0];
+    if (typeof first === 'string' && first.trim()) {
+      return first.trim();
+    }
+    if (typeof first === 'object' && first !== null) {
+      return extractServerMessage(first);
+    }
+  }
+
+  // 3. Structured JSON response
   if (typeof data === 'object') {
     const record = data as Record<string, unknown>;
 
@@ -77,14 +88,15 @@ function extractServerMessage(data: unknown): string | null {
     }
 
     // If validation errors exist, extract first field error message
-    const errors = (record['errors'] || record['fieldErrors']) as Record<string, unknown> | undefined;
+    const errors = (record['errors'] || record['fieldErrors'] || record) as Record<string, unknown> | undefined;
     if (errors && typeof errors === 'object' && !Array.isArray(errors)) {
       for (const key of Object.keys(errors)) {
+        if (key === 'status' || key === 'statusCode' || key === 'timestamp') continue;
         const val = errors[key];
         if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'string') {
           return `${key}: ${val[0]}`;
         }
-        if (typeof val === 'string' && val.trim()) {
+        if (typeof val === 'string' && val.trim() && key !== 'error' && key !== 'message' && key !== 'detail') {
           return `${key}: ${val.trim()}`;
         }
       }

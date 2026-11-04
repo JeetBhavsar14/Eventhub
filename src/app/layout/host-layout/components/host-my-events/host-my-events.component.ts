@@ -19,6 +19,13 @@ export class HostMyEventsComponent {
   @Output() submitForReview = new EventEmitter<string>();
   @Output() publishEvent = new EventEmitter<string>();
   @Output() reviewFeedback = new EventEmitter<HostEventItem>();
+  @Output() requestCancellation = new EventEmitter<{ event: HostEventItem; reason: string }>();
+
+  onRequestCancellation(ev: HostEventItem): void {
+    const reason = window.prompt(`Please provide a reason for cancelling "${ev.title}". This will be sent to the Admin team for review and approval:`);
+    if (!reason || !reason.trim()) return;
+    this.requestCancellation.emit({ event: ev, reason: reason.trim() });
+  }
 
   // Portfolio Grid Pagination
   portfolioPage = signal(1);

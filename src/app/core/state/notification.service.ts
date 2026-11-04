@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal, effect } from '@angular/core';
 import { ApiClient } from '@core/api';
 import { AuthService } from '@core/auth';
-import { AppNotification, NotificationType, NotificationPriority } from '@core/models';
+import { AppNotification, NotificationType, NotificationPriority, Booking } from '@core/models';
 
 @Injectable({
   providedIn: 'root'
@@ -39,8 +39,58 @@ export class NotificationService {
     });
   }
 
+  // Local Storage state helpers for persistent read & dismissed notifications
+  private getLocalReadIds(): Set<string> {
+    if (typeof window === 'undefined') return new Set();
+    try {
+      const stored = localStorage.getItem('eventhub_read_notifications');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  }
+
+  private saveLocalReadId(id: string): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const set = this.getLocalReadIds();
+      set.add(id);
+      localStorage.setItem('eventhub_read_notifications', JSON.stringify(Array.from(set)));
+    } catch {}
+  }
+
+  private saveAllLocalReadIds(ids: string[]): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const set = this.getLocalReadIds();
+      ids.forEach(id => set.add(id));
+      localStorage.setItem('eventhub_read_notifications', JSON.stringify(Array.from(set)));
+    } catch {}
+  }
+
+  private getLocalDismissedIds(): Set<string> {
+    if (typeof window === 'undefined') return new Set();
+    try {
+      const stored = localStorage.getItem('eventhub_dismissed_notifications');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  }
+
+  private saveLocalDismissedId(id: string): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const set = this.getLocalDismissedIds();
+      set.add(id);
+      localStorage.setItem('eventhub_dismissed_notifications', JSON.stringify(Array.from(set)));
+    } catch {}
+  }
+
   /**
-   * Fetch all notifications for the active user (matched by userId or userEmail)
+   * Fetch and synchronize notifications:
+   * 1. Maps live ticket bookings from Django backend into notifications.
+   * 2. Incorporates server notifications from /notifications (gracefully handling backend future scope).
    */
   async loadNotifications(): Promise<void> {
     const user = this.auth.currentUser();
@@ -52,24 +102,107 @@ export class NotificationService {
     this.isLoading.set(true);
     this.error.set(null);
 
-    try {
-      // Query notifications from mock server
-      const res = await this.api.get<AppNotification[]>('/notifications');
-      if (res.data) {
-        // Filter notifications addressed to this user, their email, or broadcast to 'all'
-        const userNotifs = res.data
-          .filter(n =>
-            n.userId === user.id ||
-            n.userId === 'all' ||
-            (n.userEmail && n.userEmail.toLowerCase() === user.email.toLowerCase())
-          )
-          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const readIds = this.getLocalReadIds();
+    const dismissedIds = this.getLocalDismissedIds();
+    const allNotifs: AppNotification[] = [];
 
-        this.notifications.set(userNotifs);
+    try {
+      // 1. Authoritative Ticket Booking Mapping from Django Backend
+      const bookingsRes = await this.api.get<Booking[]>('/bookings', { userId: user.id });
+      if (bookingsRes.data && Array.isArray(bookingsRes.data)) {
+        for (const b of bookingsRes.data) {
+          const bookingRef = b.bookingReference || b.id || 'EVT-BOOKING';
+          const ticketsQty = (b.tickets && b.tickets.length > 0)
+            ? b.tickets.reduce((sum, t) => sum + (t.quantity || 1), 0)
+            : (b.ticketPasses?.length || 1);
+          const totalAmt = b.totalAmount || 0;
+
+          if (b.status === 'confirmed' || b.status === 'partially_cancelled') {
+            const notifId = `notif-booking-${b.id || bookingRef}`;
+            if (!dismissedIds.has(notifId)) {
+              allNotifs.push({
+                id: notifId,
+                userId: user.id,
+                userEmail: user.email,
+                type: 'booking',
+                title: 'Ticket Booking Confirmed!',
+                message: `Your booking for "${b.eventTitle || 'Confirmed Event'}" (${ticketsQty} ticket pass${ticketsQty > 1 ? 'es' : ''} • ₹${totalAmt.toLocaleString()}) is confirmed. Pass Ref: ${bookingRef}`,
+                priority: 'high',
+                icon: 'ticket',
+                eventId: b.eventId,
+                eventTitle: b.eventTitle,
+                bookingReference: bookingRef,
+                timestamp: b.createdAt || new Date().toISOString(),
+                read: readIds.has(notifId),
+                action: {
+                  label: 'View Tickets',
+                  actionType: 'navigate',
+                  route: '/bookings',
+                  primary: true
+                }
+              });
+            }
+          } else if (b.status === 'cancelled') {
+            const notifId = `notif-cancel-${b.id || bookingRef}`;
+            if (!dismissedIds.has(notifId)) {
+              allNotifs.push({
+                id: notifId,
+                userId: user.id,
+                userEmail: user.email,
+                type: 'booking',
+                title: 'Booking Cancelled',
+                message: `Your booking for "${b.eventTitle || 'Event'}" (${bookingRef}) was cancelled and admission passes are voided.`,
+                priority: 'normal',
+                icon: 'alert-circle',
+                eventId: b.eventId,
+                eventTitle: b.eventTitle,
+                bookingReference: bookingRef,
+                timestamp: b.createdAt || new Date().toISOString(),
+                read: readIds.has(notifId),
+                action: {
+                  label: 'View Bookings',
+                  actionType: 'navigate',
+                  route: '/bookings',
+                  primary: true
+                }
+              });
+            }
+          }
+        }
       }
+
+      // 2. Fetch server-side notifications from /notifications endpoint (gracefully handles backend future scope)
+      try {
+        const res = await this.api.get<AppNotification[]>('/notifications');
+        if (res.data && Array.isArray(res.data)) {
+          const userNotifs = res.data.filter(n =>
+            !dismissedIds.has(n.id) &&
+            (n.userId === user.id ||
+              n.userId === 'all' ||
+              (n.userEmail && n.userEmail.toLowerCase() === user.email.toLowerCase()))
+          );
+          for (const n of userNotifs) {
+            const alreadyExists = allNotifs.some(
+              existing => existing.id === n.id || (n.bookingReference && existing.bookingReference === n.bookingReference)
+            );
+            if (!alreadyExists) {
+              allNotifs.push({
+                ...n,
+                read: n.read || readIds.has(n.id)
+              });
+            }
+          }
+        }
+      } catch {
+        // Backend /notifications API is in Backend Future Scope
+      }
+
+      // 3. Sort by timestamp descending
+      allNotifs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      this.notifications.set(allNotifs);
     } catch (err: unknown) {
-      const apiErr = err as { userMessage?: string } | null;
-      this.error.set(apiErr?.userMessage || 'An unexpected error occurred. Please try again.');
+      console.warn('Could not load notifications / bookings:', err);
+      this.notifications.set(allNotifs);
     } finally {
       this.isLoading.set(false);
     }
@@ -79,7 +212,7 @@ export class NotificationService {
    * Mark a single notification as read
    */
   async markAsRead(id: string): Promise<boolean> {
-    // Optimistic UI update
+    this.saveLocalReadId(id);
     this.notifications.update(list =>
       list.map(n => n.id === id ? { ...n, read: true } : n)
     );
@@ -88,7 +221,7 @@ export class NotificationService {
       const res = await this.api.patch(`/notifications/${id}`, { read: true });
       return !res.error;
     } catch {
-      return false;
+      return true; // Local persistence guarantees state
     }
   }
 
@@ -99,16 +232,16 @@ export class NotificationService {
     const unread = this.notifications().filter(n => !n.read);
     if (unread.length === 0) return true;
 
-    // Optimistic UI update
+    this.saveAllLocalReadIds(unread.map(n => n.id));
     this.notifications.update(list => list.map(n => ({ ...n, read: true })));
 
     try {
       await Promise.all(
-        unread.map(n => this.api.patch(`/notifications/${n.id}`, { read: true }))
+        unread.map(n => this.api.patch(`/notifications/${n.id}`, { read: true }).catch(() => {}))
       );
       return true;
     } catch {
-      return false;
+      return true;
     }
   }
 
@@ -116,13 +249,14 @@ export class NotificationService {
    * Delete / dismiss a notification completely
    */
   async deleteNotification(id: string): Promise<boolean> {
+    this.saveLocalDismissedId(id);
     this.notifications.update(list => list.filter(n => n.id !== id));
 
     try {
       const res = await this.api.delete(`/notifications/${id}`);
       return !res.error;
     } catch {
-      return false;
+      return true;
     }
   }
 
@@ -146,7 +280,7 @@ export class NotificationService {
   }
 
   /**
-   * Dispatch a generic notification to a recipient
+   * Dispatch a notification
    */
   async sendNotification(data: {
     userId: string;
@@ -177,25 +311,31 @@ export class NotificationService {
       read: false
     };
 
+    // Real-time optimistic update for the active user
+    const user = this.auth.currentUser();
+    if (
+      user &&
+      (newNotif.userId === user.id ||
+        newNotif.userId === 'all' ||
+        (newNotif.userEmail && newNotif.userEmail.toLowerCase() === user.email.toLowerCase()))
+    ) {
+      this.notifications.update(list => {
+        if (newNotif.bookingReference && list.some(item => item.bookingReference === newNotif.bookingReference)) {
+          return list;
+        }
+        return [newNotif, ...list];
+      });
+    }
+
     try {
       const res = await this.api.post<AppNotification>('/notifications', newNotif);
       if (res.data) {
-        const user = this.auth.currentUser();
-        // If this notification belongs to currently logged-in user, append to live list
-        if (
-          user &&
-          (newNotif.userId === user.id ||
-            newNotif.userId === 'all' ||
-            (newNotif.userEmail && newNotif.userEmail.toLowerCase() === user.email.toLowerCase()))
-        ) {
-          this.notifications.update(list => [res.data!, ...list]);
-        }
         return res.data;
       }
-    } catch (err) {
-      console.warn('Could not post notification to API:', err);
+    } catch {
+      // Backend /notifications API is in Backend Future Scope
     }
-    return null;
+    return newNotif;
   }
 
   /**

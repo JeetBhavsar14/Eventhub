@@ -1,0 +1,557 @@
+<div class="my-payments-container fade-in" [class.embedded-view]="isEmbedded()">
+
+  <!-- Page Header (Only displayed in standalone /my-payments route) -->
+  <header class="payments-header" *ngIf="!isEmbedded()">
+    <div class="header-left">
+      <span class="eyebrow">FINANCIAL LEDGER & BILLING</span>
+      <h1>My Payments</h1>
+      <p>View all your transaction receipts, invoice breakdowns, and payment statuses.</p>
+    </div>
+    <div class="header-right">
+      <a routerLink="/bookings" class="header-link">
+        <app-icon name="ticket" [size]="16"></app-icon>
+        <span>Go to My Bookings</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- 1. KPI Overview Metrics -->
+  <div class="kpi-metrics-grid">
+    <div class="kpi-card total-spent" (click)="setFilterTab('paid')">
+      <div class="kpi-icon-wrap">
+        <app-icon name="credit-card" [size]="22"></app-icon>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Total Amount Paid</span>
+        <strong class="kpi-value">₹{{ totalSpent().toLocaleString() }}</strong>
+        <span class="kpi-sub">Across verified bookings</span>
+      </div>
+    </div>
+
+    <div class="kpi-card paid-invoices" (click)="setFilterTab('paid')">
+      <div class="kpi-icon-wrap success">
+        <app-icon name="check-circle" [size]="22"></app-icon>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Paid Invoices</span>
+        <strong class="kpi-value">{{ successfulCount() }}</strong>
+        <span class="kpi-sub">Confirmed receipts</span>
+      </div>
+    </div>
+
+    <div class="kpi-card pending-payments" (click)="setFilterTab('pending')">
+      <div class="kpi-icon-wrap warning">
+        <app-icon name="clock" [size]="22"></app-icon>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Pending Payments</span>
+        <strong class="kpi-value">{{ pendingCount() }}</strong>
+        <span class="kpi-sub">Awaiting confirmation</span>
+      </div>
+    </div>
+
+    <!-- Cancelled Bookings KPI Card -->
+    <div class="kpi-card cancelled-payments" (click)="setFilterTab('cancelled')">
+      <div class="kpi-icon-wrap danger">
+        <app-icon name="alert-circle" [size]="22"></app-icon>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-label">Cancelled Bookings</span>
+        <strong class="kpi-value danger-text">{{ cancelledCount() }}</strong>
+        <span class="kpi-sub">₹{{ cancelledAmount().toLocaleString() }} voided</span>
+      </div>
+    </div>
+
+    <!-- Future Scope Card for Refunds -->
+    <div class="kpi-card future-scope-card" (click)="setFilterTab('refunds')">
+      <div class="kpi-icon-wrap muted">
+        <app-icon name="shield-check" [size]="22"></app-icon>
+      </div>
+      <div class="kpi-content">
+        <div class="future-badge-row">
+          <span class="kpi-label">Refunds & Reversals</span>
+          <span class="future-pill">Future Scope</span>
+        </div>
+        <strong class="kpi-value muted">—</strong>
+        <span class="kpi-sub">Automated refund ledger</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Controls Bar: Filter Tabs & Search Box -->
+  <div class="payments-controls-bar">
+    <div class="tabs-nav" role="tablist">
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'all'" 
+        (click)="setFilterTab('all')">
+        All Transactions
+        <span class="count-pill">{{ bookings().length }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'paid'" 
+        (click)="setFilterTab('paid')">
+        Paid / Confirmed
+        <span class="count-pill success">{{ successfulCount() }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'pending'" 
+        (click)="setFilterTab('pending')">
+        Pending
+        <span class="count-pill warning">{{ pendingCount() }}</span>
+      </button>
+
+      <!-- Dedicated Cancelled Tab -->
+      <button 
+        type="button" 
+        class="tab-btn tab-cancelled" 
+        [class.active]="activeTab() === 'cancelled'" 
+        (click)="setFilterTab('cancelled')">
+        Cancelled
+        <span class="count-pill danger">{{ cancelledCount() }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="tab-btn future-tab" 
+        [class.active]="activeTab() === 'refunds'" 
+        (click)="setFilterTab('refunds')">
+        Refunds
+        <span class="future-scope-pill">Future Scope</span>
+      </button>
+    </div>
+
+    <div class="search-wrap" *ngIf="activeTab() !== 'refunds'">
+      <app-icon name="search" [size]="16"></app-icon>
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery" 
+        placeholder="Search event, ref, or ID..." 
+        aria-label="Search payment records" />
+      <button *ngIf="searchQuery()" (click)="searchQuery.set('')" class="clear-search-btn" aria-label="Clear search">
+        <app-icon name="x" [size]="14"></app-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. Loading & Error States -->
+  <div class="state-box" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>Loading your payments & invoice records...</p>
+  </div>
+
+  <div class="state-box error-state" *ngIf="!isLoading() && error()">
+    <app-icon name="alert-triangle" [size]="32"></app-icon>
+    <h3>Error Loading Payments</h3>
+    <p>{{ error() }}</p>
+    <app-button variant="outline" size="sm" (click)="loadPaymentsData()">Retry</app-button>
+  </div>
+
+  <!-- 4. Refunds Future Scope View -->
+  <div class="future-scope-view" *ngIf="!isLoading() && activeTab() === 'refunds'">
+    <div class="future-scope-icon-box">
+      <app-icon name="shield-check" [size]="36"></app-icon>
+    </div>
+    <h3>Automated Refund Tracking (Future Scope)</h3>
+    <p>
+      Refund calculations, reverse payment intents, and banking dispute logs will be managed under this section in an upcoming platform release.
+    </p>
+    <div class="future-roadmap-pill">
+      <span>Scheduled for Upcoming Integration Cycle</span>
+    </div>
+  </div>
+
+  <!-- 5. DEDICATED CANCELLED BOOKINGS SECTION (When Cancelled tab is active) -->
+  <div class="cancelled-section-wrapper" *ngIf="!isLoading() && !error() && activeTab() === 'cancelled'">
+    <div class="cancelled-section-banner">
+      <div class="banner-icon-col">
+        <app-icon name="alert-circle" [size]="28"></app-icon>
+      </div>
+      <div class="banner-text-col">
+        <h2>Cancelled Bookings & Voided Payments</h2>
+        <p>Archive of all reservations that have been cancelled. Ticket passes under these orders are voided and cannot be used for venue entry.</p>
+      </div>
+      <div class="banner-summary-badge" *ngIf="cancelledCount() > 0">
+        <span class="count-tag">{{ cancelledCount() }} Order(s) Cancelled</span>
+        <span class="amount-tag">₹{{ cancelledAmount().toLocaleString() }} Voided</span>
+      </div>
+    </div>
+
+    <!-- Cancelled List -->
+    <div class="transactions-list cancelled-list" *ngIf="paginatedPayments().length > 0">
+      <div 
+        *ngFor="let payment of paginatedPayments()" 
+        class="transaction-card status-cancelled cancelled-special-card">
+
+        <div class="cancelled-card-top-alert">
+          <app-icon name="alert-triangle" [size]="14"></app-icon>
+          <span>This booking has been cancelled and its admission pass(es) are voided.</span>
+        </div>
+
+        <div class="tx-card-main-content">
+          <div class="tx-thumb-col">
+            <img 
+              [src]="payment.eventThumbnail || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=400&q=80'" 
+              [alt]="payment.eventTitle" 
+              class="event-thumb-img desaturated" />
+            <span class="thumb-void-badge">VOID</span>
+          </div>
+
+          <div class="tx-main-info">
+            <div class="tx-header-line">
+              <h3 class="event-title">{{ payment.eventTitle }}</h3>
+              <span class="payment-badge cancelled">
+                <span class="badge-dot"></span>
+                <span>Cancelled / Void</span>
+              </span>
+            </div>
+
+            <div class="tx-meta-grid">
+              <div class="meta-item">
+                <span class="meta-label">Voided Reference:</span>
+                <code class="meta-val code-ref">{{ payment.bookingReference || payment.id }}</code>
+              </div>
+
+              <div class="meta-item">
+                <span class="meta-label">Original Event Date:</span>
+                <span class="meta-val">{{ payment.eventDate | date:'EEE, dd MMM yyyy' }}</span>
+              </div>
+
+              <div class="meta-item">
+                <span class="meta-label">Cancelled Record:</span>
+                <span class="meta-val">{{ payment.createdAt | date:'medium' }}</span>
+              </div>
+
+              <div class="meta-item">
+                <span class="meta-label">Payment Channel:</span>
+                <span class="meta-val channel-val">
+                  <app-icon name="credit-card" [size]="14"></app-icon>
+                  {{ payment.payment?.label || 'Stripe Online Gateway' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="tx-tickets-summary">
+              <span class="tickets-badge cancelled-tag">
+                🚫 {{ payment.tickets.length || 1 }} Ticket Type ({{ payment.ticketPasses?.length || payment.tickets[0]?.quantity || 1 }} Voided Pass{{ (payment.ticketPasses?.length || payment.tickets[0]?.quantity || 1) > 1 ? 'es' : '' }})
+              </span>
+              <span class="venue-tag" *ngIf="payment.eventLocation">
+                📍 {{ payment.eventLocation }}
+              </span>
+            </div>
+          </div>
+
+          <div class="tx-amount-actions-col">
+            <div class="amount-wrap">
+              <span class="amount-label">Original Total</span>
+              <strong class="total-figure cancelled-strike">₹{{ payment.totalAmount.toLocaleString() }}</strong>
+              <span class="void-caption">Voided</span>
+            </div>
+
+            <div class="action-buttons-wrap">
+              <button 
+                type="button" 
+                class="btn-view-receipt btn-void-receipt" 
+                (click)="openReceiptModal(payment)">
+                <app-icon name="file-text" [size]="15"></app-icon>
+                <span>View Voided Invoice</span>
+              </button>
+
+              <button 
+                type="button"
+                class="btn-book-again" 
+                (click)="bookAgain(payment)">
+                <app-icon name="refresh" [size]="14"></app-icon>
+                <span>Book Event Again</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Empty State for Cancelled Bookings -->
+    <div class="empty-payments-state" *ngIf="paginatedPayments().length === 0">
+      <div class="empty-icon-wrap success">
+        <app-icon name="check-circle" [size]="40"></app-icon>
+      </div>
+      <h3>No Cancelled Bookings</h3>
+      <p>You do not have any cancelled bookings in your account history. All your purchases remain valid.</p>
+    </div>
+  </div>
+
+  <!-- 6. STANDARD TRANSACTIONS TABLE / CARD LIST (For All / Paid / Pending tabs) -->
+  <div class="transactions-container" *ngIf="!isLoading() && !error() && activeTab() !== 'refunds' && activeTab() !== 'cancelled'">
+    
+    <!-- Info banner if viewing All transactions and there are cancelled orders -->
+    <div class="all-tab-cancelled-notice" *ngIf="activeTab() === 'all' && cancelledCount() > 0">
+      <app-icon name="info" [size]="16"></app-icon>
+      <span>
+        You have <strong>{{ cancelledCount() }}</strong> cancelled booking(s) in your history. 
+        <button type="button" class="btn-text-link" (click)="setFilterTab('cancelled')">
+          View separate Cancelled section &rarr;
+        </button>
+      </span>
+    </div>
+
+    <div class="transactions-list" *ngIf="paginatedPayments().length > 0">
+      <div 
+        *ngFor="let payment of paginatedPayments()" 
+        class="transaction-card" 
+        [class.status-paid]="payment.status === 'confirmed' || payment.status === 'partially_cancelled'"
+        [class.status-pending]="payment.status === 'pending'"
+        [class.status-cancelled]="payment.status === 'cancelled'">
+
+        <div class="tx-thumb-col">
+          <img 
+            [src]="payment.eventThumbnail || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=400&q=80'" 
+            [alt]="payment.eventTitle" 
+            class="event-thumb-img" 
+            [class.desaturated]="payment.status === 'cancelled'" />
+          <span class="thumb-void-badge" *ngIf="payment.status === 'cancelled'">VOID</span>
+        </div>
+
+        <div class="tx-main-info">
+          <div class="tx-header-line">
+            <h3 class="event-title">{{ payment.eventTitle }}</h3>
+            
+            <!-- Payment Status Pill Badge -->
+            <span class="payment-badge" [ngClass]="payment.status">
+              <span class="badge-dot"></span>
+              <ng-container [ngSwitch]="payment.status">
+                <span *ngSwitchCase="'confirmed'">Paid & Confirmed</span>
+                <span *ngSwitchCase="'partially_cancelled'">Paid (Partially Refunded)</span>
+                <span *ngSwitchCase="'pending'">Payment Pending</span>
+                <span *ngSwitchCase="'cancelled'">Cancelled / Void</span>
+                <span *ngSwitchDefault>{{ payment.status | titlecase }}</span>
+              </ng-container>
+            </span>
+          </div>
+
+          <div class="tx-meta-grid">
+            <div class="meta-item">
+              <span class="meta-label">Transaction Reference:</span>
+              <code class="meta-val code-ref">{{ payment.bookingReference || payment.id }}</code>
+            </div>
+
+            <div class="meta-item">
+              <span class="meta-label">Event Date:</span>
+              <span class="meta-val">{{ payment.eventDate | date:'EEE, dd MMM yyyy' }}</span>
+            </div>
+
+            <div class="meta-item">
+              <span class="meta-label">Booking Placed:</span>
+              <span class="meta-val">{{ payment.createdAt | date:'medium' }}</span>
+            </div>
+
+            <div class="meta-item">
+              <span class="meta-label">Payment Channel:</span>
+              <span class="meta-val channel-val">
+                <app-icon name="credit-card" [size]="14"></app-icon>
+                {{ payment.payment?.label || 'Stripe Online Gateway' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="tx-tickets-summary">
+            <span class="tickets-badge" [class.cancelled-tag]="payment.status === 'cancelled'">
+              {{ payment.status === 'cancelled' ? '🚫' : '🎟️' }} {{ payment.tickets.length || 1 }} Ticket Type ({{ payment.ticketPasses?.length || payment.tickets[0]?.quantity || 1 }} {{ payment.status === 'cancelled' ? 'Voided' : 'Admissions' }})
+            </span>
+            <span class="venue-tag" *ngIf="payment.eventLocation">
+              📍 {{ payment.eventLocation }}
+            </span>
+          </div>
+        </div>
+
+        <div class="tx-amount-actions-col">
+          <div class="amount-wrap">
+            <span class="amount-label">{{ payment.status === 'cancelled' ? 'Original Total' : 'Grand Total' }}</span>
+            <strong class="total-figure" [class.cancelled-strike]="payment.status === 'cancelled'">₹{{ payment.totalAmount.toLocaleString() }}</strong>
+            <span class="void-caption" *ngIf="payment.status === 'cancelled'">Voided</span>
+          </div>
+
+          <div class="action-buttons-wrap">
+            <!-- Paid actions -->
+            <button 
+              *ngIf="payment.status === 'confirmed' || payment.status === 'partially_cancelled'" 
+              type="button" 
+              class="btn-view-receipt" 
+              (click)="openReceiptModal(payment)">
+              <app-icon name="file-text" [size]="15"></app-icon>
+              <span>View Invoice</span>
+            </button>
+
+            <!-- Pending actions -->
+            <button 
+              *ngIf="payment.status === 'pending'" 
+              type="button" 
+              class="btn-resume-pay" 
+              (click)="resumeCheckout(payment)">
+              <span>Resume Checkout</span>
+              <app-icon name="arrow-right" [size]="14"></app-icon>
+            </button>
+
+            <!-- Cancelled actions -->
+            <button 
+              *ngIf="payment.status === 'cancelled'" 
+              type="button" 
+              class="btn-view-receipt btn-void-receipt" 
+              (click)="openReceiptModal(payment)">
+              <app-icon name="file-text" [size]="15"></app-icon>
+              <span>View Voided Invoice</span>
+            </button>
+
+            <a *ngIf="payment.status !== 'cancelled'" [routerLink]="['/bookings']" class="btn-sub-link">
+              <span>View Pass</span>
+            </a>
+            <button *ngIf="payment.status === 'cancelled'" type="button" class="btn-sub-link btn-book-sub" (click)="bookAgain(payment)">
+              <span>Book Again</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Empty State for filters -->
+    <div class="empty-payments-state" *ngIf="paginatedPayments().length === 0">
+      <div class="empty-icon-wrap">
+        <app-icon name="credit-card" [size]="40"></app-icon>
+      </div>
+      <h3>No payments found</h3>
+      <p>No transactions match your current filters. Try selecting a different tab or clearing search.</p>
+    </div>
+
+  </div>
+
+  <!-- 7. Pagination Controls -->
+  <div class="payments-pagination-wrap" *ngIf="!isLoading() && !error() && activeTab() !== 'refunds' && filteredPayments().length > 0">
+    <app-pagination-bar 
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      [startItem]="startItem()"
+      [endItem]="endItem()"
+      [totalItems]="filteredPayments().length"
+      itemLabel="transactions"
+      [pageSize]="pageSize()"
+      (pageChange)="setPage($event)">
+    </app-pagination-bar>
+  </div>
+
+  <!-- 8. Itemized Invoice / Receipt Pop-up Modal -->
+  <div class="modal-backdrop" *ngIf="selectedReceipt() as receipt" (click)="closeReceiptModal()">
+    <div class="receipt-modal-card" [class.receipt-is-void]="receipt.status === 'cancelled'" (click)="$event.stopPropagation()">
+      
+      <!-- Void stamp banner on receipt if cancelled -->
+      <div class="receipt-void-banner" *ngIf="receipt.status === 'cancelled'">
+        <app-icon name="alert-triangle" [size]="16"></app-icon>
+        <span>THIS INVOICE IS VOIDED — ORDER CANCELLED</span>
+      </div>
+
+      <div class="modal-header-row no-print">
+        <div class="brand-pill" [class.danger-pill]="receipt.status === 'cancelled'">
+          <span>{{ receipt.status === 'cancelled' ? 'VOIDED TAX INVOICE' : 'TAX INVOICE RECEIPT' }}</span>
+        </div>
+        <button type="button" class="btn-close-modal" (click)="closeReceiptModal()" aria-label="Close modal">
+          <app-icon name="x" [size]="18"></app-icon>
+        </button>
+      </div>
+
+      <div class="receipt-printable-body" id="printable-receipt">
+        
+        <div class="receipt-top-row">
+          <div>
+            <h2 class="receipt-logo">EventHub</h2>
+            <p class="receipt-subline">Live Experiences & Ticketing Platform</p>
+          </div>
+          <div class="receipt-ref-box">
+            <span class="ref-label">RECEIPT NUMBER</span>
+            <strong class="ref-code">{{ receipt.bookingReference || receipt.id }}</strong>
+            <span class="issue-date">Date: {{ receipt.createdAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
+
+        <hr class="receipt-divider" />
+
+        <div class="receipt-parties-grid">
+          <div>
+            <span class="party-label">BILLED TO</span>
+            <strong class="party-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</strong>
+            <p class="party-contact">{{ currentUser()?.email }}</p>
+            <p class="party-contact" *ngIf="currentUser()?.phone">{{ currentUser()?.phone }}</p>
+          </div>
+          <div>
+            <span class="party-label">EVENT & VENUE</span>
+            <strong class="party-name">{{ receipt.eventTitle }}</strong>
+            <p class="party-contact">{{ receipt.eventDate | date:'EEE, dd MMM yyyy' }} • {{ receipt.eventTime }}</p>
+            <p class="party-contact">{{ receipt.eventLocation || receipt.eventAddress }}</p>
+          </div>
+        </div>
+
+        <table class="receipt-table">
+          <thead>
+            <tr>
+              <th>Ticket Tier & Description</th>
+              <th class="text-center">Qty</th>
+              <th class="text-right">Unit Price</th>
+              <th class="text-right">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of receipt.tickets">
+              <td>
+                <strong>{{ t.name }}</strong>
+                <small class="tier-desc">{{ receipt.status === 'cancelled' ? 'Cancelled admission pass' : 'General turnstile admission' }}</small>
+              </td>
+              <td class="text-center">{{ t.quantity }}</td>
+              <td class="text-right">₹{{ t.price }}</td>
+              <td class="text-right">₹{{ t.price * t.quantity }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="receipt-totals-panel">
+          <div class="total-line">
+            <span>Subtotal</span>
+            <span>₹{{ receipt.totalAmount }}</span>
+          </div>
+          <div class="total-line">
+            <span>GST & Service Charges (Included)</span>
+            <span>₹0.00</span>
+          </div>
+          <div class="total-line grand-total">
+            <strong>{{ receipt.status === 'cancelled' ? 'Total Amount (Voided)' : 'Grand Total Paid' }}</strong>
+            <strong class="grand-price" [class.cancelled-strike]="receipt.status === 'cancelled'">₹{{ receipt.totalAmount.toLocaleString() }}</strong>
+          </div>
+        </div>
+
+        <div class="receipt-footer-status">
+          <div class="status-verified-pill" [class.cancelled-pill]="receipt.status === 'cancelled'">
+            <app-icon [name]="receipt.status === 'cancelled' ? 'alert-circle' : 'shield-check'" [size]="16"></app-icon>
+            <span>{{ receipt.status === 'cancelled' ? 'Order Cancelled — Voided from Gate Admission' : ('Payment Verified via ' + (receipt.payment?.label || 'Stripe Payment Gateway')) }}</span>
+          </div>
+          <p class="security-note">This document is a computer-generated tax invoice verified by EventHub.</p>
+        </div>
+
+      </div>
+
+      <div class="modal-footer-actions no-print">
+        <button type="button" class="btn-print" (click)="printReceipt()">
+          <app-icon name="printer" [size]="16"></app-icon>
+          <span>Print Receipt / PDF</span>
+        </button>
+        <button type="button" class="btn-done" (click)="closeReceiptModal()">Close</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

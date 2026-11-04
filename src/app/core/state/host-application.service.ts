@@ -290,7 +290,7 @@ export class HostApplicationService {
     this.localStorage.set(HOST_APP_KEY, newApp);
 
     // Asynchronously sync to backend json-server
-    this.api.post('/hostApplications', {
+    this.api.post<HostApplicationData>('/hostApplications', {
       id: newApp.id,
       applicantName: newApp.applicantName,
       email: newApp.email,
@@ -309,6 +309,13 @@ export class HostApplicationService {
       status: 'under_review',
       submittedDate: new Date().toISOString().split('T')[0],
       submittedAt: newApp.submittedAt
+    }).then(res => {
+      if (res.data) {
+        this._storedApplication.set(res.data);
+        if (user?.id) {
+          this.localStorage.set(`${HOST_APP_KEY}_${user.id}`, res.data);
+        }
+      }
     }).catch(() => {});
 
     return newApp;

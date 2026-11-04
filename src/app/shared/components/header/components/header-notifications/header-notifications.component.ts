@@ -13,7 +13,16 @@ import { AppNotification } from '@core/models';
 })
 export class HeaderNotificationsComponent {
   @Input() isOpen = false;
-  @Input() notifications: AppNotification[] = [];
+
+  private _notifications = signal<AppNotification[]>([]);
+
+  @Input() set notifications(val: AppNotification[] | null | undefined) {
+    this._notifications.set(val || []);
+  }
+  get notifications(): AppNotification[] {
+    return this._notifications();
+  }
+
   @Input() unreadCount = 0;
 
   @Output() toggleOpened = new EventEmitter<MouseEvent>();
@@ -26,15 +35,23 @@ export class HeaderNotificationsComponent {
 
   notificationFilter = signal<'all' | 'action_required' | 'activity' | 'unread'>('all');
 
+  // Computed signals accurately tracking reactive _notifications signal
+  readonly allNotifications = computed(() => this._notifications());
+  readonly totalCount = computed(() => this._notifications().length);
+
   readonly actionRequiredNotifications = computed(() =>
-    this.notifications.filter(n => n.type === 'invitation' && (!n.invitationStatus || n.invitationStatus === 'pending'))
+    this._notifications().filter(n => n.type === 'invitation' && (!n.invitationStatus || n.invitationStatus === 'pending'))
   );
 
   readonly activityNotifications = computed(() =>
-    this.notifications.filter(n => !(n.type === 'invitation' && (!n.invitationStatus || n.invitationStatus === 'pending')))
+    this._notifications().filter(n => !(n.type === 'invitation' && (!n.invitationStatus || n.invitationStatus === 'pending')))
   );
 
-  readonly filteredNotifications = computed(() => {
+  readonly unreadNotificationsList = computed(() =>
+    this._notifications().filter(n => !n.read)
+  );
+
+  readonly displayedNotifications = computed(() => {
     const filter = this.notificationFilter();
     if (filter === 'action_required') {
       return this.actionRequiredNotifications();
@@ -43,9 +60,9 @@ export class HeaderNotificationsComponent {
       return this.activityNotifications();
     }
     if (filter === 'unread') {
-      return this.notifications.filter(n => !n.read);
+      return this.unreadNotificationsList();
     }
-    return this.notifications;
+    return this._notifications();
   });
 
   setFilter(filter: 'all' | 'action_required' | 'activity' | 'unread', event: MouseEvent) {
@@ -105,4 +122,3 @@ export class HeaderNotificationsComponent {
     }
   }
 }
-

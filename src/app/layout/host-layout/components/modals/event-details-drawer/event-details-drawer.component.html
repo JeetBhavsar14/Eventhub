@@ -149,6 +149,15 @@
         <button *ngIf="event.status === 'approved'" class="btn-primary" (click)="onPublishApproved()">
           Publish Live Now
         </button>
+        <button 
+          *ngIf="event.status === 'published' || event.status === 'approved'" 
+          type="button" 
+          class="btn-secondary" 
+          style="color: #dc2626; border-color: #fca5a5;"
+          (click)="onRequestCancellation()">
+          <app-icon name="alert-triangle" [size]="14"></app-icon>
+          <span>Request Cancellation</span>
+        </button>
       </ng-container>
 
       <!-- In Edit Mode Buttons -->

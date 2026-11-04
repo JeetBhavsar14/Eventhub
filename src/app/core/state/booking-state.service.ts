@@ -1,5 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { SessionStorageService } from '@core/storage';
+import { ToastService } from './toast.service';
 
 export interface TicketBookingOrder {
   eventId: string;
@@ -14,6 +15,11 @@ export interface TicketBookingOrder {
     name: string;
     price: number;
     quantity: number;
+  }>;
+  attendees?: Array<{
+    name: string;
+    email: string;
+    phone?: string;
   }>;
   subtotal: number;
   discount: number;
@@ -30,6 +36,7 @@ const STORAGE_KEY = 'eventhub_pending_booking_order';
 })
 export class BookingStateService {
   private sessionStorage = inject(SessionStorageService);
+  private toast = inject(ToastService);
   private _pendingOrder = signal<TicketBookingOrder | null>(null);
 
   readonly pendingOrder = this._pendingOrder.asReadonly();
@@ -39,6 +46,18 @@ export class BookingStateService {
   }
 
   setPendingOrder(order: Omit<TicketBookingOrder, 'expiresAt'>): TicketBookingOrder {
+    const selectedTicket = order.tickets[0];
+
+    if (!selectedTicket) {
+      this.toast.error('Please select at least one ticket.');
+      return null as any;
+    }
+
+    if (order.tickets.length !== 1) {
+      this.toast.error('Only one ticket type is allowed per booking.');
+      return null as any;
+    }
+
     const fullOrder: TicketBookingOrder = {
       ...order,
       expiresAt: Date.now() + 2 * 60 * 1000 // 2 minutes from now

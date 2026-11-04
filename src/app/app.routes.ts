@@ -163,6 +163,11 @@ export const routes: Routes = [
             canActivate: [authGuard] 
           },
           { 
+            path: 'my-payments', 
+            loadComponent: () => import('./features/profile/my-payments/my-payments.component').then(m => m.MyPaymentsComponent), 
+            canActivate: [authGuard] 
+          },
+          { 
             path: 'my-gift-cards', 
             loadComponent: () => import('./features/my-gift-cards/my-gift-cards.component').then(m => m.MyGiftCardsComponent), 
             canActivate: [authGuard] 

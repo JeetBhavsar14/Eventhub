@@ -213,7 +213,10 @@ export class AdminService {
   }
 
   async approveEvent(eventId: string): Promise<boolean> {
-    const res = await this.api.patch(`/events/${eventId}`, { status: 'published' });
+    let res = await this.api.post(`/events/${eventId}/review/`, { action: 'approve' });
+    if (res.error) {
+      res = await this.api.patch(`/events/${eventId}`, { status: 'published' });
+    }
     if (res.error) return false;
     this.curationEvents.update(list =>
       list.map(e => e.id === eventId ? { ...e, status: 'approved' } : e)
@@ -222,7 +225,10 @@ export class AdminService {
   }
 
   async delistEvent(eventId: string): Promise<boolean> {
-    const res = await this.api.patch(`/events/${eventId}`, { status: 'rejected' });
+    let res = await this.api.post(`/events/${eventId}/cancel/`);
+    if (res.error) {
+      res = await this.api.patch(`/events/${eventId}`, { status: 'rejected' });
+    }
     if (res.error) return false;
     this.curationEvents.update(list =>
       list.map(e => e.id === eventId ? { ...e, status: 'rejected' } : e)

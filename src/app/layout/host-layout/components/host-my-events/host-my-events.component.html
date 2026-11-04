@@ -65,6 +65,12 @@
           (click)="reviewFeedback.emit(ev)">
           Feedback
         </button>
+        <button 
+          *ngIf="ev.status === 'published' || ev.status === 'approved'" 
+          class="btn-card-action btn-danger-subtle" 
+          (click)="onRequestCancellation(ev)">
+          Cancel Event
+        </button>
       </div>
     </div>
   </div>

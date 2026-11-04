@@ -55,12 +55,10 @@ export class LoginComponent {
   // Pre-configured demonstration OTP code (avoids accepting arbitrary OTPs)
   readonly DEMO_OTP = '1234';
 
-  // Demo account identifiers only — passwords are kept out of client bundles
+  // Demo account identifiers for quick testing
   readonly demoAccounts: DemoAccount[] = [
-    { role: 'Super Admin', email: 'admin@eventhub.com', badge: 'admin' },
+    { role: 'Django Super Admin', email: 'anujkguni@gmail.com', badge: 'admin' },
     { role: 'Host / Organizer', email: 'host@eventhub.com', badge: 'host' },
-    { role: 'Management & Operations', email: 'management@eventhub.com', badge: 'management' },
-    { role: 'Event Staff', email: 'staff@eventhub.com', badge: 'staff' },
     { role: 'Standard Attendee', email: 'jeet@eventhub.com', badge: 'user' }
   ];
 
@@ -85,7 +83,7 @@ export class LoginComponent {
       const user = this.authService.currentUser();
       const role = user?.platformRole;
 
-      if (role === 'admin') {
+      if (role === 'admin' || role === 'super_admin') {
         this.router.navigate(['/admin']);
       } else if (role === 'host' || user?.isHost) {
         this.router.navigate(['/host/dashboard']);
@@ -331,7 +329,11 @@ export class LoginComponent {
 
   selectDemoAccount(account: DemoAccount) {
     this.email = account.email;
-    this.password = '';
+    if (account.email === 'anujkguni@gmail.com') {
+      this.password = 'Anuj@1902';
+    } else {
+      this.password = '';
+    }
     this.errorMessage.set('');
     this.closeForgotPassword();
   }

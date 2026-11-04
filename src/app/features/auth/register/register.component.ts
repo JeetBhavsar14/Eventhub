@@ -33,7 +33,7 @@ export class RegisterComponent {
     this.errorMessage.set('');
     
     // Basic validation
-    if (!this.firstName || !this.lastName || !this.email || !this.password) {
+    if (!this.firstName || !this.lastName || !this.email || !this.phone || !this.password) {
       this.errorMessage.set('Please fill in all required fields.');
       return;
     }

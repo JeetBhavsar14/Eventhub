@@ -85,18 +85,13 @@
         </div>
         <div class="summary-metric">
           <span class="metric-lbl">Avg. Ticket</span>
-          <span class="metric-val">₹1,405</span>
+          <span class="metric-val">₹{{ stats.totalBookings > 0 ? (stats.totalRevenue / stats.totalBookings | number:'1.0-0') : 0 }}</span>
         </div>
         <div class="summary-metric">
-          <span class="metric-lbl">Conversion Rate</span>
-          <span class="metric-val">12.4%</span>
+          <span class="metric-lbl">Live Ratio</span>
+          <span class="metric-val">{{ stats.totalEvents > 0 ? (stats.publishedEvents / stats.totalEvents * 100 | number:'1.0-1') : 0 }}%</span>
         </div>
       </div>
-    </div>
-
-    <div class="chart-sample-notice">
-      <app-icon name="info"></app-icon>
-      <span>Illustrative prototype sample data for {{ hostInfo.organization }}.</span>
     </div>
   </div>
 
