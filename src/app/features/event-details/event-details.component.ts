@@ -32,7 +32,15 @@ export class EventDetailsComponent implements OnInit {
   currentUser = this.authService.currentUser;
 
   getStartingPrice(): number {
-    return getStartingPrice(this.event(), 500);
+    return getStartingPrice(this.event(), 0);
+  }
+
+  get heroPriceLabel(): string {
+    const ev = this.event();
+    if (!ev) return '';
+
+    const price = this.getStartingPrice();
+    return price > 0 ? `From ₹${price}` : 'Free Entry';
   }
 
   get mapUrl(): SafeResourceUrl {
@@ -63,7 +71,47 @@ export class EventDetailsComponent implements OnInit {
     try {
       const res = await this.apiClient.get<EventItem>(`/events/${id}`);
       if (res.data) {
-        this.event.set(res.data);
+        const eventData: EventItem = { ...res.data };
+
+        // Fetch live ticket types from Django backend to match accurate ticket inventory & pricing
+        try {
+          const ttRes = await this.apiClient.get<any>(`/bookings/events/${id}/ticket-types/`);
+          if (ttRes.data) {
+            const rawList = Array.isArray(ttRes.data)
+              ? ttRes.data
+              : (Array.isArray(ttRes.data.results) ? ttRes.data.results : []);
+
+            if (rawList.length > 0) {
+              eventData.ticketTypes = rawList.map((tt: any) => {
+                const rawPrice = tt.price ?? tt.unit_price ?? tt.total_price ?? tt.total_amount ?? (tt.tickets?.[0]?.price) ?? 0;
+                const rawName = tt.name || tt.ticket_type_name || (tt.tickets?.[0]?.name) || 'General';
+                const rawAvailable = tt.available_quantity !== undefined 
+                  ? tt.available_quantity 
+                  : (tt.available !== undefined ? tt.available : tt.total_quantity);
+                const rawCapacity = tt.total_quantity ?? tt.capacity ?? 100;
+
+                return {
+                  id: String(tt.id || tt.ticket_type || tt.ticketTypeId || ''),
+                  name: rawName,
+                  price: typeof rawPrice === 'string' ? parseFloat(rawPrice) || 0 : Number(rawPrice) || 0,
+                  capacity: Number(rawCapacity) || 100,
+                  available: rawAvailable !== undefined ? Number(rawAvailable) : 100,
+                  description: tt.description || ''
+                };
+              });
+
+              const validPrices = eventData.ticketTypes.map(t => t.price).filter(p => !isNaN(p));
+              if (validPrices.length > 0) {
+                eventData.startingPrice = Math.min(...validPrices);
+                eventData.price = eventData.startingPrice;
+              }
+            }
+          }
+        } catch (ttErr) {
+          console.warn('[EventDetails] Could not fetch ticket-types:', ttErr);
+        }
+
+        this.event.set(eventData);
         await this.loadSimilarEvents(res.data.category, res.data.id, res.data.location?.city);
       } else {
         this.error.set(res.error?.userMessage || 'Event not found.');

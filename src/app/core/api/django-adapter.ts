@@ -51,6 +51,14 @@ export function adaptDjangoEvent(item: any): EventItem {
 
   // If already in frontend EventItem format:
   if (item.thumbnailUrl && item.ticketTypes) {
+    if (item.startingPrice === undefined && Array.isArray(item.ticketTypes) && item.ticketTypes.length > 0) {
+      const prices = item.ticketTypes
+        .map((t: any) => typeof t.price === 'string' ? parseFloat(t.price) : Number(t.price))
+        .filter((p: number) => !isNaN(p));
+      if (prices.length > 0) {
+        item.startingPrice = Math.min(...prices);
+      }
+    }
     return item as EventItem;
   }
 
@@ -67,6 +75,41 @@ export function adaptDjangoEvent(item: any): EventItem {
     item.event_type === 'online' ? 'Online' : (item.event_type === 'hybrid' ? 'Hybrid' : 'In-Person');
 
   const coverImage = item.cover_image_url || DEFAULT_EVENT_IMAGE;
+
+  // Normalize ticket types from Django response if available
+  const rawTicketTypes = item.ticket_types || item.ticketTypes || [];
+  const ticketTypes = Array.isArray(rawTicketTypes) ? rawTicketTypes.map((tt: any) => {
+    const rawPrice = tt.price ?? tt.unit_price ?? tt.total_price ?? tt.total_amount ?? (tt.tickets?.[0]?.price) ?? 0;
+    const rawName = tt.name || tt.ticket_type_name || (tt.tickets?.[0]?.name) || 'General';
+    const rawAvailable = tt.available_quantity !== undefined 
+      ? tt.available_quantity 
+      : (tt.available !== undefined ? tt.available : tt.total_quantity);
+    const rawCapacity = tt.total_quantity ?? tt.capacity ?? 100;
+
+    return {
+      id: String(tt.id || tt.ticket_type || tt.ticketTypeId || ''),
+      name: rawName,
+      price: typeof rawPrice === 'string' ? parseFloat(rawPrice) || 0 : Number(rawPrice) || 0,
+      capacity: Number(rawCapacity) || 100,
+      available: rawAvailable !== undefined ? Number(rawAvailable) : 100,
+      description: tt.description || ''
+    };
+  }) : [];
+
+  // Parse direct price on item if present
+  const rawItemPrice = item.price ?? item.starting_price ?? item.min_price ?? item.ticket_price;
+  const parsedPrice = (rawItemPrice !== undefined && rawItemPrice !== null)
+    ? (typeof rawItemPrice === 'string' ? parseFloat(rawItemPrice) : Number(rawItemPrice))
+    : undefined;
+  const directPrice = (parsedPrice !== undefined && !isNaN(parsedPrice)) ? parsedPrice : undefined;
+
+  let computedStartingPrice: number | undefined = directPrice;
+  if (ticketTypes.length > 0) {
+    const minTicketPrice = Math.min(...ticketTypes.map(t => t.price));
+    if (!isNaN(minTicketPrice)) {
+      computedStartingPrice = minTicketPrice;
+    }
+  }
 
   const adapted: EventItem = {
     id: String(item.id),
@@ -90,7 +133,9 @@ export function adaptDjangoEvent(item: any): EventItem {
       address: item.address || undefined
     },
     capacity: item.capacity || 100,
-    ticketTypes: item.ticket_types || [],
+    ticketTypes,
+    price: directPrice ?? computedStartingPrice,
+    startingPrice: computedStartingPrice,
     maxTicketsPerBooking: 10,
     hostId: item.user || item.host_email || undefined,
     createdAt: item.created_at || new Date().toISOString()

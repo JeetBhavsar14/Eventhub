@@ -34,6 +34,8 @@ export interface EventItem {
   location?: EventLocation;
   capacity?: number;
   ticketTypes: EventTicketType[];
+  price?: number;
+  startingPrice?: number;
   maxTicketsPerBooking?: number;
   hostId?: string;
   createdAt?: string;
