@@ -69,6 +69,12 @@
 
       <!-- Quick Role Action Launchers -->
       <div class="hero-role-actions">
+        <!-- Edit Profile Launcher -->
+        <button type="button" class="btn-role-shortcut personal" (click)="setTab('personal')">
+          <app-icon name="edit" [size]="15"></app-icon>
+          <span>Edit Profile</span>
+        </button>
+
         <!-- Admin Shortcut -->
         <a *ngIf="isAdminUser()" routerLink="/admin" class="btn-role-shortcut admin">
           <app-icon name="shield" [size]="15"></app-icon>
@@ -171,6 +177,14 @@
 
         <button 
           class="nav-tab-btn" 
+          [class.active]="activeTab() === 'personal'" 
+          (click)="setTab('personal')">
+          <app-icon name="user" [size]="18"></app-icon>
+          <span>Personal Info</span>
+        </button>
+
+        <button 
+          class="nav-tab-btn" 
           [class.active]="activeTab() === 'roles'" 
           (click)="setTab('roles')">
           <app-icon name="shield-check" [size]="18"></app-icon>
@@ -262,6 +276,62 @@
                 <span>{{ task.actionText }}</span>
                 <app-icon name="arrow-right" [size]="13"></app-icon>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCOUNT DETAILS & CONTACT VERIFICATION CARD -->
+        <div class="dashboard-card-box personal-overview-box">
+          <div class="card-box-header">
+            <div>
+              <h3 class="box-title">Account Details & Contact Verification</h3>
+              <p class="box-subtitle">Your registered profile details and security verification status.</p>
+            </div>
+            <button class="btn-box-link" (click)="setTab('personal')">
+              <app-icon name="edit" [size]="14"></app-icon>
+              <span>Edit Details</span>
+            </button>
+          </div>
+
+          <div class="personal-summary-grid">
+            <div class="summary-cell">
+              <span class="cell-label">First & Last Name</span>
+              <strong class="cell-value">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</strong>
+            </div>
+
+            <div class="summary-cell">
+              <span class="cell-label">Email Address</span>
+              <div class="cell-flex-row">
+                <strong class="cell-value">{{ currentUser()?.email }}</strong>
+                <span class="badge-verify badge-verified" *ngIf="currentUser()?.isEmailVerified">
+                  <app-icon name="check-circle" [size]="12"></app-icon>
+                  Verified
+                </span>
+                <span class="badge-verify badge-unverified" *ngIf="!currentUser()?.isEmailVerified">
+                  Unverified
+                </span>
+              </div>
+            </div>
+
+            <div class="summary-cell">
+              <span class="cell-label">Phone Number</span>
+              <div class="cell-flex-row">
+                <strong class="cell-value">{{ currentUser()?.phone || 'Not provided' }}</strong>
+                <span class="badge-verify badge-verified" *ngIf="currentUser()?.phone && currentUser()?.isPhoneVerified">
+                  <app-icon name="check-circle" [size]="12"></app-icon>
+                  Verified
+                </span>
+                <span class="badge-verify badge-unverified" *ngIf="currentUser()?.phone && !currentUser()?.isPhoneVerified">
+                  Unverified
+                </span>
+              </div>
+            </div>
+
+            <div class="summary-cell action-cell">
+              <button type="button" class="btn-manage-profile" (click)="setTab('personal')">
+                <app-icon name="edit" [size]="14"></app-icon>
+                <span>Change Name, Email or Phone</span>
+              </button>
             </div>
           </div>
         </div>
@@ -529,7 +599,12 @@
         </div>
 
         <div class="form-container-card">
-          <app-profile-form [user]="currentUser()" [isSaving]="isSaving()" (submitted)="saveProfile($event)"></app-profile-form>
+          <app-profile-form 
+            [user]="currentUser()" 
+            [isSaving]="isSaving()" 
+            (submitted)="saveProfile($event)"
+            (requestVerification)="handleVerificationRequest($event)">
+          </app-profile-form>
           <p *ngIf="saveMessage()" class="save-status-msg" [class.error]="saveError()">{{ saveMessage() }}</p>
         </div>
       </section>
@@ -766,6 +841,101 @@
           {{ isCancellingBookingId() === selectedBookingForCancel()?.id ? 'Cancelling All...' : 'Cancel Entire Booking' }}
         </button>
         <button type="button" class="btn-modal-done" (click)="closeCancelModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────
+       MODAL 3: EMAIL & PHONE OTP VERIFICATION MODAL
+       ───────────────────────────────────────────────────────── -->
+  <div class="verification-modal-backdrop" *ngIf="verificationModal()" (click)="closeVerificationModal()">
+    <div class="verification-modal-card" (click)="$event.stopPropagation()">
+      <!-- Close button -->
+      <button type="button" class="btn-close-verify" (click)="closeVerificationModal()" aria-label="Close modal">
+        <app-icon name="close" [size]="18"></app-icon>
+      </button>
+
+      <!-- Modal Header with circular icon badge -->
+      <div class="verify-header">
+        <div class="verify-icon-ring" [class.phone-mode]="verificationModal()?.type === 'phone'">
+          <app-icon [name]="verificationModal()?.type === 'phone' ? 'phone' : 'mail'" [size]="28"></app-icon>
+        </div>
+        <h3 class="verify-title">
+          {{ verificationModal()?.type === 'phone' ? 'Verify Phone Number' : 'Verify Email Address' }}
+        </h3>
+        <p class="verify-subtitle">
+          We've dispatched a 6-digit verification code to
+        </p>
+        <div class="verify-target-chip">
+          <app-icon [name]="verificationModal()?.type === 'phone' ? 'phone' : 'mail'" [size]="14"></app-icon>
+          <span>{{ verificationModal()?.targetValue }}</span>
+        </div>
+        <p class="verify-instructions">
+          Please enter the 6-digit code below to confirm and apply your profile changes.
+        </p>
+      </div>
+
+      <!-- 6-digit OTP Input Grid -->
+      <div class="otp-input-group">
+        <div class="otp-grid">
+          <input
+            *ngFor="let digit of verificationOtp(); let i = index"
+            [id]="'otp-input-' + i"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="1"
+            class="otp-digit-field"
+            [value]="digit"
+            (input)="onOtpInput(i, $event)"
+            (keydown)="onOtpKeyDown(i, $event)"
+            (paste)="onOtpPaste($event)"
+            autocomplete="one-time-code"
+            aria-label="OTP digit"
+          />
+        </div>
+      </div>
+
+      <!-- Error alert message if verification failed -->
+      <div *ngIf="verificationError()" class="verify-alert-error">
+        <app-icon name="shield-alert" [size]="16"></app-icon>
+        <span>{{ verificationError() }}</span>
+      </div>
+
+      <!-- Test Mode Hint Banner -->
+      <div class="test-hint-pill">
+        <span>💡 For test mode, you can use code <strong>123456</strong></span>
+      </div>
+
+      <!-- Countdown & Resend Option -->
+      <div class="verify-resend-row">
+        <span *ngIf="verificationCountdown() > 0" class="countdown-text">
+          Resend code in <strong>{{ verificationCountdown() }}s</strong>
+        </span>
+        <button 
+          *ngIf="verificationCountdown() === 0" 
+          type="button" 
+          class="btn-resend-trigger"
+          [disabled]="isResendingOtp()"
+          (click)="resendVerificationCode()">
+          <app-icon name="refresh" [size]="14"></app-icon>
+          <span>{{ isResendingOtp() ? 'Sending...' : 'Resend Verification Code' }}</span>
+        </button>
+      </div>
+
+      <!-- Modal Footer Action Buttons -->
+      <div class="verify-modal-actions">
+        <button type="button" class="btn-cancel-verify" (click)="closeVerificationModal()">
+          Cancel
+        </button>
+        <button 
+          type="button" 
+          class="btn-confirm-verify"
+          [disabled]="verificationOtp().join('').length !== 6 || isVerifyingOtp()"
+          (click)="confirmVerification()">
+          <span *ngIf="isVerifyingOtp()">Verifying...</span>
+          <span *ngIf="!isVerifyingOtp()">Verify & Confirm</span>
+        </button>
       </div>
     </div>
   </div>

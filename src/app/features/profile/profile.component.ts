@@ -1,9 +1,9 @@
-import { Component, signal, inject, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, computed, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import * as QRCode from 'qrcode';
-import { ProfileFormComponent } from '@shared/forms';
+import { ProfileFormComponent, VerificationRequestEvent } from '@shared/forms';
 import { AuthService } from '@core/auth';
 import { HostApplicationService, ToastService } from '@core/state';
 import { ApiClient } from '@core/api';
@@ -37,7 +37,7 @@ export interface RolePermissionItem {
   styleUrl: './profile.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   activeTab = signal<ProfileTab>('dashboard');
   
   private authService = inject(AuthService);
@@ -48,6 +48,15 @@ export class ProfileComponent implements OnInit {
   readonly currentUser = this.authService.currentUser;
   readonly hostStatus = this.hostAppService.status;
   readonly applicationData = this.hostAppService.applicationData;
+
+  // Verification Modal State
+  readonly verificationModal = signal<VerificationRequestEvent | null>(null);
+  readonly verificationOtp = signal<string[]>(['', '', '', '', '', '']);
+  readonly isVerifyingOtp = signal(false);
+  readonly isResendingOtp = signal(false);
+  readonly verificationError = signal('');
+  readonly verificationCountdown = signal(30);
+  private countdownTimer: ReturnType<typeof setInterval> | null = null;
 
   // Role Computeds
   readonly userRole = computed(() => this.currentUser()?.platformRole || 'user');
@@ -594,6 +603,203 @@ export class ProfileComponent implements OnInit {
       this.toastService.error(result.message || 'Failed to update profile');
     }
     this.isSaving.set(false);
+  }
+
+  ngOnDestroy(): void {
+    this.clearOtpTimer();
+  }
+
+  private clearOtpTimer(): void {
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
+  }
+
+  handleVerificationRequest(event: VerificationRequestEvent): void {
+    this.verificationModal.set(event);
+    this.initiateVerification(event.type, event.targetValue);
+  }
+
+  async initiateVerification(type: 'email' | 'phone', target: string): Promise<void> {
+    this.verificationOtp.set(['', '', '', '', '', '']);
+    this.verificationError.set('');
+    this.verificationCountdown.set(30);
+    this.clearOtpTimer();
+
+    this.countdownTimer = setInterval(() => {
+      const current = this.verificationCountdown();
+      if (current > 1) {
+        this.verificationCountdown.set(current - 1);
+      } else {
+        this.verificationCountdown.set(0);
+        this.clearOtpTimer();
+      }
+    }, 1000);
+
+    await this.authService.sendVerificationOtp(type, target);
+
+    setTimeout(() => {
+      const firstInput = document.getElementById('otp-input-0') as HTMLInputElement | null;
+      if (firstInput) {
+        firstInput.focus();
+        firstInput.select();
+      }
+    }, 100);
+  }
+
+  closeVerificationModal(): void {
+    this.clearOtpTimer();
+    this.verificationModal.set(null);
+    this.verificationOtp.set(['', '', '', '', '', '']);
+    this.verificationError.set('');
+  }
+
+  onOtpInput(index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const val = (input.value || '').replace(/\D/g, '');
+
+    const otpArr = [...this.verificationOtp()];
+    if (val.length > 0) {
+      otpArr[index] = val.slice(-1);
+      input.value = otpArr[index];
+      this.verificationOtp.set(otpArr);
+
+      if (index < 5) {
+        const nextInput = document.getElementById(`otp-input-${index + 1}`) as HTMLInputElement | null;
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        }
+      }
+    } else {
+      otpArr[index] = '';
+      this.verificationOtp.set(otpArr);
+    }
+
+    if (otpArr.every(d => d.trim().length === 1)) {
+      this.confirmVerification();
+    }
+  }
+
+  onOtpKeyDown(index: number, event: KeyboardEvent): void {
+    const input = event.target as HTMLInputElement;
+    if (event.key === 'Backspace') {
+      if (!input.value && index > 0) {
+        const prevInput = document.getElementById(`otp-input-${index - 1}`) as HTMLInputElement | null;
+        if (prevInput) {
+          prevInput.focus();
+          const otpArr = [...this.verificationOtp()];
+          otpArr[index - 1] = '';
+          prevInput.value = '';
+          this.verificationOtp.set(otpArr);
+        }
+      }
+    } else if (event.key === 'ArrowLeft' && index > 0) {
+      const prevInput = document.getElementById(`otp-input-${index - 1}`) as HTMLInputElement | null;
+      prevInput?.focus();
+    } else if (event.key === 'ArrowRight' && index < 5) {
+      const nextInput = document.getElementById(`otp-input-${index + 1}`) as HTMLInputElement | null;
+      nextInput?.focus();
+    }
+  }
+
+  onOtpPaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    const pastedData = (event.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+    if (!pastedData) return;
+
+    const otpArr = ['', '', '', '', '', ''];
+    for (let i = 0; i < pastedData.length; i++) {
+      otpArr[i] = pastedData[i];
+      const el = document.getElementById(`otp-input-${i}`) as HTMLInputElement | null;
+      if (el) el.value = pastedData[i];
+    }
+    this.verificationOtp.set(otpArr);
+
+    const focusIndex = Math.min(pastedData.length, 5);
+    const targetInput = document.getElementById(`otp-input-${focusIndex}`) as HTMLInputElement | null;
+    targetInput?.focus();
+
+    if (pastedData.length === 6) {
+      this.confirmVerification();
+    }
+  }
+
+  async resendVerificationCode(): Promise<void> {
+    const modal = this.verificationModal();
+    if (!modal || this.verificationCountdown() > 0 || this.isResendingOtp()) return;
+
+    this.isResendingOtp.set(true);
+    try {
+      await this.authService.sendVerificationOtp(modal.type, modal.targetValue);
+      this.toastService.info(`A fresh 6-digit code has been dispatched to ${modal.targetValue}`);
+      this.initiateVerification(modal.type, modal.targetValue);
+    } catch {
+      this.toastService.error('Failed to resend code. Please try again.');
+    } finally {
+      this.isResendingOtp.set(false);
+    }
+  }
+
+  async confirmVerification(): Promise<void> {
+    const modal = this.verificationModal();
+    if (!modal || this.isVerifyingOtp()) return;
+
+    const code = this.verificationOtp().join('').trim();
+    if (code.length !== 6) {
+      this.verificationError.set('Please enter the complete 6-digit code.');
+      return;
+    }
+
+    this.isVerifyingOtp.set(true);
+    this.verificationError.set('');
+
+    try {
+      const res = await this.authService.verifyOtp(modal.type, modal.targetValue, code);
+      if (!res.success) {
+        this.verificationError.set(res.message);
+        this.isVerifyingOtp.set(false);
+        return;
+      }
+
+      if (modal.secondaryVerification) {
+        const nextType = modal.secondaryVerification.type;
+        const nextTarget = modal.secondaryVerification.targetValue;
+        
+        const updatedPending: UserProfileUpdate = {
+          ...modal.pendingChanges,
+          [modal.type]: modal.targetValue,
+          [modal.type === 'email' ? 'isEmailVerified' : 'isPhoneVerified']: true
+        };
+
+        this.verificationModal.set({
+          type: nextType,
+          targetValue: nextTarget,
+          pendingChanges: updatedPending,
+          secondaryVerification: undefined
+        });
+
+        this.toastService.success(`${modal.type === 'email' ? 'Email' : 'Phone'} verified! Now verifying ${nextType}.`);
+        await this.initiateVerification(nextType, nextTarget);
+        this.isVerifyingOtp.set(false);
+        return;
+      }
+
+      const finalChanges: UserProfileUpdate = {
+        ...modal.pendingChanges,
+        [modal.type]: modal.targetValue,
+        [modal.type === 'email' ? 'isEmailVerified' : 'isPhoneVerified']: true
+      };
+
+      await this.authService.updateProfile(finalChanges);
+      this.closeVerificationModal();
+      this.toastService.success(res.message || 'Credentials verified and profile updated successfully!');
+    } catch (err: any) {
+      this.verificationError.set(err?.message || 'Verification failed. Please try again.');
+    } finally {
+      this.isVerifyingOtp.set(false);
+    }
   }
 
   printTicket(): void {

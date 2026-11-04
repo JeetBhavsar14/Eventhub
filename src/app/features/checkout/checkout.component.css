@@ -55,11 +55,14 @@
   font-size: 0.9rem;
   font-weight: 700;
   text-decoration: none;
-  transition: background 0.2s;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s, transform 0.15s ease;
 }
 
 .btn-browse-events:hover {
   background: #4338ca;
+  color: #ffffff;
 }
 
 .checkout-header {

@@ -54,7 +54,7 @@
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--gray-200);
-  z-index: 100;
+  z-index: 99999;
   overflow: hidden;
   animation: fadeDown 0.15s ease;
 }

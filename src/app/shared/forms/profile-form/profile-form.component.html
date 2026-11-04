@@ -1,22 +1,159 @@
 <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+  <!-- Name Change Row -->
   <div class="form-row">
-    <app-input formControlName="firstName" label="First Name" placeholder="First Name" [required]="true"></app-input>
-    <app-input formControlName="lastName" label="Last Name" placeholder="Last Name" [required]="true"></app-input>
+    <div class="field-container">
+      <label class="field-label" for="profileFirstName">
+        First Name <span class="required-star">*</span>
+      </label>
+      <div class="custom-input-box">
+        <app-icon name="user" [size]="17" class="input-icon"></app-icon>
+        <input
+          id="profileFirstName"
+          type="text"
+          formControlName="firstName"
+          placeholder="First name"
+          class="custom-field-input"
+        />
+      </div>
+      <span class="field-error" *ngIf="form.get('firstName')?.touched && form.get('firstName')?.invalid">
+        First name is required
+      </span>
+    </div>
+
+    <div class="field-container">
+      <label class="field-label" for="profileLastName">
+        Last Name <span class="required-star">*</span>
+      </label>
+      <div class="custom-input-box">
+        <app-icon name="user" [size]="17" class="input-icon"></app-icon>
+        <input
+          id="profileLastName"
+          type="text"
+          formControlName="lastName"
+          placeholder="Last name"
+          class="custom-field-input"
+        />
+      </div>
+      <span class="field-error" *ngIf="form.get('lastName')?.touched && form.get('lastName')?.invalid">
+        Last name is required
+      </span>
+    </div>
   </div>
 
+  <!-- Email & Phone Verification Row -->
   <div class="form-row">
-    <app-input type="email" formControlName="email" label="Email Address" placeholder="Email"></app-input>
-    <app-input type="tel" formControlName="phone" label="Phone Number" placeholder="Phone"></app-input>
+    <!-- Email Field -->
+    <div class="field-container">
+      <div class="field-header-row">
+        <label class="field-label" for="profileEmail">
+          Email Address <span class="required-star">*</span>
+        </label>
+        <div class="badge-status-wrap">
+          <span *ngIf="isEmailChanged()" class="badge-verify badge-pending">
+            <app-icon name="refresh" [size]="12"></app-icon>
+            Verify on Save
+          </span>
+          <span *ngIf="!isEmailChanged() && isEmailVerified()" class="badge-verify badge-verified">
+            <app-icon name="check-circle" [size]="12"></app-icon>
+            Verified
+          </span>
+          <span *ngIf="!isEmailChanged() && !isEmailVerified()" class="badge-verify badge-unverified">
+            Unverified
+          </span>
+          <button 
+            *ngIf="!isEmailChanged() && !isEmailVerified() && form.get('email')?.value"
+            type="button" 
+            class="btn-inline-verify"
+            (click)="onVerifyClick('email')">
+            Verify Now
+          </button>
+        </div>
+      </div>
+      <div class="custom-input-box" [class.field-modified]="isEmailChanged()">
+        <app-icon name="mail" [size]="17" class="input-icon"></app-icon>
+        <input
+          id="profileEmail"
+          type="email"
+          formControlName="email"
+          placeholder="name@example.com"
+          class="custom-field-input"
+        />
+      </div>
+      <span class="field-error" *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+        Please enter a valid email address
+      </span>
+    </div>
+
+    <!-- Phone Field -->
+    <div class="field-container">
+      <div class="field-header-row">
+        <label class="field-label" for="profilePhone">Phone Number</label>
+        <div class="badge-status-wrap">
+          <span *ngIf="isPhoneChanged()" class="badge-verify badge-pending">
+            <app-icon name="refresh" [size]="12"></app-icon>
+            Verify on Save
+          </span>
+          <span *ngIf="!isPhoneChanged() && isPhoneVerified()" class="badge-verify badge-verified">
+            <app-icon name="check-circle" [size]="12"></app-icon>
+            Verified
+          </span>
+          <span *ngIf="!isPhoneChanged() && !isPhoneVerified() && form.get('phone')?.value" class="badge-verify badge-unverified">
+            Unverified
+          </span>
+          <button 
+            *ngIf="!isPhoneChanged() && !isPhoneVerified() && form.get('phone')?.value"
+            type="button" 
+            class="btn-inline-verify"
+            (click)="onVerifyClick('phone')">
+            Verify Now
+          </button>
+        </div>
+      </div>
+      <div class="custom-input-box" [class.field-modified]="isPhoneChanged()">
+        <app-icon name="phone" [size]="17" class="input-icon"></app-icon>
+        <input
+          id="profilePhone"
+          type="tel"
+          formControlName="phone"
+          placeholder="+91 9876543210"
+          class="custom-field-input"
+        />
+      </div>
+    </div>
   </div>
 
-  <div class="form-group">
-    <label for="bio">Bio</label>
-    <textarea id="bio" class="custom-textarea" formControlName="bio" rows="4" placeholder="Tell us a little about yourself..."></textarea>
+  <!-- Security Alert Banner if Email or Phone was modified -->
+  <div *ngIf="isEmailChanged() || isPhoneChanged()" class="security-notice-card">
+    <div class="notice-icon-circle">
+      <app-icon name="shield" [size]="18"></app-icon>
+    </div>
+    <div class="notice-text-content">
+      <strong>Verification Required Upon Saving</strong>
+      <p>
+        Changing your
+        <ng-container *ngIf="isEmailChanged() && isPhoneChanged()"><strong>email address</strong> and <strong>phone number</strong></ng-container>
+        <ng-container *ngIf="isEmailChanged() && !isPhoneChanged()"><strong>email address</strong></ng-container>
+        <ng-container *ngIf="!isEmailChanged() && isPhoneChanged()"><strong>phone number</strong></ng-container>
+        will prompt you for a 6-digit verification code to protect your account.
+      </p>
+    </div>
+  </div>
+
+  <!-- Bio -->
+  <div class="field-container">
+    <label class="field-label" for="bio">Bio & Headline</label>
+    <textarea 
+      id="bio" 
+      class="custom-textarea" 
+      formControlName="bio" 
+      rows="4" 
+      placeholder="Tell us a little about yourself, your interests, or hosting background...">
+    </textarea>
   </div>
 
   <div class="form-actions">
     <app-button type="submit" variant="primary" [disabled]="form.invalid || isSaving">
-      {{ isSaving ? 'Saving...' : 'Save Changes' }}
+      {{ isSaving ? 'Saving Changes...' : 'Save Profile Changes' }}
     </app-button>
   </div>
 </form>

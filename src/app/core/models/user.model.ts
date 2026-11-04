@@ -15,4 +15,8 @@ export interface User {
 }
 
 /** Fields a user may edit from their profile. Account and role fields stay server-managed. */
-export type UserProfileUpdate = Pick<User, 'firstName' | 'lastName' | 'phone' | 'bio'>;
+export type UserProfileUpdate = Partial<Pick<User, 'firstName' | 'lastName' | 'phone' | 'bio'>> & {
+  email?: string;
+  isEmailVerified?: boolean;
+  isPhoneVerified?: boolean;
+};

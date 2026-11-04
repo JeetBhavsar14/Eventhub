@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiClient } from '@core/api';
 import { AuthService } from '@core/auth';
@@ -11,7 +11,7 @@ import { ButtonComponent, IconComponent } from '@shared/components';
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ButtonComponent, IconComponent],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -360,5 +360,12 @@ export class CheckoutComponent implements OnInit {
 
   goHome() {
     this.router.navigate(['/']);
+  }
+
+  goToDiscover(event?: Event) {
+    if (event) {
+      event.preventDefault();
+    }
+    this.router.navigate(['/discover']);
   }
 }

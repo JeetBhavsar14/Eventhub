@@ -44,7 +44,7 @@
             <h3>Tickets Currently Unavailable</h3>
             <p>Ticket reservations for this event are not active yet or have concluded. Please check back later or explore other upcoming live experiences.</p>
           </div>
-          <a routerLink="/discover" class="btn-browse-events">
+          <a routerLink="/discover" (click)="goToDiscover($event)" class="btn-browse-events">
             <app-icon name="search" [size]="15" style="margin-right: 0.4rem;"></app-icon>
             <span>Explore Other Events</span>
           </a>
