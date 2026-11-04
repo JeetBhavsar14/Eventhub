@@ -69,6 +69,12 @@
 
       <!-- Quick Role Action Launchers -->
       <div class="hero-role-actions">
+        <!-- Edit Profile Launcher -->
+        <button type="button" class="btn-role-shortcut personal" (click)="setTab('personal')">
+          <app-icon name="edit" [size]="15"></app-icon>
+          <span>Edit Profile</span>
+        </button>
+
         <!-- Admin Shortcut -->
         <a *ngIf="isAdminUser()" routerLink="/admin" class="btn-role-shortcut admin">
           <app-icon name="shield" [size]="15"></app-icon>
@@ -171,6 +177,14 @@
 
         <button 
           class="nav-tab-btn" 
+          [class.active]="activeTab() === 'personal'" 
+          (click)="setTab('personal')">
+          <app-icon name="user" [size]="18"></app-icon>
+          <span>Personal Info</span>
+        </button>
+
+        <button 
+          class="nav-tab-btn" 
           [class.active]="activeTab() === 'roles'" 
           (click)="setTab('roles')">
           <app-icon name="shield-check" [size]="18"></app-icon>
@@ -266,6 +280,62 @@
           </div>
         </div>
 
+        <!-- ACCOUNT DETAILS & CONTACT VERIFICATION CARD -->
+        <div class="dashboard-card-box personal-overview-box">
+          <div class="card-box-header">
+            <div>
+              <h3 class="box-title">Account Details & Contact Verification</h3>
+              <p class="box-subtitle">Your registered profile details and security verification status.</p>
+            </div>
+            <button class="btn-box-link" (click)="setTab('personal')">
+              <app-icon name="edit" [size]="14"></app-icon>
+              <span>Edit Details</span>
+            </button>
+          </div>
+
+          <div class="personal-summary-grid">
+            <div class="summary-cell">
+              <span class="cell-label">First & Last Name</span>
+              <strong class="cell-value">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</strong>
+            </div>
+
+            <div class="summary-cell">
+              <span class="cell-label">Email Address</span>
+              <div class="cell-flex-row">
+                <strong class="cell-value">{{ currentUser()?.email }}</strong>
+                <span class="badge-verify badge-verified" *ngIf="currentUser()?.isEmailVerified">
+                  <app-icon name="check-circle" [size]="12"></app-icon>
+                  Verified
+                </span>
+                <span class="badge-verify badge-unverified" *ngIf="!currentUser()?.isEmailVerified">
+                  Unverified
+                </span>
+              </div>
+            </div>
+
+            <div class="summary-cell">
+              <span class="cell-label">Phone Number</span>
+              <div class="cell-flex-row">
+                <strong class="cell-value">{{ currentUser()?.phone || 'Not provided' }}</strong>
+                <span class="badge-verify badge-verified" *ngIf="currentUser()?.phone && currentUser()?.isPhoneVerified">
+                  <app-icon name="check-circle" [size]="12"></app-icon>
+                  Verified
+                </span>
+                <span class="badge-verify badge-unverified" *ngIf="currentUser()?.phone && !currentUser()?.isPhoneVerified">
+                  Unverified
+                </span>
+              </div>
+            </div>
+
+            <div class="summary-cell action-cell">
+              <button type="button" class="btn-manage-profile" (click)="setTab('personal')">
+                <app-icon name="edit" [size]="14"></app-icon>
+                <span>Change Name, Email or Phone</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- RECENT BOOKINGS TIMELINE -->
         <div class="dashboard-card-box">
           <div class="card-box-header">
@@ -282,14 +352,14 @@
           <!-- Bookings List -->
           <div class="bookings-timeline-list" *ngIf="!isLoadingBookings() && bookings().length > 0">
             <div *ngFor="let b of bookings().slice(0, 4)" class="timeline-booking-row">
-              <div class="row-icon-status confirmed">
+              <div class="row-icon-status" [class.confirmed]="b.status === 'confirmed'" [class.cancelled]="b.status === 'cancelled'" [class.partially-cancelled]="b.status === 'partially_cancelled'">
                 <app-icon name="ticket" [size]="18"></app-icon>
               </div>
               <div class="row-content-main">
                 <div class="row-top-title">
                   <h4 class="b-title">{{ b.eventTitle }}</h4>
-                  <span class="b-status-badge" [class.confirmed]="b.status === 'confirmed'">
-                    {{ b.status === 'confirmed' ? 'Confirmed Admission' : b.status }}
+                  <span class="b-status-badge" [class.confirmed]="b.status === 'confirmed'" [class.cancelled]="b.status === 'cancelled'" [class.partially-cancelled]="b.status === 'partially_cancelled'">
+                    {{ b.status === 'confirmed' ? 'Confirmed Admission' : (b.status === 'partially_cancelled' ? 'Partially Cancelled' : 'Cancelled') }}
                   </span>
                 </div>
                 <div class="row-meta-sub">
@@ -333,14 +403,29 @@
           <span class="total-passes-chip">{{ bookings().length }} Total Bookings</span>
         </div>
 
-        <div class="bookings-full-grid" *ngIf="bookings().length > 0">
+        <!-- Bookings Status Filter Subtabs -->
+        <div class="booking-subtabs-row">
+          <button type="button" class="subtab-pill" [class.active]="bookingStatusFilter() === 'all'" (click)="setBookingFilter('all')">
+            All ({{ bookings().length }})
+          </button>
+          <button type="button" class="subtab-pill" [class.active]="bookingStatusFilter() === 'confirmed'" (click)="setBookingFilter('confirmed')">
+            Confirmed ({{ confirmedBookingsCount() }})
+          </button>
+          <button type="button" class="subtab-pill" [class.active]="bookingStatusFilter() === 'cancelled'" (click)="setBookingFilter('cancelled')">
+            Cancelled ({{ cancelledBookingsCount() }})
+          </button>
+        </div>
+
+        <div class="bookings-full-grid" *ngIf="filteredProfileBookings().length > 0">
           <div *ngFor="let b of paginatedBookings()" class="booking-ticket-card">
             <div class="ticket-top-banner">
               <div>
-                <span class="ticket-ref-tag">PASS #{{ b.id }}</span>
+                <span class="ticket-ref-tag">PASS #{{ b.bookingReference || b.id }}</span>
                 <h3 class="ticket-event-title">{{ b.eventTitle }}</h3>
               </div>
-              <span class="ticket-status-pill">{{ b.status | titlecase }}</span>
+              <span class="ticket-status-pill" [class.cancelled]="b.status === 'cancelled'" [class.partially-cancelled]="b.status === 'partially_cancelled'">
+                {{ b.status === 'partially_cancelled' ? 'Partially Cancelled' : (b.status | titlecase) }}
+              </span>
             </div>
 
             <div class="ticket-details-grid">
@@ -354,7 +439,12 @@
               </div>
               <div class="detail-cell">
                 <span class="d-label">Tickets Reserved</span>
-                <strong class="d-val">{{ getBookingTicketsCount(b) }} Passes</strong>
+                <strong class="d-val">
+                  {{ getBookingTicketsCount(b) }} Pass{{ getBookingTicketsCount(b) === 1 ? '' : 'es' }}
+                  <ng-container *ngIf="b.status === 'partially_cancelled'">
+                    (Active)
+                  </ng-container>
+                </strong>
               </div>
               <div class="detail-cell">
                 <span class="d-label">Total Paid</span>
@@ -364,30 +454,39 @@
 
             <div class="ticket-footer-actions">
               <span class="booked-on-text">Booked on {{ b.createdAt | date:'shortDate' }}</span>
-              <button class="btn-pass-action" (click)="openQrPass(b)">
-                <app-icon name="qr-code" [size]="16"></app-icon>
-                <span>View Live QR Admission</span>
-              </button>
+              <div class="action-buttons-group">
+                <button 
+                  *ngIf="b.status === 'confirmed' || b.status === 'partially_cancelled'" 
+                  class="btn-cancel-action" 
+                  [disabled]="isCancellingBookingId() === b.id" 
+                  (click)="handleCancelBookingClick(b)">
+                  <span>{{ isCancellingBookingId() === b.id ? 'Cancelling...' : (b.ticketPasses && b.ticketPasses.length > 1 ? 'Cancel Tickets' : 'Cancel Booking') }}</span>
+                </button>
+                <button *ngIf="b.status !== 'cancelled'" class="btn-pass-action" (click)="openQrPass(b)">
+                  <app-icon name="qr-code" [size]="16"></app-icon>
+                  <span>View Live QR Admission</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Bookings Pagination Bar -->
         <app-pagination-bar
-          *ngIf="bookings().length > 0"
+          *ngIf="filteredProfileBookings().length > 0"
           [currentPage]="bookingPage()"
           [totalPages]="totalBookingPages()"
           [startItem]="bookingStartItem()"
           [endItem]="bookingEndItem()"
-          [totalItems]="bookings().length"
+          [totalItems]="filteredProfileBookings().length"
           itemLabel="bookings"
           (pageChange)="setBookingPage($event)">
         </app-pagination-bar>
 
-        <div class="empty-bookings-box" *ngIf="bookings().length === 0">
+        <div class="empty-bookings-box" *ngIf="filteredProfileBookings().length === 0">
           <app-icon name="ticket" [size]="40"></app-icon>
-          <h4>No Bookings Found</h4>
-          <p>Find exciting live experiences and book your first tickets today.</p>
+          <h4>No {{ bookingStatusFilter() === 'all' ? '' : (bookingStatusFilter() | titlecase) }} Bookings Found</h4>
+          <p>{{ bookingStatusFilter() === 'cancelled' ? 'You have no cancelled bookings.' : 'Find exciting live experiences and book your first tickets today.' }}</p>
           <a routerLink="/discover" class="btn-empty-action">Explore Events Catalog</a>
         </div>
       </section>
@@ -500,7 +599,12 @@
         </div>
 
         <div class="form-container-card">
-          <app-profile-form [user]="currentUser()" [isSaving]="isSaving()" (submitted)="saveProfile($event)"></app-profile-form>
+          <app-profile-form 
+            [user]="currentUser()" 
+            [isSaving]="isSaving()" 
+            (submitted)="saveProfile($event)"
+            (requestVerification)="handleVerificationRequest($event)">
+          </app-profile-form>
           <p *ngIf="saveMessage()" class="save-status-msg" [class.error]="saveError()">{{ saveMessage() }}</p>
         </div>
       </section>
@@ -519,16 +623,16 @@
         <div class="payments-split-grid">
           <div class="payment-card-visual">
             <div class="card-chip-symbol"></div>
-            <span class="card-brand">EventHub Verified Pay</span>
-            <div class="card-number-hidden">•••• •••• •••• 4242</div>
+            <span class="card-brand">EventHub Account</span>
+            <div class="card-number-hidden">{{ currentUser()?.email }}</div>
             <div class="card-bottom-row">
               <div>
-                <small>Cardholder</small>
+                <small>Account Holder</small>
                 <strong>{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</strong>
               </div>
               <div>
-                <small>Expires</small>
-                <strong>12/28</strong>
+                <small>Total Spent</small>
+                <strong>₹{{ totalSpent().toLocaleString() }}</strong>
               </div>
             </div>
           </div>
@@ -586,6 +690,27 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Saved Payment Methods & UPI List -->
+        <div class="dashboard-card-box" style="margin-top: 1.5rem;">
+          <div class="card-box-header">
+            <div>
+              <h3 class="box-title">Linked Payment Methods</h3>
+              <p class="box-subtitle">Saved Cards & UPI handles authorized for one-click ticket checkout.</p>
+            </div>
+          </div>
+
+          <div class="empty-methods-state" style="padding: 1.5rem; text-align: center; color: var(--color-text-secondary, #64748b);">
+            <app-icon name="credit-card" [size]="28" style="opacity: 0.5; margin-bottom: 0.5rem; display: inline-block;"></app-icon>
+            <p style="margin: 0; font-size: 0.95rem; font-weight: 500;">No permanent payment methods stored.</p>
+            <small style="color: var(--color-text-tertiary, #94a3b8);">Payment cards and UPI transactions are securely processed directly on Stripe during ticket checkout.</small>
+          </div>
+        </div>
+
+        <!-- Detailed Ledger & Transactions Component -->
+        <div style="margin-top: 2rem;">
+          <app-my-payments [isEmbedded]="true"></app-my-payments>
         </div>
       </section>
 
@@ -647,7 +772,170 @@
           <app-icon name="printer" [size]="16"></app-icon>
           <span>Print Pass</span>
         </button>
+        <button 
+          *ngIf="selectedBookingForQr()?.status === 'confirmed' || selectedBookingForQr()?.status === 'partially_cancelled'"
+          type="button" 
+          class="btn-cancel-action"
+          (click)="handleCancelBookingClick(selectedBookingForQr()!); closeQrPass()">
+          <span>{{ selectedBookingForQr()?.ticketPasses && (selectedBookingForQr()?.ticketPasses?.length || 0) > 1 ? 'Cancel Tickets' : 'Cancel Ticket' }}</span>
+        </button>
         <button class="btn-modal-close" (click)="closeQrPass()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Multi-Ticket Cancellation Modal -->
+  <div class="modal-backdrop-qr" *ngIf="selectedBookingForCancel()" (click)="closeCancelModal()">
+    <div class="cancel-modal-card" (click)="$event.stopPropagation()">
+      <div class="cancel-modal-header">
+        <div>
+          <span class="cancel-modal-eyebrow">TICKET MANAGEMENT</span>
+          <h3 class="cancel-modal-title">Cancel Tickets</h3>
+          <p class="cancel-modal-sub">
+            {{ selectedBookingForCancel()?.eventTitle }} · Pass #{{ selectedBookingForCancel()?.bookingReference || selectedBookingForCancel()?.id }}
+          </p>
+        </div>
+        <button class="btn-close-modal" (click)="closeCancelModal()" aria-label="Close modal">
+          <app-icon name="close" [size]="18"></app-icon>
+        </button>
+      </div>
+
+      <div class="cancel-modal-body">
+        <div class="cancel-instructions">
+          Select an individual ticket to cancel, or cancel the entire booking. Remaining tickets will remain valid and admitted.
+        </div>
+
+        <div class="ticket-passes-list">
+          <div *ngFor="let pass of selectedBookingForCancel()?.ticketPasses" class="pass-row" [class.pass-cancelled]="pass.status === 'cancelled'">
+            <div class="pass-info">
+              <div class="pass-number-row">
+                <span class="pass-code">{{ pass.ticketNumber }}</span>
+                <span class="pass-status-pill" [class.cancelled]="pass.status === 'cancelled'">
+                  {{ pass.status === 'cancelled' ? 'Cancelled' : 'Valid Pass' }}
+                </span>
+              </div>
+              <p class="pass-attendee">{{ pass.attendeeName }} <span *ngIf="pass.attendeeEmail">({{ pass.attendeeEmail }})</span></p>
+              <p class="pass-issued" *ngIf="pass.issuedAt">Issued: {{ pass.issuedAt | date:'mediumDate' }}</p>
+            </div>
+            <div class="pass-action">
+              <button 
+                *ngIf="pass.status === 'valid'"
+                type="button"
+                class="btn-cancel-pass"
+                [disabled]="cancellingTicketId() === pass.id || isCancellingBookingId() === selectedBookingForCancel()?.id"
+                (click)="cancelSingleTicket(selectedBookingForCancel()!, pass.id)">
+                {{ cancellingTicketId() === pass.id ? 'Cancelling...' : 'Cancel Ticket' }}
+              </button>
+              <span *ngIf="pass.status === 'cancelled'" class="cancelled-tag">Cancelled</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cancel-modal-footer">
+        <button 
+          type="button" 
+          class="btn-cancel-all"
+          [disabled]="isCancellingBookingId() === selectedBookingForCancel()?.id || cancellingTicketId() !== null || selectedBookingForCancel()?.status === 'cancelled'"
+          (click)="cancelEntireBooking(selectedBookingForCancel()!)">
+          {{ isCancellingBookingId() === selectedBookingForCancel()?.id ? 'Cancelling All...' : 'Cancel Entire Booking' }}
+        </button>
+        <button type="button" class="btn-modal-done" (click)="closeCancelModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────
+       MODAL 3: EMAIL & PHONE OTP VERIFICATION MODAL
+       ───────────────────────────────────────────────────────── -->
+  <div class="verification-modal-backdrop" *ngIf="verificationModal()" (click)="closeVerificationModal()">
+    <div class="verification-modal-card" (click)="$event.stopPropagation()">
+      <!-- Close button -->
+      <button type="button" class="btn-close-verify" (click)="closeVerificationModal()" aria-label="Close modal">
+        <app-icon name="close" [size]="18"></app-icon>
+      </button>
+
+      <!-- Modal Header with circular icon badge -->
+      <div class="verify-header">
+        <div class="verify-icon-ring" [class.phone-mode]="verificationModal()?.type === 'phone'">
+          <app-icon [name]="verificationModal()?.type === 'phone' ? 'phone' : 'mail'" [size]="28"></app-icon>
+        </div>
+        <h3 class="verify-title">
+          {{ verificationModal()?.type === 'phone' ? 'Verify Phone Number' : 'Verify Email Address' }}
+        </h3>
+        <p class="verify-subtitle">
+          We've dispatched a 6-digit verification code to
+        </p>
+        <div class="verify-target-chip">
+          <app-icon [name]="verificationModal()?.type === 'phone' ? 'phone' : 'mail'" [size]="14"></app-icon>
+          <span>{{ verificationModal()?.targetValue }}</span>
+        </div>
+        <p class="verify-instructions">
+          Please enter the 6-digit code below to confirm and apply your profile changes.
+        </p>
+      </div>
+
+      <!-- 6-digit OTP Input Grid -->
+      <div class="otp-input-group">
+        <div class="otp-grid">
+          <input
+            *ngFor="let digit of verificationOtp(); let i = index"
+            [id]="'otp-input-' + i"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="1"
+            class="otp-digit-field"
+            [value]="digit"
+            (input)="onOtpInput(i, $event)"
+            (keydown)="onOtpKeyDown(i, $event)"
+            (paste)="onOtpPaste($event)"
+            autocomplete="one-time-code"
+            aria-label="OTP digit"
+          />
+        </div>
+      </div>
+
+      <!-- Error alert message if verification failed -->
+      <div *ngIf="verificationError()" class="verify-alert-error">
+        <app-icon name="shield-alert" [size]="16"></app-icon>
+        <span>{{ verificationError() }}</span>
+      </div>
+
+      <!-- Test Mode Hint Banner -->
+      <div class="test-hint-pill">
+        <span>💡 For test mode, you can use code <strong>123456</strong></span>
+      </div>
+
+      <!-- Countdown & Resend Option -->
+      <div class="verify-resend-row">
+        <span *ngIf="verificationCountdown() > 0" class="countdown-text">
+          Resend code in <strong>{{ verificationCountdown() }}s</strong>
+        </span>
+        <button 
+          *ngIf="verificationCountdown() === 0" 
+          type="button" 
+          class="btn-resend-trigger"
+          [disabled]="isResendingOtp()"
+          (click)="resendVerificationCode()">
+          <app-icon name="refresh" [size]="14"></app-icon>
+          <span>{{ isResendingOtp() ? 'Sending...' : 'Resend Verification Code' }}</span>
+        </button>
+      </div>
+
+      <!-- Modal Footer Action Buttons -->
+      <div class="verify-modal-actions">
+        <button type="button" class="btn-cancel-verify" (click)="closeVerificationModal()">
+          Cancel
+        </button>
+        <button 
+          type="button" 
+          class="btn-confirm-verify"
+          [disabled]="verificationOtp().join('').length !== 6 || isVerifyingOtp()"
+          (click)="confirmVerification()">
+          <span *ngIf="isVerifyingOtp()">Verifying...</span>
+          <span *ngIf="!isVerifyingOtp()">Verify & Confirm</span>
+        </button>
       </div>
     </div>
   </div>

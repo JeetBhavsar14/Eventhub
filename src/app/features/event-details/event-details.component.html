@@ -36,7 +36,7 @@
         <div class="hero-badges-row">
           <span class="hero-chip">{{ ev.format || 'In-Person' }}</span>
           <span class="hero-chip">{{ ev.location?.city || 'India' }}, India</span>
-          <span class="hero-chip price-chip">From ₹{{ getStartingPrice() }}</span>
+          <span class="hero-chip price-chip">{{ heroPriceLabel }}</span>
         </div>
 
         <!-- Book Tickets Button (BookMyShow style vibrant coral/crimson button) -->

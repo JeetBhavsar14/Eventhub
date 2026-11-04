@@ -25,3 +25,34 @@ export const authGuard: CanActivateFn = () => {
   // Not logged in — redirect to login page
   return router.createUrlTree(['/auth/login']);
 };
+
+/**
+ * Redirects authenticated users (such as normal users and host users)
+ * visiting the root URL (localhost:4200 / '') to the '/discover' page
+ * instead of the unauthenticated landing page.
+ */
+export const homeRedirectGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.isAuthenticated()) {
+    const user = authService.currentUser();
+    const role = (user?.platformRole || 'user').toLowerCase();
+
+    if (role === 'admin' || role === 'super_admin') {
+      return router.createUrlTree(['/admin']);
+    }
+    if (role === 'management') {
+      return router.createUrlTree(['/management']);
+    }
+    if (role === 'staff') {
+      return router.createUrlTree(['/staff']);
+    }
+
+    // Normal login user and host login user -> redirect to discover
+    return router.createUrlTree(['/discover']);
+  }
+
+  // Unauthenticated guest user sees the landing page
+  return true;
+};

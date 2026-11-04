@@ -1,14 +1,15 @@
-import { Component, signal, inject, computed, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, inject, computed, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import * as QRCode from 'qrcode';
-import { ProfileFormComponent } from '@shared/forms';
+import { ProfileFormComponent, VerificationRequestEvent } from '@shared/forms';
 import { AuthService } from '@core/auth';
 import { HostApplicationService, ToastService } from '@core/state';
 import { ApiClient } from '@core/api';
-import { UserProfileUpdate, Booking, GiftCardPurchase } from '@core/models';
+import { UserProfileUpdate, Booking, GiftCardPurchase, EventItem } from '@core/models';
 import { IconComponent, PaginationBarComponent } from '@shared/components';
+import { MyPaymentsComponent } from './my-payments/my-payments.component';
 
 export type ProfileTab = 'dashboard' | 'bookings' | 'personal' | 'payments' | 'roles';
 
@@ -31,12 +32,12 @@ export interface RolePermissionItem {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule, ProfileFormComponent, IconComponent, PaginationBarComponent],
+  imports: [CommonModule, RouterLink, FormsModule, ProfileFormComponent, IconComponent, PaginationBarComponent, MyPaymentsComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   activeTab = signal<ProfileTab>('dashboard');
   
   private authService = inject(AuthService);
@@ -47,6 +48,15 @@ export class ProfileComponent implements OnInit {
   readonly currentUser = this.authService.currentUser;
   readonly hostStatus = this.hostAppService.status;
   readonly applicationData = this.hostAppService.applicationData;
+
+  // Verification Modal State
+  readonly verificationModal = signal<VerificationRequestEvent | null>(null);
+  readonly verificationOtp = signal<string[]>(['', '', '', '', '', '']);
+  readonly isVerifyingOtp = signal(false);
+  readonly isResendingOtp = signal(false);
+  readonly verificationError = signal('');
+  readonly verificationCountdown = signal(30);
+  private countdownTimer: ReturnType<typeof setInterval> | null = null;
 
   // Role Computeds
   readonly userRole = computed(() => this.currentUser()?.platformRole || 'user');
@@ -296,17 +306,31 @@ export class ProfileComponent implements OnInit {
   // Bookings Data
   readonly bookings = signal<Booking[]>([]);
   readonly isLoadingBookings = signal(false);
+  readonly isCancellingBookingId = signal<string | null>(null);
+  readonly cancellingTicketId = signal<string | null>(null);
+  readonly selectedBookingForCancel = signal<Booking | null>(null);
+  readonly bookingStatusFilter = signal<'all' | 'confirmed' | 'cancelled'>('all');
+
+  readonly filteredProfileBookings = computed(() => {
+    const f = this.bookingStatusFilter();
+    if (f === 'confirmed') return this.bookings().filter(b => b.status === 'confirmed' || b.status === 'partially_cancelled');
+    if (f === 'cancelled') return this.bookings().filter(b => b.status === 'cancelled');
+    return this.bookings();
+  });
+
+  readonly confirmedBookingsCount = computed(() => this.bookings().filter(b => b.status === 'confirmed' || b.status === 'partially_cancelled').length);
+  readonly cancelledBookingsCount = computed(() => this.bookings().filter(b => b.status === 'cancelled').length);
 
   // Pagination for Bookings
   readonly bookingPage = signal(1);
   readonly bookingPageSize = signal(4);
 
   readonly totalBookingPages = computed(() => {
-    return Math.max(1, Math.ceil(this.bookings().length / this.bookingPageSize()));
+    return Math.max(1, Math.ceil(this.filteredProfileBookings().length / this.bookingPageSize()));
   });
 
   readonly paginatedBookings = computed(() => {
-    const list = this.bookings();
+    const list = this.filteredProfileBookings();
     const size = this.bookingPageSize();
     const maxPage = Math.max(1, Math.ceil(list.length / size));
     const page = Math.min(this.bookingPage(), maxPage);
@@ -315,7 +339,7 @@ export class ProfileComponent implements OnInit {
   });
 
   readonly bookingStartItem = computed(() => {
-    const total = this.bookings().length;
+    const total = this.filteredProfileBookings().length;
     if (total === 0) return 0;
     const size = this.bookingPageSize();
     const maxPage = Math.max(1, Math.ceil(total / size));
@@ -324,17 +348,94 @@ export class ProfileComponent implements OnInit {
   });
 
   readonly bookingEndItem = computed(() => {
-    const total = this.bookings().length;
+    const total = this.filteredProfileBookings().length;
     const size = this.bookingPageSize();
     const maxPage = Math.max(1, Math.ceil(total / size));
     const page = Math.min(this.bookingPage(), maxPage);
     return Math.min(page * size, total);
   });
 
+  setBookingFilter(f: 'all' | 'confirmed' | 'cancelled') {
+    this.bookingStatusFilter.set(f);
+    this.bookingPage.set(1);
+  }
+
   setBookingPage(page: number) {
     if (page >= 1 && page <= this.totalBookingPages()) {
       this.bookingPage.set(page);
     }
+  }
+
+  handleCancelBookingClick(booking: Booking): void {
+    if (booking.ticketPasses && booking.ticketPasses.length > 1) {
+      this.selectedBookingForCancel.set(booking);
+    } else {
+      this.cancelEntireBooking(booking);
+    }
+  }
+
+  async cancelSingleTicket(booking: Booking, ticketId: string): Promise<void> {
+    this.cancellingTicketId.set(ticketId);
+    try {
+      const res = await this.apiClient.post<any>(`/bookings/tickets/${ticketId}/cancel/`);
+      if (!res.error) {
+        const updatedPasses = (booking.ticketPasses || []).map(p =>
+          p.id === ticketId ? { ...p, status: 'cancelled' as const } : p
+        );
+        const remainingValid = updatedPasses.filter(p => p.status === 'valid').length;
+        const newStatus: Booking['status'] = remainingValid === 0 ? 'cancelled' : 'partially_cancelled';
+
+        const updatedBooking: Booking = {
+          ...booking,
+          ticketPasses: updatedPasses,
+          status: newStatus
+        };
+
+        this.bookings.update(list => list.map(b => b.id === booking.id ? updatedBooking : b));
+        this.selectedBookingForCancel.set(updatedBooking);
+        this.toastService.success('Ticket cancelled successfully');
+      } else {
+        this.toastService.error(res.error.userMessage || 'Failed to cancel ticket.');
+      }
+    } catch {
+      this.toastService.error('An error occurred while cancelling the ticket.');
+    } finally {
+      this.cancellingTicketId.set(null);
+    }
+  }
+
+  async cancelEntireBooking(booking: Booking): Promise<void> {
+    const confirmed = window.confirm(`Are you sure you want to cancel the entire booking for "${booking.eventTitle}"?`);
+    if (!confirmed) return;
+
+    this.isCancellingBookingId.set(booking.id);
+    try {
+      const res = await this.apiClient.post<any>(`/bookings/${booking.id}/cancel/`);
+      if (!res.error) {
+        const updatedPasses = (booking.ticketPasses || []).map(p => ({
+          ...p,
+          status: 'cancelled' as const
+        }));
+        const updatedBooking: Booking = {
+          ...booking,
+          ticketPasses: updatedPasses,
+          status: 'cancelled'
+        };
+        this.bookings.update(list => list.map(b => b.id === booking.id ? updatedBooking : b));
+        this.selectedBookingForCancel.set(null);
+        this.toastService.success('Booking cancelled successfully');
+      } else {
+        this.toastService.error(res.error.userMessage || 'Failed to cancel booking.');
+      }
+    } catch {
+      this.toastService.error('An error occurred while cancelling your booking.');
+    } finally {
+      this.isCancellingBookingId.set(null);
+    }
+  }
+
+  closeCancelModal(): void {
+    this.selectedBookingForCancel.set(null);
   }
 
   // Gift Cards Data (Dynamic wallet balance)
@@ -350,7 +451,7 @@ export class ProfileComponent implements OnInit {
   });
 
   readonly totalSpent = computed(() => {
-    return this.bookings().reduce((sum, b) => b.status === 'confirmed' ? sum + (b.totalAmount || 0) : sum, 0);
+    return this.bookings().reduce((sum, b) => (b.status === 'confirmed' || b.status === 'partially_cancelled') ? sum + (b.totalAmount || 0) : sum, 0);
   });
 
   // QR Modal State
@@ -360,18 +461,21 @@ export class ProfileComponent implements OnInit {
   // Upcoming Bookings Filter
   readonly upcomingBookings = computed(() => {
     const today = new Date().toISOString().slice(0, 10);
-    return this.bookings().filter(b => b.status === 'confirmed' && b.eventDate >= today);
+    return this.bookings().filter(b => (b.status === 'confirmed' || b.status === 'partially_cancelled') && b.eventDate >= today);
   });
 
   // Past Bookings Filter
   readonly pastBookings = computed(() => {
     const today = new Date().toISOString().slice(0, 10);
-    return this.bookings().filter(b => b.eventDate < today || b.status !== 'confirmed');
+    return this.bookings().filter(b => b.eventDate < today && b.status !== 'cancelled');
   });
 
   // Total Active Tickets Count
   readonly activeTicketsCount = computed(() => {
     return this.upcomingBookings().reduce((sum, b) => {
+      if (b.ticketPasses && b.ticketPasses.length > 0) {
+        return sum + b.ticketPasses.filter(t => t.status === 'valid').length;
+      }
       const ticketsInBooking = b.tickets.reduce((cnt, t) => cnt + t.quantity, 0);
       return sum + ticketsInBooking;
     }, 0);
@@ -406,9 +510,35 @@ export class ProfileComponent implements OnInit {
     this.isLoadingBookings.set(true);
 
     try {
-      const res = await this.apiClient.get<Booking[]>('/bookings', { userId: user.id });
+      const [res, eventsRes] = await Promise.all([
+        this.apiClient.get<Booking[]>('/bookings', { userId: user.id }),
+        this.apiClient.get<EventItem[]>('/events')
+      ]);
+
       if (res.data) {
-        this.bookings.set([...res.data].sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+        const eventsMap = new Map<string, EventItem>();
+        if (eventsRes.data && Array.isArray(eventsRes.data)) {
+          for (const ev of eventsRes.data) {
+            eventsMap.set(String(ev.id), ev);
+          }
+        }
+
+        const enriched = res.data.map(b => {
+          const ev = eventsMap.get(String(b.eventId));
+          if (ev) {
+            return {
+              ...b,
+              eventTitle: ev.title || b.eventTitle,
+              eventDate: ev.date || b.eventDate,
+              eventTime: ev.time || b.eventTime,
+              eventLocation: ev.location?.venue || ev.location?.city || b.eventLocation,
+              eventThumbnail: ev.thumbnailUrl || b.eventThumbnail
+            };
+          }
+          return b;
+        });
+
+        this.bookings.set([...enriched].sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
       }
     } catch (e) {
       console.error('Failed to load bookings', e);
@@ -452,6 +582,12 @@ export class ProfileComponent implements OnInit {
   }
 
   getBookingTicketsCount(booking: Booking): number {
+    if (booking.ticketPasses && booking.ticketPasses.length > 0) {
+      if (booking.status === 'cancelled') {
+        return booking.ticketPasses.length;
+      }
+      return booking.ticketPasses.filter(t => t.status === 'valid').length;
+    }
     return booking.tickets.reduce((acc, t) => acc + t.quantity, 0);
   }
 
@@ -467,6 +603,203 @@ export class ProfileComponent implements OnInit {
       this.toastService.error(result.message || 'Failed to update profile');
     }
     this.isSaving.set(false);
+  }
+
+  ngOnDestroy(): void {
+    this.clearOtpTimer();
+  }
+
+  private clearOtpTimer(): void {
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
+  }
+
+  handleVerificationRequest(event: VerificationRequestEvent): void {
+    this.verificationModal.set(event);
+    this.initiateVerification(event.type, event.targetValue);
+  }
+
+  async initiateVerification(type: 'email' | 'phone', target: string): Promise<void> {
+    this.verificationOtp.set(['', '', '', '', '', '']);
+    this.verificationError.set('');
+    this.verificationCountdown.set(30);
+    this.clearOtpTimer();
+
+    this.countdownTimer = setInterval(() => {
+      const current = this.verificationCountdown();
+      if (current > 1) {
+        this.verificationCountdown.set(current - 1);
+      } else {
+        this.verificationCountdown.set(0);
+        this.clearOtpTimer();
+      }
+    }, 1000);
+
+    await this.authService.sendVerificationOtp(type, target);
+
+    setTimeout(() => {
+      const firstInput = document.getElementById('otp-input-0') as HTMLInputElement | null;
+      if (firstInput) {
+        firstInput.focus();
+        firstInput.select();
+      }
+    }, 100);
+  }
+
+  closeVerificationModal(): void {
+    this.clearOtpTimer();
+    this.verificationModal.set(null);
+    this.verificationOtp.set(['', '', '', '', '', '']);
+    this.verificationError.set('');
+  }
+
+  onOtpInput(index: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const val = (input.value || '').replace(/\D/g, '');
+
+    const otpArr = [...this.verificationOtp()];
+    if (val.length > 0) {
+      otpArr[index] = val.slice(-1);
+      input.value = otpArr[index];
+      this.verificationOtp.set(otpArr);
+
+      if (index < 5) {
+        const nextInput = document.getElementById(`otp-input-${index + 1}`) as HTMLInputElement | null;
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select();
+        }
+      }
+    } else {
+      otpArr[index] = '';
+      this.verificationOtp.set(otpArr);
+    }
+
+    if (otpArr.every(d => d.trim().length === 1)) {
+      this.confirmVerification();
+    }
+  }
+
+  onOtpKeyDown(index: number, event: KeyboardEvent): void {
+    const input = event.target as HTMLInputElement;
+    if (event.key === 'Backspace') {
+      if (!input.value && index > 0) {
+        const prevInput = document.getElementById(`otp-input-${index - 1}`) as HTMLInputElement | null;
+        if (prevInput) {
+          prevInput.focus();
+          const otpArr = [...this.verificationOtp()];
+          otpArr[index - 1] = '';
+          prevInput.value = '';
+          this.verificationOtp.set(otpArr);
+        }
+      }
+    } else if (event.key === 'ArrowLeft' && index > 0) {
+      const prevInput = document.getElementById(`otp-input-${index - 1}`) as HTMLInputElement | null;
+      prevInput?.focus();
+    } else if (event.key === 'ArrowRight' && index < 5) {
+      const nextInput = document.getElementById(`otp-input-${index + 1}`) as HTMLInputElement | null;
+      nextInput?.focus();
+    }
+  }
+
+  onOtpPaste(event: ClipboardEvent): void {
+    event.preventDefault();
+    const pastedData = (event.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+    if (!pastedData) return;
+
+    const otpArr = ['', '', '', '', '', ''];
+    for (let i = 0; i < pastedData.length; i++) {
+      otpArr[i] = pastedData[i];
+      const el = document.getElementById(`otp-input-${i}`) as HTMLInputElement | null;
+      if (el) el.value = pastedData[i];
+    }
+    this.verificationOtp.set(otpArr);
+
+    const focusIndex = Math.min(pastedData.length, 5);
+    const targetInput = document.getElementById(`otp-input-${focusIndex}`) as HTMLInputElement | null;
+    targetInput?.focus();
+
+    if (pastedData.length === 6) {
+      this.confirmVerification();
+    }
+  }
+
+  async resendVerificationCode(): Promise<void> {
+    const modal = this.verificationModal();
+    if (!modal || this.verificationCountdown() > 0 || this.isResendingOtp()) return;
+
+    this.isResendingOtp.set(true);
+    try {
+      await this.authService.sendVerificationOtp(modal.type, modal.targetValue);
+      this.toastService.info(`A fresh 6-digit code has been dispatched to ${modal.targetValue}`);
+      this.initiateVerification(modal.type, modal.targetValue);
+    } catch {
+      this.toastService.error('Failed to resend code. Please try again.');
+    } finally {
+      this.isResendingOtp.set(false);
+    }
+  }
+
+  async confirmVerification(): Promise<void> {
+    const modal = this.verificationModal();
+    if (!modal || this.isVerifyingOtp()) return;
+
+    const code = this.verificationOtp().join('').trim();
+    if (code.length !== 6) {
+      this.verificationError.set('Please enter the complete 6-digit code.');
+      return;
+    }
+
+    this.isVerifyingOtp.set(true);
+    this.verificationError.set('');
+
+    try {
+      const res = await this.authService.verifyOtp(modal.type, modal.targetValue, code);
+      if (!res.success) {
+        this.verificationError.set(res.message);
+        this.isVerifyingOtp.set(false);
+        return;
+      }
+
+      if (modal.secondaryVerification) {
+        const nextType = modal.secondaryVerification.type;
+        const nextTarget = modal.secondaryVerification.targetValue;
+        
+        const updatedPending: UserProfileUpdate = {
+          ...modal.pendingChanges,
+          [modal.type]: modal.targetValue,
+          [modal.type === 'email' ? 'isEmailVerified' : 'isPhoneVerified']: true
+        };
+
+        this.verificationModal.set({
+          type: nextType,
+          targetValue: nextTarget,
+          pendingChanges: updatedPending,
+          secondaryVerification: undefined
+        });
+
+        this.toastService.success(`${modal.type === 'email' ? 'Email' : 'Phone'} verified! Now verifying ${nextType}.`);
+        await this.initiateVerification(nextType, nextTarget);
+        this.isVerifyingOtp.set(false);
+        return;
+      }
+
+      const finalChanges: UserProfileUpdate = {
+        ...modal.pendingChanges,
+        [modal.type]: modal.targetValue,
+        [modal.type === 'email' ? 'isEmailVerified' : 'isPhoneVerified']: true
+      };
+
+      await this.authService.updateProfile(finalChanges);
+      this.closeVerificationModal();
+      this.toastService.success(res.message || 'Credentials verified and profile updated successfully!');
+    } catch (err: any) {
+      this.verificationError.set(err?.message || 'Verification failed. Please try again.');
+    } finally {
+      this.isVerifyingOtp.set(false);
+    }
   }
 
   printTicket(): void {

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, adminGuard, managementGuard, staffGuard, hostGuard } from '@core/auth';
+import { authGuard, adminGuard, managementGuard, staffGuard, hostGuard, homeRedirectGuard } from '@core/auth';
 import { ShellComponent, MainLayoutComponent } from './layout';
 
 export const routes: Routes = [
@@ -66,7 +66,8 @@ export const routes: Routes = [
           // Public Features (Lazy Loaded)
           { 
             path: '', 
-            loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent) 
+            loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
+            canActivate: [homeRedirectGuard]
           },
           { 
             path: 'discover', 
@@ -160,6 +161,11 @@ export const routes: Routes = [
           { 
             path: 'bookings', 
             loadComponent: () => import('./features/bookings/bookings.component').then(m => m.BookingsComponent), 
+            canActivate: [authGuard] 
+          },
+          { 
+            path: 'my-payments', 
+            loadComponent: () => import('./features/profile/my-payments/my-payments.component').then(m => m.MyPaymentsComponent), 
             canActivate: [authGuard] 
           },
           { 

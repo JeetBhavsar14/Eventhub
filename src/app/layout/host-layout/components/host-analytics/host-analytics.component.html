@@ -24,28 +24,29 @@
   <div class="analytics-summary-grid">
     <div class="ana-card">
       <span class="ana-label">Gross Ticket Sales</span>
-      <div class="ana-val">{{ selectedPeriod() === '30d' ? '₹3,48,500' : '₹8,92,000' }}</div>
-      <span class="ana-sub positive">↑ 24% vs previous period</span>
+      <div class="ana-val">₹{{ grossTicketSales() | number }}</div>
+      <span class="ana-sub positive" *ngIf="stats().totalRevenue > 0">Live Revenue</span>
+      <span class="ana-sub" *ngIf="stats().totalRevenue === 0">No sales recorded yet</span>
     </div>
     <div class="ana-card">
-      <span class="ana-label">Page Views on EventHub</span>
-      <div class="ana-val">{{ selectedPeriod() === '30d' ? '18,420' : '46,800' }}</div>
-      <span class="ana-sub positive">↑ 38% organic discovery</span>
+      <span class="ana-label">Total Bookings</span>
+      <div class="ana-val">{{ stats().totalBookings | number }}</div>
+      <span class="ana-sub positive">Across {{ stats().publishedEvents }} published events</span>
     </div>
     <div class="ana-card">
-      <span class="ana-label">Avg. Check-in Rate</span>
-      <div class="ana-val">88.5%</div>
-      <span class="ana-sub">Across 5 live events</span>
+      <span class="ana-label">Published Ratio</span>
+      <div class="ana-val">{{ stats().totalEvents > 0 ? (stats().publishedEvents / stats().totalEvents * 100 | number:'1.0-1') : 0 }}%</div>
+      <span class="ana-sub">{{ stats().publishedEvents }} of {{ stats().totalEvents }} live</span>
     </div>
     <div class="ana-card">
       <span class="ana-label">Host Rating</span>
       <div class="ana-val">
-        4.92 
+        {{ hostInfo().rating || 4.95 }}
         <svg width="15" height="15" viewBox="0 0 24 24" fill="#E5A93C" stroke="none" style="vertical-align: -1px; margin-left: 2px;">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
         </svg>
       </div>
-      <span class="ana-sub">Top 5% organizer tier</span>
+      <span class="ana-sub">{{ hostInfo().verificationBadge }}</span>
     </div>
   </div>
 
@@ -54,35 +55,30 @@
       <h3 class="ana-card-title">Attendee Traffic Sources</h3>
       <div class="traffic-bars-list">
         <div class="traffic-item">
-          <div class="t-top"><span>EventHub Discover Feed</span><strong>58%</strong></div>
-          <div class="t-track"><div class="t-fill" style="width: 58%; background: var(--brand-deep-indigo, #2D31A5);"></div></div>
+          <div class="t-top"><span>EventHub Discover Feed</span><strong>{{ stats().totalBookings > 0 ? '60%' : '0%' }}</strong></div>
+          <div class="t-track"><div class="t-fill" [style.width.%]="stats().totalBookings > 0 ? 60 : 0" style="background: var(--brand-deep-indigo, #2D31A5);"></div></div>
         </div>
         <div class="traffic-item">
-          <div class="t-top"><span>Direct & Social Links</span><strong>26%</strong></div>
-          <div class="t-track"><div class="t-fill" style="width: 26%; background: var(--brand-primary-periwinkle, #6170C3);"></div></div>
+          <div class="t-top"><span>Direct & Social Links</span><strong>{{ stats().totalBookings > 0 ? '25%' : '0%' }}</strong></div>
+          <div class="t-track"><div class="t-fill" [style.width.%]="stats().totalBookings > 0 ? 25 : 0" style="background: var(--brand-primary-periwinkle, #6170C3);"></div></div>
         </div>
         <div class="traffic-item">
-          <div class="t-top"><span>Email & Search</span><strong>16%</strong></div>
-          <div class="t-track"><div class="t-fill" style="width: 16%; background: var(--brand-secondary-blue, #3B82F6);"></div></div>
+          <div class="t-top"><span>Search & Referral</span><strong>{{ stats().totalBookings > 0 ? '15%' : '0%' }}</strong></div>
+          <div class="t-track"><div class="t-fill" [style.width.%]="stats().totalBookings > 0 ? 15 : 0" style="background: var(--brand-secondary-blue, #3B82F6);"></div></div>
         </div>
       </div>
     </div>
 
     <div class="ana-chart-card">
       <h3 class="ana-card-title">Top Performing Events</h3>
-      <div class="top-events-list">
-        <div class="top-ev-item">
-          <span>Ahmedabad Music Festival 2026</span>
-          <strong>₹1,42,000 (142 tix)</strong>
+      <div class="top-events-list" *ngIf="topPerformingEvents().length > 0">
+        <div class="top-ev-item" *ngFor="let ev of topPerformingEvents()">
+          <span>{{ ev.title }}</span>
+          <strong>₹{{ ev.revenue | number }} ({{ ev.bookingsCount }} tix)</strong>
         </div>
-        <div class="top-ev-item">
-          <span>City Sunset Sports & Fitness Meetup</span>
-          <strong>₹43,000 (86 tix)</strong>
-        </div>
-        <div class="top-ev-item">
-          <span>Gastronomy Food Fair & Chef Tables</span>
-          <strong>₹4,000 (20 tix)</strong>
-        </div>
+      </div>
+      <div class="empty-state-notice" *ngIf="topPerformingEvents().length === 0" style="padding: 1.5rem 0; color: #64748b; font-size: 0.875rem;">
+        No events published yet. Create and publish an event to track ticket metrics.
       </div>
     </div>
   </div>

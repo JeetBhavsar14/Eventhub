@@ -69,7 +69,8 @@
       <app-host-my-events *ngIf="currentView() === 'my_events'" [events]="filteredEvents()"
         (viewDetails)="openEventDetails($event)" (createEvent)="openCreateWizard()"
         (submitForReview)="submitDraftForReview($event)" (publishEvent)="publishApprovedEvent($event)"
-        (reviewFeedback)="openFeedbackModal($event)">
+        (reviewFeedback)="openFeedbackModal($event)"
+        (requestCancellation)="handleHostCancellationRequest($event)">
       </app-host-my-events>
 
       <!-- SUB-VIEW 3: BOOKINGS & ATTENDEES VIEW (EXTRACTED COMPONENT) -->
@@ -124,7 +125,8 @@
     (close)="selectedEventForDetails.set(null)"
     (submitDraft)="submitDraftForReview($event); selectedEventForDetails.set(null)"
     (publishApproved)="publishApprovedEvent($event); selectedEventForDetails.set(null)"
-    (saveChanges)="saveDrawerEventChanges($event)">
+    (saveChanges)="saveDrawerEventChanges($event)"
+    (requestCancellation)="handleHostCancellationRequest($event)">
   </app-event-details-drawer>
 
   <!-- MODAL 3: FEEDBACK REVIEW & CLARIFICATION -->

@@ -37,7 +37,7 @@
         class="notif-tab" 
         [class.active]="notificationFilter() === 'all'"
         (click)="setFilter('all', $event)">
-        All <span class="tab-count">({{ notifications.length }})</span>
+        All <span class="tab-count">({{ totalCount() }})</span>
       </button>
       <button 
         class="notif-tab" 
@@ -60,68 +60,15 @@
       </button>
     </div>
 
-    <!-- Notifications List with Grouped Sections -->
+    <!-- Notifications List -->
     <div class="notif-list">
       
-      <!-- Group 1: Action Required Section -->
-      <div class="notif-section-group" *ngIf="(notificationFilter() === 'all' || notificationFilter() === 'action_required') && actionRequiredNotifications().length > 0">
-        <div class="notif-section-title">
-          <span class="pulse-indicator"></span>
-          <span>Action Required</span>
-          <span class="section-tag">Pending RSVP</span>
-        </div>
-
+      <!-- Render active notifications -->
+      <ng-container *ngIf="displayedNotifications().length > 0">
         <div 
-          *ngFor="let notif of actionRequiredNotifications()" 
-          class="notif-card action-card" 
-          [class.unread]="!notif.read"
-          (click)="onNotificationClick(notif)">
-          
-          <div class="notif-card-icon type-invitation">
-            <app-icon name="mail" [size]="16"></app-icon>
-          </div>
-
-          <div class="notif-card-content">
-            <div class="notif-card-top">
-              <span class="notif-card-title">{{ notif.title }}</span>
-              <span class="notif-time">{{ formatTimeAgo(notif.timestamp) }}</span>
-            </div>
-            <p class="notif-card-msg">{{ notif.message }}</p>
-
-            <!-- Action Buttons -->
-            <div class="notif-actions">
-              <button 
-                class="notif-action-btn primary"
-                (click)="onAccept(notif, $event)">
-                <app-icon name="check" [size]="12"></app-icon>
-                Accept & Join
-              </button>
-              <button 
-                class="notif-action-btn ghost"
-                (click)="onDecline(notif, $event)">
-                Decline
-              </button>
-            </div>
-          </div>
-
-          <button 
-            class="notif-dismiss-btn" 
-            (click)="onDismiss(notif.id, $event)"
-            title="Dismiss notification">
-            <app-icon name="close" [size]="12"></app-icon>
-          </button>
-        </div>
-      </div>
-
-      <!-- Group 2: Recent Activity Section -->
-      <div class="notif-section-group" *ngIf="(notificationFilter() === 'all' || notificationFilter() === 'activity' || notificationFilter() === 'unread')">
-        <div class="notif-section-title" *ngIf="notificationFilter() === 'all' && actionRequiredNotifications().length > 0">
-          <span>Recent Activity</span>
-        </div>
-
-        <div 
-          *ngFor="let notif of (notificationFilter() === 'all' ? activityNotifications() : filteredNotifications())" 
+          *ngFor="let notif of displayedNotifications()" 
           class="notif-card" 
+          [class.action-card]="notif.type === 'invitation' && (!notif.invitationStatus || notif.invitationStatus === 'pending')"
           [class.unread]="!notif.read"
           (click)="onNotificationClick(notif)">
           
@@ -136,8 +83,23 @@
             </div>
             <p class="notif-card-msg">{{ notif.message }}</p>
 
+            <!-- Action Buttons for Invitations -->
+            <div class="notif-actions" *ngIf="notif.type === 'invitation' && (!notif.invitationStatus || notif.invitationStatus === 'pending')">
+              <button 
+                class="notif-action-btn primary"
+                (click)="onAccept(notif, $event)">
+                <app-icon name="check" [size]="12"></app-icon>
+                Accept & Join
+              </button>
+              <button 
+                class="notif-action-btn ghost"
+                (click)="onDecline(notif, $event)">
+                Decline
+              </button>
+            </div>
+
             <!-- Status badges for responded invitations -->
-            <div class="notif-actions" *ngIf="notif.type === 'invitation'">
+            <div class="notif-actions" *ngIf="notif.type === 'invitation' && notif.invitationStatus">
               <div class="notif-status-badge accepted" *ngIf="notif.invitationStatus === 'accepted'">
                 <app-icon name="check-circle" [size]="13"></app-icon>
                 <span>Accepted</span>
@@ -151,7 +113,7 @@
               </div>
             </div>
 
-            <!-- General Navigational Action -->
+            <!-- General Navigational Action (e.g. View Tickets) -->
             <div class="notif-actions" *ngIf="notif.type !== 'invitation' && notif.action">
               <button class="notif-action-btn link">
                 {{ notif.action.label }} →
@@ -166,10 +128,10 @@
             <app-icon name="close" [size]="12"></app-icon>
           </button>
         </div>
-      </div>
+      </ng-container>
 
-      <!-- Empty State -->
-      <div class="notif-empty" *ngIf="filteredNotifications().length === 0">
+      <!-- Empty State: ONLY shown when displayedNotifications has 0 items -->
+      <div class="notif-empty" *ngIf="displayedNotifications().length === 0">
         <div class="empty-icon-circle">
           <app-icon name="bell" [size]="24"></app-icon>
         </div>
@@ -179,7 +141,7 @@
         <p class="empty-sub" *ngIf="notificationFilter() === 'unread'">You have zero unread notifications.</p>
         <p class="empty-sub" *ngIf="notificationFilter() === 'all'">You have no notifications yet.</p>
       </div>
+
     </div>
   </div>
 </div>
-

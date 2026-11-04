@@ -58,7 +58,7 @@
    ───────────────────────────────────────────────────────── */
 .landing-hero-section {
   position: relative;
-  z-index: 100;
+  z-index: 1;
   background: radial-gradient(120% 120% at 50% 0%, #1e2078 0%, #0c0d3b 100%);
   color: #ffffff;
   padding: 5rem 1.5rem 8.5rem;

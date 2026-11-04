@@ -17,22 +17,82 @@
           <span class="step-badge">Step 1 of 2</span>
         </div>
 
-        <div class="ticket-list">
+        <div class="ticket-list" *ngIf="ev.ticketTypes && ev.ticketTypes.length > 0">
           <div class="ticket-item" *ngFor="let tt of ev.ticketTypes" [class.has-selected]="getQuantity(tt.id) > 0">
             <div class="ticket-info">
               <h3>{{ tt.name }}</h3>
               <p class="price">₹{{ tt.price }}</p>
-              <p class="available" [class.sold-out]="tt.available === 0">
-                {{ tt.available === 0 ? 'Sold Out' : ((tt.available !== undefined ? tt.available : 'Limited') + ' tickets remaining') }}
+              <p class="available" [class.sold-out]="getRemainingTickets(tt) === 0">
+                {{ getRemainingTickets(tt) === 0 ? 'Sold Out' : (getRemainingTickets(tt) + ' tickets remaining') }}
               </p>
             </div>
             
             <div class="quantity-controls">
               <button class="qty-btn" (click)="updateQuantity(tt.id, -1)" [disabled]="getQuantity(tt.id) === 0" aria-label="Decrease quantity">-</button>
               <span class="qty">{{ getQuantity(tt.id) }}</span>
-              <button class="qty-btn" (click)="updateQuantity(tt.id, 1)" [disabled]="tt.available === 0 || (tt.available !== undefined && getQuantity(tt.id) >= tt.available)" aria-label="Increase quantity">+</button>
+              <button class="qty-btn" (click)="updateQuantity(tt.id, 1)" [disabled]="getRemainingTickets(tt) === 0" aria-label="Increase quantity">+</button>
             </div>
 
+          </div>
+        </div>
+
+        <div class="empty-tickets-notice" *ngIf="!ev.ticketTypes || ev.ticketTypes.length === 0">
+          <div class="notice-icon">
+            <app-icon name="ticket" [size]="26"></app-icon>
+          </div>
+          <div class="notice-text">
+            <h3>Tickets Currently Unavailable</h3>
+            <p>Ticket reservations for this event are not active yet or have concluded. Please check back later or explore other upcoming live experiences.</p>
+          </div>
+          <a routerLink="/discover" (click)="goToDiscover($event)" class="btn-browse-events">
+            <app-icon name="search" [size]="15" style="margin-right: 0.4rem;"></app-icon>
+            <span>Explore Other Events</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- Section 2: Individual Ticket Holder Details -->
+      <section class="checkout-section attendee-section" *ngIf="totalQuantity() > 0">
+        <div class="section-title-wrap">
+          <h2 class="section-title">Ticket Holder Details</h2>
+          <span class="step-badge">Step 2 of 2</span>
+        </div>
+        <p class="section-subtitle">
+          Please assign each ticket to its attendee. Individual ticket passes with check-in QR codes will be generated for each person.
+        </p>
+
+        <div class="attendee-card-list">
+          <div *ngFor="let attendee of attendees(); let i = index; trackBy: trackByIndex" class="attendee-card">
+            <div class="attendee-card-header">
+              <span class="ticket-index-badge">Ticket #{{ i + 1 }}</span>
+              <span class="ticket-role-label">{{ i === 0 ? 'Primary Ticket Holder (You)' : 'Guest / Attendee #' + (i + 1) }}</span>
+            </div>
+
+            <div class="attendee-fields-grid">
+              <div class="form-field">
+                <label [for]="'att-name-' + i">Full Name <span class="text-danger">*</span></label>
+                <input 
+                  type="text" 
+                  [id]="'att-name-' + i"
+                  class="attendee-input" 
+                  [value]="attendee.name"
+                  (input)="updateAttendee(i, 'name', $any($event.target).value)"
+                  placeholder="e.g. John Doe"
+                  required />
+              </div>
+
+              <div class="form-field">
+                <label [for]="'att-email-' + i">Email Address <span class="text-danger">*</span></label>
+                <input 
+                  type="email" 
+                  [id]="'att-email-' + i"
+                  class="attendee-input" 
+                  [value]="attendee.email"
+                  (input)="updateAttendee(i, 'email', $any($event.target).value)"
+                  placeholder="e.g. john@example.com"
+                  required />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -79,8 +139,8 @@
             <span>-₹{{ discount() }}</span>
           </div>
           <div class="total-row">
-            <span>Taxes & Fees (18% GST)</span>
-            <span>₹{{ taxAmount() }}</span>
+            <span>Taxes & Fees</span>
+            <span>Included</span>
           </div>
           <div class="total-row grand-total">
             <span>Grand Total</span>

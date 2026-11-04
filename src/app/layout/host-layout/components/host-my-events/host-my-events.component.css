@@ -301,6 +301,15 @@
   background: #d97706;
 }
 
+.btn-danger-subtle {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.btn-danger-subtle:hover {
+  background: #dc2626;
+}
+
 /* ─────────────────────────────────────────────────────────
    RESPONSIVE DESIGN BREAKPOINTS
    ───────────────────────────────────────────────────────── */

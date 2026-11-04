@@ -38,7 +38,7 @@ export function filterEvents(
   // 3. Price Filter
   if (filter.price && filter.price !== 'Any Price' && filter.price !== 'Any Range') {
     result = result.filter(e => {
-      const price = getStartingPrice(e, 500);
+      const price = getStartingPrice(e, 0);
       if (filter.price === 'Free') return price === 0;
       if (filter.price === 'Under ₹500') return price > 0 && price < 500;
       if (filter.price === '₹500 - ₹1500') return price >= 500 && price <= 1500;

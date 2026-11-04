@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiClient } from '@core/api';
 import { AuthService } from '@core/auth';
@@ -11,7 +11,7 @@ import { ButtonComponent, IconComponent } from '@shared/components';
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, IconComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ButtonComponent, IconComponent],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -28,6 +28,7 @@ export class CheckoutComponent implements OnInit {
   error = signal<string | null>(null);
 
   selectedTickets = signal<{ [key: string]: number }>({});
+  attendees = signal<Array<{ name: string; email: string }>>([]);
   couponCode = signal('');
   appliedCoupon = signal<Offer | null>(null);
   couponError = signal('');
@@ -73,12 +74,11 @@ export class CheckoutComponent implements OnInit {
   });
 
   taxAmount = computed(() => {
-    const taxableAmount = this.subtotal() - this.discount();
-    return Math.round(taxableAmount * 0.18); // 18% GST
+    return 0; // Taxes and fees are included in backend ticket pricing
   });
 
   grandTotal = computed(() => {
-    return this.subtotal() - this.discount() + this.taxAmount();
+    return this.subtotal() - this.discount();
   });
 
   ngOnInit() {
@@ -96,7 +96,51 @@ export class CheckoutComponent implements OnInit {
     try {
       const res = await this.apiClient.get<EventItem>(`/events/${id}`);
       if (res.data) {
-        this.event.set(res.data);
+        const eventData = { ...res.data };
+
+        // Fetch real Django ticket types for this event
+        try {
+          const ttRes = await this.apiClient.get<any>(`/bookings/events/${id}/ticket-types/`);
+          if (ttRes.data) {
+            const rawList = Array.isArray(ttRes.data) 
+              ? ttRes.data 
+              : (Array.isArray(ttRes.data.results) ? ttRes.data.results : []);
+            
+            eventData.ticketTypes = rawList.map((tt: any) => {
+              const rawPrice = tt.price ?? tt.unit_price ?? tt.total_price ?? tt.total_amount ?? (tt.tickets?.[0]?.price) ?? 0;
+              const rawName = tt.name || tt.ticket_type_name || (tt.tickets?.[0]?.name) || 'General';
+              const rawAvailable = tt.available_quantity !== undefined 
+                ? tt.available_quantity 
+                : (tt.available !== undefined ? tt.available : tt.total_quantity);
+              const rawCapacity = tt.total_quantity ?? tt.capacity ?? 100;
+
+              return {
+                id: String(tt.id || tt.ticket_type || tt.ticketTypeId),
+                name: rawName,
+                price: typeof rawPrice === 'string' ? parseFloat(rawPrice) || 0 : Number(rawPrice) || 0,
+                capacity: Number(rawCapacity) || 100,
+                available: rawAvailable !== undefined ? Number(rawAvailable) : 100,
+                description: tt.description || ''
+              };
+            });
+          } else {
+            eventData.ticketTypes = [];
+          }
+        } catch (ttErr) {
+          console.warn('[Checkout] Failed to load ticket types from Django:', ttErr);
+          eventData.ticketTypes = [];
+        }
+
+        this.event.set(eventData);
+
+        // Auto-select 1 ticket by default so quantity is 1 and price is displayed immediately
+        if (eventData.ticketTypes && eventData.ticketTypes.length > 0) {
+          const firstAvailable = eventData.ticketTypes.find((t: any) => (t.available === undefined || t.available > 0));
+          if (firstAvailable) {
+            this.selectedTickets.set({ [firstAvailable.id]: 1 });
+            this.syncAttendees(1);
+          }
+        }
       } else {
         this.error.set(res.error?.userMessage || 'Event not found.');
       }
@@ -107,6 +151,42 @@ export class CheckoutComponent implements OnInit {
     }
   }
 
+  trackByIndex(index: number): number {
+    return index;
+  }
+
+  syncAttendees(qty: number) {
+    const user = this.currentUser();
+    const current = [...this.attendees()];
+    const defaultName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'Attendee';
+    const defaultEmail = user?.email || '';
+
+    if (current.length === 0 && qty > 0) {
+      current.push({ name: defaultName, email: defaultEmail });
+    }
+
+    while (current.length < qty) {
+      current.push({ name: '', email: '' });
+    }
+
+    if (current.length > qty) {
+      current.splice(qty);
+    }
+
+    this.attendees.set(current);
+  }
+
+  updateAttendee(index: number, field: 'name' | 'email', value: string) {
+    this.attendees.update(list => {
+      const copy = [...list];
+      if (copy[index]) {
+        copy[index] = { ...copy[index], [field]: value };
+      }
+      return copy;
+    });
+    this.error.set(null);
+  }
+
   updateQuantity(ticketTypeId: string, change: number) {
     const current = this.selectedTickets()[ticketTypeId] || 0;
     const next = Math.max(0, current + change);
@@ -114,6 +194,16 @@ export class CheckoutComponent implements OnInit {
     const max = this.event()?.maxTicketsPerBooking || 10;
     const currentTotal = this.totalQuantity();
     
+    if (change > 0) {
+      // Backend rule: only one ticket type is allowed per booking
+      const currentSelections = this.selectedTickets();
+      const hasOtherType = Object.keys(currentSelections).some(id => id !== ticketTypeId && currentSelections[id] > 0);
+      if (hasOtherType) {
+        this.error.set('Only one ticket type is allowed per booking. You can purchase multiple tickets of the same type.');
+        return;
+      }
+    }
+
     if (change > 0 && currentTotal >= max) {
       this.error.set(`A maximum of ${max} tickets can be purchased in one booking.`);
       return;
@@ -124,11 +214,22 @@ export class CheckoutComponent implements OnInit {
     }
     
     this.error.set(null);
-    this.selectedTickets.update(st => ({ ...st, [ticketTypeId]: next }));
+    this.selectedTickets.update(st => {
+      const updated = { ...st, [ticketTypeId]: next };
+      const newTotal = Object.values(updated).reduce((a, b) => a + b, 0);
+      this.syncAttendees(newTotal);
+      return updated;
+    });
   }
 
   getQuantity(ticketTypeId: string): number {
     return this.selectedTickets()[ticketTypeId] || 0;
+  }
+
+  getRemainingTickets(ticketType: any): number {
+    const base = ticketType?.available !== undefined ? ticketType.available : (ticketType?.capacity ?? 0);
+    const selected = this.getQuantity(ticketType?.id);
+    return Math.max(0, base - selected);
   }
 
   async applyCoupon() {
@@ -170,6 +271,21 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
+    const attList = this.attendees();
+    for (let i = 0; i < attList.length; i++) {
+      const a = attList[i];
+      if (!a.name.trim()) {
+        this.error.set(`Please enter the full name for Ticket #${i + 1}.`);
+        window.scrollTo({ top: 300, behavior: 'smooth' });
+        return;
+      }
+      if (!a.email.trim() || !a.email.includes('@')) {
+        this.error.set(`Please enter a valid email for Ticket #${i + 1}.`);
+        window.scrollTo({ top: 300, behavior: 'smooth' });
+        return;
+      }
+    }
+
     this.showProceedModal.set(true);
   }
 
@@ -205,6 +321,20 @@ export class CheckoutComponent implements OnInit {
       }
     }
 
+    if (ticketsBooked.length !== 1) {
+      alert('Only one ticket type is allowed per booking.');
+      return;
+    }
+
+    const attList = this.attendees();
+    for (let i = 0; i < attList.length; i++) {
+      const a = attList[i];
+      if (!a.name.trim() || !a.email.trim()) {
+        this.error.set(`Please provide details for Ticket #${i + 1}.`);
+        return;
+      }
+    }
+
     // Set order in state with 2-minute expiration
     this.bookingState.setPendingOrder({
       eventId: currentEvent.id,
@@ -215,6 +345,7 @@ export class CheckoutComponent implements OnInit {
       eventAddress: [currentEvent.location?.city, currentEvent.location?.state, currentEvent.location?.country].filter(Boolean).join(', '),
       eventThumbnail: currentEvent.thumbnailUrl,
       tickets: ticketsBooked,
+      attendees: this.attendees(),
       subtotal: this.subtotal(),
       discount: this.discount(),
       offerCode: this.appliedCoupon()?.code || null,
@@ -229,5 +360,12 @@ export class CheckoutComponent implements OnInit {
 
   goHome() {
     this.router.navigate(['/']);
+  }
+
+  goToDiscover(event?: Event) {
+    if (event) {
+      event.preventDefault();
+    }
+    this.router.navigate(['/discover']);
   }
 }

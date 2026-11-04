@@ -217,7 +217,7 @@ export class AdminLayoutComponent implements OnInit {
   promptApproveHostApplication(appId: string, applicantName: string) {
     this.triggerConfirm(
       'Approve Host Application & Grant SaaS Access?',
-      `Confirm approval for ${applicantName}? This promotes their profile to a Verified Host in db.json and unlocks the Host Studio.`,
+      `Confirm approval for ${applicantName}? This promotes their profile to a Verified Host and unlocks the Host Studio.`,
       'Approve & Promote',
       false,
       async () => {

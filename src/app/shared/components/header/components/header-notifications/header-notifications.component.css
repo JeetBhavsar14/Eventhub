@@ -73,7 +73,7 @@
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-xl, 16px);
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.06);
-  z-index: 1000;
+  z-index: 99999;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -545,4 +545,3 @@
     height: 19px;
   }
 }
-

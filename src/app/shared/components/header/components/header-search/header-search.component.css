@@ -84,7 +84,7 @@
   border: 1px solid var(--gray-200);
   border-radius: var(--radius-xl, 16px);
   box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.05);
-  z-index: 1000;
+  z-index: 99999;
   overflow: hidden;
   animation: spotlightFadeDown 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   max-height: 480px;

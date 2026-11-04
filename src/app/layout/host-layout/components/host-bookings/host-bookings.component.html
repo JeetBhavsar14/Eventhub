@@ -3,12 +3,68 @@
   <div class="view-header-bar">
     <div>
       <h2 class="view-title">Bookings & Attendee Management</h2>
-      <p class="view-sub">Track ticket orders, attendee passes, and check-in readiness</p>
+      <p class="view-sub">Track ticket orders, individual attendee passes, and gate check-in status</p>
     </div>
-    <button class="btn-export-csv" (click)="exportCsv.emit()">
-      <app-icon name="download"></app-icon>
-      <span>Export CSV</span>
-    </button>
+    <div class="header-action-group">
+      <button class="btn-export-csv" (click)="downloadAttendeeRosterCsv()" title="Export all bookings and attendee passes to CSV">
+        <app-icon name="download"></app-icon>
+        <span>Export CSV</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="bookings-controls-card">
+    <div class="search-input-wrapper">
+      <app-icon name="search" [size]="16" class="search-icon"></app-icon>
+      <input
+        type="text"
+        class="bookings-search-input"
+        placeholder="Search by attendee name, email, order ID, or ticket number..."
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+        aria-label="Search Bookings and Attendees"
+      />
+      <button
+        *ngIf="searchQuery()"
+        type="button"
+        class="search-clear-btn"
+        (click)="clearSearch()"
+        title="Clear search">
+        <app-icon name="close" [size]="14"></app-icon>
+      </button>
+    </div>
+
+    <div class="status-filters-group">
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="statusFilter() === 'all'"
+        (click)="setStatusFilter('all')">
+        All ({{ attendees.length }})
+      </button>
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="statusFilter() === 'confirmed'"
+        (click)="setStatusFilter('confirmed')">
+        Confirmed
+      </button>
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="statusFilter() === 'checked_in'"
+        (click)="setStatusFilter('checked_in')">
+        Checked In
+      </button>
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="statusFilter() === 'cancelled'"
+        (click)="setStatusFilter('cancelled')">
+        Cancelled
+      </button>
+    </div>
   </div>
 
   <!-- Desktop / Tablet Attendees Table -->
@@ -17,31 +73,81 @@
       <thead>
         <tr>
           <th>Order ID</th>
-          <th>Attendee</th>
+          <th>Primary Attendee</th>
           <th>Event Title</th>
           <th>Ticket Tier</th>
-          <th>Quantity</th>
-          <th>Amount</th>
+          <th>Passes</th>
+          <th>Total Amount</th>
           <th>Booking Date</th>
           <th>Status</th>
+          <th class="th-actions">Attendee Details</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let att of paginatedAttendees()">
-          <td><strong>#{{ att.orderId }}</strong></td>
+        <tr *ngFor="let att of paginatedAttendees()" class="clickable-row" (click)="openAttendeeDetails(att)">
+          <td>
+            <div class="order-id-badge">#{{ att.orderId }}</div>
+          </td>
           <td>
             <div class="att-name-cell">
               <strong>{{ att.attendeeName }}</strong>
               <small>{{ att.email }}</small>
             </div>
           </td>
-          <td>{{ att.eventTitle }}</td>
+          <td class="event-title-cell" [title]="att.eventTitle">
+            <span class="truncate-text">{{ att.eventTitle }}</span>
+          </td>
           <td><span class="tier-badge">{{ att.tier }}</span></td>
-          <td>{{ att.ticketsCount }} Pass{{ att.ticketsCount > 1 ? 'es' : '' }}</td>
-          <td><strong>₹{{ att.totalAmount | number }}</strong></td>
-          <td><small>{{ att.bookingDate }}</small></td>
           <td>
-            <span class="badge-status-confirmed">● Confirmed</span>
+            <div class="passes-count-cell">
+              <strong>{{ att.ticketsCount }} Pass{{ att.ticketsCount > 1 ? 'es' : '' }}</strong>
+              <span class="passes-sub" *ngIf="getRecordPasses(att).length > 1">
+                {{ getRecordPasses(att).length }} ticket holders
+              </span>
+            </div>
+          </td>
+          <td><strong>₹{{ att.totalAmount | number }}</strong></td>
+          <td><small class="date-text">{{ att.bookingDate }}</small></td>
+          <td>
+            <span *ngIf="isOrderCheckedIn(att)" class="badge-status-checkedin">
+              <app-icon name="user-check" [size]="12"></app-icon>
+              <span>Checked In</span>
+            </span>
+            <span *ngIf="!isOrderCheckedIn(att) && att.status === 'cancelled'" class="badge-status-cancelled">
+              ● Cancelled
+            </span>
+            <span *ngIf="!isOrderCheckedIn(att) && att.status === 'partially_cancelled'" class="badge-status-partial">
+              ● Partial Cancel
+            </span>
+            <span *ngIf="!isOrderCheckedIn(att) && att.status !== 'cancelled' && att.status !== 'partially_cancelled'" class="badge-status-confirmed">
+              ● Confirmed
+            </span>
+          </td>
+          <td class="td-actions" (click)="$event.stopPropagation()">
+            <button
+              type="button"
+              class="btn-view-details"
+              (click)="openAttendeeDetails(att, $event)"
+              title="View attendee details, passes, and check-in status">
+              <app-icon name="eye" [size]="14"></app-icon>
+              <span>View Attendees</span>
+            </button>
+          </td>
+        </tr>
+
+        <!-- Empty state inside table -->
+        <tr *ngIf="paginatedAttendees().length === 0">
+          <td colspan="9" class="empty-table-cell">
+            <div class="empty-state-content">
+              <app-icon name="ticket" [size]="32" class="empty-icon"></app-icon>
+              <p class="empty-title">No bookings or attendees found</p>
+              <p class="empty-sub">
+                {{ searchQuery() ? 'Try adjusting your search query or status filter.' : 'Bookings and attendee passes will appear here once attendees register for your events.' }}
+              </p>
+              <button *ngIf="searchQuery()" type="button" class="btn-reset-search" (click)="clearSearch()">
+                Clear Search
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -49,17 +155,31 @@
   </div>
 
   <!-- Mobile Attendees Cards List (< 768px) -->
-  <div class="attendees-mobile-cards-list" *ngIf="attendees.length > 0">
-    <div *ngFor="let att of paginatedAttendees()" class="attendee-mobile-card">
+  <div class="attendees-mobile-cards-list" *ngIf="filteredAttendees().length > 0">
+    <div
+      *ngFor="let att of paginatedAttendees()"
+      class="attendee-mobile-card"
+      (click)="openAttendeeDetails(att)">
       <div class="att-card-top-row">
         <span class="att-order-id">#{{ att.orderId }}</span>
-        <span class="badge-status-confirmed">● Confirmed</span>
+        <span *ngIf="isOrderCheckedIn(att)" class="badge-status-checkedin">
+          <app-icon name="user-check" [size]="12"></app-icon> Checked In
+        </span>
+        <span *ngIf="!isOrderCheckedIn(att) && att.status === 'cancelled'" class="badge-status-cancelled">
+          ● Cancelled
+        </span>
+        <span *ngIf="!isOrderCheckedIn(att) && att.status !== 'cancelled'" class="badge-status-confirmed">
+          ● Confirmed
+        </span>
       </div>
+
       <div class="att-card-user-info">
         <strong class="att-card-name">{{ att.attendeeName }}</strong>
         <small class="att-card-email">{{ att.email }}</small>
       </div>
+
       <div class="att-card-event-title">{{ att.eventTitle }}</div>
+
       <div class="att-card-meta-grid">
         <div class="att-meta-item">
           <span class="meta-k">Tier</span>
@@ -70,20 +190,39 @@
           <span class="meta-v">{{ att.ticketsCount }} Pass{{ att.ticketsCount > 1 ? 'es' : '' }}</span>
         </div>
         <div class="att-meta-item">
-          <span class="meta-k">Amount</span>
+          <span class="meta-k">Total Amount</span>
           <span class="meta-v"><strong>₹{{ att.totalAmount | number }}</strong></span>
         </div>
         <div class="att-meta-item">
-          <span class="meta-k">Date</span>
+          <span class="meta-k">Booking Date</span>
           <span class="meta-v">{{ att.bookingDate }}</span>
         </div>
+      </div>
+
+      <div class="att-card-footer" (click)="$event.stopPropagation()">
+        <button
+          type="button"
+          class="btn-mobile-view-attendees"
+          (click)="openAttendeeDetails(att, $event)">
+          <app-icon name="eye" [size]="15"></app-icon>
+          <span>View Attendee Details ({{ getRecordPasses(att).length }})</span>
+        </button>
       </div>
     </div>
   </div>
 
+  <!-- Mobile Empty State -->
+  <div class="attendees-mobile-empty" *ngIf="filteredAttendees().length === 0">
+    <app-icon name="ticket" [size]="36"></app-icon>
+    <p class="empty-title">No bookings or attendees found</p>
+    <p class="empty-sub">
+      {{ searchQuery() ? 'Try adjusting your search query or status filter.' : 'Bookings and attendee passes will appear here once attendees register.' }}
+    </p>
+  </div>
+
   <!-- Bookings & Attendees Pagination Controls -->
-  <app-pagination-bar 
-    *ngIf="attendees.length > 0"
+  <app-pagination-bar
+    *ngIf="filteredAttendees().length > 0"
     [currentPage]="bookingsPage()"
     [totalPages]="bookingsTotalPages()"
     [pageNumbers]="bookingsPageNumbers()"
@@ -96,4 +235,230 @@
     (pageChange)="setBookingsPage($event)"
     (pageSizeChange)="setBookingsPageSize($event)">
   </app-pagination-bar>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ATTENDEE & PASSES DETAILS MODAL / DRAWER                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div
+    class="attendee-modal-backdrop"
+    *ngIf="selectedRecord() as sel"
+    (click)="closeAttendeeDetails()">
+    <div
+      class="attendee-modal-dialog"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="attendee-modal-heading">
+
+      <!-- Modal Header -->
+      <div class="attendee-modal-header">
+        <div class="header-left">
+          <span class="modal-eyebrow">BOOKING & ATTENDEE ROSTER</span>
+          <div class="modal-title-row">
+            <h3 id="attendee-modal-heading" class="modal-order-title">
+              Order #{{ sel.orderId }}
+            </h3>
+            <span *ngIf="isOrderCheckedIn(sel)" class="badge-status-checkedin">
+              <app-icon name="user-check" [size]="12"></app-icon> Checked In
+            </span>
+            <span *ngIf="!isOrderCheckedIn(sel) && sel.status === 'cancelled'" class="badge-status-cancelled">
+              ● Cancelled
+            </span>
+            <span *ngIf="!isOrderCheckedIn(sel) && sel.status !== 'cancelled'" class="badge-status-confirmed">
+              ● Confirmed
+            </span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button
+            type="button"
+            class="btn-modal-print"
+            (click)="printAttendeePasses()"
+            title="Print attendee roster and passes">
+            <app-icon name="download" [size]="14"></app-icon>
+            <span>Print</span>
+          </button>
+          <button
+            type="button"
+            class="btn-modal-close"
+            (click)="closeAttendeeDetails()"
+            aria-label="Close attendee details modal">
+            <app-icon name="close" [size]="18"></app-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body Content -->
+      <div class="attendee-modal-body">
+
+        <!-- 1. Event Overview Banner -->
+        <div class="modal-event-card">
+          <div class="event-card-header">
+            <app-icon name="calendar" [size]="18" class="event-icon"></app-icon>
+            <strong class="event-name">{{ sel.eventTitle }}</strong>
+          </div>
+          <div class="event-card-meta">
+            <span class="meta-pill" *ngIf="sel.eventDate">
+              <app-icon name="clock" [size]="12"></app-icon>
+              <span>{{ sel.eventDate }} {{ sel.eventTime ? '• ' + sel.eventTime : '' }}</span>
+            </span>
+            <span class="meta-pill" *ngIf="sel.eventLocation">
+              <app-icon name="map-pin" [size]="12"></app-icon>
+              <span>{{ sel.eventLocation }}</span>
+            </span>
+            <span class="meta-pill">
+              <app-icon name="ticket" [size]="12"></app-icon>
+              <span>Booked on {{ sel.bookingDate }}</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- 2. Purchaser / Primary Booker Contact -->
+        <div class="modal-section-card">
+          <div class="section-card-title">
+            <app-icon name="user" [size]="16"></app-icon>
+            <span>Primary Purchaser / Booker</span>
+          </div>
+          <div class="purchaser-info-grid">
+            <div class="info-field">
+              <label>Full Name</label>
+              <strong>{{ sel.attendeeName }}</strong>
+            </div>
+            <div class="info-field">
+              <label>Email Address</label>
+              <span class="selectable-val">{{ sel.email }}</span>
+            </div>
+            <div class="info-field" *ngIf="sel.phone">
+              <label>Phone Number</label>
+              <span>{{ sel.phone }}</span>
+            </div>
+            <div class="info-field">
+              <label>Total Passes Booked</label>
+              <span class="passes-count-pill">{{ sel.ticketsCount }} Ticket{{ sel.ticketsCount > 1 ? 's' : '' }} ({{ sel.tier }})</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. All Individual Ticket Passes & Attendees -->
+        <div class="modal-section-card passes-section">
+          <div class="passes-section-header">
+            <div class="section-card-title">
+              <app-icon name="ticket" [size]="16"></app-icon>
+              <span>Individual Attendee Passes ({{ getRecordPasses(sel).length }})</span>
+            </div>
+            <button
+              *ngIf="sel.status !== 'cancelled'"
+              type="button"
+              class="btn-toggle-all-checkin"
+              (click)="toggleAllPassesCheckIn(sel, $event)">
+              <app-icon [name]="isOrderCheckedIn(sel) ? 'close' : 'user-check'" [size]="13"></app-icon>
+              <span>{{ isOrderCheckedIn(sel) ? 'Unmark All Gate Check-ins' : 'Mark All As Checked In' }}</span>
+            </button>
+          </div>
+
+          <div class="passes-list">
+            <div
+              *ngFor="let pass of getRecordPasses(sel); let idx = index"
+              class="pass-item-card"
+              [class.pass-checked-in]="isPassCheckedIn(pass, sel.orderId)"
+              [class.pass-cancelled]="pass.status === 'cancelled' || sel.status === 'cancelled'">
+              <div class="pass-card-top">
+                <div class="pass-index-tag">
+                  <span class="pass-num">Pass #{{ idx + 1 }}</span>
+                  <span class="pass-role-pill" *ngIf="idx === 0">Primary Booker</span>
+                  <span class="pass-role-pill guest" *ngIf="idx > 0">Attendee Guest</span>
+                </div>
+                <div class="pass-status-pill-group">
+                  <span class="tier-pill">{{ sel.tier }}</span>
+                  <span *ngIf="isPassCheckedIn(pass, sel.orderId)" class="badge-status-checkedin sm">
+                    <app-icon name="check-circle" [size]="11"></app-icon> Checked In
+                  </span>
+                  <span *ngIf="!isPassCheckedIn(pass, sel.orderId) && (pass.status === 'cancelled' || sel.status === 'cancelled')" class="badge-status-cancelled sm">
+                    Cancelled
+                  </span>
+                  <span *ngIf="!isPassCheckedIn(pass, sel.orderId) && pass.status !== 'cancelled' && sel.status !== 'cancelled'" class="badge-status-confirmed sm">
+                    Valid Pass
+                  </span>
+                </div>
+              </div>
+
+              <div class="pass-card-body">
+                <div class="pass-attendee-details">
+                  <div class="pass-name-row">
+                    <span class="pass-label">Attendee Name:</span>
+                    <strong class="pass-name">{{ pass.attendeeName }}</strong>
+                  </div>
+                  <div class="pass-email-row" *ngIf="pass.attendeeEmail || sel.email">
+                    <span class="pass-label">Email:</span>
+                    <span class="pass-email">{{ pass.attendeeEmail || sel.email }}</span>
+                  </div>
+                </div>
+
+                <div class="pass-ticket-reference">
+                  <span class="tkt-ref-label">Ticket ID:</span>
+                  <code class="tkt-code">{{ pass.ticketNumber }}</code>
+                  <button
+                    type="button"
+                    class="btn-copy-code"
+                    (click)="copyTicketNumber(pass.ticketNumber, $event)"
+                    title="Copy Ticket ID to clipboard">
+                    <app-icon [name]="copiedPassId() === pass.ticketNumber ? 'check' : 'edit'" [size]="12"></app-icon>
+                    <span>{{ copiedPassId() === pass.ticketNumber ? 'Copied' : 'Copy' }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Pass Gate Admission Action -->
+              <div class="pass-card-footer" *ngIf="pass.status !== 'cancelled' && sel.status !== 'cancelled'">
+                <button
+                  type="button"
+                  class="btn-gate-toggle"
+                  [class.checked]="isPassCheckedIn(pass, sel.orderId)"
+                  (click)="togglePassCheckIn(pass, sel, $event)">
+                  <app-icon [name]="isPassCheckedIn(pass, sel.orderId) ? 'check-circle' : 'user-check'" [size]="14"></app-icon>
+                  <span>{{ isPassCheckedIn(pass, sel.orderId) ? 'Checked In at Gate (Click to undo)' : 'Check In Attendee' }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Financial & Order Breakdown -->
+        <div class="modal-section-card financial-card">
+          <div class="section-card-title">
+            <app-icon name="credit-card" [size]="16"></app-icon>
+            <span>Payment & Financial Summary</span>
+          </div>
+          <div class="financial-breakdown-grid">
+            <div class="fin-row">
+              <span class="fin-k">Tickets Subtotal ({{ sel.ticketsCount }} passes):</span>
+              <span class="fin-v">₹{{ sel.totalAmount | number }}</span>
+            </div>
+            <div class="fin-row total-row">
+              <strong class="fin-k">Total Paid:</strong>
+              <strong class="fin-v">₹{{ sel.totalAmount | number }}</strong>
+            </div>
+            <div class="fin-row payment-status-row">
+              <span class="fin-k">Payment Status:</span>
+              <span class="badge-status-confirmed">● Paid & Verified</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="attendee-modal-footer">
+        <button
+          type="button"
+          class="btn-modal-close-action"
+          (click)="closeAttendeeDetails()">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 </div>

@@ -15,7 +15,9 @@ import {
   DashboardPrototypeState,
   EventItem,
   Booking,
-  BookingTicket
+  BookingTicket,
+  BookingTicketPass,
+  BookingAttendee
 } from '@core/models';
 
 @Injectable({
@@ -42,20 +44,23 @@ export class HostDashboardService {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      const [eventsRes, actsRes, notifsRes, bookingsRes] = await Promise.all([
-        this.api.get<EventItem[]>('/events'),
-        this.api.get<HostRecentActivity[]>('/hostActivities'),
-        this.api.get<HostNotificationItem[]>('/hostNotifications'),
-        this.api.get<Booking[]>('/bookings')
-      ]);
-
-      const firstError = eventsRes?.error || actsRes?.error || notifsRes?.error || bookingsRes?.error;
-      if (firstError) {
-        this.error.set(firstError.userMessage);
+      // 1. Fetch host's own events from Django; fallback to general /events if no host events yet
+      let eventsRes = await this.api.get<EventItem[]>('/events/my-events/');
+      if (!eventsRes.data || eventsRes.data.length === 0) {
+        eventsRes = await this.api.get<EventItem[]>('/events');
       }
 
+      // 2. Fetch bookings
+      const bookingsRes = await this.api.get<Booking[]>('/bookings');
+
+      // Only report an error if primary events retrieval failed fatally
+      if (eventsRes?.error && (!this.events() || this.events().length === 0)) {
+        this.error.set(eventsRes.error.userMessage);
+      }
+
+      let mappedEvents: HostEventItem[] = [];
       if (eventsRes.data && eventsRes.data.length > 0) {
-        const mappedEvents: HostEventItem[] = eventsRes.data.map((e: EventItem) => ({
+        mappedEvents = eventsRes.data.map((e: EventItem) => ({
           id: e.id,
           title: e.title,
           category: e.category || 'Music & Concerts',
@@ -65,43 +70,94 @@ export class HostDashboardService {
           venue: e.location?.venue || 'Main Venue Arena',
           city: e.location?.city || 'Mumbai',
           imageUrl: e.thumbnailUrl || 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80',
-          bookingsCount: e.capacity ? Math.floor(e.capacity * 0.4) : 120,
+          bookingsCount: 0,
           capacity: e.capacity || 500,
           price: e.ticketTypes?.[0]?.price ?? 500,
           status: (e.status === 'cancelled' ? 'rejected' : e.status === 'draft' ? 'draft' : 'published') as HostEventStatus,
-          revenue: (e.ticketTypes?.[0]?.price ?? 500) * (e.capacity ? Math.floor(e.capacity * 0.4) : 120),
+          revenue: 0,
           daysRemaining: 15,
           description: e.description || 'Live curated experience.'
         }));
         this.events.set(mappedEvents);
+      } else {
+        this.events.set([]);
       }
 
-      if (actsRes.data) {
-        this.recentActivities.set(actsRes.data);
-      }
-
-      if (notifsRes.data) {
-        this.notifications.set(notifsRes.data);
-      }
-
+      let mappedAttendees: HostAttendeeRecord[] = [];
       if (bookingsRes.data && bookingsRes.data.length > 0) {
-        const mappedAttendees: HostAttendeeRecord[] = bookingsRes.data.map((b: Booking) => ({
-          orderId: b.bookingReference || b.id || 'ORD-9820',
-          attendeeName: b.attendee?.name || 'Devansh Kothari',
-          email: b.attendee?.email || 'devansh@example.com',
-          eventTitle: b.eventTitle || 'Mumbai Festivals Showcase 1',
-          tier: b.tickets?.[0]?.name ? `${b.tickets[0].name} Pass` : 'General Admission',
-          ticketsCount: b.tickets?.reduce((acc: number, t: BookingTicket) => acc + (t.quantity || 1), 0) || 1,
-          totalAmount: b.totalAmount || 1500,
-          bookingDate: b.createdAt ? new Date(b.createdAt).toLocaleDateString() : 'Today',
-          checkInStatus: 'pending'
-        }));
+        mappedAttendees = bookingsRes.data.map((b: Booking) => {
+          const totalQty = b.tickets?.reduce((acc: number, t: BookingTicket) => acc + (t.quantity || 1), 0) || (b.ticketPasses?.length || 1);
+          let passes: BookingTicketPass[] = b.ticketPasses && b.ticketPasses.length > 0 ? [...b.ticketPasses] : [];
+          if (passes.length === 0) {
+            if (b.attendees && b.attendees.length > 0) {
+              passes = b.attendees.map((att, idx) => ({
+                id: `pass-${b.id}-${idx + 1}`,
+                ticketNumber: `TKT-${String(b.id).slice(0, 8).toUpperCase()}-${idx + 1}`,
+                attendeeName: att.name || `Attendee ${idx + 1}`,
+                attendeeEmail: att.email || '',
+                status: (b.status === 'cancelled' ? 'cancelled' : 'valid') as 'valid' | 'cancelled',
+                issuedAt: b.createdAt || new Date().toISOString(),
+                price: (b.totalAmount || 0) / (b.attendees?.length || 1)
+              }));
+            } else {
+              for (let i = 0; i < totalQty; i++) {
+                passes.push({
+                  id: `pass-${b.id}-${i + 1}`,
+                  ticketNumber: `TKT-${String(b.id).slice(0, 8).toUpperCase()}-${i + 1}`,
+                  attendeeName: i === 0 ? (b.attendee?.name || 'Primary Attendee') : `Guest ${i + 1}`,
+                  attendeeEmail: i === 0 ? (b.attendee?.email || '') : '',
+                  status: (b.status === 'cancelled' ? 'cancelled' : 'valid') as 'valid' | 'cancelled',
+                  issuedAt: b.createdAt || new Date().toISOString(),
+                  price: (b.totalAmount || 0) / totalQty
+                });
+              }
+            }
+          }
+
+          const attendeeList: BookingAttendee[] = (b.attendees && b.attendees.length > 0)
+            ? b.attendees
+            : passes.map(p => ({
+                name: p.attendeeName,
+                email: p.attendeeEmail || '',
+                phone: ''
+              }));
+
+          const primaryName = b.attendee?.name || (attendeeList[0]?.name) || passes[0]?.attendeeName || 'Attendee';
+          const primaryEmail = b.attendee?.email || (attendeeList[0]?.email) || passes[0]?.attendeeEmail || 'attendee@example.com';
+          const primaryPhone = b.attendee?.phone || attendeeList[0]?.phone || '';
+
+          return {
+            id: b.id,
+            orderId: b.bookingReference || b.id || 'ORD-9820',
+            attendeeName: primaryName,
+            email: primaryEmail,
+            phone: primaryPhone,
+            eventTitle: b.eventTitle || 'Confirmed Event',
+            eventDate: b.eventDate,
+            eventTime: b.eventTime,
+            eventLocation: b.eventLocation,
+            tier: b.tickets?.[0]?.name ? `${b.tickets[0].name} Pass` : 'General Admission',
+            ticketsCount: totalQty,
+            totalAmount: b.totalAmount || 0,
+            bookingDate: b.createdAt ? new Date(b.createdAt).toLocaleDateString() : 'Today',
+            checkInStatus: b.status === 'cancelled' ? 'cancelled' : 'pending',
+            status: b.status || 'confirmed',
+            attendees: attendeeList,
+            ticketPasses: passes,
+            tickets: b.tickets || []
+          };
+        });
         this.attendees.set(mappedAttendees);
+      } else {
+        this.attendees.set([]);
       }
+
+      // Synchronize all derived dashboard metrics, actions, and audit log
+      this.syncDerivedDashboardState(mappedEvents, mappedAttendees);
     } catch (err: unknown) {
       const apiErr = err as { userMessage?: string } | null;
       this.error.set(apiErr?.userMessage || 'An unexpected error occurred. Please try again.');
-      console.warn('Could not connect to mock server, using cached default signals', err);
+      console.warn('Could not load host dashboard data', err);
     } finally {
       this.isLoading.set(false);
     }
@@ -131,27 +187,30 @@ export class HostDashboardService {
     if (!name) {
       if (user && (user.firstName || user.lastName)) {
         name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      } else if (user?.email) {
+        name = user.email.split('@')[0];
       } else if (app?.applicantName) {
         name = app.applicantName;
       } else {
-        name = 'Jeet Bhavsar';
+        name = 'Host Organizer';
       }
     }
 
     // Determine host email
-    const email = custom.email || user?.email || app?.email || 'jeet@eventhub.com';
+    const email = custom.email || user?.email || app?.email || 'host@eventhub.com';
 
     // Determine host phone
-    const phone = custom.phone || user?.phone || app?.phone || '+91 98765 43210';
+    const phone = custom.phone || user?.phone || app?.phone || '';
 
     // Determine host organization
     let organization = custom.organization;
     if (!organization) {
       if (app?.organizationName && app.organizationName !== 'Independent Host') {
         organization = app.organizationName;
+      } else if (user?.email) {
+        organization = `${user.email.split('@')[0]}'s Experiences`;
       } else {
-        const firstName = name.split(' ')[0] || 'Jeet';
-        organization = `${firstName}'s Experiences & Live Events`;
+        organization = `${name}'s Production`;
       }
     }
 
@@ -189,350 +248,20 @@ export class HostDashboardService {
     this._customHostInfo.update(curr => ({ ...curr, ...info }));
   }
 
-  // Events Data
-  private defaultEvents: HostEventItem[] = [
-    {
-      id: 'EVT-701',
-      title: 'Ahmedabad Music Festival 2026',
-      category: 'Music & Concerts',
-      type: 'Outdoor Festival',
-      date: 'Nov 15, 2026',
-      time: '6:00 PM – 11:30 PM',
-      venue: 'Sabarmati Riverfront Promenade',
-      city: 'Ahmedabad',
-      imageUrl: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80',
-      bookingsCount: 142,
-      capacity: 200,
-      price: 1000,
-      status: 'published',
-      revenue: 142000,
-      daysRemaining: 6,
-      description: 'The premier open-air music experience celebrating indie, fusion, and electronic artists across western India.'
-    },
-    {
-      id: 'EVT-702',
-      title: 'Tech Innovation Summit & Pitch Night',
-      category: 'Technology & Startups',
-      type: 'Conference',
-      date: 'Dec 02, 2026',
-      time: '9:30 AM – 5:00 PM',
-      venue: 'Gujarat Science City Auditorium',
-      city: 'Ahmedabad',
-      imageUrl: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=600&q=80',
-      bookingsCount: 0,
-      capacity: 150,
-      price: 0,
-      status: 'pending_review',
-      revenue: 0,
-      submittedDate: 'Oct 07, 2026',
-      daysRemaining: 23,
-      description: 'An exclusive gathering of 150+ tech founders, investors, and engineers exploring AI, Web3, and venture growth.'
-    },
-    {
-      id: 'EVT-703',
-      title: 'Weekend Terracotta & Clay Workshop',
-      category: 'Art & Culture',
-      type: 'Hands-on Workshop',
-      date: 'Nov 22, 2026',
-      time: '11:00 AM – 2:00 PM',
-      venue: 'Kanoria Centre for Arts',
-      city: 'Ahmedabad',
-      imageUrl: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=600&q=80',
-      bookingsCount: 0,
-      capacity: 30,
-      price: 750,
-      status: 'draft',
-      revenue: 0,
-      daysRemaining: 13,
-      description: 'Learn pottery fundamentals and traditional wheel sculpting from master Gujarati artisans.'
-    },
-    {
-      id: 'EVT-704',
-      title: 'City Sunset Sports & Fitness Meetup',
-      category: 'Sports & Fitness',
-      type: 'Community Meetup',
-      date: 'Nov 18, 2026',
-      time: '7:00 AM – 10:30 AM',
-      venue: 'EKA Club Arena',
-      city: 'Ahmedabad',
-      imageUrl: 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=600&q=80',
-      bookingsCount: 86,
-      capacity: 100,
-      price: 500,
-      status: 'published',
-      revenue: 43000,
-      daysRemaining: 9,
-      description: 'High-energy 5K morning run, functional training circuits, and endurance wellness coaching.'
-    },
-    {
-      id: 'EVT-705',
-      title: 'Indie Cinema Showcase: Gujarati Short Films',
-      category: 'Film & Media',
-      type: 'Screening',
-      date: 'Dec 10, 2026',
-      time: '7:30 PM – 10:30 PM',
-      venue: 'Natarani Amphitheatre',
-      city: 'Ahmedabad',
-      imageUrl: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80',
-      bookingsCount: 0,
-      capacity: 80,
-      price: 350,
-      status: 'changes_requested',
-      revenue: 0,
-      feedbackNotes: 'Please upload written venue clearance confirmation for audio equipment permits after 10:00 PM.',
-      daysRemaining: 31,
-      description: 'Curated indie cinema showcase featuring award-winning regional short films and Q&A with filmmakers.'
-    },
-    {
-      id: 'EVT-706',
-      title: 'Gastronomy Food Fair & Chef Tables',
-      category: 'Food & Drinks',
-      type: 'Culinary Expo',
-      date: 'Dec 20, 2026',
-      time: '12:00 PM – 10:00 PM',
-      venue: 'Sindhu Bhavan Cultural Grounds',
-      city: 'Ahmedabad',
-      imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80',
-      bookingsCount: 20,
-      capacity: 500,
-      price: 200,
-      status: 'approved',
-      revenue: 4000,
-      daysRemaining: 41,
-      description: 'Over 40 artisanal food pop-ups, chef tasting tables, masterclasses, and local spice pairing.'
-    }
-  ];
-
-  events = signal<HostEventItem[]>(this.defaultEvents);
-
-  // Pending Actions Data
-  private defaultPendingActions: HostPendingAction[] = [
-    {
-      id: 'ACT-01',
-      type: 'feedback',
-      title: 'Changes Requested: Indie Cinema Showcase',
-      description: 'Curation team requested venue sound clearance confirmation before publishing.',
-      severity: 'warning',
-      actionLabel: 'Review Feedback & Edit',
-      actionType: 'edit_feedback',
-      eventId: 'EVT-705',
-      badgeText: 'Action Required'
-    },
-    {
-      id: 'ACT-02',
-      type: 'pending_review',
-      title: '3 Events Awaiting Review Decision',
-      description: 'Tech Innovation Summit and 2 others are in the curation queue (~24h turnaround).',
-      severity: 'info',
-      actionLabel: 'Track Review Queue',
-      actionType: 'view_pending',
-      badgeText: 'In Review'
-    },
-    {
-      id: 'ACT-03',
-      type: 'draft_incomplete',
-      title: 'Incomplete Draft: Weekend Clay Workshop',
-      description: 'Draft is 70% complete. Missing ticket pricing tier breakdown.',
-      severity: 'notice',
-      actionLabel: 'Complete Draft',
-      actionType: 'edit_draft',
-      eventId: 'EVT-703',
-      badgeText: 'Draft Setup'
-    },
-    {
-      id: 'ACT-04',
-      type: 'team_invite',
-      title: 'Team Invitation Pending',
-      description: 'priya.desai@agency.com has not yet confirmed their check-in staff invite.',
-      severity: 'notice',
-      actionLabel: 'Manage Team',
-      actionType: 'manage_team',
-      badgeText: 'Team'
-    }
-  ];
-
-  pendingActions = signal<HostPendingAction[]>(this.defaultPendingActions);
-
-  // Recent Activity Data
-  private defaultActivity: HostRecentActivity[] = [
-    {
-      id: 'ACT-LOG-01',
-      title: 'Event Approved by Curation Team',
-      description: 'Gastronomy Food Fair & Chef Tables was certified and approved for publishing.',
-      timestamp: '2 hours ago',
-      type: 'approved',
-      eventTitle: 'Gastronomy Food Fair'
-    },
-    {
-      id: 'ACT-LOG-02',
-      title: 'New Ticket Booking Received (4 VIP Passes)',
-      description: 'Kunal Patel purchased 4 VIP access passes (Order #ORD-9821).',
-      timestamp: '4 hours ago',
-      type: 'booking',
-      eventTitle: 'Ahmedabad Music Festival 2026'
-    },
-    {
-      id: 'ACT-LOG-03',
-      title: 'Event Submitted for Curation Review',
-      description: 'Tech Innovation Summit & Pitch Night was sent to the verification queue.',
-      timestamp: 'Yesterday at 4:15 PM',
-      type: 'submission',
-      eventTitle: 'Tech Innovation Summit'
-    },
-    {
-      id: 'ACT-LOG-04',
-      title: 'Review Clarification Requested',
-      description: 'Sound permit request note added to Indie Cinema Showcase.',
-      timestamp: '2 days ago',
-      type: 'feedback',
-      eventTitle: 'Indie Cinema Showcase'
-    },
-    {
-      id: 'ACT-LOG-05',
-      title: 'Team Member Joined Workspace',
-      description: 'Rohan Mehta accepted the invitation as Event Manager.',
-      timestamp: '3 days ago',
-      type: 'team'
-    }
-  ];
-
-  recentActivities = signal<HostRecentActivity[]>(this.defaultActivity);
-
-  // Team Members Data
-  teamMembers = signal<HostTeamMember[]>([
-    {
-      id: 'TM-01',
-      name: 'Jeet Bhavsar',
-      email: 'jeet@eventhub.com',
-      role: 'Owner',
-      status: 'active',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-      addedDate: 'Jan 15, 2025'
-    },
-    {
-      id: 'TM-02',
-      name: 'Rohan Mehta',
-      email: 'rohan.m@novalive.io',
-      role: 'Event Manager',
-      status: 'active',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-      addedDate: 'Oct 01, 2026'
-    },
-    {
-      id: 'TM-03',
-      name: 'Priya Desai',
-      email: 'priya.desai@agency.com',
-      role: 'Check-in Staff',
-      status: 'invited',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-      addedDate: 'Oct 06, 2026'
-    }
-  ]);
-
-  // Attendee Bookings Data
-  attendees = signal<HostAttendeeRecord[]>([
-    {
-      orderId: 'ORD-9821',
-      attendeeName: 'Kunal Patel',
-      email: 'kunal.p@example.com',
-      eventTitle: 'Ahmedabad Music Festival 2026',
-      tier: 'VIP Pass',
-      ticketsCount: 4,
-      totalAmount: 4000,
-      bookingDate: 'Oct 09, 2026, 12:20 PM',
-      checkInStatus: 'pending'
-    },
-    {
-      orderId: 'ORD-9818',
-      attendeeName: 'Sneha Roy',
-      email: 'sneha.roy@example.com',
-      eventTitle: 'City Sunset Sports & Fitness Meetup',
-      tier: 'General Admission',
-      ticketsCount: 2,
-      totalAmount: 1000,
-      bookingDate: 'Oct 08, 2026, 4:10 PM',
-      checkInStatus: 'pending'
-    },
-    {
-      orderId: 'ORD-9814',
-      attendeeName: 'Devansh Joshi',
-      email: 'devansh.j@example.com',
-      eventTitle: 'Ahmedabad Music Festival 2026',
-      tier: 'General Admission',
-      ticketsCount: 2,
-      totalAmount: 2000,
-      bookingDate: 'Oct 08, 2026, 10:45 AM',
-      checkInStatus: 'pending'
-    },
-    {
-      orderId: 'ORD-9802',
-      attendeeName: 'Ananya Iyer',
-      email: 'ananya.iyer@example.com',
-      eventTitle: 'Gastronomy Food Fair & Chef Tables',
-      tier: 'Workshop Seat',
-      ticketsCount: 2,
-      totalAmount: 400,
-      bookingDate: 'Oct 07, 2026, 6:30 PM',
-      checkInStatus: 'pending'
-    },
-    {
-      orderId: 'ORD-9788',
-      attendeeName: 'Rahul Verma',
-      email: 'rahul.v@example.com',
-      eventTitle: 'City Sunset Sports & Fitness Meetup',
-      tier: 'Early Bird',
-      ticketsCount: 1,
-      totalAmount: 450,
-      bookingDate: 'Oct 06, 2026, 2:15 PM',
-      checkInStatus: 'pending'
-    }
-  ]);
-
-  // Notifications List
-  notifications = signal<HostNotificationItem[]>([
-    {
-      id: 'NOTIF-01',
-      title: 'Event Approved: Gastronomy Food Fair',
-      message: 'Your event was reviewed and approved! You can now publish it to start selling tickets.',
-      timestamp: '2 hours ago',
-      unread: true,
-      type: 'approval',
-      eventId: 'EVT-706'
-    },
-    {
-      id: 'NOTIF-02',
-      title: 'Action Needed: Indie Cinema Showcase',
-      message: 'Reviewer added a clarification note regarding venue sound permits.',
-      timestamp: '1 day ago',
-      unread: true,
-      type: 'action',
-      eventId: 'EVT-705'
-    },
-    {
-      id: 'NOTIF-03',
-      title: 'Booking Milestone: 140+ Passes Sold',
-      message: 'Ahmedabad Music Festival has reached 70% capacity!',
-      timestamp: '2 days ago',
-      unread: false,
-      type: 'booking',
-      eventId: 'EVT-701'
-    },
-    {
-      id: 'NOTIF-04',
-      title: 'Host Verification Confirmed',
-      message: 'Your host application was approved with full organizing privileges.',
-      timestamp: '1 week ago',
-      unread: false,
-      type: 'system'
-    }
-  ]);
+  // Signals strictly synchronized with live Django data
+  events = signal<HostEventItem[]>([]);
+  pendingActions = signal<HostPendingAction[]>([]);
+  recentActivities = signal<HostRecentActivity[]>([]);
+  teamMembers = signal<HostTeamMember[]>([]);
+  attendees = signal<HostAttendeeRecord[]>([]);
+  notifications = signal<HostNotificationItem[]>([]);
 
   // Unread notifications count
   unreadNotificationsCount = computed(() => {
     return this.notifications().filter(n => n.unread).length;
   });
 
-  // Overview Statistics
+  // Overview Statistics dynamically computed from live events and bookings
   stats = computed(() => {
     const list = this.events();
     const published = list.filter(e => e.status === 'published').length;
@@ -541,16 +270,23 @@ export class HostDashboardService {
     const changes = list.filter(e => e.status === 'changes_requested').length;
     const approved = list.filter(e => e.status === 'approved').length;
     const rejected = list.filter(e => e.status === 'rejected').length;
-    const totalBookings = list.reduce((sum, e) => sum + e.bookingsCount, 0);
-    const totalRevenue = list.reduce((sum, e) => sum + e.revenue, 0);
+
+    const attendeeList = this.attendees();
+    const totalBookings = attendeeList.length > 0
+      ? attendeeList.reduce((sum, a) => sum + (a.ticketsCount || 1), 0)
+      : 0;
+
+    const totalRevenue = attendeeList.length > 0
+      ? attendeeList.reduce((sum, a) => sum + (a.totalAmount || 0), 0)
+      : 0;
 
     return {
-      totalEvents: 12, // Required illustrative sample stat: 12
+      totalEvents: list.length,
       activeEventsCount: list.length,
-      publishedEvents: 5, // Required sample: 5
-      pendingReview: 3, // Required sample: 3
-      totalBookings: 248, // Required sample: 248
-      totalRevenue: 348500,
+      publishedEvents: published,
+      pendingReview: pending,
+      totalBookings: totalBookings,
+      totalRevenue: totalRevenue,
       draftCount: drafts,
       changesRequestedCount: changes,
       approvedCount: approved,
@@ -558,44 +294,40 @@ export class HostDashboardService {
     };
   });
 
-  // Booking Overview Chart Data (7d / 30d / 90d)
+  // Booking Overview Chart Data (7d / 30d / 90d) derived from real attendees
   getBookingChartData(period: '7d' | '30d' | '90d'): { points: BookingDataPoint[], maxVal: number } {
+    const attendeeList = this.attendees();
+    const totalBookings = attendeeList.reduce((sum, a) => sum + (a.ticketsCount || 1), 0);
+    const totalRevenue = attendeeList.reduce((sum, a) => sum + (a.totalAmount || 0), 0);
+
     if (period === '7d') {
-      const points: BookingDataPoint[] = [
-        { label: 'Mon', bookings: 14, attendees: 12, revenue: 14000 },
-        { label: 'Tue', bookings: 22, attendees: 18, revenue: 22000 },
-        { label: 'Wed', bookings: 18, attendees: 16, revenue: 18000 },
-        { label: 'Thu', bookings: 35, attendees: 30, revenue: 35000 },
-        { label: 'Fri', bookings: 48, attendees: 42, revenue: 48000 },
-        { label: 'Sat', bookings: 62, attendees: 55, revenue: 62000 },
-        { label: 'Sun', bookings: 49, attendees: 44, revenue: 49000 }
-      ];
-      return { points, maxVal: 70 };
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const points: BookingDataPoint[] = days.map((label, idx) => {
+        const bCount = totalBookings > 0 && idx === 6 ? totalBookings : 0;
+        const rev = totalRevenue > 0 && idx === 6 ? totalRevenue : 0;
+        return { label, bookings: bCount, attendees: bCount, revenue: rev };
+      });
+      return { points, maxVal: Math.max(10, totalBookings) };
     }
 
     if (period === '90d') {
-      const points: BookingDataPoint[] = [
-        { label: 'Aug W1', bookings: 80, attendees: 70, revenue: 78000 },
-        { label: 'Aug W3', bookings: 110, attendees: 95, revenue: 105000 },
-        { label: 'Sep W1', bookings: 145, attendees: 130, revenue: 142000 },
-        { label: 'Sep W3', bookings: 180, attendees: 160, revenue: 178000 },
-        { label: 'Oct W1', bookings: 210, attendees: 190, revenue: 215000 },
-        { label: 'Oct W2', bookings: 248, attendees: 220, revenue: 248000 }
-      ];
-      return { points, maxVal: 280 };
+      const months = ['Month 1', 'Month 2', 'Month 3'];
+      const points: BookingDataPoint[] = months.map((label, idx) => {
+        const bCount = totalBookings > 0 && idx === 2 ? totalBookings : 0;
+        const rev = totalRevenue > 0 && idx === 2 ? totalRevenue : 0;
+        return { label, bookings: bCount, attendees: bCount, revenue: rev };
+      });
+      return { points, maxVal: Math.max(10, totalBookings) };
     }
 
     // Default 30d
-    const points: BookingDataPoint[] = [
-      { label: 'Sep 10', bookings: 18, attendees: 15, revenue: 18000 },
-      { label: 'Sep 15', bookings: 32, attendees: 28, revenue: 32000 },
-      { label: 'Sep 20', bookings: 45, attendees: 40, revenue: 45000 },
-      { label: 'Sep 25', bookings: 68, attendees: 58, revenue: 68000 },
-      { label: 'Sep 30', bookings: 95, attendees: 84, revenue: 95000 },
-      { label: 'Oct 05', bookings: 160, attendees: 142, revenue: 160000 },
-      { label: 'Oct 09', bookings: 248, attendees: 218, revenue: 248000 }
-    ];
-    return { points, maxVal: 280 };
+    const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+    const points: BookingDataPoint[] = weeks.map((label, idx) => {
+      const bCount = totalBookings > 0 && idx === 3 ? totalBookings : 0;
+      const rev = totalRevenue > 0 && idx === 3 ? totalRevenue : 0;
+      return { label, bookings: bCount, attendees: bCount, revenue: rev };
+    });
+    return { points, maxVal: Math.max(10, totalBookings) };
   }
 
   // Upcoming Events (Published & Approved)
@@ -605,26 +337,156 @@ export class HostDashboardService {
     );
   });
 
+  private syncDerivedDashboardState(events: HostEventItem[], attendees: HostAttendeeRecord[]): void {
+    // 1. Pending actions derived from real event statuses
+    const actions: HostPendingAction[] = [];
+    for (const e of events) {
+      if (e.status === 'changes_requested') {
+        actions.push({
+          id: `PA-${e.id}`,
+          type: 'feedback',
+          title: `Changes Requested: ${e.title}`,
+          description: e.feedbackNotes || 'Curation team requested clarifications before publishing.',
+          severity: 'warning',
+          actionLabel: 'Review Feedback & Edit',
+          actionType: 'edit_feedback',
+          eventId: e.id,
+          badgeText: 'Action Required'
+        });
+      } else if (e.status === 'pending_review') {
+        actions.push({
+          id: `PA-${e.id}`,
+          type: 'pending_review',
+          title: `Pending Review: ${e.title}`,
+          description: 'Event is currently in the curation review queue (~24h turnaround).',
+          severity: 'info',
+          actionLabel: 'Track Review Queue',
+          actionType: 'view_pending',
+          eventId: e.id,
+          badgeText: 'In Review'
+        });
+      } else if (e.status === 'draft') {
+        actions.push({
+          id: `PA-${e.id}`,
+          type: 'draft_incomplete',
+          title: `Draft Event: ${e.title}`,
+          description: 'Complete configuration and submit draft to curation team.',
+          severity: 'notice',
+          actionLabel: 'Complete Draft',
+          actionType: 'edit_draft',
+          eventId: e.id,
+          badgeText: 'Draft Setup'
+        });
+      }
+    }
+    this.pendingActions.set(actions);
+
+    // 2. Recent activities dynamically generated from real events and bookings
+    const activities: HostRecentActivity[] = [];
+    for (const a of attendees) {
+      activities.push({
+        id: `ACT-BKG-${a.orderId}`,
+        title: `New Booking for ${a.eventTitle}`,
+        description: `${a.attendeeName} reserved ${a.ticketsCount} pass(es) (₹${a.totalAmount}).`,
+        timestamp: a.bookingDate || 'Recent',
+        type: 'booking',
+        eventTitle: a.eventTitle
+      });
+    }
+    for (const e of events) {
+      if (e.status === 'published') {
+        activities.push({
+          id: `ACT-PUB-${e.id}`,
+          title: 'Event Published Live',
+          description: `"${e.title}" is published on EventHub explore.`,
+          timestamp: e.date || 'Recent',
+          type: 'approved',
+          eventTitle: e.title
+        });
+      } else if (e.status === 'pending_review') {
+        activities.push({
+          id: `ACT-SUB-${e.id}`,
+          title: 'Event Submitted for Curation Review',
+          description: `"${e.title}" was submitted to the verification queue.`,
+          timestamp: e.submittedDate || 'Recent',
+          type: 'submission',
+          eventTitle: e.title
+        });
+      } else if (e.status === 'changes_requested') {
+        activities.push({
+          id: `ACT-CHG-${e.id}`,
+          title: 'Review Clarification Requested',
+          description: e.feedbackNotes || `Modifications requested for "${e.title}".`,
+          timestamp: 'Recent',
+          type: 'feedback',
+          eventTitle: e.title
+        });
+      }
+    }
+    if (activities.length === 0) {
+      activities.push({
+        id: 'ACT-WELCOME',
+        title: 'Welcome to EventHub Host Workspace',
+        description: 'Create and submit your first event to start accepting attendees.',
+        timestamp: 'Just now',
+        type: 'approved'
+      });
+    }
+    this.recentActivities.set(activities);
+
+    // 3. Notifications derived from real items
+    const notifs: HostNotificationItem[] = [];
+    for (const e of events) {
+      if (e.status === 'changes_requested') {
+        notifs.push({
+          id: `NOTIF-CHG-${e.id}`,
+          title: `Action Needed: ${e.title}`,
+          message: e.feedbackNotes || 'Reviewer added comments regarding your event.',
+          timestamp: 'Recent',
+          unread: true,
+          type: 'action',
+          eventId: e.id
+        });
+      } else if (e.status === 'published') {
+        notifs.push({
+          id: `NOTIF-PUB-${e.id}`,
+          title: `Event Live: ${e.title}`,
+          message: 'Your event is certified and open for ticket reservations.',
+          timestamp: 'Recent',
+          unread: false,
+          type: 'approval',
+          eventId: e.id
+        });
+      }
+    }
+    for (const a of attendees) {
+      notifs.push({
+        id: `NOTIF-BKG-${a.orderId}`,
+        title: `Passes Reserved: ${a.eventTitle}`,
+        message: `${a.attendeeName} reserved ${a.ticketsCount} tickets (Order #${a.orderId}).`,
+        timestamp: a.bookingDate || 'Recent',
+        unread: false,
+        type: 'booking'
+      });
+    }
+    this.notifications.set(notifs);
+  }
+
   // Switch Prototype Display State
   setPrototypeState(state: DashboardPrototypeState) {
     this.prototypeState.set(state);
-
     if (state === 'empty_events') {
       this.events.set([]);
       this.pendingActions.set([]);
-    } else if (state === 'no_upcoming') {
-      this.events.set(this.defaultEvents.filter(e => e.status === 'draft' || e.status === 'pending_review'));
     } else if (state === 'no_pending_actions') {
-      this.events.set(this.defaultEvents);
       this.pendingActions.set([]);
-    } else {
-      this.events.set(this.defaultEvents);
-      this.pendingActions.set(this.defaultPendingActions);
     }
   }
 
   // Action Handlers
   submitEventForReview(eventId: string) {
+    this.api.post(`/events/${eventId}/submit/`, {}).catch(() => {});
+
     this.events.update(list =>
       list.map(e => {
         if (e.id === eventId) {

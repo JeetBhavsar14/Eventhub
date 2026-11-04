@@ -238,6 +238,13 @@ export class HomeComponent implements OnInit, AfterViewInit {
   });
 
   async ngOnInit(): Promise<void> {
+    if (this.authService.isAuthenticated()) {
+      const role = (this.authService.currentUser()?.platformRole || 'user').toLowerCase();
+      if (role !== 'admin' && role !== 'super_admin') {
+        this.router.navigate(['/discover']);
+        return;
+      }
+    }
     await this.loadEvents();
   }
 

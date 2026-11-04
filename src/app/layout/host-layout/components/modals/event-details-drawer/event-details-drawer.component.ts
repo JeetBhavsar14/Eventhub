@@ -52,6 +52,14 @@ export class EventDetailsDrawerComponent {
   @Output() submitDraft = new EventEmitter<string>();
   @Output() publishApproved = new EventEmitter<string>();
   @Output() saveChanges = new EventEmitter<{ data: EventEditPayload; submitForReview: boolean }>();
+  @Output() requestCancellation = new EventEmitter<{ event: HostEventItem; reason: string }>();
+
+  onRequestCancellation(): void {
+    const reason = window.prompt(`Please enter the cancellation reason for "${this.event.title}" (this will be sent to the Admin team for review and approval):`);
+    if (!reason || !reason.trim()) return;
+    this.requestCancellation.emit({ event: this.event, reason: reason.trim() });
+    this.onClose();
+  }
 
   startEditing() {
     this.editForm = {

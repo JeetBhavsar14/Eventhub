@@ -35,19 +35,136 @@
   <!-- Main Gateway Content -->
   <main class="gateway-layout">
     
-    <!-- Left Column: Payment Options (Cut from checkout page) -->
+    <!-- Left Column: Payment Methods -->
     <section class="gateway-methods-card">
       <div class="methods-card-header">
         <div class="step-indicator">
           <span class="step-num">Step 2</span>
-          <h2>Select Payment Method</h2>
+          <h2>Payment Method</h2>
+        </div>
+        <div class="stripe-badge-pill">
+          <span class="security-lock">
+            <app-icon name="shield-check" [size]="14"></app-icon>
+            PCI-DSS & RBI Secure
+          </span>
         </div>
       </div>
 
-      <p class="methods-sub">Choose your preferred payment method to complete ticket verification.</p>
+      <p class="methods-sub">Choose your preferred payment method below. Protected by 256-bit bank grade encryption.</p>
 
-      <!-- Embedded Payment Form Cut from Booking/Checkout -->
-      <app-payment-form [amount]="order()!.totalAmount"></app-payment-form>
+      <!-- Visual Payment Method Selector (Card vs UPI) -->
+      <div class="payment-tabs-bar">
+        <button 
+          type="button" 
+          class="pay-tab-btn" 
+          [class.active]="selectedPaymentMethod() === 'card'" 
+          (click)="setPaymentMethod('card')">
+          <app-icon name="credit-card" [size]="18"></app-icon>
+          <div class="tab-label-text">
+            <strong>Credit / Debit Card</strong>
+            <small>Stripe Gateway (Live Production)</small>
+          </div>
+        </button>
+
+        <button 
+          type="button" 
+          class="pay-tab-btn upi-tab" 
+          [class.active]="selectedPaymentMethod() === 'upi'" 
+          (click)="setPaymentMethod('upi')">
+          <span class="tab-icon-badge upi-badge-text">UPI</span>
+          <div class="tab-label-text">
+            <div class="tab-title-row">
+              <strong>UPI / QR Code</strong>
+              <span class="future-scope-pill-tag">Backend Future Scope</span>
+            </div>
+            <small>GPay, PhonePe, Paytm (Simulated)</small>
+          </div>
+        </button>
+      </div>
+
+      <!-- UPI Visual & Option Container -->
+      <div class="upi-method-container" *ngIf="selectedPaymentMethod() === 'upi'">
+        <!-- Backend Future Scope Notice for UPI -->
+        <div class="upi-future-scope-banner">
+          <div class="future-scope-header">
+            <app-icon name="info" [size]="15"></app-icon>
+            <strong>Backend Future Scope: Native UPI Settlement</strong>
+            <span class="future-scope-pill-sm">Backend In Progress</span>
+          </div>
+          <p>
+            The backend does not yet provide server-side UPI webhook handlers. Live payments are processed via Card (Stripe). You may test UPI flow using this simulation to verify multi-ticket passes and QR codes.
+          </p>
+        </div>
+
+        <div class="upi-app-badges">
+          <span class="app-chip gpay">Google Pay</span>
+          <span class="app-chip phonepe">PhonePe</span>
+          <span class="app-chip paytm">Paytm</span>
+          <span class="app-chip bhim">BHIM UPI</span>
+          <span class="app-chip cred">CRED</span>
+        </div>
+
+        <div class="upi-sub-switch">
+          <button type="button" [class.active]="upiMode() === 'id'" (click)="setUpiMode('id')">Enter UPI ID / VPA</button>
+          <button type="button" [class.active]="upiMode() === 'qr'" (click)="setUpiMode('qr')">Scan Dynamic QR Code</button>
+        </div>
+
+        <!-- Mode 1: Enter UPI ID -->
+        <div class="upi-id-box" *ngIf="upiMode() === 'id'">
+          <label for="upi-vpa-input" class="upi-input-label">Virtual Payment Address (UPI ID)</label>
+          <div class="upi-input-wrap">
+            <input 
+              type="text" 
+              id="upi-vpa-input"
+              class="upi-vpa-input" 
+              placeholder="e.g. yourname@okaxis or 9876543210@ybl"
+              [value]="upiVpa()"
+              (input)="upiVpa.set($any($event.target).value)" />
+            <button type="button" class="btn-clear-upi" *ngIf="upiVpa()" (click)="upiVpa.set('')">✕</button>
+          </div>
+
+          <div class="quick-suffixes">
+            <span class="suffix-hint">Popular handles:</span>
+            <button type="button" class="suffix-pill" (click)="quickSetUpiSuffix('okhdfcbank')">@okhdfcbank</button>
+            <button type="button" class="suffix-pill" (click)="quickSetUpiSuffix('okicici')">@okicici</button>
+            <button type="button" class="suffix-pill" (click)="quickSetUpiSuffix('ybl')">@ybl</button>
+            <button type="button" class="suffix-pill" (click)="quickSetUpiSuffix('paytm')">@paytm</button>
+            <button type="button" class="suffix-pill" (click)="quickSetUpiSuffix('upi')">@upi</button>
+          </div>
+        </div>
+
+        <!-- Mode 2: Dynamic UPI QR Code -->
+        <div class="upi-qr-box" *ngIf="upiMode() === 'qr'">
+          <p class="qr-instructions">Scan this QR code with any UPI app to pay <strong>₹{{ order()!.totalAmount }}</strong></p>
+          <div class="dynamic-qr-card" *ngIf="upiQrUrl()">
+            <img [src]="upiQrUrl()" alt="UPI Payment QR Code" class="dynamic-upi-img">
+            <span class="qr-verified-tag">✓ Verified UPI Merchant</span>
+          </div>
+          <p class="qr-timer-note">QR code active until booking timer ends ({{ formattedTime() }})</p>
+        </div>
+      </div>
+
+      <!-- Card / Stripe Embedded Element Box -->
+      <div class="stripe-element-container" [class.hidden]="selectedPaymentMethod() !== 'card'">
+        <!-- Skeleton while Stripe elements load -->
+        <div *ngIf="isStripeLoading()" class="stripe-loading-skeleton">
+          <div class="skeleton-shimmer tab-bar-shim"></div>
+          <div class="skeleton-shimmer card-input-shim"></div>
+          <div class="skeleton-row">
+            <div class="skeleton-shimmer half-shim"></div>
+            <div class="skeleton-shimmer half-shim"></div>
+          </div>
+        </div>
+
+        <!-- Stripe Elements container -->
+        <div id="stripe-payment-element" [class.hidden]="isStripeLoading()"></div>
+      </div>
+
+      <!-- Payment / Validation Error Notice -->
+      <div class="payment-error-alert" *ngIf="paymentError()">
+        <app-icon name="alert-triangle" [size]="18"></app-icon>
+        <span>{{ paymentError() }}</span>
+      </div>
 
       <div class="gateway-action-bar">
         <button type="button" class="btn-cancel" (click)="cancelAndReturn()" [disabled]="isProcessing()">
@@ -55,16 +172,31 @@
           <span>Cancel & Back</span>
         </button>
 
+        <!-- Dynamic Action Button based on Payment Method -->
         <button 
+          *ngIf="selectedPaymentMethod() === 'upi'"
+          type="button" 
+          class="btn-confirm-pay btn-upi-simulate" 
+          (click)="confirmUpiPayment()" 
+          [disabled]="isProcessing() || isExpired()">
+          <span *ngIf="!isProcessing()">Simulate UPI Payment (₹{{ order()!.totalAmount }})</span>
+          <span *ngIf="isProcessing()" class="btn-loading-flex">
+            <span class="spinner-small"></span> Verifying Simulation...
+          </span>
+          <app-icon *ngIf="!isProcessing()" name="shield-check" [size]="16"></app-icon>
+        </button>
+
+        <button 
+          *ngIf="selectedPaymentMethod() === 'card'"
           type="button" 
           class="btn-confirm-pay" 
           (click)="confirmPayment()" 
-          [disabled]="isProcessing() || isExpired()">
-          <span *ngIf="!isProcessing()">Pay ₹{{ order()!.totalAmount }} Securely</span>
+          [disabled]="isProcessing() || isExpired() || isStripeLoading()">
+          <span *ngIf="!isProcessing()">Pay ₹{{ order()!.totalAmount }} via Card</span>
           <span *ngIf="isProcessing()" class="btn-loading-flex">
-            <span class="spinner-small"></span> Authorizing Payment...
+            <span class="spinner-small"></span> Authorizing Card...
           </span>
-          <app-icon *ngIf="!isProcessing()" name="chevron-right" [size]="16"></app-icon>
+          <app-icon *ngIf="!isProcessing()" name="shield-check" [size]="16"></app-icon>
         </button>
       </div>
 
@@ -99,42 +231,43 @@
             class="mini-thumb" />
           <div class="mini-info">
             <h4>{{ order()!.eventTitle }}</h4>
-            <p class="mini-meta">
-              <app-icon name="calendar" [size]="12"></app-icon>
-              <span>{{ order()!.eventDate | date:'EEE, dd MMM yyyy' }}</span>
-            </p>
-            <p class="mini-meta" *ngIf="order()!.eventLocation">
-              <app-icon name="map-pin" [size]="12"></app-icon>
-              <span>{{ order()!.eventLocation }}</span>
-            </p>
-          </div>
-        </div>
-
-        <!-- Ticket Line Items -->
-        <div class="ticket-line-items">
-          <div class="ticket-line" *ngFor="let t of order()!.tickets">
-            <div class="line-left">
-              <span class="t-qty">{{ t.quantity }}x</span>
-              <span class="t-name">{{ t.name }}</span>
+            <div class="mini-meta">
+              <span class="meta-item">
+                <app-icon name="calendar" [size]="13"></app-icon>
+                {{ order()!.eventDate | date:'mediumDate' }}
+              </span>
+              <span class="meta-item">
+                <app-icon name="map-pin" [size]="13"></app-icon>
+                {{ order()!.eventLocation }}
+              </span>
             </div>
-            <strong class="line-price">₹{{ t.price * t.quantity }}</strong>
           </div>
         </div>
 
-        <!-- Price Breakdown -->
-        <div class="summary-breakdown">
+        <div class="tickets-breakdown">
+          <h5>Tickets Selected</h5>
+          <div class="ticket-row" *ngFor="let item of order()!.tickets">
+            <div class="ticket-info">
+              <span class="ticket-name">{{ item.name }}</span>
+              <span class="ticket-calc">{{ item.quantity }} × ₹{{ item.price }}</span>
+            </div>
+            <strong class="ticket-sum">₹{{ item.price * item.quantity }}</strong>
+          </div>
+        </div>
+
+        <div class="price-breakdown-box">
           <div class="breakdown-row">
-            <span>Ticket Subtotal</span>
+            <span>Subtotal</span>
             <span>₹{{ order()!.subtotal }}</span>
           </div>
-          
+
           <div class="breakdown-row discount-row" *ngIf="order()!.discount > 0">
-            <span>Promo Discount ({{ order()!.offerCode }})</span>
-            <span class="disc-val">-₹{{ order()!.discount }}</span>
+            <span>Discount ({{ order()!.offerCode }})</span>
+            <span class="discount-val">-₹{{ order()!.discount }}</span>
           </div>
 
           <div class="breakdown-row">
-            <span>Taxes & GST (18%)</span>
+            <span>Taxes & Fees (GST 18%)</span>
             <span>₹{{ order()!.tax }}</span>
           </div>
 
@@ -168,17 +301,19 @@
 
     <h2>Payment Successful!</h2>
     <p class="message">
-      Your payment of <strong>₹{{ bookingResult()?.totalAmount }}</strong> has been verified. 
+      Your payment of <strong>₹{{ bookingResult()?.totalAmount }}</strong> has been verified with Stripe. 
       Your confirmed ticket pass is ready.
     </p>
     
     <div class="ticket-preview">
-      <div class="ticket-qr" *ngIf="qrCodeUrl()">
-        <img [src]="qrCodeUrl()" alt="Ticket QR Code">
+      <div class="ticket-qr" *ngIf="bookingQrCodeUrl() || qrCodeUrl()">
+        <img [src]="bookingQrCodeUrl() || qrCodeUrl()" alt="Booking QR Code">
+        <span class="qr-booking-label">Booking Pass QR</span>
+        <span class="qr-booking-sub">#{{ bookingResult()?.bookingReference || bookingResult()?.id }}</span>
       </div>
       <div class="ticket-details">
         <p><strong>Booking reference:</strong> {{ bookingResult()?.bookingReference || bookingResult()?.id }}</p>
-        <p><strong>Guest:</strong> {{ bookingResult()?.attendee?.name || currentUser()?.firstName }}</p>
+        <p><strong>Primary Guest:</strong> {{ bookingResult()?.attendee?.name || currentUser()?.firstName }}</p>
         <p><strong>Event:</strong> {{ bookingResult()?.eventTitle }}</p>
         <p><strong>When:</strong> {{ bookingResult()?.eventDate | date:'EEE, d MMM y' }} · {{ bookingResult()?.eventTime }}</p>
         <p><strong>Where:</strong> {{ bookingResult()?.eventLocation }}, {{ bookingResult()?.eventAddress }}</p>
@@ -187,7 +322,35 @@
             {{ ticket.quantity }} × {{ ticket.name }}<span *ngIf="!last">, </span>
           </span>
         </p>
-        <p><strong>Paid:</strong> ₹{{ bookingResult()?.totalAmount }} via {{ bookingResult()?.payment?.label }}</p>
+        <p><strong>Payment Status:</strong> Paid ₹{{ bookingResult()?.totalAmount }} (Confirmed)</p>
+      </div>
+    </div>
+
+    <!-- Separate Individual Ticket Passes with Dedicated QR Codes -->
+    <div class="ticket-passes-success-section" *ngIf="ticketQrCodes().length > 0">
+      <div class="passes-section-head">
+        <h3 class="passes-section-title">Individual Ticket Passes ({{ ticketQrCodes().length }})</h3>
+        <span class="passes-section-badge">{{ ticketQrCodes().length }} Generated</span>
+      </div>
+      <p class="passes-section-sub">
+        Dedicated check-in passes generated per attendee with their unique backend ticket identifiers.
+      </p>
+
+      <div class="success-passes-grid">
+        <div *ngFor="let pass of ticketQrCodes(); let idx = index" class="success-pass-card">
+          <div class="success-pass-header">
+            <span class="pass-index-badge">Ticket #{{ idx + 1 }}</span>
+            <span class="pass-status-badge">Valid Pass</span>
+          </div>
+          <div class="success-pass-qr">
+            <img [src]="pass.qrUrl" [alt]="'QR for ' + pass.ticketNumber">
+            <span class="pass-qr-id">{{ pass.ticketNumber }}</span>
+          </div>
+          <div class="success-pass-info">
+            <strong>{{ pass.attendeeName }}</strong>
+            <span *ngIf="pass.attendeeEmail" class="pass-email-text">{{ pass.attendeeEmail }}</span>
+          </div>
+        </div>
       </div>
     </div>
 

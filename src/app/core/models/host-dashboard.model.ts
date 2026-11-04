@@ -1,3 +1,5 @@
+import { BookingAttendee, BookingTicketPass, BookingTicket } from './booking.model';
+
 export type HostEventStatus =
   | 'draft'
   | 'pending_review'
@@ -66,15 +68,24 @@ export interface HostTeamMember {
 }
 
 export interface HostAttendeeRecord {
+  id?: string;
   orderId: string;
   attendeeName: string;
   email: string;
+  phone?: string;
   eventTitle: string;
+  eventDate?: string;
+  eventTime?: string;
+  eventLocation?: string;
   tier: 'General Admission' | 'VIP Pass' | 'Early Bird' | 'Workshop Seat' | string;
   ticketsCount: number;
   totalAmount: number;
   bookingDate: string;
-  checkInStatus: 'checked_in' | 'pending';
+  checkInStatus: 'checked_in' | 'pending' | 'cancelled';
+  status?: 'confirmed' | 'cancelled' | 'pending' | 'partially_cancelled';
+  attendees?: BookingAttendee[];
+  ticketPasses?: BookingTicketPass[];
+  tickets?: BookingTicket[];
 }
 
 export interface HostNotificationItem {

@@ -11,6 +11,7 @@
   <nav class="booking-tabs" aria-label="Booking filters">
     <button type="button" [class.active]="selectedFilter() === 'upcoming'" (click)="setFilter('upcoming')">Upcoming</button>
     <button type="button" [class.active]="selectedFilter() === 'past'" (click)="setFilter('past')">Past events</button>
+    <button type="button" [class.active]="selectedFilter() === 'cancelled'" (click)="setFilter('cancelled')">Cancelled</button>
     <button type="button" [class.active]="selectedFilter() === 'all'" (click)="setFilter('all')">All bookings</button>
   </nav>
 
@@ -40,18 +41,55 @@
       <img class="event-image" [src]="booking.eventThumbnail || 'https://picsum.photos/seed/' + booking.eventId + '/360/240'" [alt]="booking.eventTitle">
       <div class="booking-date"><span>{{ booking.eventDate | date:'MMM' }}</span><strong>{{ booking.eventDate | date:'d' }}</strong><small>{{ booking.eventDate | date:'y' }}</small></div>
       <div class="booking-summary">
-        <div class="booking-title-row"><h2>{{ booking.eventTitle }}</h2><span class="status" [class.cancelled]="booking.status === 'cancelled'">{{ booking.status }}</span></div>
+        <div class="booking-title-row">
+          <h2>{{ booking.eventTitle }}</h2>
+          <span class="status" [class.pending]="booking.status === 'pending'" [class.cancelled]="booking.status === 'cancelled'" [class.partially-cancelled]="booking.status === 'partially_cancelled'">
+            {{ booking.status === 'partially_cancelled' ? 'Partially Cancelled' : booking.status }}
+          </span>
+        </div>
         <p class="event-meta">{{ booking.eventTime || 'Time to be announced' }} · {{ booking.eventLocation || 'Venue to be announced' }}</p>
-        <p class="ticket-meta">{{ ticketCount(booking) }} ticket{{ ticketCount(booking) === 1 ? '' : 's' }} · Booking {{ booking.bookingReference || booking.id }}</p>
+        <p class="ticket-meta">
+          <ng-container *ngIf="booking.status === 'partially_cancelled'">
+            {{ ticketCount(booking) }} valid / {{ booking.ticketPasses?.length }} tickets · 
+          </ng-container>
+          <ng-container *ngIf="booking.status !== 'partially_cancelled'">
+            {{ ticketCount(booking) }} ticket{{ ticketCount(booking) === 1 ? '' : 's' }} · 
+          </ng-container>
+          Ref {{ booking.bookingReference || booking.id }}
+          <span class="card-payment-tag" *ngIf="booking.payment?.label">
+            · {{ booking.payment?.label }}
+          </span>
+        </p>
+
+        <!-- Preview pills of all individual tickets on this booking -->
+        <div class="booking-passes-chip-row" *ngIf="booking.ticketPasses && booking.ticketPasses.length > 0">
+          <span *ngFor="let pass of booking.ticketPasses; let pIdx = index" class="card-pass-pill" [class.cancelled]="pass.status === 'cancelled'">
+            🎟️ <strong>Ticket #{{ pIdx + 1 }}:</strong> {{ pass.attendeeName }} <small>({{ pass.ticketNumber }})</small>
+          </span>
+        </div>
         <div class="booking-actions no-print">
           <a [routerLink]="['/events', booking.eventId]"><app-button variant="outline" size="sm">View event</app-button></a>
-          <app-button variant="primary" size="sm" (onClick)="toggleTicket(booking)">{{ expandedBookingId() === booking.id ? 'Hide ticket' : 'View ticket' }}</app-button>
+          <app-button [variant]="booking.status === 'cancelled' ? 'outline' : 'primary'" size="sm" (onClick)="toggleTicket(booking)">{{ expandedBookingId() === booking.id ? 'Hide ticket' : 'View ticket' }}</app-button>
+          <app-button 
+            *ngIf="booking.status !== 'cancelled' && expandedBookingId() === booking.id" 
+            variant="outline" 
+            size="sm" 
+            [disabled]="isCancellingId() === booking.id" 
+            (onClick)="handleCancelClick(booking)">
+            {{ isCancellingId() === booking.id ? 'Cancelling...' : (booking.ticketPasses && booking.ticketPasses.length > 1 ? 'Cancel tickets' : 'Cancel ticket') }}
+          </app-button>
         </div>
       </div>
 
-      <section *ngIf="expandedBookingId() === booking.id" class="ticket-panel">
+      <section *ngIf="expandedBookingId() === booking.id" class="ticket-panel" [class.ticket-panel--cancelled]="booking.status === 'cancelled'">
+        <!-- Cancelled Booking Notification Banner -->
+        <div class="cancelled-booking-banner" *ngIf="booking.status === 'cancelled'">
+          <span class="cancelled-banner-badge">CANCELLED BOOKING</span>
+          <p>This booking has been cancelled. All ticket passes and QR check-in codes are voided and cannot be used for venue entry.</p>
+        </div>
+
         <div class="ticket-main">
-          <p class="ticket-label">ADMIT ONE / EVENT TICKET</p>
+          <p class="ticket-label">{{ booking.status === 'cancelled' ? 'VOID / CANCELLED TICKET' : 'ADMIT ONE / EVENT TICKET' }}</p>
           <h3>{{ booking.eventTitle }}</h3>
           <div class="ticket-grid">
             <p><span>Guest</span>{{ booking.attendee?.name || currentUser()?.firstName + ' ' + currentUser()?.lastName }}</p>
@@ -60,9 +98,61 @@
             <p><span>Reference</span>{{ booking.bookingReference || booking.id }}</p>
           </div>
           <div class="ticket-types"><span *ngFor="let ticket of booking.tickets">{{ ticket.quantity }} × {{ ticket.name }}</span></div>
+
+          <!-- Individual Ticket Passes Grid -->
+          <div class="booking-passes-section" *ngIf="booking.ticketPasses && booking.ticketPasses.length > 0">
+            <h4 class="passes-heading">Individual Ticket Passes ({{ booking.ticketPasses.length }})</h4>
+            <div class="passes-grid">
+              <div *ngFor="let pass of booking.ticketPasses; let idx = index" class="pass-card" [class.pass-card--cancelled]="pass.status === 'cancelled'">
+                <div class="pass-card-header">
+                  <span class="pass-badge">Pass #{{ idx + 1 }}</span>
+                  <span class="pass-status-pill" [class.cancelled]="pass.status === 'cancelled'">
+                    {{ pass.status === 'cancelled' ? 'Cancelled' : 'Valid' }}
+                  </span>
+                </div>
+                <div class="pass-card-body">
+                  <div class="pass-qr-wrap" *ngIf="ticketQrMap()[pass.id]">
+                    <img [src]="ticketQrMap()[pass.id]" alt="Pass QR Code" class="pass-qr-img">
+                    <span class="pass-qr-caption">Pass QR (ID: {{ pass.ticketNumber }})</span>
+                  </div>
+                  <div class="pass-number">{{ pass.ticketNumber }}</div>
+                  <div class="pass-holder">
+                    <strong>{{ pass.attendeeName }}</strong>
+                    <span *ngIf="pass.attendeeEmail" class="pass-email">{{ pass.attendeeEmail }}</span>
+                  </div>
+                </div>
+                <div class="pass-card-footer no-print" *ngIf="pass.status === 'valid' && booking.status !== 'cancelled'">
+                  <button 
+                    type="button" 
+                    class="btn-cancel-single-pass" 
+                    [disabled]="cancellingTicketId() === pass.id || isCancellingId() === booking.id"
+                    (click)="cancelSingleTicket(booking, pass.id)">
+                    {{ cancellingTicketId() === pass.id ? 'Cancelling...' : 'Cancel Ticket' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="ticket-code"><img *ngIf="qrCodeUrl()" [src]="qrCodeUrl()" alt="Ticket check-in QR code"><span>Scan at entry</span></div>
-        <div class="ticket-footer"><span>Paid ₹{{ booking.totalAmount }}{{ booking.payment?.label ? ' · ' + booking.payment?.label : '' }}</span><button type="button" class="print-button no-print" (click)="printTicket()">Print ticket</button></div>
+        <div class="ticket-code">
+          <img *ngIf="qrCodeUrl()" [src]="qrCodeUrl()" alt="Ticket check-in QR code">
+          <span>{{ booking.status === 'cancelled' ? 'Ticket Void' : 'Scan at entry' }}</span>
+        </div>
+        <div class="ticket-footer">
+          <span>Paid ₹{{ booking.totalAmount }}{{ booking.payment?.label ? ' · ' + booking.payment?.label : '' }}</span>
+          <div class="ticket-footer-actions no-print">
+            <button 
+              *ngIf="booking.status !== 'cancelled'" 
+              type="button" 
+              class="btn-cancel-ticket-footer" 
+              [disabled]="isCancellingId() === booking.id" 
+              (click)="handleCancelClick(booking)">
+              {{ isCancellingId() === booking.id ? 'Cancelling...' : (booking.ticketPasses && booking.ticketPasses.length > 1 ? 'Cancel tickets' : 'Cancel ticket') }}
+            </button>
+            <button type="button" class="btn-hide-ticket-footer" (click)="toggleTicket(booking)">Hide ticket</button>
+            <button type="button" class="print-button" (click)="printTicket()">Print ticket</button>
+          </div>
+        </div>
       </section>
     </article>
   </section>
@@ -78,4 +168,63 @@
     itemLabel="bookings"
     (pageChange)="setPage($event)">
   </app-pagination-bar>
+
+  <!-- Multi-Ticket Cancellation Modal -->
+  <div class="cancel-modal-backdrop" *ngIf="selectedBookingForCancel()" (click)="closeCancelModal()">
+    <div class="cancel-modal-card" (click)="$event.stopPropagation()">
+      <div class="cancel-modal-header">
+        <div>
+          <span class="cancel-modal-eyebrow">TICKET MANAGEMENT</span>
+          <h3 class="cancel-modal-title">Cancel Tickets</h3>
+          <p class="cancel-modal-sub">
+            {{ selectedBookingForCancel()?.eventTitle }} · Ref #{{ selectedBookingForCancel()?.bookingReference || selectedBookingForCancel()?.id }}
+          </p>
+        </div>
+        <button class="btn-close-modal" (click)="closeCancelModal()" aria-label="Close modal">✕</button>
+      </div>
+
+      <div class="cancel-modal-body">
+        <p class="cancel-instructions">
+          Select an individual ticket to cancel, or cancel the entire booking. Remaining tickets will remain valid and active.
+        </p>
+
+        <div class="ticket-passes-list">
+          <div *ngFor="let pass of selectedBookingForCancel()?.ticketPasses" class="pass-row" [class.pass-cancelled]="pass.status === 'cancelled'">
+            <div class="pass-info">
+              <div class="pass-number-row">
+                <span class="pass-code">{{ pass.ticketNumber }}</span>
+                <span class="pass-status-pill" [class.cancelled]="pass.status === 'cancelled'">
+                  {{ pass.status === 'cancelled' ? 'Cancelled' : 'Valid Pass' }}
+                </span>
+              </div>
+              <p class="pass-attendee">{{ pass.attendeeName }} <span *ngIf="pass.attendeeEmail">({{ pass.attendeeEmail }})</span></p>
+              <p class="pass-issued" *ngIf="pass.issuedAt">Issued: {{ pass.issuedAt | date:'mediumDate' }}</p>
+            </div>
+            <div class="pass-action">
+              <button 
+                *ngIf="pass.status === 'valid'"
+                type="button"
+                class="btn-cancel-pass"
+                [disabled]="cancellingTicketId() === pass.id || isCancellingId() === selectedBookingForCancel()?.id"
+                (click)="cancelSingleTicket(selectedBookingForCancel()!, pass.id)">
+                {{ cancellingTicketId() === pass.id ? 'Cancelling...' : 'Cancel This Ticket' }}
+              </button>
+              <span *ngIf="pass.status === 'cancelled'" class="cancelled-tag">Cancelled</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cancel-modal-footer">
+        <button 
+          type="button" 
+          class="btn-cancel-all"
+          [disabled]="isCancellingId() === selectedBookingForCancel()?.id || cancellingTicketId() !== null || selectedBookingForCancel()?.status === 'cancelled'"
+          (click)="cancelEntireBooking(selectedBookingForCancel()!)">
+          {{ isCancellingId() === selectedBookingForCancel()?.id ? 'Cancelling All...' : 'Cancel Entire Booking' }}
+        </button>
+        <button type="button" class="btn-modal-done" (click)="closeCancelModal()">Done</button>
+      </div>
+    </div>
+  </div>
 </main>

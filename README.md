@@ -6,7 +6,14 @@ The application provides separate workspaces for attendees, event hosts, managem
 
 I am developing this project with a focus on modular architecture, reusable components, centralized API communication, and maintainable frontend code.
 
-**Project Status:** Active Development
+**Project Status:** Active Development & Backend Integration
+
+> **Note on Internship Context & Backend Integration:**
+> Previously, I was working as a solo frontend intern developing EventHub using a local mock-server (`mock-server.mjs`) and mock data to design all features, user flows, and role-based workspaces.
+> 
+> Recently, our backend intern provided a local-network API (`http://192.168.1.3:8000`), and I have integrated this real Django backend into the frontend (including SimpleJWT authentication, modular API adapters, and live contact verification).
+> 
+> The mock server and mock data are **intentionally retained in this repository** as an offline fallback so the application can still be run, tested, and evaluated even when the backend intern's machine or local network is not accessible.
 
 ---
 
@@ -17,16 +24,16 @@ I am developing this project with a focus on modular architecture, reusable comp
 - Search events.
 - Filter events by category.
 - Explore events based on location.
-- View event details and ticket information.
+- View event details and live ticket pricing.
 
 ### 2. User / Attendee
-- User registration and login.
+- User registration and login (Django SimpleJWT & mock fallback).
 - Event and ticket selection.
 - Checkout and payment form interface.
 - Apply offers and discounts.
 - View booking details.
 - Generate QR-code-based digital tickets.
-- Manage user profile.
+- Manage user profile with Email and Phone OTP verification.
 
 ### 3. Host / Organizer Dashboard
 - Dashboard with event statistics.
@@ -62,6 +69,7 @@ I am developing this project with a focus on modular architecture, reusable comp
 
 ### 7. Shared Application Features
 - Centralized Axios API client.
+- Modular domain adapters (`event`, `booking`, `user`, `host`) mapping Django API to frontend models.
 - Centralized API error handling.
 - Authentication and role-based route guards.
 - Angular Signals for reactive state management.
@@ -84,7 +92,8 @@ I am developing this project with a focus on modular architecture, reusable comp
 | Angular Router | Routing and navigation |
 | Axios | API communication |
 | RxJS | Reactive programming |
-| json-server | Mock REST API |
+| Django REST Framework | Real backend API (provided by backend intern) |
+| json-server / TinyHTTP | Offline mock REST API fallback |
 | LowDB | Local JSON data persistence |
 | qrcode | QR code generation |
 | Vitest | Unit testing |
@@ -101,6 +110,9 @@ src/
 └── app/
     ├── core/
     │   ├── api/
+    │   │   ├── adapters/    # Modular adapters for Django backend endpoints
+    │   │   ├── api-client.ts
+    │   │   └── axios-instance.ts
     │   ├── auth/
     │   ├── authorization/
     │   ├── constants/
@@ -139,7 +151,7 @@ src/
 
 ### Architecture Approach
 
-- **Core:** Application-wide services, authentication, API communication, models, and state management.
+- **Core:** Application-wide services, authentication, API communication, adapters, models, and state management.
 - **Features:** Individual application modules such as discovery, bookings, checkout, and profiles.
 - **Layout:** Separate workspaces for different user roles.
 - **Shared:** Reusable UI components and forms.
@@ -148,33 +160,34 @@ For API communication, the application follows this structure:
 
 ```text
 Feature Component
-       |
-       v
-Feature Service
-       |
-       v
+       │
+       ▼
+Feature Service / Signals
+       │
+       ▼
 Centralized ApiClient
-       |
-       v
-Axios Instance
-       |
-       v
-Mock API
+       │
+       ▼
+Domain Adapters (event, booking, user, host)
+       │
+       ▼
+Axios Instance with JWT Interceptors
+       │
+  ┌────┴─────────────────────────────┐
+  ▼                                  ▼
+Django Backend (Primary)       Mock API (Offline Fallback)
+(http://192.168.1.3:8000)      (http://localhost:3000)
 ```
 
 ---
 
 ## Authentication
 
-EventHub currently uses a custom mock authentication implementation.
+EventHub supports both the **integrated Django backend authentication** and the **offline mock authentication**:
 
-It includes:
-- Login and registration endpoints.
-- JWT generation using HMAC-SHA256.
-- Token signature and expiration verification.
-- Session validation through `/auth/me`.
-- Role-based frontend route guards.
-- Environment-based demo credentials.
+- **Live Django Backend:** SimpleJWT token authentication (`/accounts/login/`, `/accounts/token/refresh/`, `/accounts/profile/`) with automatic token renewal and contact verification.
+- **Offline Mock Fallback:** Custom JWT generation and local session validation.
+- Role-based frontend route guards controlling access to admin, host, management, and staff screens.
 
 ### User Roles
 
@@ -186,7 +199,7 @@ It includes:
 | Field Staff | `/staff` |
 | Standard User | `/discover` |
 
-Frontend route guards control navigation. Backend authorization must be implemented independently for production use.
+Frontend route guards control navigation. Backend authorization verifies requests server-side.
 
 ---
 
@@ -211,74 +224,39 @@ cd Eventhub
 npm install
 ```
 
-### 3. Configure environment variables
+### 3. Environment Configuration
 
-Create your local `.env` file:
+Check `src/environments/environment.ts`:
+- **For Real Backend:** Configured with `apiBaseUrl: 'http://192.168.1.3:8000'` (the backend intern's server address).
+- **For Offline Mock:** Change to `apiBaseUrl: 'http://localhost:3000'`.
 
-```bash
-cp .env.example .env
-```
+You can also use `.env.example` as a template for your local `.env`.
 
-For Windows PowerShell:
+### 4. Running the Application
 
-```powershell
-Copy-Item .env.example .env
-```
-
-Configure your local demo credentials and JWT secret in `.env`.
-
-### 4. Start the mock API
-
-```bash
-npm run mock-api
-```
-
-The mock API runs on:
-
-```text
-http://localhost:3000
-```
-
-### 5. Start Angular
-
-Open another terminal:
-
+#### Option A: Running with Real Backend (Default)
+When the backend intern's server is running on the local network (`http://192.168.1.3:8000`):
 ```bash
 npm start
 ```
+The app will open on `http://localhost:4200` and communicate directly with the live Django API.
 
-Open the application:
-
-```text
-http://127.0.0.1:4200
-```
-
-Keep both servers running while using the application.
-
----
-
-## Environment Variables
-
-| Variable | Description |
-|---|---|
-| `PORT` | Mock API port |
-| `NODE_ENV` | Runtime environment |
-| `ALLOWED_ORIGINS` | Allowed CORS origins |
-| `JWT_SECRET` | JWT signing secret |
-| `DEMO_ADMIN_PASSWORD` | Admin demo password |
-| `DEMO_HOST_PASSWORD` | Host demo password |
-| `DEMO_MANAGEMENT_PASSWORD` | Management demo password |
-| `DEMO_STAFF_PASSWORD` | Staff demo password |
-| `DEMO_USER_PASSWORD` | User demo password |
-| `API_BASE_URL` | API URL setting in the environment template |
-
-Never commit your actual `.env` file or credentials.
+#### Option B: Running with Offline Mock Server
+If the backend intern's server is not active or you are working offline:
+1. In terminal 1, start the mock server:
+   ```bash
+   npm run mock-api
+   ```
+2. In terminal 2, start Angular:
+   ```bash
+   npm start
+   ```
 
 ---
 
-## Mock API
+## Mock API & Offline Fallback
 
-The project currently uses a local JSON-based mock backend.
+The project retains a local JSON-based mock backend created during the initial solo frontend phase.
 
 Important files:
 
@@ -289,15 +267,9 @@ Important files:
 | `db.json` | Local database created at runtime |
 | `.env.example` | Environment configuration template |
 
-### Custom Authentication Endpoints
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| POST | `/auth/login` | User login |
-| POST | `/auth/register` | User registration |
-| GET | `/auth/me` | Session validation |
-
-Other REST-style endpoints are handled by json-server.
+### Why the Mock Server is Retained:
+- **Offline Independence:** Allows running and reviewing the complete frontend without requiring the backend intern's machine to be online.
+- **Safe Isolation:** `mock-server.mjs` and `db.json` are only development utilities and are never included in the production build bundle (`ng build`).
 
 ---
 
@@ -307,7 +279,7 @@ Other REST-style endpoints are handled by json-server.
 |---|---|
 | `npm install` | Install dependencies |
 | `npm start` | Start Angular application |
-| `npm run mock-api` | Start mock API server |
+| `npm run mock-api` | Start mock API server (offline fallback) |
 | `npm run build` | Build the application |
 | `npm run watch` | Watch and rebuild source files |
 | `npm test` | Run configured unit tests |
@@ -316,15 +288,12 @@ Other REST-style endpoints are handled by json-server.
 
 ## Current Limitations
 
-EventHub is currently a development and demonstration project.
+EventHub is currently in active development:
 
-- Authentication uses a custom mock backend.
-- Demo and registered-user passwords are maintained in memory by the mock server.
-- The application does not currently have a verified external payment gateway integration.
-- Frontend route guards do not replace backend authorization.
-- Production database, payment, and identity integrations are still required.
-
-Do not use real payment details or sensitive user information with the mock backend.
+- Integrated with the backend intern's API over the local network (`192.168.1.3:8000`).
+- Mock server is kept as an offline fallback when outside the local network.
+- Payment gateway uses a frontend demo interface pending full production merchant approval.
+- Frontend route guards enforce UI access, backed by JWT validation on backend endpoints.
 
 ---
 
@@ -332,13 +301,10 @@ Do not use real payment details or sensitive user information with the mock back
 
 Some planned improvements include:
 
-- Permission Management Center.
-- Complete in-app notification workflows.
-- Event reviews and ratings.
-- Corporate and group booking workflows.
-- Django REST Framework backend integration.
-- Production database and payment gateway integration.
-- Backend-side authentication and authorization.
+- Cloud deployment for both Django backend and Angular frontend.
+- Production payment gateway integration (Stripe / Razorpay).
+- Real-time turnstile sync with WebSockets.
+- Event reviews and rating system.
 
 ---
 

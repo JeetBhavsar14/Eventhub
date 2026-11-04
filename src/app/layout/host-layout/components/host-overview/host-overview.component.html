@@ -34,7 +34,7 @@
       <div class="stat-value">{{ stats.totalEvents }}</div>
       <div class="stat-footer">
         <span class="stat-subtext">Across all statuses</span>
-        <span class="stat-trend trend-positive">+2 this month</span>
+        <span class="stat-trend trend-positive">{{ stats.publishedEvents }} Active Live</span>
       </div>
     </div>
 
@@ -79,7 +79,7 @@
       <div class="stat-value">{{ stats.totalBookings }}</div>
       <div class="stat-footer">
         <span class="stat-subtext">Across your events</span>
-        <span class="stat-trend trend-positive">₹3.48L Gross</span>
+        <span class="stat-trend trend-positive">₹{{ stats.totalRevenue | number }} Gross</span>
       </div>
     </div>
 

@@ -186,6 +186,24 @@ export class HostLayoutComponent implements OnInit {
     this.showToast('Event published live! Tickets are now available.');
   }
 
+  handleHostCancellationRequest(req: { event: HostEventItem; reason: string }): void {
+    this.triggerConfirm(
+      'Submit Event Cancellation Request',
+      `Submit a cancellation request for "${req.event.title}" to the Admin curation team? Stated reason: "${req.reason}". This requires Admin review before being delisted.`,
+      'Submit to Admin',
+      true,
+      () => {
+        this.dashboardService.updateEvent(
+          req.event.id,
+          { ...req.event, status: 'changes_requested' },
+          true,
+          `Cancellation Request: ${req.reason}`
+        );
+        this.showToast(`Cancellation request for "${req.event.title}" sent to Admin for approval.`);
+      }
+    );
+  }
+
   // Confirmation Dialog State
   showConfirmDialog = signal(false);
   confirmDialogData = signal<{
