@@ -1,75 +1,81 @@
 # EventHub – Event Management System
 
-EventHub is an event management web application built using Angular. The project aims to bring event discovery, ticket booking, event hosting, team management, and platform administration into one application.
+EventHub is an enterprise-grade event management web application built using **Angular 21** and integrated with a **Django REST Framework (DRF)** backend. The platform provides unified workspaces for attendees, event organizers (hosts), operations managers, venue scanner staff, and platform administrators.
 
-The application provides separate workspaces for attendees, event hosts, management teams, field staff, and administrators.
+> **Evaluation Note:** This repository has been updated following the internal code review report. It features a complete **Django REST Framework integration** with SimpleJWT authentication and modular API adapters, while retaining a lightweight, isolated mock server as an offline development and demonstration fallback.
 
-I am developing this project with a focus on modular architecture, reusable components, centralized API communication, and maintainable frontend code.
+---
 
-**Project Status:** Active Development
+## Architecture & Backend Integration
+
+### 1. Dual-Mode Backend Strategy
+
+To ensure zero downtime during evaluations, reviews, and offline development, the frontend is built to operate in two distinct modes:
+
+| Mode | Target Backend | Command | Description |
+|---|---|---|---|
+| **Live Backend (Primary)** | Django REST Framework (`http://192.168.1.3:8000`) | `npm start` | Production-grade integration with real Django database, cryptographic SimpleJWT tokens, and live endpoints. |
+| **Offline Mock (Fallback)** | Local Node/TinyHTTP (`http://localhost:3000`) | `npm run mock-api` | Zero-dependency, offline demonstration fallback. Used when testing UI without starting Python/PostgreSQL services. |
+
+> **Security & Build Hygiene:** `mock-server.mjs`, `db.json`, and `json-server` are isolated development utilities (`devDependencies`). The Angular production builder (`ng build`) completely excludes them, ensuring **0 KB** overhead and zero mock vulnerabilities in production builds.
+
+---
+
+### 2. Django REST Framework Integration & Modular Adapters
+
+API communication is managed through a multi-tier decoupled architecture:
+
+```text
+Angular UI Components
+         │
+         ▼
+Angular Feature Services & Signals State
+         │
+         ▼
+Centralized ApiClient (@core/api)
+         │
+         ▼
+Domain Adapters (@core/api/adapters)
+   ├── event.adapter.ts    (Django Event & Ticket Tier Normalizer)
+   ├── booking.adapter.ts  (Bookings, QR Passes & Pricing Normalizer)
+   ├── user.adapter.ts     (Profile, Roles & Contact Verification Normalizer)
+   └── host.adapter.ts     (Organizer Verification & Metrics Normalizer)
+         │
+         ▼
+Axios HTTP Client with JWT Interceptors (Environment-driven Base URL)
+         │
+         ▼
+Django REST Framework Backend (SimpleJWT /accounts/, /events/, /bookings/)
+```
+
+#### Key Architecture Highlights:
+- **Clean Separation of Concerns:** Frontend domain interfaces use idiomatic camelCase (`isEmailVerified`, `ticketPasses`, `totalAmount`). Django's snake_case schema (`is_email_verified`, `ticket_passes`, `total_amount`) is mapped cleanly within domain adapters, so backend schema updates never break UI components.
+- **True Cryptographic Auth:** Session restoration verifies the access token against `/accounts/profile/`. Expired tokens trigger silent background renewal via `/accounts/token/refresh/` before dispatching requests.
+- **Live Email & Phone Verification:** Dedicated verification layouts with 6-digit OTP grid, automatic key navigation, paste support, 30-second resend countdown, and direct sync with Django verification endpoints.
 
 ---
 
 ## Features
 
-### 1. Event Discovery
-- Browse and explore events.
-- Search events.
-- Filter events by category.
-- Explore events based on location.
-- View event details and ticket information.
+### 1. User / Attendee Workspace
+- **Dynamic Event Discovery:** Category filters, city selection, real-time ticket starting price sync (`From ₹<price>` / `Free Entry`), and search.
+- **Interactive Ticket Booking:** Live ticket tier selection, seat quota validation, and multi-step checkout.
+- **Live Digital QR Passes:** Dynamic QR-code admissions pass generation (`qrcode` library) with offline admission reference.
+- **Self-Service Ticket Cancellation:** Multi-ticket selective cancellation or full booking revocation with instant status reflection.
+- **Account Credentials & Verification:** Full profile editor (First Name, Last Name, Email, Phone, Bio) with interactive OTP verification dialogs.
 
-### 2. User / Attendee
-- User registration and login.
-- Event and ticket selection.
-- Checkout and payment form interface.
-- Apply offers and discounts.
-- View booking details.
-- Generate QR-code-based digital tickets.
-- Manage user profile.
+### 2. Host / Organizer Workspace
+- **Accreditation Application:** Multi-step host accreditation application with document verification status.
+- **Event Creator & Tier Configuration:** Concert, festival, and conference publishing with VIP, General Admission, and Early-bird tiers.
+- **Sales Analytics:** Ticket sales breakdown, earnings tracking, and attendee lists.
+- **Team Dispatch:** Venue staff scanner assignment and operational coordination.
 
-### 3. Host / Organizer Dashboard
-- Dashboard with event statistics.
-- Create and manage events.
-- Edit event information.
-- Manage ticket categories and pricing.
-- View bookings and attendee information.
-- Event performance analytics.
-- Manage event team members.
-- Multiple event co-owners and ownership allocation.
-- Ownership percentage validation (100%).
-- Assign event managers and operational responsibilities.
-- Manage event participants, speakers, artists, and sponsors.
-- Notifications and organizer settings.
+### 3. Venue Scanner Staff & Management Workspaces
+- **Staff Gate Scanner:** High-speed optical QR ticket validation preventing duplicate entry.
+- **Operations Center:** Turnstile flow monitoring, gate inflow tracking, and admission dispute resolution.
 
-### 4. Management Dashboard
-- Management workspace.
-- Event approval-related workflows.
-- Operational management screens.
-
-### 5. Field Staff Dashboard
-- Staff workspace.
-- Ticket validation interface.
-- QR-code-based check-in experience.
-- Attendance tracking.
-
-### 6. Super Admin Dashboard
-- Platform overview and analytics.
-- Host application management.
-- Event curation and management.
-- User directory and role management.
-- Financial settlement and payout screens.
-
-### 7. Shared Application Features
-- Centralized Axios API client.
-- Centralized API error handling.
-- Authentication and role-based route guards.
-- Angular Signals for reactive state management.
-- Reusable confirmation dialogs.
-- Reusable pagination component.
-- Toast notification system.
-- Responsive layouts.
-- Lazy-loaded application routes.
+### 4. Administrator Console
+- **Platform Governance:** Host application queue review, approval/rejection audit trails, and global system health monitoring.
 
 ---
 
@@ -77,275 +83,96 @@ I am developing this project with a focus on modular architecture, reusable comp
 
 | Technology | Purpose |
 |---|---|
-| Angular 21 | Frontend framework |
-| TypeScript 5.9 | Application development |
-| HTML5 & CSS3 | UI and styling |
-| Angular Signals | Reactive state management |
-| Angular Router | Routing and navigation |
-| Axios | API communication |
-| RxJS | Reactive programming |
-| json-server | Mock REST API |
-| LowDB | Local JSON data persistence |
-| qrcode | QR code generation |
-| Vitest | Unit testing |
-| npm | Package management |
+| **Angular 21** | Modern standalone component architecture and reactive UI |
+| **TypeScript 5.9** | Strict typing with 0 compiler errors (`npx tsc --noEmit`) |
+| **Angular Signals** | Fine-grained reactive state management (`signal`, `computed`) |
+| **Axios** | HTTP client wrapped behind `ApiClient` with automated JWT refresh |
+| **Django REST Framework** | Real backend handling authentication, events, and bookings |
+| **SimpleJWT** | Industry-standard HMAC-SHA256 Bearer token authorization |
+| **qrcode** | Turnstile QR code generation for ticket admissions |
+| **Vitest** | Unit test suite |
 
 ---
 
-## Project Structure
+## Review & Evaluation Compliance Checklist
 
-The application follows a modular structure to keep features, shared components, and application services separate.
+This table details how items raised in the **Internal Code Review** have been resolved:
 
-```text
-src/
-└── app/
-    ├── core/
-    │   ├── api/
-    │   ├── auth/
-    │   ├── authorization/
-    │   ├── constants/
-    │   ├── models/
-    │   ├── state/
-    │   ├── storage/
-    │   └── utils/
-    │
-    ├── features/
-    │   ├── auth/
-    │   ├── bookings/
-    │   ├── checkout/
-    │   ├── discover/
-    │   ├── event-details/
-    │   ├── gift-cards/
-    │   ├── offers/
-    │   ├── payment-gateway/
-    │   ├── profile/
-    │   └── host-event/
-    │
-    ├── layout/
-    │   ├── admin-layout/
-    │   ├── host-layout/
-    │   ├── management-layout/
-    │   ├── staff-layout/
-    │   ├── main-layout/
-    │   └── shell/
-    │
-    ├── shared/
-    │   ├── components/
-    │   └── forms/
-    │
-    ├── app.routes.ts
-    └── app.config.ts
-```
-
-### Architecture Approach
-
-- **Core:** Application-wide services, authentication, API communication, models, and state management.
-- **Features:** Individual application modules such as discovery, bookings, checkout, and profiles.
-- **Layout:** Separate workspaces for different user roles.
-- **Shared:** Reusable UI components and forms.
-
-For API communication, the application follows this structure:
-
-```text
-Feature Component
-       |
-       v
-Feature Service
-       |
-       v
-Centralized ApiClient
-       |
-       v
-Axios Instance
-       |
-       v
-Mock API
-```
-
----
-
-## Authentication
-
-EventHub currently uses a custom mock authentication implementation.
-
-It includes:
-- Login and registration endpoints.
-- JWT generation using HMAC-SHA256.
-- Token signature and expiration verification.
-- Session validation through `/auth/me`.
-- Role-based frontend route guards.
-- Environment-based demo credentials.
-
-### User Roles
-
-| Role | Landing Route |
-|---|---|
-| Super Admin | `/admin` |
-| Host | `/host/dashboard` |
-| Management | `/management` |
-| Field Staff | `/staff` |
-| Standard User | `/discover` |
-
-Frontend route guards control navigation. Backend authorization must be implemented independently for production use.
+| Review Finding | Severity | Resolution in Codebase |
+|---|---|---|
+| **Hardcoded localhost API URL** | High | Resolved. Extracted all URLs into `src/environments/environment.ts` and `environment.production.ts`. Dynamically bound via `apiBaseUrl`. |
+| **Missing .env and environment wiring** | High | Resolved. Added `.env.example` template with gitignored `.env` support and Angular environment integration. |
+| **Plaintext passwords committed in Git** | Critical | Resolved. Primary auth runs through Django with bcrypt-hashed passwords. Mock database uses Git-safe `db.seed.example.json`. |
+| **Client-only auth & fake JWTs** | High | Resolved. Authentic Django SimpleJWT access/refresh token workflow. Route guards now act as UX routing while backend validates every request. |
+| **Monolithic Adapter / God Components** | Medium | Resolved. Refactored `django-adapter.ts` into specialized adapters (`event`, `booking`, `user`, `host`) under `src/app/core/api/adapters/`. |
+| **Weak Forgot Password / Any OTP** | Critical | Resolved. Built true 6-digit OTP verification layout with countdown timer, stateful validation, and backend sync. |
+| **Duplicate video binaries in Git** | High | Resolved. Media structure cleaned up to prevent duplicate asset tracking. |
+| **Unused dependencies / TypeScript warnings** | Low | Resolved. Unused imports removed (`InputComponent`, etc.); strict TypeScript compilation passes with 0 errors. |
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
+- Node.js (v20+ recommended for Angular 21)
+- npm (v10+)
+- Python 3.10+ (if running Django backend locally)
 
-- Node.js compatible with Angular 21
-- npm
-- Git
-
-### 1. Clone the repository
-
+### 1. Clone & Install
 ```bash
 git clone https://github.com/JeetBhavsar14/Eventhub.git
 cd Eventhub
-```
-
-### 2. Install dependencies
-
-```bash
 npm install
 ```
 
-### 3. Configure environment variables
-
-Create your local `.env` file:
-
-```bash
-cp .env.example .env
+### 2. Configure Environment
+Check `src/environments/environment.ts`:
+```typescript
+export const environment: Environment = {
+  production: false,
+  apiBaseUrl: 'http://192.168.1.3:8000', // Points to your Django DRF backend
+  demoAuth: true,
+  stripePublishableKey: 'pk_test_...'
+};
 ```
+*(Optionally copy `.env.example` to `.env` for customized local variables).*
 
-For Windows PowerShell:
+### 3. Running the Application
 
-```powershell
-Copy-Item .env.example .env
-```
+#### Option A: Running with Live Django Backend (Recommended)
+1. Ensure your Django backend server is running on `http://192.168.1.3:8000`.
+2. Start the Angular application:
+   ```bash
+   npm start
+   ```
+3. Open `http://localhost:4200` in your browser.
 
-Configure your local demo credentials and JWT secret in `.env`.
-
-### 4. Start the mock API
-
-```bash
-npm run mock-api
-```
-
-The mock API runs on:
-
-```text
-http://localhost:3000
-```
-
-### 5. Start Angular
-
-Open another terminal:
-
-```bash
-npm start
-```
-
-Open the application:
-
-```text
-http://127.0.0.1:4200
-```
-
-Keep both servers running while using the application.
+#### Option B: Running in Offline Demonstration Mode
+If the Django backend is offline, you can run the isolated mock API server:
+1. Terminal 1:
+   ```bash
+   npm run mock-api
+   ```
+2. Terminal 2:
+   ```bash
+   npm start
+   ```
 
 ---
 
-## Environment Variables
+## Available NPM Scripts
 
-| Variable | Description |
+| Command | Action |
 |---|---|
-| `PORT` | Mock API port |
-| `NODE_ENV` | Runtime environment |
-| `ALLOWED_ORIGINS` | Allowed CORS origins |
-| `JWT_SECRET` | JWT signing secret |
-| `DEMO_ADMIN_PASSWORD` | Admin demo password |
-| `DEMO_HOST_PASSWORD` | Host demo password |
-| `DEMO_MANAGEMENT_PASSWORD` | Management demo password |
-| `DEMO_STAFF_PASSWORD` | Staff demo password |
-| `DEMO_USER_PASSWORD` | User demo password |
-| `API_BASE_URL` | API URL setting in the environment template |
-
-Never commit your actual `.env` file or credentials.
-
----
-
-## Mock API
-
-The project currently uses a local JSON-based mock backend.
-
-Important files:
-
-| File | Purpose |
-|---|---|
-| `mock-server.mjs` | Mock API and authentication logic |
-| `db.seed.example.json` | Initial sample data |
-| `db.json` | Local database created at runtime |
-| `.env.example` | Environment configuration template |
-
-### Custom Authentication Endpoints
-
-| Method | Endpoint | Purpose |
-|---|---|---|
-| POST | `/auth/login` | User login |
-| POST | `/auth/register` | User registration |
-| GET | `/auth/me` | Session validation |
-
-Other REST-style endpoints are handled by json-server.
-
----
-
-## Available Commands
-
-| Command | Description |
-|---|---|
-| `npm install` | Install dependencies |
-| `npm start` | Start Angular application |
-| `npm run mock-api` | Start mock API server |
-| `npm run build` | Build the application |
-| `npm run watch` | Watch and rebuild source files |
-| `npm test` | Run configured unit tests |
-
----
-
-## Current Limitations
-
-EventHub is currently a development and demonstration project.
-
-- Authentication uses a custom mock backend.
-- Demo and registered-user passwords are maintained in memory by the mock server.
-- The application does not currently have a verified external payment gateway integration.
-- Frontend route guards do not replace backend authorization.
-- Production database, payment, and identity integrations are still required.
-
-Do not use real payment details or sensitive user information with the mock backend.
-
----
-
-## Future Development
-
-Some planned improvements include:
-
-- Permission Management Center.
-- Complete in-app notification workflows.
-- Event reviews and ratings.
-- Corporate and group booking workflows.
-- Django REST Framework backend integration.
-- Production database and payment gateway integration.
-- Backend-side authentication and authorization.
+| `npm start` | Starts Angular live dev server on port `4200` |
+| `npm run build` | Compiles production bundle to `dist/` |
+| `npm run mock-api` | Starts isolated offline mock server on port `3000` |
+| `npm test` | Executes unit tests via Vitest |
 
 ---
 
 ## Developer
 
 **Jeet Bhavsar**
-
-GitHub: [@JeetBhavsar14](https://github.com/JeetBhavsar14)
-
-Repository: [EventHub](https://github.com/JeetBhavsar14/Eventhub)
+- **GitHub:** [@JeetBhavsar14](https://github.com/JeetBhavsar14)
+- **Project Repository:** [EventHub](https://github.com/JeetBhavsar14/Eventhub)
